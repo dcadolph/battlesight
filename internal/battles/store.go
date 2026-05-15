@@ -22,7 +22,7 @@ func NewStore(db *sql.DB) *Store {
 }
 
 // All returns every battle sorted by year.
-func (s *Store) All(ctx context.Context) ([]Battle, error) {
+func (s *Store) All(ctx context.Context) ([]Battle, int, error) {
 	return s.List(ctx, Filter{Limit: 0})
 }
 
@@ -45,6 +45,12 @@ func (s *Store) ByID(ctx context.Context, id string) (Battle, bool, error) {
 		return Battle{}, false, err
 	}
 	b.Sides = sides
+
+	refs, err := s.refsForBattle(ctx, b.ID)
+	if err != nil {
+		return Battle{}, false, err
+	}
+	b.References = refs
 
 	return b, true, nil
 }
@@ -141,7 +147,7 @@ func (s *Store) Stats(ctx context.Context) (StatsResponse, error) {
 	if queryErr != nil {
 		return stats, queryErr
 	}
-	stats.Wars, queryErr = s.nameCounts(ctx, "war")
+	stats.Wars, queryErr = s.warCounts(ctx)
 	if queryErr != nil {
 		return stats, queryErr
 	}
@@ -226,6 +232,139 @@ func (s *Store) loadSides(ctx context.Context, battles []Battle) error {
 		}
 		if idx, ok := idxMap[battleID]; ok {
 			battles[idx].Sides = append(battles[idx].Sides, side)
+		}
+	}
+	return rows.Err()
+}
+
+// warCounts returns wars with their battle counts, earliest year, and total casualties.
+func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
+	rows, err := s.db.QueryContext(ctx,
+		"SELECT war, COUNT(*), MIN(year) FROM battles WHERE war != '' GROUP BY war ORDER BY COUNT(*) DESC")
+	if err != nil {
+		return nil, fmt.Errorf("query war counts: %w", err)
+	}
+	defer rows.Close()
+
+	var counts []WarCount
+	for rows.Next() {
+		var wc WarCount
+		if err := rows.Scan(&wc.Name, &wc.Count, &wc.MinYear); err != nil {
+			return nil, fmt.Errorf("scan war count: %w", err)
+		}
+		counts = append(counts, wc)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Build index after slice is fully populated so pointers are stable.
+	warIdx := make(map[string]int, len(counts))
+	for i, wc := range counts {
+		warIdx[wc.Name] = i
+	}
+
+	casRows, err := s.db.QueryContext(ctx,
+		`SELECT b.war, bs.casualties FROM battle_sides bs
+		 JOIN battles b ON b.id = bs.battle_id
+		 WHERE b.war != '' AND bs.casualties != ''`)
+	if err != nil {
+		return counts, nil
+	}
+	defer casRows.Close()
+
+	for casRows.Next() {
+		var war, cas string
+		casRows.Scan(&war, &cas)
+		if idx, ok := warIdx[war]; ok {
+			counts[idx].Casualties += parseCasualtyNumber(cas)
+		}
+	}
+
+	return counts, nil
+}
+
+// parseCasualtyNumber extracts the largest plausible number from a casualty
+// string like "50,000 killed/wounded" or "69 dead and 533 wounded".
+// Ignores numbers over 10 million (likely parsing artifacts).
+func parseCasualtyNumber(s string) int {
+	best := 0
+	num := 0
+	inNumber := false
+
+	for _, ch := range s {
+		if ch >= '0' && ch <= '9' {
+			num = num*10 + int(ch-'0')
+			inNumber = true
+		} else if ch == ',' && inNumber {
+			continue
+		} else {
+			if inNumber && num > best && num <= 10_000_000 {
+				best = num
+			}
+			num = 0
+			inNumber = false
+		}
+	}
+	if inNumber && num > best && num <= 10_000_000 {
+		best = num
+	}
+	return best
+}
+
+// refsForBattle returns the references for a single battle.
+func (s *Store) refsForBattle(ctx context.Context, battleID string) ([]Reference, error) {
+	rows, err := s.db.QueryContext(ctx,
+		"SELECT ref_type, title, author, year, url, note FROM battle_references WHERE battle_id = ?", battleID)
+	if err != nil {
+		return nil, fmt.Errorf("query refs for %s: %w", battleID, err)
+	}
+	defer rows.Close()
+
+	var refs []Reference
+	for rows.Next() {
+		var r Reference
+		if err := rows.Scan(&r.Type, &r.Title, &r.Author, &r.Year, &r.URL, &r.Note); err != nil {
+			return nil, fmt.Errorf("scan ref: %w", err)
+		}
+		refs = append(refs, r)
+	}
+	return refs, rows.Err()
+}
+
+// loadRefs batch-loads references for a slice of battles.
+func (s *Store) loadRefs(ctx context.Context, battles []Battle) error {
+	if len(battles) == 0 {
+		return nil
+	}
+
+	ids := make([]any, len(battles))
+	placeholders := make([]string, len(battles))
+	idxMap := make(map[string]int, len(battles))
+	for i, b := range battles {
+		ids[i] = b.ID
+		placeholders[i] = "?"
+		idxMap[b.ID] = i
+	}
+
+	query := fmt.Sprintf(
+		"SELECT battle_id, ref_type, title, author, year, url, note FROM battle_references WHERE battle_id IN (%s)",
+		strings.Join(placeholders, ","))
+
+	rows, err := s.db.QueryContext(ctx, query, ids...)
+	if err != nil {
+		return fmt.Errorf("load refs batch: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var battleID string
+		var r Reference
+		if err := rows.Scan(&battleID, &r.Type, &r.Title, &r.Author, &r.Year, &r.URL, &r.Note); err != nil {
+			return fmt.Errorf("scan ref: %w", err)
+		}
+		if idx, ok := idxMap[battleID]; ok {
+			battles[idx].References = append(battles[idx].References, r)
 		}
 	}
 	return rows.Err()

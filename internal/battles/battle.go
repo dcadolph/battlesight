@@ -12,6 +12,22 @@ type Side struct {
 	Casualties string `json:"casualties"`
 }
 
+// Reference is a book, film, documentary, or article about a battle.
+type Reference struct {
+	// Type is the kind of reference: book, film, documentary, article.
+	Type string `json:"type"`
+	// Title is the name of the work.
+	Title string `json:"title"`
+	// Author is the creator (author, director, etc.).
+	Author string `json:"author,omitempty"`
+	// Year is the publication or release year.
+	Year int `json:"year,omitempty"`
+	// URL is an optional link.
+	URL string `json:"url,omitempty"`
+	// Note is a brief description of relevance.
+	Note string `json:"note,omitempty"`
+}
+
 // Battle represents a single historical battle with its location and metadata.
 type Battle struct {
 	// ID is a unique slug for the battle.
@@ -40,4 +56,6 @@ type Battle struct {
 	Summary string `json:"summary"`
 	// Significance explains why this battle mattered.
 	Significance string `json:"significance"`
+	// References lists books, films, and other sources about this battle.
+	References []Reference `json:"references,omitempty"`
 }

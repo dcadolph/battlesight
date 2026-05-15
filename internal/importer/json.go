@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/dcadolph/battletrace/internal/battles"
 )
 
 // ImportJSON reads a curated battles JSON file and inserts records into the database.
-// Uses INSERT OR IGNORE to be idempotent on re-runs.
+// Uses INSERT OR IGNORE to be idempotent on re-runs. Also loads references.json
+// from the same directory if it exists.
 func ImportJSON(ctx context.Context, db *sql.DB, path string) (int, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -22,6 +24,8 @@ func ImportJSON(ctx context.Context, db *sql.DB, path string) (int, error) {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return 0, fmt.Errorf("parse json: %w", err)
 	}
+
+	refsMap := loadRefsFile(filepath.Join(filepath.Dir(path), "references.json"))
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -45,6 +49,14 @@ func ImportJSON(ctx context.Context, db *sql.DB, path string) (int, error) {
 	}
 	defer insertSide.Close()
 
+	insertRef, err := tx.PrepareContext(ctx,
+		`INSERT INTO battle_references (battle_id, ref_type, title, author, year, url, note)
+		 VALUES (?, ?, ?, ?, ?, ?, ?)`)
+	if err != nil {
+		return 0, fmt.Errorf("prepare ref insert: %w", err)
+	}
+	defer insertRef.Close()
+
 	var count int
 	for _, b := range raw {
 		result, err := insertBattle.ExecContext(ctx,
@@ -63,6 +75,15 @@ func ImportJSON(ctx context.Context, db *sql.DB, path string) (int, error) {
 				return count, fmt.Errorf("insert side for %s: %w", b.ID, err)
 			}
 		}
+
+		if refs, ok := refsMap[b.ID]; ok {
+			for _, ref := range refs {
+				if _, err := insertRef.ExecContext(ctx, b.ID, ref.Type, ref.Title, ref.Author, ref.Year, ref.URL, ref.Note); err != nil {
+					return count, fmt.Errorf("insert ref for %s: %w", b.ID, err)
+				}
+			}
+		}
+
 		count++
 	}
 
@@ -71,4 +92,18 @@ func ImportJSON(ctx context.Context, db *sql.DB, path string) (int, error) {
 	}
 
 	return count, nil
+}
+
+// loadRefsFile reads references.json into a map keyed by battle ID.
+func loadRefsFile(path string) map[string][]battles.Reference {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+
+	var refs map[string][]battles.Reference
+	if err := json.Unmarshal(data, &refs); err != nil {
+		return nil
+	}
+	return refs
 }

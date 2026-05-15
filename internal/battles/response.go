@@ -20,8 +20,8 @@ type StatsResponse struct {
 	YearRange [2]int `json:"yearRange"`
 	// Eras lists each era with its battle count.
 	Eras []NameCount `json:"eras"`
-	// Wars lists each war with its battle count.
-	Wars []NameCount `json:"wars"`
+	// Wars lists each war with its battle count and earliest year.
+	Wars []WarCount `json:"wars"`
 	// BattleTypes lists each battle type with its count.
 	BattleTypes []NameCount `json:"battleTypes"`
 }
@@ -32,6 +32,18 @@ type NameCount struct {
 	Name string `json:"name"`
 	// Count is how many battles have this label.
 	Count int `json:"count"`
+}
+
+// WarCount pairs a war name with its battle count, earliest year, and estimated casualties.
+type WarCount struct {
+	// Name is the war name.
+	Name string `json:"name"`
+	// Count is how many battles belong to this war.
+	Count int `json:"count"`
+	// MinYear is the earliest battle year in this war.
+	MinYear int `json:"minYear"`
+	// Casualties is the estimated total casualties across all battles.
+	Casualties int `json:"casualties"`
 }
 
 // Filter holds query parameters for listing battles.

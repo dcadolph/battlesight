@@ -5,6 +5,15 @@ export interface Side {
   casualties: string;
 }
 
+export interface Reference {
+  type: string;
+  title: string;
+  author?: string;
+  year?: number;
+  url?: string;
+  note?: string;
+}
+
 export interface Battle {
   id: string;
   name: string;
@@ -19,6 +28,7 @@ export interface Battle {
   victor: string;
   summary: string;
   significance: string;
+  references?: Reference[];
 }
 
 export const ERA_COLORS: Record<string, string> = {

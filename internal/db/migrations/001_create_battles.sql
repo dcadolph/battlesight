@@ -13,9 +13,10 @@ CREATE TABLE IF NOT EXISTS battles (
     significance TEXT NOT NULL,
     source       TEXT NOT NULL DEFAULT 'curated',
     source_id    TEXT NOT NULL DEFAULT '',
-    verified     INTEGER NOT NULL DEFAULT 0,
-    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+    verified        INTEGER NOT NULL DEFAULT 0,
+    wikipedia_title TEXT NOT NULL DEFAULT '',
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS battle_sides (

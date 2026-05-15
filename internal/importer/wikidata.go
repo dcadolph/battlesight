@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"net/http"
 	"net/url"
@@ -15,6 +16,7 @@ import (
 
 const wikidataSPARQL = "https://query.wikidata.org/sparql"
 
+// Primary query: battles with point-in-time date (P585).
 const wikidataQuery = `
 SELECT ?battle ?battleLabel ?date ?coords ?conflictLabel ?article
 WHERE {
@@ -26,6 +28,47 @@ WHERE {
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
 ORDER BY ?date`
+
+// Secondary query: battles with start date (P580) but no point-in-time.
+const wikidataQueryStartDate = `
+SELECT ?battle ?battleLabel ?date ?coords ?conflictLabel ?article
+WHERE {
+  ?battle wdt:P31/wdt:P279* wd:Q178561.
+  ?battle wdt:P625 ?coords.
+  ?battle wdt:P580 ?date.
+  FILTER NOT EXISTS { ?battle wdt:P585 ?pointDate. }
+  OPTIONAL { ?battle wdt:P607 ?conflict. }
+  OPTIONAL { ?article schema:about ?battle; schema:isPartOf <https://en.wikipedia.org/>. }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+ORDER BY ?date`
+
+// Tertiary query: battles with coords but no date properties.
+const wikidataQueryNoDate = `
+SELECT ?battle ?battleLabel ?coords ?conflictLabel ?article
+WHERE {
+  ?battle wdt:P31/wdt:P279* wd:Q178561.
+  ?battle wdt:P625 ?coords.
+  FILTER NOT EXISTS { ?battle wdt:P585 ?date. }
+  FILTER NOT EXISTS { ?battle wdt:P580 ?startDate. }
+  OPTIONAL { ?battle wdt:P607 ?conflict. }
+  OPTIONAL { ?article schema:about ?battle; schema:isPartOf <https://en.wikipedia.org/>. }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}`
+
+// Fourth query: battles WITHOUT coordinates but WITH Wikipedia articles.
+// We'll extract coordinates from the Wikipedia infobox later.
+const wikidataQueryNoCoordsWithDate = `
+SELECT ?battle ?battleLabel ?date ?conflictLabel ?article
+WHERE {
+  ?battle wdt:P31/wdt:P279* wd:Q178561.
+  FILTER NOT EXISTS { ?battle wdt:P625 ?coords. }
+  ?article schema:about ?battle; schema:isPartOf <https://en.wikipedia.org/>.
+  OPTIONAL { ?battle wdt:P585 ?date. }
+  OPTIONAL { ?battle wdt:P580 ?date. }
+  OPTIONAL { ?battle wdt:P607 ?conflict. }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}`
 
 var pointRegex = regexp.MustCompile(`Point\(([0-9.\-]+)\s+([0-9.\-]+)\)`)
 
@@ -49,11 +92,42 @@ type sparqlValue struct {
 }
 
 // ImportWikidata fetches battles from Wikidata SPARQL and inserts them into the database.
+// Runs three queries: point-in-time dates, start dates, and no-date battles.
 func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
-	bindings, err := fetchSPARQL(ctx)
+	log.Println("query 1/3: battles with point-in-time dates")
+	bindings1, err := fetchSPARQLQuery(ctx, wikidataQuery)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("primary query: %w", err)
 	}
+	log.Printf("  got %d results", len(bindings1))
+
+	log.Println("query 2/3: battles with start dates only")
+	bindings2, err := fetchSPARQLQuery(ctx, wikidataQueryStartDate)
+	if err != nil {
+		log.Printf("  secondary query failed: %v (continuing)", err)
+	} else {
+		log.Printf("  got %d results", len(bindings2))
+	}
+
+	log.Println("query 3/4: battles with coords but no dates")
+	bindings3, err := fetchSPARQLQuery(ctx, wikidataQueryNoDate)
+	if err != nil {
+		log.Printf("  query 3 failed: %v (continuing)", err)
+	} else {
+		log.Printf("  got %d results", len(bindings3))
+	}
+
+	log.Println("query 4/4: battles without coords (have Wikipedia articles)")
+	bindings4, err := fetchSPARQLQuery(ctx, wikidataQueryNoCoordsWithDate)
+	if err != nil {
+		log.Printf("  query 4 failed: %v (continuing)", err)
+	} else {
+		log.Printf("  got %d results", len(bindings4))
+	}
+
+	bindings := append(bindings1, bindings2...)
+	bindings = append(bindings, bindings3...)
+	bindings = append(bindings, bindings4...)
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -62,8 +136,8 @@ func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
 	defer tx.Rollback()
 
 	stmt, err := tx.PrepareContext(ctx,
-		`INSERT OR IGNORE INTO battles (id, name, year, date, lat, lng, era, war, battle_type, victor, summary, significance, source, source_id, verified, wikipedia_title)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'land', '', '', '', 'wikidata', ?, 0, ?)`)
+		`INSERT OR IGNORE INTO battles (id, name, year, date, date_start, date_end, lat, lng, era, war, battle_type, victor, summary, significance, source, source_id, verified, wikipedia_title)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'land', '', '', '', 'wikidata', ?, 0, ?)`)
 	if err != nil {
 		return 0, fmt.Errorf("prepare insert: %w", err)
 	}
@@ -104,10 +178,6 @@ func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
 		date := formatWikidataDate(b.Date.Value, year)
 		lat, lng := parsePoint(b.Coords.Value)
 
-		if lat == 0 && lng == 0 {
-			continue
-		}
-
 		slug := slugify(name)
 		if slug == "" {
 			continue
@@ -117,7 +187,9 @@ func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
 		war := b.Conflict.Value
 		wikiTitle := wikipediaTitle(b.Article.Value)
 
-		result, err := stmt.ExecContext(ctx, slug, name, year, date, lat, lng, era, war, id, wikiTitle)
+		dr := ParseDateRange(date, year)
+
+		result, err := stmt.ExecContext(ctx, slug, name, year, date, dr.Start, dr.End, lat, lng, era, war, id, wikiTitle)
 		if err != nil {
 			continue
 		}
@@ -133,9 +205,9 @@ func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
 	return count, nil
 }
 
-// fetchSPARQL queries Wikidata and returns the result bindings.
-func fetchSPARQL(ctx context.Context) ([]sparqlBinding, error) {
-	params := url.Values{"query": {wikidataQuery}}
+// fetchSPARQLQuery queries Wikidata with the given SPARQL and returns the result bindings.
+func fetchSPARQLQuery(ctx context.Context, query string) ([]sparqlBinding, error) {
+	params := url.Values{"query": {query}}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, wikidataSPARQL+"?"+params.Encode(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
@@ -234,14 +306,19 @@ func yearToEra(year int) string {
 	}
 }
 
-// wikipediaTitle extracts the article title from a Wikipedia URL.
+// wikipediaTitle extracts the article title from a Wikipedia URL, decoding percent-encoded characters.
 func wikipediaTitle(articleURL string) string {
 	if articleURL == "" {
 		return ""
 	}
 	prefix := "https://en.wikipedia.org/wiki/"
 	if strings.HasPrefix(articleURL, prefix) {
-		return strings.ReplaceAll(articleURL[len(prefix):], "_", " ")
+		encoded := articleURL[len(prefix):]
+		decoded, err := url.PathUnescape(encoded)
+		if err != nil {
+			decoded = encoded
+		}
+		return strings.ReplaceAll(decoded, "_", " ")
 	}
 	return ""
 }

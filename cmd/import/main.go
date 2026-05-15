@@ -66,11 +66,19 @@ func main() {
 	}
 
 	if *infobox {
-		log.Println("enriching with Wikipedia infobox data (sides, commanders, casualties)...")
+		log.Println("enriching with Wikipedia infobox data (sides, commanders, casualties, dates)...")
 		count, err := importer.EnrichInfoboxes(ctx, database)
 		if err != nil {
 			log.Fatalf("infobox enrichment failed: %v", err)
 		}
 		log.Printf("enriched %d battles with infobox data", count)
+
+		log.Println("enriching coordinates from Wikipedia for battles missing them...")
+		coordCount, err := importer.EnrichCoordinates(ctx, database)
+		if err != nil {
+			log.Printf("coordinate enrichment failed: %v (continuing)", err)
+		} else {
+			log.Printf("enriched %d battles with coordinates", coordCount)
+		}
 	}
 }

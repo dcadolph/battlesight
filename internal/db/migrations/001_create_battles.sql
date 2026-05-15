@@ -11,8 +11,10 @@ CREATE TABLE IF NOT EXISTS battles (
     victor       TEXT NOT NULL,
     summary      TEXT NOT NULL,
     significance TEXT NOT NULL,
-    source       TEXT NOT NULL DEFAULT 'curated',
-    source_id    TEXT NOT NULL DEFAULT '',
+    date_start      TEXT NOT NULL DEFAULT '',
+    date_end        TEXT NOT NULL DEFAULT '',
+    source          TEXT NOT NULL DEFAULT 'curated',
+    source_id       TEXT NOT NULL DEFAULT '',
     verified        INTEGER NOT NULL DEFAULT 0,
     wikipedia_title TEXT NOT NULL DEFAULT '',
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
@@ -30,6 +32,7 @@ CREATE TABLE IF NOT EXISTS battle_sides (
 );
 
 CREATE INDEX IF NOT EXISTS idx_battles_year ON battles(year);
+CREATE INDEX IF NOT EXISTS idx_battles_date_start ON battles(date_start);
 CREATE INDEX IF NOT EXISTS idx_battles_era ON battles(era);
 CREATE INDEX IF NOT EXISTS idx_battles_war ON battles(war);
 CREATE INDEX IF NOT EXISTS idx_battles_source ON battles(source);

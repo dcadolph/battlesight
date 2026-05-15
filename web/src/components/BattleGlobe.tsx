@@ -134,7 +134,7 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
 
   const pointAltitude = useCallback((point: object) => {
     const b = point as Battle;
-    if (dramatic) return 0.04 + Math.random() * 0.06;
+    if (dramatic) return 0.02 + Math.abs(Math.sin(b.lat * 0.1 + b.lng * 0.1)) * 0.08;
     if (selectedBattle?.id === b.id) return 0.15;
     if (selectedBattle) return 0;
     return 0;

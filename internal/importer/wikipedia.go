@@ -29,7 +29,7 @@ type wikiPage struct {
 // a wikipedia_title but no summary. Processes in batches of 20 with rate limiting.
 func EnrichFromWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 	rows, err := db.QueryContext(ctx,
-		`SELECT id, wikipedia_title FROM battles WHERE wikipedia_title != '' AND summary = '' LIMIT 10000`)
+		`SELECT id, wikipedia_title FROM battles WHERE wikipedia_title != '' AND summary = ''`)
 	if err != nil {
 		return 0, fmt.Errorf("query battles needing enrichment: %w", err)
 	}

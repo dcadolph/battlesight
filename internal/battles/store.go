@@ -21,6 +21,19 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
+// battleColumns is the canonical SELECT clause for a battle row.
+const battleColumns = "id, name, year, date, lat, lng, era, war, battle_type, victor, summary, significance, COALESCE(verified, 0), COALESCE(source, '')"
+
+// trustedWarSQL produces a SQL fragment that keeps only rows whose war field
+// looks usable. Pass the column reference (e.g. "war" or "b.war").
+func trustedWarSQL(col string) string {
+	return `(` + col + ` = '' OR (` +
+		col + ` NOT LIKE '%|%' AND ` + col + ` NOT LIKE '%{%' AND ` + col + ` NOT LIKE '%}%' AND ` +
+		col + ` NOT LIKE '%=%' AND ` + col + ` NOT LIKE '%image%' AND ` +
+		col + ` NOT LIKE '%<%' AND ` + col + ` NOT LIKE '%>%' AND ` +
+		`LENGTH(` + col + `) <= 120))`
+}
+
 // All returns every battle sorted by year.
 func (s *Store) All(ctx context.Context) ([]Battle, int, error) {
 	return s.List(ctx, Filter{Limit: 0})
@@ -29,14 +42,13 @@ func (s *Store) All(ctx context.Context) ([]Battle, int, error) {
 // ByID returns a single battle or false if not found.
 func (s *Store) ByID(ctx context.Context, id string) (Battle, bool, error) {
 	row := s.db.QueryRowContext(ctx,
-		"SELECT id, name, year, date, lat, lng, era, war, battle_type, victor, summary, significance FROM battles WHERE id = ?", id)
+		"SELECT "+battleColumns+" FROM battles WHERE id = ?", id)
 
 	var b Battle
-	err := row.Scan(&b.ID, &b.Name, &b.Year, &b.Date, &b.Lat, &b.Lng, &b.Era, &b.War, &b.BattleType, &b.Victor, &b.Summary, &b.Significance)
-	if err == sql.ErrNoRows {
-		return Battle{}, false, nil
-	}
-	if err != nil {
+	if err := scanBattle(row, &b); err != nil {
+		if err == sql.ErrNoRows {
+			return Battle{}, false, nil
+		}
 		return Battle{}, false, fmt.Errorf("query battle %s: %w", id, err)
 	}
 
@@ -55,6 +67,30 @@ func (s *Store) ByID(ctx context.Context, id string) (Battle, bool, error) {
 	return b, true, nil
 }
 
+// RandomVerified returns one randomly-chosen hand-curated battle.
+func (s *Store) RandomVerified(ctx context.Context) (Battle, bool, error) {
+	row := s.db.QueryRowContext(ctx,
+		"SELECT "+battleColumns+" FROM battles WHERE verified = 1 ORDER BY RANDOM() LIMIT 1")
+	var b Battle
+	if err := scanBattle(row, &b); err != nil {
+		if err == sql.ErrNoRows {
+			return Battle{}, false, nil
+		}
+		return Battle{}, false, fmt.Errorf("query random verified: %w", err)
+	}
+	sides, err := s.sidesForBattle(ctx, b.ID)
+	if err != nil {
+		return Battle{}, false, err
+	}
+	b.Sides = sides
+	refs, err := s.refsForBattle(ctx, b.ID)
+	if err != nil {
+		return Battle{}, false, err
+	}
+	b.References = refs
+	return b, true, nil
+}
+
 // List returns battles matching the filter, sorted by year.
 func (s *Store) List(ctx context.Context, f Filter) ([]Battle, int, error) {
 	where, args := buildWhere(f)
@@ -70,8 +106,8 @@ func (s *Store) List(ctx context.Context, f Filter) ([]Battle, int, error) {
 		limit = 10000
 	}
 
-	query := "SELECT id, name, year, date, lat, lng, era, war, battle_type, victor, summary, significance FROM battles" +
-		where + " ORDER BY year ASC LIMIT ? OFFSET ?"
+	query := "SELECT " + battleColumns + " FROM battles" +
+		where + " ORDER BY date_start ASC, year ASC LIMIT ? OFFSET ?"
 	args = append(args, limit, f.Offset)
 
 	rows, err := s.db.QueryContext(ctx, query, args...)
@@ -100,17 +136,23 @@ func (s *Store) Search(ctx context.Context, query string, limit, offset int) ([]
 
 	ftsQuery := sanitizeFTS(query)
 
-	countSQL := `SELECT COUNT(*) FROM battles_fts WHERE battles_fts MATCH ?`
+	countSQL := `SELECT COUNT(*) FROM battles b
+		JOIN battles_fts fts ON b.rowid = fts.rowid
+		WHERE fts.battles_fts MATCH ?
+		  AND (b.lat != 0 OR b.lng != 0)
+		  AND ` + trustedSQL
 	var total int
 	if err := s.db.QueryRowContext(ctx, countSQL, ftsQuery).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("count search results: %w", err)
 	}
 
-	searchSQL := `SELECT b.id, b.name, b.year, b.date, b.lat, b.lng, b.era, b.war, b.battle_type, b.victor, b.summary, b.significance
+	searchSQL := `SELECT ` + prefixCols("b", battleColumns) + `
 		FROM battles b
 		JOIN battles_fts fts ON b.rowid = fts.rowid
 		WHERE fts.battles_fts MATCH ?
-		ORDER BY rank
+		  AND (b.lat != 0 OR b.lng != 0)
+		  AND ` + prefixCols("b", "") + trustedSQL + `
+		ORDER BY b.verified DESC, rank
 		LIMIT ? OFFSET ?`
 
 	rows, err := s.db.QueryContext(ctx, searchSQL, ftsQuery, limit, offset)
@@ -142,6 +184,12 @@ func (s *Store) Stats(ctx context.Context) (StatsResponse, error) {
 		return stats, fmt.Errorf("query stats totals: %w", err)
 	}
 
+	if err := s.db.QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM battles WHERE verified = 1").
+		Scan(&stats.VerifiedBattles); err != nil {
+		return stats, fmt.Errorf("query verified count: %w", err)
+	}
+
 	var queryErr error
 	stats.Eras, queryErr = s.nameCounts(ctx, "era")
 	if queryErr != nil {
@@ -161,7 +209,9 @@ func (s *Store) Stats(ctx context.Context) (StatsResponse, error) {
 
 // nameCounts returns distinct values and their counts for a column.
 func (s *Store) nameCounts(ctx context.Context, column string) ([]NameCount, error) {
-	query := fmt.Sprintf("SELECT %s, COUNT(*) FROM battles GROUP BY %s ORDER BY COUNT(*) DESC", column, column)
+	query := fmt.Sprintf(
+		"SELECT %s, COUNT(*) FROM battles WHERE %s != '' GROUP BY %s ORDER BY COUNT(*) DESC",
+		column, column, column)
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("query %s counts: %w", column, err)
@@ -238,9 +288,12 @@ func (s *Store) loadSides(ctx context.Context, battles []Battle) error {
 }
 
 // warCounts returns wars with their battle counts, earliest year, and total casualties.
+// Only returns wars that pass the trust filter.
 func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
 	rows, err := s.db.QueryContext(ctx,
-		"SELECT war, COUNT(*), MIN(year) FROM battles WHERE war != '' GROUP BY war ORDER BY COUNT(*) DESC")
+		`SELECT war, COUNT(*), MIN(year) FROM battles
+		 WHERE war != '' AND `+trustedSQL+` AND LENGTH(war) > 3
+		 GROUP BY war ORDER BY COUNT(*) DESC LIMIT 500`)
 	if err != nil {
 		return nil, fmt.Errorf("query war counts: %w", err)
 	}
@@ -258,7 +311,6 @@ func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
 		return nil, err
 	}
 
-	// Build index after slice is fully populated so pointers are stable.
 	warIdx := make(map[string]int, len(counts))
 	for i, wc := range counts {
 		warIdx[wc.Name] = i
@@ -267,7 +319,7 @@ func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
 	casRows, err := s.db.QueryContext(ctx,
 		`SELECT b.war, bs.casualties FROM battle_sides bs
 		 JOIN battles b ON b.id = bs.battle_id
-		 WHERE b.war != '' AND bs.casualties != ''`)
+		 WHERE b.war != '' AND bs.casualties != '' AND `+strings.ReplaceAll(trustedSQL, "war ", "b.war ")+``)
 	if err != nil {
 		return counts, nil
 	}
@@ -277,39 +329,87 @@ func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
 		var war, cas string
 		casRows.Scan(&war, &cas)
 		if idx, ok := warIdx[war]; ok {
-			counts[idx].Casualties += parseCasualtyNumber(cas)
+			counts[idx].Casualties += ParseCasualtyNumber(cas)
 		}
 	}
 
 	return counts, nil
 }
 
-// parseCasualtyNumber extracts the largest plausible number from a casualty
-// string like "50,000 killed/wounded" or "69 dead and 533 wounded".
-// Ignores numbers over 10 million (likely parsing artifacts).
-func parseCasualtyNumber(s string) int {
+// ParseCasualtyNumber extracts a representative casualty number from a freeform
+// string like "50,000 killed/wounded", "15,000–20,000", or "69 dead and 533 wounded".
+//
+// Rules of thumb:
+//   - When two numbers are separated by an en/em dash or "to", the result is
+//     their midpoint (treated as a range).
+//   - Otherwise the largest plausible number (sum of explicit components is
+//     too aggressive; max is closer to typical Wikipedia infobox phrasing).
+//   - Commas are stripped so "50,000" becomes 50000.
+//   - Values above 10 million are discarded as parsing artifacts.
+func ParseCasualtyNumber(s string) int {
+	nums := extractNumbers(s)
+	if len(nums) == 0 {
+		return 0
+	}
+
+	if pair, ok := findRange(s, nums); ok {
+		return (pair[0] + pair[1]) / 2
+	}
+
 	best := 0
+	for _, n := range nums {
+		if n > best && n <= 10_000_000 {
+			best = n
+		}
+	}
+	return best
+}
+
+// extractNumbers pulls every comma-separated integer out of a string.
+func extractNumbers(s string) []int {
+	var out []int
 	num := 0
 	inNumber := false
-
 	for _, ch := range s {
-		if ch >= '0' && ch <= '9' {
+		switch {
+		case ch >= '0' && ch <= '9':
 			num = num*10 + int(ch-'0')
 			inNumber = true
-		} else if ch == ',' && inNumber {
-			continue
-		} else {
-			if inNumber && num > best && num <= 10_000_000 {
-				best = num
+		case ch == ',' && inNumber:
+			// commas inside numbers are thousands separators; skip
+		default:
+			if inNumber {
+				out = append(out, num)
 			}
 			num = 0
 			inNumber = false
 		}
 	}
-	if inNumber && num > best && num <= 10_000_000 {
-		best = num
+	if inNumber {
+		out = append(out, num)
 	}
-	return best
+	return out
+}
+
+// findRange returns the first two numbers of a range expression like
+// "15,000–20,000" or "15000 to 20000". Returns false if no range is detected.
+func findRange(s string, nums []int) ([2]int, bool) {
+	if len(nums) < 2 {
+		return [2]int{}, false
+	}
+	low := strings.ToLower(s)
+	for _, sep := range []string{"–", "—", " to ", "-"} {
+		idx := strings.Index(low, sep)
+		if idx < 0 {
+			continue
+		}
+		left := nums[0]
+		right := nums[1]
+		if right > left && right <= 10_000_000 && left <= 10_000_000 {
+			return [2]int{left, right}, true
+		}
+	}
+	return [2]int{}, false
 }
 
 // refsForBattle returns the references for a single battle.
@@ -330,44 +430,6 @@ func (s *Store) refsForBattle(ctx context.Context, battleID string) ([]Reference
 		refs = append(refs, r)
 	}
 	return refs, rows.Err()
-}
-
-// loadRefs batch-loads references for a slice of battles.
-func (s *Store) loadRefs(ctx context.Context, battles []Battle) error {
-	if len(battles) == 0 {
-		return nil
-	}
-
-	ids := make([]any, len(battles))
-	placeholders := make([]string, len(battles))
-	idxMap := make(map[string]int, len(battles))
-	for i, b := range battles {
-		ids[i] = b.ID
-		placeholders[i] = "?"
-		idxMap[b.ID] = i
-	}
-
-	query := fmt.Sprintf(
-		"SELECT battle_id, ref_type, title, author, year, url, note FROM battle_references WHERE battle_id IN (%s)",
-		strings.Join(placeholders, ","))
-
-	rows, err := s.db.QueryContext(ctx, query, ids...)
-	if err != nil {
-		return fmt.Errorf("load refs batch: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var battleID string
-		var r Reference
-		if err := rows.Scan(&battleID, &r.Type, &r.Title, &r.Author, &r.Year, &r.URL, &r.Note); err != nil {
-			return fmt.Errorf("scan ref: %w", err)
-		}
-		if idx, ok := idxMap[battleID]; ok {
-			battles[idx].References = append(battles[idx].References, r)
-		}
-	}
-	return rows.Err()
 }
 
 // buildWhere constructs a WHERE clause from a Filter.
@@ -396,6 +458,19 @@ func buildWhere(f Filter) (string, []any) {
 		args = append(args, f.YearMax)
 	}
 
+	if !f.IncludeNoCoord {
+		conditions = append(conditions, "(lat != 0 OR lng != 0)")
+	}
+
+	switch f.Quality {
+	case "verified":
+		conditions = append(conditions, "verified = 1")
+	case "all":
+		// no quality gate
+	default: // "" or "trusted"
+		conditions = append(conditions, trustedSQL)
+	}
+
 	if len(conditions) == 0 {
 		return "", nil
 	}
@@ -417,10 +492,49 @@ func scanBattles(rows *sql.Rows) ([]Battle, error) {
 	var battles []Battle
 	for rows.Next() {
 		var b Battle
-		if err := rows.Scan(&b.ID, &b.Name, &b.Year, &b.Date, &b.Lat, &b.Lng, &b.Era, &b.War, &b.BattleType, &b.Victor, &b.Summary, &b.Significance); err != nil {
+		var verified int
+		if err := rows.Scan(&b.ID, &b.Name, &b.Year, &b.Date, &b.Lat, &b.Lng,
+			&b.Era, &b.War, &b.BattleType, &b.Victor, &b.Summary, &b.Significance,
+			&verified, &b.Source); err != nil {
 			return nil, fmt.Errorf("scan battle: %w", err)
 		}
+		b.Verified = verified == 1
 		battles = append(battles, b)
 	}
 	return battles, rows.Err()
+}
+
+// scanBattle reads one battle from a single row.
+func scanBattle(row *sql.Row, b *Battle) error {
+	var verified int
+	err := row.Scan(&b.ID, &b.Name, &b.Year, &b.Date, &b.Lat, &b.Lng,
+		&b.Era, &b.War, &b.BattleType, &b.Victor, &b.Summary, &b.Significance,
+		&verified, &b.Source)
+	if err == nil {
+		b.Verified = verified == 1
+	}
+	return err
+}
+
+// prefixCols copies a comma-separated column list and prefixes each with
+// the given table alias. If cols is empty, returns the empty string.
+func prefixCols(prefix, cols string) string {
+	if cols == "" {
+		return ""
+	}
+	parts := strings.Split(cols, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		if strings.HasPrefix(p, "COALESCE(") {
+			// Inject prefix into the inner column reference.
+			out = append(out, strings.Replace(p, "COALESCE(", "COALESCE("+prefix+".", 1))
+			continue
+		}
+		out = append(out, prefix+"."+p)
+	}
+	return strings.Join(out, ", ")
 }

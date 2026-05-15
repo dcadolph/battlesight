@@ -87,9 +87,7 @@ export default function App() {
     setPlaybackBattles(null);
   }, []);
 
-  const hasFilters = filters.era || filters.war || filters.battleType;
-  const isDefaultView = !isolatedBattle && !playbackBattles && !hasFilters &&
-    yearRange[0] === MIN_YEAR && yearRange[1] === MAX_YEAR;
+  const showPillars = !isolatedBattle && !playbackBattles && !selectedBattle;
 
   let globeBattles = battles;
   if (isolatedBattle) {
@@ -135,6 +133,7 @@ export default function App() {
         onBattleSelect={handleBattleClick}
         onIsolate={handleIsolate}
         onPlaybackOpen={() => setShowPlayback(true)}
+        playbackActive={showPlayback}
         battleCount={battles.length}
       />
 
@@ -143,7 +142,7 @@ export default function App() {
         yearRange={yearRange}
         onBattleClick={handleBattleClick}
         selectedBattle={selectedBattle}
-        dramatic={isDefaultView}
+        dramatic={showPillars}
       />
 
       <TimelineSlider

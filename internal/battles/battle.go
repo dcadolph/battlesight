@@ -58,4 +58,10 @@ type Battle struct {
 	Significance string `json:"significance"`
 	// References lists books, films, and other sources about this battle.
 	References []Reference `json:"references,omitempty"`
+	// Verified is true for hand-curated battles, false for auto-imported.
+	Verified bool `json:"verified"`
+	// Source identifies where this record came from: curated, wikidata, cdb90.
+	Source string `json:"source,omitempty"`
+	// HasReplay is true when a hand-crafted phased replay exists for this battle.
+	HasReplay bool `json:"hasReplay"`
 }

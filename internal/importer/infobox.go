@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	infoboxRe    = regexp.MustCompile(`(?si)\{\{[Ii]nfobox military conflict(.*?)\n\}\}`)
+	infoboxRe    = regexp.MustCompile(`(?si)\{\{[Ii]nfobox (?:military conflict|battle|military engagement)(.*?)\n\}\}`)
 	fieldRe      = regexp.MustCompile(`(?m)^\s*\|\s*(\w+)\s*=\s*(.*)$`)
 	wikiLink     = regexp.MustCompile(`\[\[(?:[^|\]]*\|)?([^\]]+)\]\]`)
 	htmlTag      = regexp.MustCompile(`<[^>]+>`)
@@ -107,7 +107,9 @@ func EnrichInfoboxes(ctx context.Context, db *sql.DB) (int, error) {
 		`UPDATE battles SET
 			war = CASE WHEN ? != '' THEN ? ELSE war END,
 			date = CASE WHEN ? != '' THEN ? ELSE date END,
-			victor = CASE WHEN ? != '' AND victor = '' THEN ? ELSE victor END,
+			date_start = CASE WHEN ? != '' THEN ? ELSE date_start END,
+			date_end = CASE WHEN ? != '' THEN ? ELSE date_end END,
+			victor = CASE WHEN ? != '' THEN ? ELSE victor END,
 			battle_type = CASE WHEN ? != '' AND battle_type = 'land' THEN ? ELSE battle_type END
 		WHERE id = ?`)
 	if err != nil {
@@ -158,12 +160,17 @@ func EnrichInfoboxes(ctx context.Context, db *sql.DB) (int, error) {
 
 			info := parseInfobox(wikitext)
 
-			// Update battle metadata (war, date, victor, type).
+			// Parse dates into sortable ISO format.
+			dr := ParseDateRange(info.date, 0)
+
+			// Update battle metadata (war, date, dates, victor, type).
 			victor := inferVictor(info)
 			btype := inferBattleType(info)
 			updateBattle.ExecContext(ctx,
 				info.partof, info.partof,
 				info.date, info.date,
+				dr.Start, dr.Start,
+				dr.End, dr.End,
 				victor, victor,
 				btype, btype,
 				r.id)
@@ -284,29 +291,63 @@ func cleanWikitext(s string) string {
 	return s
 }
 
-// inferVictor tries to determine the winning side from the result field.
+// inferVictor determines the winning side from the result field.
 func inferVictor(info parsedInfobox) string {
 	r := strings.ToLower(info.result)
-	if strings.Contains(r, "victory") {
-		c1 := strings.ToLower(info.combatant1)
-		c2 := strings.ToLower(info.combatant2)
-		if c1 != "" && (strings.Contains(r, c1) || strings.HasPrefix(r, c1)) {
-			return info.combatant1
-		}
-		if c2 != "" && (strings.Contains(r, c2) || strings.HasPrefix(r, c2)) {
-			return info.combatant2
-		}
-		// Try matching just the first word of the result before "victory".
-		parts := strings.SplitN(r, "victory", 2)
-		if len(parts) > 0 {
-			before := strings.TrimSpace(parts[0])
-			if before != "" && c1 != "" && strings.Contains(c1, before) {
-				return info.combatant1
-			}
-			if before != "" && c2 != "" && strings.Contains(c2, before) {
-				return info.combatant2
-			}
-		}
+
+	if !strings.Contains(r, "victory") {
+		return ""
+	}
+
+	// Strip common prefixes.
+	r = strings.TrimSpace(r)
+	for _, prefix := range []string{"decisive ", "strategic ", "tactical ", "pyrrhic ", "major ", "minor ", "narrow ", "overall ", "clear "} {
+		r = strings.TrimPrefix(r, prefix)
+	}
+
+	c1 := strings.ToLower(info.combatant1)
+	c2 := strings.ToLower(info.combatant2)
+
+	// Direct combatant match.
+	if c1 != "" && strings.HasPrefix(r, c1) {
+		return info.combatant1
+	}
+	if c2 != "" && strings.HasPrefix(r, c2) {
+		return info.combatant2
+	}
+
+	// Extract the word(s) before "victory" and try matching.
+	parts := strings.SplitN(r, "victory", 2)
+	if len(parts) == 0 {
+		return ""
+	}
+	before := strings.TrimSpace(parts[0])
+	if before == "" {
+		return ""
+	}
+
+	// Try substring matching against combatants.
+	if c1 != "" && (strings.Contains(c1, before) || strings.Contains(before, c1)) {
+		return info.combatant1
+	}
+	if c2 != "" && (strings.Contains(c2, before) || strings.Contains(before, c2)) {
+		return info.combatant2
+	}
+
+	// Try matching first word of each combatant.
+	beforeFirst := strings.Fields(before)[0]
+	if c1 != "" && strings.Contains(c1, beforeFirst) {
+		return info.combatant1
+	}
+	if c2 != "" && strings.Contains(c2, beforeFirst) {
+		return info.combatant2
+	}
+
+	// If no combatant match, use the raw text before "victory" as the victor name.
+	// Capitalize first letter.
+	victor := strings.TrimRight(before, " ,;:-")
+	if len(victor) > 1 {
+		return strings.ToUpper(victor[:1]) + victor[1:]
 	}
 	return ""
 }

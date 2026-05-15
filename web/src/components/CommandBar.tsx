@@ -12,6 +12,7 @@ interface CommandBarProps {
   onBattleSelect: (battle: Battle) => void;
   onIsolate: (battle: Battle | null) => void;
   onPlaybackOpen: () => void;
+  playbackActive: boolean;
   battleCount: number;
 }
 
@@ -19,7 +20,7 @@ function formatYear(year: number): string {
   return year < 0 ? `${Math.abs(year)} BC` : `${year}`;
 }
 
-export default function CommandBar({ filters, onFiltersChange, onBattleSelect, onIsolate, onPlaybackOpen, battleCount }: CommandBarProps) {
+export default function CommandBar({ filters, onFiltersChange, onBattleSelect, onIsolate, onPlaybackOpen, playbackActive, battleCount }: CommandBarProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Battle[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -142,37 +143,58 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
         )}
       </div>
 
-      {/* Action buttons */}
-      <div className="fixed top-[88px] left-5 z-40 flex gap-1.5">
-        <button
-          onClick={() => setPanel(panel === 'filters' ? 'none' : 'filters')}
-          className={`h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1 ${
-            panel === 'filters' || hasFilters
-              ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
-              : 'bg-[#1e2030] text-slate-400 border border-slate-600/50 hover:text-white hover:border-slate-500/60'
-          }`}
-        >
-          Filters{hasFilters ? ` (${[filters.era, filters.war, filters.battleType].filter(Boolean).length})` : ''}
-        </button>
-        <button
-          onClick={onPlaybackOpen}
-          className="h-7 px-2.5 rounded-md text-[11px] font-medium bg-[#1e2030] text-slate-400 border border-slate-600/50 hover:text-white hover:border-slate-500/60 transition-colors"
-        >
-          ▶ Story
-        </button>
-        {hasFilters && (
+      {/* Mode tabs */}
+      <div className="fixed top-[88px] left-5 z-40">
+        <div className="flex bg-[#16171f] rounded-lg border border-slate-700/50 overflow-hidden">
           <button
-            onClick={() => onFiltersChange({ era: '', war: '', battleType: '' })}
-            className="h-7 px-2 rounded-md text-[10px] text-slate-600 hover:text-slate-300 transition-colors"
+            onClick={() => { setPanel('none'); }}
+            className={`h-8 px-4 text-[12px] font-medium transition-colors ${
+              !playbackActive
+                ? 'bg-blue-500/15 text-blue-400'
+                : 'text-slate-500 hover:text-slate-300'
+            }`}
           >
-            Clear
+            Explore
           </button>
+          <button
+            onClick={onPlaybackOpen}
+            className={`h-8 px-4 text-[12px] font-medium transition-colors ${
+              playbackActive
+                ? 'bg-blue-500/15 text-blue-400'
+                : 'text-slate-500 hover:text-slate-300'
+            }`}
+          >
+            Stories
+          </button>
+        </div>
+
+        {!playbackActive && (
+          <div className="flex gap-1.5 mt-2">
+            <button
+              onClick={() => setPanel(panel === 'filters' ? 'none' : 'filters')}
+              className={`h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1 ${
+                panel === 'filters' || hasFilters
+                  ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
+                  : 'bg-[#1e2030] text-slate-400 border border-slate-600/50 hover:text-white hover:border-slate-500/60'
+              }`}
+            >
+              Filters{hasFilters ? ` (${[filters.era, filters.war, filters.battleType].filter(Boolean).length})` : ''}
+            </button>
+            {hasFilters && (
+              <button
+                onClick={() => onFiltersChange({ era: '', war: '', battleType: '' })}
+                className="h-7 px-2 rounded-md text-[10px] text-slate-600 hover:text-slate-300 transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         )}
       </div>
 
       {/* Filter panel */}
-      {panel === 'filters' && stats && (
-        <div className="fixed top-[118px] left-5 z-40 w-56 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-2">
+      {!playbackActive && panel === 'filters' && stats && (
+        <div className="fixed top-[130px] left-5 z-40 w-56 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-2">
           <div>
             <label className="block text-[10px] text-slate-600 uppercase tracking-wider mb-1">Era</label>
             <select

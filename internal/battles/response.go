@@ -16,6 +16,10 @@ type ListResponse struct {
 type StatsResponse struct {
 	// TotalBattles is the count of all battles in the database.
 	TotalBattles int `json:"totalBattles"`
+	// VerifiedBattles is the count of hand-curated battles.
+	VerifiedBattles int `json:"verifiedBattles"`
+	// ReplayCount is the number of battles with a hand-crafted replay.
+	ReplayCount int `json:"replayCount"`
 	// YearRange is the min and max year across all battles.
 	YearRange [2]int `json:"yearRange"`
 	// Eras lists each era with its battle count.
@@ -58,8 +62,17 @@ type Filter struct {
 	YearMin int
 	// YearMax is the latest year to include.
 	YearMax int
-	// Limit is the maximum number of results (0 = default 1000).
+	// Limit is the maximum number of results (0 = default 10000).
 	Limit int
 	// Offset is the pagination offset.
 	Offset int
+	// IncludeNoCoord forces inclusion of records where lat=0 and lng=0; by
+	// default these are filtered because they cannot appear on the globe.
+	IncludeNoCoord bool
+	// Quality picks a trust level. Values:
+	//   "verified"  - only hand-curated battles
+	//   "trusted"   - verified plus records with non-empty sides and clean war
+	//   "all"       - everything (no quality gate)
+	// Empty string defaults to "trusted".
+	Quality string
 }

@@ -1,0 +1,524 @@
+[
+  {
+    "id": "marathon",
+    "name": "Battle of Marathon",
+    "year": -490,
+    "date": "September 490 BC",
+    "lat": 38.1133,
+    "lng": 23.9738,
+    "era": "ancient",
+    "war": "Greco-Persian Wars",
+    "battleType": "land",
+    "sides": [
+      {"name": "Athens", "commander": "Miltiades", "strength": "10,000", "casualties": "192 killed"},
+      {"name": "Persian Empire", "commander": "Datis", "strength": "25,000", "casualties": "6,400 killed"}
+    ],
+    "victor": "Athens",
+    "summary": "Athenian hoplites charged across the plain and routed a larger Persian invasion force, proving that Persian armies could be beaten in open battle.",
+    "significance": "Preserved Greek independence and democratic institutions. The messenger run to Athens inspired the modern marathon race."
+  },
+  {
+    "id": "thermopylae",
+    "name": "Battle of Thermopylae",
+    "year": -480,
+    "date": "August 480 BC",
+    "lat": 38.7967,
+    "lng": 22.5358,
+    "era": "ancient",
+    "war": "Greco-Persian Wars",
+    "battleType": "land",
+    "sides": [
+      {"name": "Greek City-States", "commander": "Leonidas I", "strength": "7,000", "casualties": "4,000 killed"},
+      {"name": "Persian Empire", "commander": "Xerxes I", "strength": "70,000-300,000", "casualties": "20,000 killed"}
+    ],
+    "victor": "Persian Empire",
+    "summary": "A small Greek force led by 300 Spartans held the narrow coastal pass for three days against a vastly larger Persian army before being outflanked via a mountain path.",
+    "significance": "The stand became a symbol of courage against overwhelming odds. It delayed Xerxes long enough for Greece to organize its naval defense at Salamis."
+  },
+  {
+    "id": "salamis",
+    "name": "Battle of Salamis",
+    "year": -480,
+    "date": "September 480 BC",
+    "lat": 37.9500,
+    "lng": 23.5833,
+    "era": "ancient",
+    "war": "Greco-Persian Wars",
+    "battleType": "naval",
+    "sides": [
+      {"name": "Greek City-States", "commander": "Themistocles", "strength": "371 triremes", "casualties": "40 ships lost"},
+      {"name": "Persian Empire", "commander": "Xerxes I", "strength": "500-1,200 ships", "casualties": "200-300 ships lost"}
+    ],
+    "victor": "Greek City-States",
+    "summary": "Themistocles lured the Persian fleet into the narrow straits near Salamis, where their numerical advantage was negated. Greek triremes rammed and sank the larger Persian vessels.",
+    "significance": "Destroyed Persian naval superiority and ended the invasion threat. Often cited as one of the most consequential naval battles in history."
+  },
+  {
+    "id": "gaugamela",
+    "name": "Battle of Gaugamela",
+    "year": -331,
+    "date": "1 October 331 BC",
+    "lat": 36.5547,
+    "lng": 43.4347,
+    "era": "ancient",
+    "war": "Wars of Alexander the Great",
+    "battleType": "land",
+    "sides": [
+      {"name": "Macedon", "commander": "Alexander the Great", "strength": "47,000", "casualties": "1,200 killed"},
+      {"name": "Persian Empire", "commander": "Darius III", "strength": "50,000-100,000", "casualties": "40,000-90,000 killed"}
+    ],
+    "victor": "Macedon",
+    "summary": "Alexander led a decisive cavalry charge through a gap in the Persian line, driving straight at Darius, who fled the field. The Persian army collapsed.",
+    "significance": "Ended the Achaemenid Persian Empire. Alexander became ruler of the largest empire the world had seen."
+  },
+  {
+    "id": "cannae",
+    "name": "Battle of Cannae",
+    "year": -216,
+    "date": "2 August 216 BC",
+    "lat": 41.3056,
+    "lng": 16.1322,
+    "era": "ancient",
+    "war": "Second Punic War",
+    "battleType": "land",
+    "sides": [
+      {"name": "Carthage", "commander": "Hannibal Barca", "strength": "50,000", "casualties": "5,700 killed"},
+      {"name": "Roman Republic", "commander": "Varro & Paullus", "strength": "86,000", "casualties": "50,000-70,000 killed"}
+    ],
+    "victor": "Carthage",
+    "summary": "Hannibal executed a double envelopment, allowing his center to bend inward while cavalry encircled the Roman flanks and rear, annihilating the Roman army.",
+    "significance": "The textbook example of tactical encirclement studied in military academies to this day. Rome's worst single-day loss."
+  },
+  {
+    "id": "alesia",
+    "name": "Siege of Alesia",
+    "year": -52,
+    "date": "September 52 BC",
+    "lat": 47.5367,
+    "lng": 4.5000,
+    "era": "ancient",
+    "war": "Gallic Wars",
+    "battleType": "siege",
+    "sides": [
+      {"name": "Roman Republic", "commander": "Julius Caesar", "strength": "60,000", "casualties": "12,800 killed"},
+      {"name": "Gallic Tribes", "commander": "Vercingetorix", "strength": "80,000 besieged + 250,000 relief", "casualties": "Unknown, mass surrender"}
+    ],
+    "victor": "Roman Republic",
+    "summary": "Caesar built two rings of fortifications: one facing inward to contain Vercingetorix, another facing outward to repel the Gallic relief army. He defeated both forces simultaneously.",
+    "significance": "Ended organized Gallic resistance. Gaul became a Roman province, fundamentally shaping Western European civilization."
+  },
+  {
+    "id": "actium",
+    "name": "Battle of Actium",
+    "year": -31,
+    "date": "2 September 31 BC",
+    "lat": 38.9500,
+    "lng": 20.7167,
+    "era": "ancient",
+    "war": "Final War of the Roman Republic",
+    "battleType": "naval",
+    "sides": [
+      {"name": "Octavian", "commander": "Agrippa", "strength": "400 ships", "casualties": "Minimal"},
+      {"name": "Antony & Cleopatra", "commander": "Mark Antony", "strength": "500 ships", "casualties": "200+ ships lost"}
+    ],
+    "victor": "Octavian",
+    "summary": "Agrippa's lighter, more maneuverable fleet trapped Antony's heavier ships. Cleopatra broke through with her squadron and fled; Antony followed, abandoning his fleet.",
+    "significance": "Ended the Roman Republic. Octavian became Augustus, the first Roman Emperor, beginning the Pax Romana."
+  },
+  {
+    "id": "hastings",
+    "name": "Battle of Hastings",
+    "year": 1066,
+    "date": "14 October 1066",
+    "lat": 50.9144,
+    "lng": 0.4878,
+    "era": "medieval",
+    "war": "Norman Conquest of England",
+    "battleType": "land",
+    "sides": [
+      {"name": "Normandy", "commander": "William the Conqueror", "strength": "10,000", "casualties": "2,000 killed"},
+      {"name": "Anglo-Saxon England", "commander": "Harold Godwinson", "strength": "7,000", "casualties": "4,000 killed including Harold"}
+    ],
+    "victor": "Normandy",
+    "summary": "After a full day of fighting, Norman cavalry feigned retreat to draw the Anglo-Saxons off Senlac Hill. Harold was killed, reportedly struck by an arrow, and his army broke.",
+    "significance": "Replaced the Anglo-Saxon ruling class with a Norman-French aristocracy. Transformed the English language, law, and culture permanently."
+  },
+  {
+    "id": "agincourt",
+    "name": "Battle of Agincourt",
+    "year": 1415,
+    "date": "25 October 1415",
+    "lat": 50.4631,
+    "lng": 2.1408,
+    "era": "medieval",
+    "war": "Hundred Years' War",
+    "battleType": "land",
+    "sides": [
+      {"name": "England", "commander": "Henry V", "strength": "6,000-9,000", "casualties": "112-600 killed"},
+      {"name": "France", "commander": "Charles d'Albret", "strength": "12,000-36,000", "casualties": "6,000-10,000 killed"}
+    ],
+    "victor": "England",
+    "summary": "English longbowmen devastated waves of French knights and men-at-arms who advanced through muddy, narrow terrain. The heavily armored French were cut down in the mire.",
+    "significance": "Demonstrated that disciplined infantry with ranged weapons could destroy mounted knights. A turning point in the decline of heavy cavalry warfare."
+  },
+  {
+    "id": "constantinople",
+    "name": "Fall of Constantinople",
+    "year": 1453,
+    "date": "29 May 1453",
+    "lat": 41.0082,
+    "lng": 28.9784,
+    "era": "medieval",
+    "war": "Ottoman Wars in Europe",
+    "battleType": "siege",
+    "sides": [
+      {"name": "Ottoman Empire", "commander": "Mehmed II", "strength": "80,000-200,000", "casualties": "Unknown"},
+      {"name": "Byzantine Empire", "commander": "Constantine XI", "strength": "7,000-10,000", "casualties": "4,000 killed including the Emperor"}
+    ],
+    "victor": "Ottoman Empire",
+    "summary": "After a 53-day siege using massive cannons, the Ottomans breached the Theodosian Walls. Emperor Constantine XI died fighting. The city fell in a final dawn assault.",
+    "significance": "Ended the 1,100-year Byzantine Empire and the last direct link to ancient Rome. Shifted trade routes and contributed to the Age of Exploration."
+  },
+  {
+    "id": "spanish-armada",
+    "name": "Defeat of the Spanish Armada",
+    "year": 1588,
+    "date": "August 1588",
+    "lat": 50.3500,
+    "lng": -4.1500,
+    "era": "early-modern",
+    "war": "Anglo-Spanish War",
+    "battleType": "naval",
+    "sides": [
+      {"name": "England", "commander": "Drake & Howard", "strength": "197 ships", "casualties": "Minimal"},
+      {"name": "Spain", "commander": "Duke of Medina Sidonia", "strength": "130 ships", "casualties": "60+ ships lost, 20,000 dead"}
+    ],
+    "victor": "England",
+    "summary": "English fireships scattered the Armada at Gravelines. Faster English galleons harassed the larger Spanish vessels. Storms destroyed much of the fleet on its retreat around Scotland and Ireland.",
+    "significance": "Ended Spain's attempt to invade England and shifted naval power toward England, setting the stage for the British Empire."
+  },
+  {
+    "id": "breitenfeld",
+    "name": "Battle of Breitenfeld",
+    "year": 1631,
+    "date": "17 September 1631",
+    "lat": 51.4000,
+    "lng": 12.3333,
+    "era": "early-modern",
+    "war": "Thirty Years' War",
+    "battleType": "land",
+    "sides": [
+      {"name": "Sweden", "commander": "Gustavus Adolphus", "strength": "42,000", "casualties": "3,500 killed"},
+      {"name": "Holy Roman Empire", "commander": "Tilly", "strength": "35,000", "casualties": "7,600 killed, 6,000 captured"}
+    ],
+    "victor": "Sweden",
+    "summary": "Despite the rout of his Saxon allies, Gustavus Adolphus rallied his Swedish forces using mobile artillery and flexible combined-arms tactics to crush Tilly's tercios.",
+    "significance": "First major Protestant victory in the Thirty Years' War. Demonstrated that the Spanish tercio formation could be defeated by mobile, combined-arms warfare."
+  },
+  {
+    "id": "trafalgar",
+    "name": "Battle of Trafalgar",
+    "year": 1805,
+    "date": "21 October 1805",
+    "lat": 36.1833,
+    "lng": -6.2500,
+    "era": "napoleonic",
+    "war": "Napoleonic Wars",
+    "battleType": "naval",
+    "sides": [
+      {"name": "Great Britain", "commander": "Horatio Nelson", "strength": "27 ships of the line", "casualties": "449 killed, 1,214 wounded"},
+      {"name": "France & Spain", "commander": "Villeneuve", "strength": "33 ships of the line", "casualties": "4,408 killed, 2,545 wounded, 22 ships captured"}
+    ],
+    "victor": "Great Britain",
+    "summary": "Nelson split the enemy line with two columns attacking perpendicular to the Franco-Spanish formation. He was killed by a sniper during the battle but the British won decisively.",
+    "significance": "Established British naval supremacy for over a century. Napoleon abandoned his plans to invade Britain."
+  },
+  {
+    "id": "austerlitz",
+    "name": "Battle of Austerlitz",
+    "year": 1805,
+    "date": "2 December 1805",
+    "lat": 49.1500,
+    "lng": 16.7667,
+    "era": "napoleonic",
+    "war": "Napoleonic Wars",
+    "battleType": "land",
+    "sides": [
+      {"name": "France", "commander": "Napoleon Bonaparte", "strength": "67,000", "casualties": "1,305 killed, 6,991 wounded"},
+      {"name": "Russia & Austria", "commander": "Kutuzov & Alexander I", "strength": "85,000", "casualties": "16,000 killed/wounded, 20,000 captured"}
+    ],
+    "victor": "France",
+    "summary": "Napoleon deliberately weakened his right flank to bait the Allies into overextending, then drove through their weakened center at the Pratzen Heights, splitting their army in two.",
+    "significance": "Napoleon's masterpiece. Dissolved the Third Coalition and the Holy Roman Empire. Often ranked as the greatest tactical victory in military history."
+  },
+  {
+    "id": "waterloo",
+    "name": "Battle of Waterloo",
+    "year": 1815,
+    "date": "18 June 1815",
+    "lat": 50.6803,
+    "lng": 4.4117,
+    "era": "napoleonic",
+    "war": "Napoleonic Wars",
+    "battleType": "land",
+    "sides": [
+      {"name": "Britain & Allies", "commander": "Duke of Wellington", "strength": "68,000 + 50,000 Prussians", "casualties": "22,000 killed/wounded"},
+      {"name": "France", "commander": "Napoleon Bonaparte", "strength": "72,000", "casualties": "25,000 killed/wounded, 8,000 captured"}
+    ],
+    "victor": "Britain & Allies",
+    "summary": "Wellington's army held defensive positions all day against repeated French assaults. The late arrival of Blucher's Prussian army on Napoleon's right flank decided the battle.",
+    "significance": "Ended Napoleon's rule permanently and the Napoleonic Wars. Ushered in nearly a century of relative European peace."
+  },
+  {
+    "id": "gettysburg",
+    "name": "Battle of Gettysburg",
+    "year": 1863,
+    "date": "1-3 July 1863",
+    "lat": 39.8110,
+    "lng": -77.2255,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "land",
+    "sides": [
+      {"name": "Union", "commander": "George Meade", "strength": "85,000", "casualties": "23,000 killed/wounded/captured"},
+      {"name": "Confederacy", "commander": "Robert E. Lee", "strength": "75,000", "casualties": "23,000-28,000 killed/wounded/captured"}
+    ],
+    "victor": "Union",
+    "summary": "Three days of fighting culminated in Pickett's Charge, a disastrous frontal assault across open ground against entrenched Union positions on Cemetery Ridge.",
+    "significance": "Turned the tide of the Civil War. The Confederacy never again mounted a major offensive into the North."
+  },
+  {
+    "id": "antietam",
+    "name": "Battle of Antietam",
+    "year": 1862,
+    "date": "17 September 1862",
+    "lat": 39.4747,
+    "lng": -77.7453,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "land",
+    "sides": [
+      {"name": "Union", "commander": "George McClellan", "strength": "87,000", "casualties": "12,400 killed/wounded/missing"},
+      {"name": "Confederacy", "commander": "Robert E. Lee", "strength": "38,000", "casualties": "10,300 killed/wounded/missing"}
+    ],
+    "victor": "Union",
+    "summary": "The bloodiest single day in American military history. Union attacks progressed from north to south across Antietam Creek in three phases but failed to destroy Lee's army.",
+    "significance": "Gave Lincoln the political opening to issue the Emancipation Proclamation, transforming the war into a fight against slavery."
+  },
+  {
+    "id": "gallipoli",
+    "name": "Battle of Gallipoli",
+    "year": 1915,
+    "date": "February 1915 - January 1916",
+    "lat": 40.3714,
+    "lng": 26.3806,
+    "era": "world-war-1",
+    "war": "World War I",
+    "battleType": "land",
+    "sides": [
+      {"name": "Ottoman Empire", "commander": "Mustafa Kemal", "strength": "315,000", "casualties": "250,000 killed/wounded"},
+      {"name": "British Empire & France", "commander": "Ian Hamilton", "strength": "490,000", "casualties": "250,000 killed/wounded"}
+    ],
+    "victor": "Ottoman Empire",
+    "summary": "Allied forces attempted to seize the Dardanelles strait by amphibious landing. Turkish forces under Kemal held the high ground and repelled every advance over eight months.",
+    "significance": "Made Mustafa Kemal a national hero; he later founded modern Turkey. Churchill, who championed the campaign, was forced to resign."
+  },
+  {
+    "id": "somme",
+    "name": "Battle of the Somme",
+    "year": 1916,
+    "date": "1 July - 18 November 1916",
+    "lat": 50.0147,
+    "lng": 2.6861,
+    "era": "world-war-1",
+    "war": "World War I",
+    "battleType": "land",
+    "sides": [
+      {"name": "British Empire & France", "commander": "Haig & Foch", "strength": "1,500,000", "casualties": "620,000 killed/wounded"},
+      {"name": "German Empire", "commander": "Fritz von Below", "strength": "1,000,000", "casualties": "465,000 killed/wounded"}
+    ],
+    "victor": "Inconclusive",
+    "summary": "The British suffered 57,000 casualties on the first day alone. Over four months of attrition, the Allies advanced just six miles through mud and wire.",
+    "significance": "Became a symbol of the futility of World War I trench warfare. The tank saw its first combat use during this battle."
+  },
+  {
+    "id": "verdun",
+    "name": "Battle of Verdun",
+    "year": 1916,
+    "date": "21 February - 18 December 1916",
+    "lat": 49.1600,
+    "lng": 5.3914,
+    "era": "world-war-1",
+    "war": "World War I",
+    "battleType": "land",
+    "sides": [
+      {"name": "France", "commander": "Philippe Petain", "strength": "1,140,000 rotated", "casualties": "377,000 killed/wounded"},
+      {"name": "German Empire", "commander": "Erich von Falkenhayn", "strength": "1,250,000 rotated", "casualties": "337,000 killed/wounded"}
+    ],
+    "victor": "France",
+    "summary": "Germany aimed to bleed France white through attrition at a point the French could not abandon. Petain organized a rotation system and supply road that sustained the defense for ten months.",
+    "significance": "The longest and one of the costliest battles in history. 'They shall not pass' became a French national rallying cry."
+  },
+  {
+    "id": "battle-of-britain",
+    "name": "Battle of Britain",
+    "year": 1940,
+    "date": "10 July - 31 October 1940",
+    "lat": 51.5074,
+    "lng": -0.1278,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "aerial",
+    "sides": [
+      {"name": "Great Britain", "commander": "Hugh Dowding", "strength": "1,963 aircraft", "casualties": "1,547 aircraft lost, 544 aircrew killed"},
+      {"name": "Nazi Germany", "commander": "Hermann Goring", "strength": "2,550 aircraft", "casualties": "1,887 aircraft lost, 2,585 aircrew killed"}
+    ],
+    "victor": "Great Britain",
+    "summary": "The Luftwaffe attempted to destroy the RAF as a precondition for invasion. Radar, Spitfires, and Hurricanes held. Hitler postponed Operation Sea Lion indefinitely.",
+    "significance": "The first major campaign fought entirely by air forces. Proved that air power alone could not force a nation to surrender. 'Never was so much owed by so many to so few.'"
+  },
+  {
+    "id": "stalingrad",
+    "name": "Battle of Stalingrad",
+    "year": 1942,
+    "date": "23 August 1942 - 2 February 1943",
+    "lat": 48.7080,
+    "lng": 44.5133,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "sides": [
+      {"name": "Soviet Union", "commander": "Zhukov & Chuikov", "strength": "1,143,000", "casualties": "478,000 killed, 651,000 wounded"},
+      {"name": "Nazi Germany", "commander": "Friedrich Paulus", "strength": "1,040,000", "casualties": "800,000 killed/wounded/captured"}
+    ],
+    "victor": "Soviet Union",
+    "summary": "Months of brutal urban fighting culminated in Operation Uranus, a Soviet double envelopment that trapped the German 6th Army. Paulus surrendered 91,000 survivors.",
+    "significance": "The turning point of the Eastern Front and arguably the entire war. Germany never recovered the strategic initiative."
+  },
+  {
+    "id": "midway",
+    "name": "Battle of Midway",
+    "year": 1942,
+    "date": "4-7 June 1942",
+    "lat": 28.2072,
+    "lng": -177.3735,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "naval",
+    "sides": [
+      {"name": "United States", "commander": "Chester Nimitz", "strength": "3 carriers, 50 support ships", "casualties": "307 killed, 1 carrier lost"},
+      {"name": "Japan", "commander": "Isoroku Yamamoto", "strength": "4 carriers, 150+ support ships", "casualties": "3,057 killed, 4 carriers lost"}
+    ],
+    "victor": "United States",
+    "summary": "US codebreakers identified the target. Dive bombers caught three Japanese carriers with fueled aircraft on deck and sank them in minutes. A fourth was sunk later that day.",
+    "significance": "Shifted the balance of naval power in the Pacific permanently. Japan lost four irreplaceable fleet carriers and its most experienced pilots."
+  },
+  {
+    "id": "kursk",
+    "name": "Battle of Kursk",
+    "year": 1943,
+    "date": "5 July - 23 August 1943",
+    "lat": 51.7500,
+    "lng": 36.1833,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "sides": [
+      {"name": "Soviet Union", "commander": "Zhukov & Rokossovsky", "strength": "1,910,000", "casualties": "254,000 killed/missing"},
+      {"name": "Nazi Germany", "commander": "Manstein & Model", "strength": "780,000", "casualties": "200,000 killed/wounded"}
+    ],
+    "victor": "Soviet Union",
+    "summary": "Germany's last major offensive on the Eastern Front. Soviet defenses in depth absorbed the armored assault, then counterattacked. Included the largest tank battle in history at Prokhorovka.",
+    "significance": "Permanently ended German offensive capability in the East. From Kursk on, the Wehrmacht was in continuous retreat toward Berlin."
+  },
+  {
+    "id": "normandy",
+    "name": "D-Day / Battle of Normandy",
+    "year": 1944,
+    "date": "6 June - 25 August 1944",
+    "lat": 49.3622,
+    "lng": -0.8789,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "sides": [
+      {"name": "Western Allies", "commander": "Dwight Eisenhower", "strength": "156,000 on D-Day, 2M+ total", "casualties": "226,000 killed/wounded"},
+      {"name": "Nazi Germany", "commander": "Erwin Rommel", "strength": "380,000 initial", "casualties": "240,000 killed/wounded, 200,000 captured"}
+    ],
+    "victor": "Western Allies",
+    "summary": "The largest amphibious invasion in history. Five beaches, three airborne divisions, and a massive deception operation opened a second front in Western Europe.",
+    "significance": "Began the liberation of Western Europe. Combined with the Eastern Front, it sealed Nazi Germany's defeat."
+  },
+  {
+    "id": "bulge",
+    "name": "Battle of the Bulge",
+    "year": 1944,
+    "date": "16 December 1944 - 25 January 1945",
+    "lat": 50.0500,
+    "lng": 5.7500,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "sides": [
+      {"name": "Western Allies", "commander": "Eisenhower & Patton", "strength": "610,000", "casualties": "89,000 killed/wounded/captured"},
+      {"name": "Nazi Germany", "commander": "Gerd von Rundstedt", "strength": "410,000", "casualties": "100,000 killed/wounded/captured"}
+    ],
+    "victor": "Western Allies",
+    "summary": "Germany's last major offensive in the West. A surprise attack through the Ardennes created a bulge in Allied lines, but Patton's Third Army relieved Bastogne and the offensive collapsed.",
+    "significance": "Exhausted Germany's last strategic reserves. The road to the Rhine and into Germany was open."
+  },
+  {
+    "id": "inchon",
+    "name": "Battle of Inchon",
+    "year": 1950,
+    "date": "15-19 September 1950",
+    "lat": 37.4563,
+    "lng": 126.7052,
+    "era": "modern",
+    "war": "Korean War",
+    "battleType": "land",
+    "sides": [
+      {"name": "United Nations", "commander": "Douglas MacArthur", "strength": "75,000", "casualties": "566 killed"},
+      {"name": "North Korea", "commander": "Wan Yong", "strength": "6,500", "casualties": "1,350 killed, 2,500 captured"}
+    ],
+    "victor": "United Nations",
+    "summary": "MacArthur launched a daring amphibious assault 150 miles behind enemy lines at Inchon, a port with extreme tidal variations that most planners considered too risky.",
+    "significance": "Cut North Korean supply lines and recaptured Seoul within two weeks. Reversed the entire momentum of the Korean War."
+  },
+  {
+    "id": "dien-bien-phu",
+    "name": "Battle of Dien Bien Phu",
+    "year": 1954,
+    "date": "13 March - 7 May 1954",
+    "lat": 21.3830,
+    "lng": 103.0158,
+    "era": "modern",
+    "war": "First Indochina War",
+    "battleType": "siege",
+    "sides": [
+      {"name": "Viet Minh", "commander": "Vo Nguyen Giap", "strength": "50,000", "casualties": "8,000 killed, 15,000 wounded"},
+      {"name": "France", "commander": "Christian de Castries", "strength": "16,000", "casualties": "2,300 killed, 11,700 captured"}
+    ],
+    "victor": "Viet Minh",
+    "summary": "Giap hauled artillery through jungle mountains to surround the French garrison in a valley. Systematic siege warfare overran French positions one by one over 56 days.",
+    "significance": "Ended French colonial rule in Indochina. Led directly to the Geneva Accords and the partition of Vietnam."
+  },
+  {
+    "id": "73-easting",
+    "name": "Battle of 73 Easting",
+    "year": 1991,
+    "date": "26 February 1991",
+    "lat": 28.3486,
+    "lng": 47.3714,
+    "era": "modern",
+    "war": "Gulf War",
+    "battleType": "land",
+    "sides": [
+      {"name": "United States", "commander": "H.R. McMaster", "strength": "12 M1A1 tanks, 13 Bradleys", "casualties": "1 killed, 0 vehicles lost"},
+      {"name": "Iraq", "commander": "Tawakalna Division", "strength": "300+ vehicles", "casualties": "160+ vehicles destroyed"}
+    ],
+    "victor": "United States",
+    "summary": "Eagle Troop of the 2nd Armored Cavalry Regiment attacked through a sandstorm and destroyed an entire Iraqi brigade in 23 minutes using superior thermal sights and GPS navigation.",
+    "significance": "Demonstrated the overwhelming advantage of modern combined-arms doctrine, GPS navigation, and thermal optics. The most studied tank battle of the modern era."
+  }
+]

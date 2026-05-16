@@ -290,6 +290,13 @@ func cleanWikitext(s string) string {
 	s = strings.ReplaceAll(s, "&apos;", "'")
 	s = strings.ReplaceAll(s, "  ", " ")
 	s = strings.TrimSpace(s)
+	// Reject template-fragment leftovers like "| image       =" or "|date=".
+	// These reach us when the parser sees a multi-line value that crossed
+	// into the next infobox field. Storing them as user-facing text causes
+	// "war = | image =" gibberish in the UI; better to drop them entirely.
+	if strings.HasPrefix(s, "|") {
+		return ""
+	}
 	// Strip leading "the " from partof fields.
 	if strings.HasPrefix(strings.ToLower(s), "the ") && len(s) > 4 {
 		s = s[4:]

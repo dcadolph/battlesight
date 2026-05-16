@@ -160,26 +160,26 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
 
       {/* Mode tabs */}
       <div className="fixed top-[88px] left-5 z-40">
-        <div className="flex bg-[#16171f] rounded-lg border border-slate-700/50 overflow-hidden">
+        <div className="flex items-center gap-5 px-1">
           <button
             onClick={() => { setPanel('none'); }}
-            className={`h-8 px-4 text-[12px] font-medium transition-colors ${
+            className={`h-8 text-[12px] font-medium tracking-wide transition-colors border-b-2 ${
               !playbackActive
-                ? 'bg-blue-500/15 text-blue-400'
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'text-white border-blue-400'
+                : 'text-slate-500 hover:text-slate-300 border-transparent'
             }`}
           >
             Explore
           </button>
           <button
             onClick={onPlaybackOpen}
-            className={`h-8 px-4 text-[12px] font-medium transition-colors ${
+            className={`h-8 text-[12px] font-medium tracking-wide transition-colors border-b-2 ${
               playbackActive
-                ? 'bg-blue-500/15 text-blue-400'
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'text-white border-blue-400'
+                : 'text-slate-500 hover:text-slate-300 border-transparent'
             }`}
           >
-            Stories
+            Wars
           </button>
         </div>
 

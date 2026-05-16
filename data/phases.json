@@ -13156,5 +13156,4629 @@
         ]
       }
     ]
+  },
+  "bulge-1944": {
+    "title": "Battle of the Bulge: Watch on the Rhine",
+    "intro": "16 December 1944. Hitler stakes his last operational reserve on a winter surprise through the Ardennes — the same forest the panzers crossed in 1940. The objective: split the Allies in two, retake Antwerp, force a separate peace. 200,000 Germans hit a quiet four-division American sector at first light.",
+    "battlefieldDesc": "Ardennes Forest, Belgium and Luxembourg. Elsenborn Ridge anchors the northern shoulder; Bastogne and St. Vith are the road hubs in the center and south; the Meuse River is the Allied line of last resort.",
+    "aspectRatio": 1.55,
+    "factionA": "Allies (US 12th Army Group + UK 21st)",
+    "factionB": "Nazi Germany (Heeresgruppe B)",
+    "phases": [
+      {
+        "title": "Surprise in the snow",
+        "timeMarker": "16 December 1944, 05:30",
+        "narration": "Three German armies — 6th Panzer in the north, 5th Panzer in the center, 7th Army in the south — open with a short artillery preparation and storm troops in the fog. The thin US line on the Schnee Eifel ridge dissolves. Two regiments of the 106th Infantry Division are surrounded and captured in the war's worst single-day American disaster since Bataan.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "river",
+            "label": "Meuse River",
+            "points": [
+              4,
+              10,
+              16,
+              90
+            ]
+          },
+          {
+            "kind": "wood",
+            "label": "Ardennes Forest",
+            "points": [
+              22,
+              16,
+              78,
+              80
+            ]
+          },
+          {
+            "kind": "ridge",
+            "label": "Elsenborn Ridge",
+            "points": [
+              26,
+              18,
+              38,
+              26
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "St. Vith",
+            "points": [
+              48,
+              36,
+              56,
+              44
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Bastogne",
+            "points": [
+              44,
+              60,
+              52,
+              68
+            ]
+          },
+          {
+            "kind": "road",
+            "label": "Skyline Drive",
+            "points": [
+              42,
+              18,
+              58,
+              88
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "US V Corps (Elsenborn)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 28,
+            "y": 22,
+            "w": 16,
+            "h": 8,
+            "strength": 2
+          },
+          {
+            "label": "US 28th + 106th ID (thin line)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 46,
+            "y": 34,
+            "w": 14,
+            "h": 32,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "US 4th ID (south)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 48,
+            "y": 70,
+            "w": 14,
+            "h": 10,
+            "strength": 2
+          },
+          {
+            "label": "6th Panzer Army",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 64,
+            "y": 20,
+            "w": 16,
+            "h": 10,
+            "strength": 4
+          },
+          {
+            "label": "5th Panzer Army",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 64,
+            "y": 42,
+            "w": 18,
+            "h": 14,
+            "strength": 4
+          },
+          {
+            "label": "7th Army",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 68,
+            "y": 70,
+            "w": 14,
+            "h": 12,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "Surprise opening",
+            "faction": "b",
+            "fromX": 70,
+            "fromY": 30,
+            "toX": 50,
+            "toY": 36,
+            "kind": "charge"
+          },
+          {
+            "label": "Schnee Eifel envelopment",
+            "faction": "b",
+            "fromX": 70,
+            "fromY": 42,
+            "toX": 50,
+            "toY": 42,
+            "kind": "flank"
+          }
+        ]
+      },
+      {
+        "title": "The shoulders hold; the bulge forms",
+        "timeMarker": "17–19 December",
+        "narration": "On the northern shoulder, the 99th and 2nd Divisions hold Elsenborn Ridge against repeated Waffen-SS attacks — the bulge cannot widen. On the southern shoulder, the 4th ID grimly holds the line near Echternach. In the gap, German panzer columns race west. SS Kampfgruppe Peiper sweeps through Malmedy, where 84 American POWs are massacred. Hodges orders the 82nd and 101st Airborne south to plug the line.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "river",
+            "label": "Meuse River",
+            "points": [
+              4,
+              10,
+              16,
+              90
+            ]
+          },
+          {
+            "kind": "ridge",
+            "label": "Elsenborn Ridge (holds)",
+            "points": [
+              26,
+              18,
+              38,
+              26
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Malmedy",
+            "points": [
+              34,
+              28,
+              40,
+              34
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "St. Vith (besieged)",
+            "points": [
+              48,
+              36,
+              56,
+              44
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Bastogne",
+            "points": [
+              44,
+              60,
+              52,
+              68
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Elsenborn shoulder (99th + 2nd ID)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 22,
+            "w": 12,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "82nd Airborne (rushing)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 36,
+            "y": 36,
+            "w": 10,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "101st Airborne (rushing)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 38,
+            "y": 56,
+            "w": 10,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "St. Vith — Hasbrouck's stand",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 40,
+            "w": 10,
+            "h": 6,
+            "strength": 2
+          },
+          {
+            "label": "Kampfgruppe Peiper (deep)",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 26,
+            "y": 36,
+            "w": 12,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "5th Panzer (the bulge)",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 50,
+            "y": 50,
+            "w": 28,
+            "h": 10,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Peiper's drive west",
+            "faction": "b",
+            "fromX": 64,
+            "fromY": 30,
+            "toX": 26,
+            "toY": 36,
+            "kind": "flank"
+          },
+          {
+            "label": "Airborne rushed south",
+            "faction": "a",
+            "fromX": 60,
+            "fromY": 8,
+            "toX": 42,
+            "toY": 60,
+            "kind": "advance"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Eisenhower commits the SHAEF strategic reserve — the 82nd and 101st Airborne — within 24 hours.",
+            "x": 50,
+            "y": 95
+          }
+        ]
+      },
+      {
+        "title": "Bastogne and \"Nuts!\"",
+        "timeMarker": "20–26 December",
+        "narration": "The 101st Airborne and elements of 10th Armored reach Bastogne and dig in around the seven-road junction. By 21 December the town is surrounded; McAuliffe's reply to the German surrender demand on 22 December is \"Nuts!\" Patton wheels 3rd Army 90 degrees north and drives toward the southern shoulder of the pocket. Weather clears on the 23rd. Allied air power returns — and Peiper's column, out of fuel, stalls short of the Meuse.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Bastogne (besieged)",
+            "points": [
+              44,
+              60,
+              52,
+              68
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "St. Vith (lost)",
+            "points": [
+              48,
+              36,
+              56,
+              44
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "101st Airborne in Bastogne",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 46,
+            "y": 64,
+            "w": 8,
+            "h": 6,
+            "strength": 3,
+            "status": "encircled"
+          },
+          {
+            "label": "Patton's 3rd Army wheeling north",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 42,
+            "y": 84,
+            "w": 18,
+            "h": 6,
+            "strength": 4
+          },
+          {
+            "label": "Allied air (now flying)",
+            "faction": "a",
+            "unitType": "aircraft",
+            "x": 30,
+            "y": 12,
+            "w": 36,
+            "h": 4,
+            "strength": 4
+          },
+          {
+            "label": "5th Panzer (stalling)",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 32,
+            "y": 50,
+            "w": 16,
+            "h": 8,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "Peiper trapped at La Gleize",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 20,
+            "y": 36,
+            "w": 8,
+            "h": 4,
+            "strength": 1,
+            "status": "encircled"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Patton wheel north",
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 90,
+            "toX": 48,
+            "toY": 66,
+            "kind": "advance"
+          },
+          {
+            "label": "Allied air strikes",
+            "faction": "a",
+            "fromX": 40,
+            "fromY": 14,
+            "toX": 40,
+            "toY": 50,
+            "kind": "advance"
+          }
+        ]
+      },
+      {
+        "title": "The pocket closes",
+        "timeMarker": "26 December 1944 – 25 January 1945",
+        "narration": "Patton's 4th Armored breaks into Bastogne the day after Christmas. Allied counter-offensives bite into both shoulders of the salient. By mid-January Hodges and Patton link up at Houffalize; by 25 January the front is restored to its 16 December position. Hitler's last reserve is gone. The Wehrmacht will fight the rest of the war on the defensive.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Houffalize (linkup)",
+            "points": [
+              46,
+              48,
+              54,
+              56
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Bastogne (relieved)",
+            "points": [
+              44,
+              60,
+              52,
+              68
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "First Army from the north",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 50,
+            "y": 30,
+            "w": 18,
+            "h": 8,
+            "strength": 4
+          },
+          {
+            "label": "Third Army from the south",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 50,
+            "y": 80,
+            "w": 18,
+            "h": 8,
+            "strength": 4
+          },
+          {
+            "label": "German divisions withdrawing",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 60,
+            "y": 48,
+            "w": 22,
+            "h": 14,
+            "strength": 1,
+            "status": "retreating"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Northern jaw",
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 24,
+            "toX": 50,
+            "toY": 50,
+            "kind": "advance"
+          },
+          {
+            "label": "Southern jaw",
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 88,
+            "toX": 50,
+            "toY": 56,
+            "kind": "advance"
+          },
+          {
+            "label": "German withdrawal",
+            "faction": "b",
+            "fromX": 64,
+            "fromY": 50,
+            "toX": 88,
+            "toY": 36,
+            "kind": "retreat"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "~89,000 American and ~85,000 German casualties — the largest single battle the US Army has ever fought.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      }
+    ]
+  },
+  "kursk-1943": {
+    "title": "Kursk: The Largest Tank Battle",
+    "intro": "July 1943. The Kursk salient bulges 150 kilometers into German lines. Hitler delays his offensive (Citadel) for new Panther and Tiger tanks; the Soviets use the months to dig eight defensive belts, lay 503,000 mines, and assemble 1.3 million troops in depth. When Citadel finally opens, it strikes the deepest defensive system in history.",
+    "battlefieldDesc": "Kursk salient: Orel to the north, Belgorod to the south, Kursk city in the center. German pincers strike from north (9th Army) and south (4th Panzer Army + Army Detachment Kempf) to bite off the salient.",
+    "aspectRatio": 1.4,
+    "factionA": "Soviet Union (Voronezh + Central + Steppe Fronts)",
+    "factionB": "Nazi Germany (Army Groups Center + South)",
+    "phases": [
+      {
+        "title": "Citadel opens",
+        "timeMarker": "5 July 1943",
+        "narration": "Citadel begins with both German pincers attacking on the same day. In the north Model's 9th Army grinds slowly into Rokossovsky's defenses, advancing only 6–8 km in three days. In the south Manstein achieves more — Hoth's 4th Panzer Army penetrates 30 km — but every meter is paid for in Tigers and Panthers. The Soviet defense in depth is doing its job.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Kursk",
+            "points": [
+              42,
+              40,
+              52,
+              50
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Orel (north German base)",
+            "points": [
+              40,
+              8,
+              50,
+              16
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Belgorod (south German base)",
+            "points": [
+              42,
+              76,
+              52,
+              84
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Prokhorovka",
+            "points": [
+              54,
+              60,
+              60,
+              66
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Soviet defensive belts",
+            "points": [
+              22,
+              22,
+              76,
+              72
+            ]
+          },
+          {
+            "kind": "river",
+            "label": "Psel River",
+            "points": [
+              32,
+              60,
+              64,
+              56
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Central Front (Rokossovsky)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 22,
+            "w": 32,
+            "h": 12,
+            "strength": 4
+          },
+          {
+            "label": "Voronezh Front (Vatutin)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 64,
+            "w": 32,
+            "h": 12,
+            "strength": 4
+          },
+          {
+            "label": "Steppe Front (Konev, reserve)",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 14,
+            "y": 40,
+            "w": 12,
+            "h": 18,
+            "strength": 4
+          },
+          {
+            "label": "9th Army (Model)",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 42,
+            "y": 14,
+            "w": 18,
+            "h": 8,
+            "strength": 4
+          },
+          {
+            "label": "4th Panzer Army (Hoth) + Kempf",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 42,
+            "y": 78,
+            "w": 22,
+            "h": 8,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Model's pincer",
+            "faction": "b",
+            "fromX": 46,
+            "fromY": 16,
+            "toX": 46,
+            "toY": 28,
+            "kind": "charge"
+          },
+          {
+            "label": "Hoth's pincer",
+            "faction": "b",
+            "fromX": 50,
+            "fromY": 78,
+            "toX": 54,
+            "toY": 60,
+            "kind": "charge"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "503,000 Soviet mines; 8 defensive belts to 250 km depth.",
+            "x": 50,
+            "y": 94
+          }
+        ]
+      },
+      {
+        "title": "Northern pincer stalls",
+        "timeMarker": "5–10 July",
+        "narration": "Model commits his armor too early into broken ground. The 9th Army takes the Olkhovatka heights but stops cold against the second defensive belt at Ponyri. After five days Model's spearheads have advanced 14 km against orders to reach 100 km. On 12 July Rokossovsky launches the Operation Kutuzov counter-offensive that turns the German salient at Orel into Model's problem.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Ponyri",
+            "points": [
+              42,
+              22,
+              50,
+              28
+            ]
+          },
+          {
+            "kind": "ridge",
+            "label": "Olkhovatka heights",
+            "points": [
+              40,
+              26,
+              52,
+              32
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Soviet second belt",
+            "points": [
+              30,
+              28,
+              64,
+              36
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "9th Army (stalled)",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 42,
+            "y": 22,
+            "w": 14,
+            "h": 6,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "Soviet second belt (holding)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 30,
+            "w": 32,
+            "h": 4,
+            "strength": 4
+          },
+          {
+            "label": "Kutuzov counter-offensive forming",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 22,
+            "y": 12,
+            "w": 14,
+            "h": 8,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Soviet counter-blow on Orel",
+            "faction": "a",
+            "fromX": 22,
+            "fromY": 14,
+            "toX": 40,
+            "toY": 12,
+            "kind": "charge"
+          }
+        ]
+      },
+      {
+        "title": "Prokhorovka",
+        "timeMarker": "12 July 1943",
+        "narration": "Manstein's southern thrust drives toward the rail junction at Prokhorovka. Vatutin commits Rotmistrov's 5th Guards Tank Army in a head-on charge to keep the SS panzer corps off balance. Hundreds of tanks meet in confused close-range fighting on the Psel steppe. Soviet losses are severe but the German exploitation force is exhausted. Hitler, hearing of the Allied landings in Sicily that morning, halts Citadel.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Prokhorovka",
+            "points": [
+              54,
+              60,
+              60,
+              66
+            ]
+          },
+          {
+            "kind": "river",
+            "label": "Psel River",
+            "points": [
+              32,
+              60,
+              64,
+              56
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Tank engagement zone",
+            "points": [
+              40,
+              50,
+              64,
+              70
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "II SS-Panzerkorps",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 46,
+            "y": 60,
+            "w": 14,
+            "h": 8,
+            "strength": 4,
+            "status": "broken"
+          },
+          {
+            "label": "5th Guards Tank Army",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 54,
+            "y": 56,
+            "w": 14,
+            "h": 8,
+            "strength": 3,
+            "status": "broken"
+          },
+          {
+            "label": "Voronezh Front infantry",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 62,
+            "w": 12,
+            "h": 6,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "Soviet head-on charge",
+            "faction": "a",
+            "fromX": 58,
+            "fromY": 56,
+            "toX": 48,
+            "toY": 60,
+            "kind": "charge"
+          },
+          {
+            "label": "SS panzers attack",
+            "faction": "b",
+            "fromX": 44,
+            "fromY": 60,
+            "toX": 56,
+            "toY": 62,
+            "kind": "charge"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "12 July also: Allies land in Sicily. Hitler suspends Citadel two days later.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      },
+      {
+        "title": "The Soviet rolling offensive",
+        "timeMarker": "12 July – 23 August 1943",
+        "narration": "Three Soviet operations follow: Kutuzov rolls up the Orel salient in the north; Rumyantsev liberates Belgorod and Kharkov in the south; the Donbass operation widens the front. Citadel has cost the Wehrmacht its eastern reserve. After Kursk the Red Army is on the offensive for the rest of the war.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Orel (liberated)",
+            "points": [
+              40,
+              8,
+              50,
+              16
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Belgorod (liberated)",
+            "points": [
+              42,
+              76,
+              52,
+              84
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Kharkov (liberated, 23 Aug)",
+            "points": [
+              22,
+              90,
+              32,
+              96
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Soviet north exploitation",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 30,
+            "y": 14,
+            "w": 28,
+            "h": 8,
+            "strength": 4
+          },
+          {
+            "label": "Soviet south exploitation",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 26,
+            "y": 80,
+            "w": 32,
+            "h": 8,
+            "strength": 4
+          },
+          {
+            "label": "German fronts collapsing back",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 64,
+            "y": 46,
+            "w": 20,
+            "h": 14,
+            "strength": 1,
+            "status": "retreating"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Operation Kutuzov",
+            "faction": "a",
+            "fromX": 30,
+            "fromY": 18,
+            "toX": 60,
+            "toY": 22,
+            "kind": "advance"
+          },
+          {
+            "label": "Operation Rumyantsev",
+            "faction": "a",
+            "fromX": 30,
+            "fromY": 86,
+            "toX": 60,
+            "toY": 82,
+            "kind": "advance"
+          }
+        ]
+      }
+    ]
+  },
+  "coral-sea-1942": {
+    "title": "Coral Sea: The First Carrier Duel",
+    "intro": "May 1942. Japan moves to seize Port Moresby on Papua and isolate Australia. Two opposing carrier task forces — neither of which ever sights the other's ships — search for each other across the Coral Sea. For the first time in history a fleet battle is fought entirely by aircraft from carriers.",
+    "battlefieldDesc": "Coral Sea between New Guinea (top), the Solomons (right), and northeast Australia (bottom). Tulagi at top right; Port Moresby at top left; the carrier groups maneuver in the open sea between.",
+    "aspectRatio": 1.4,
+    "factionA": "Allies (US TF 17 + RAN cruisers)",
+    "factionB": "Empire of Japan (MO Operation)",
+    "phases": [
+      {
+        "title": "MO Operation and the Allied trap",
+        "timeMarker": "3 May 1942",
+        "narration": "Operation MO sends two Japanese forces south: an invasion convoy bound for Port Moresby, escorted by light carrier Shōhō, and a striking force built around fleet carriers Shōkaku and Zuikaku, looping east of the Solomons to ambush any Allied response. Nimitz, reading the JN-25 code, has Fletcher's TF 17 (Yorktown + Lexington) waiting in the Coral Sea.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "coast",
+            "label": "New Guinea",
+            "points": [
+              0,
+              0,
+              60,
+              0,
+              60,
+              12,
+              0,
+              12
+            ]
+          },
+          {
+            "kind": "coast",
+            "label": "Solomon Islands",
+            "points": [
+              80,
+              4,
+              100,
+              4,
+              100,
+              30,
+              80,
+              30
+            ]
+          },
+          {
+            "kind": "coast",
+            "label": "Australia",
+            "points": [
+              0,
+              86,
+              70,
+              86,
+              70,
+              100,
+              0,
+              100
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Port Moresby (objective)",
+            "points": [
+              10,
+              12,
+              18,
+              18
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Tulagi",
+            "points": [
+              86,
+              22,
+              94,
+              28
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "TF 17 (Yorktown + Lexington)",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 56,
+            "y": 60,
+            "w": 12,
+            "h": 6,
+            "strength": 4
+          },
+          {
+            "label": "RAN cruisers (Crace)",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 36,
+            "y": 70,
+            "w": 8,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "Shōhō + Moresby invasion",
+            "faction": "b",
+            "unitType": "ships",
+            "x": 22,
+            "y": 26,
+            "w": 10,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "Shōkaku + Zuikaku (striking force)",
+            "faction": "b",
+            "unitType": "ships",
+            "x": 78,
+            "y": 36,
+            "w": 12,
+            "h": 6,
+            "strength": 4
+          },
+          {
+            "label": "Tulagi covering force",
+            "faction": "b",
+            "unitType": "ships",
+            "x": 86,
+            "y": 26,
+            "w": 8,
+            "h": 4,
+            "strength": 2
+          }
+        ],
+        "movements": [
+          {
+            "label": "Invasion force south",
+            "faction": "b",
+            "fromX": 22,
+            "fromY": 18,
+            "toX": 22,
+            "toY": 30,
+            "kind": "advance"
+          },
+          {
+            "label": "Striking force east loop",
+            "faction": "b",
+            "fromX": 90,
+            "fromY": 18,
+            "toX": 80,
+            "toY": 40,
+            "kind": "flank"
+          }
+        ]
+      },
+      {
+        "title": "\"Scratch one flattop\"",
+        "timeMarker": "7 May 1942",
+        "narration": "Both sides launch strikes at false sightings — Japanese aircraft sink the oiler Neosho and destroyer Sims; American aircraft find and sink the light carrier Shōhō in ten minutes (\"Scratch one flattop,\" Dixon's famous radio call). The Moresby invasion convoy turns back, never to land. The big carriers still circle each other in the dark.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "coast",
+            "label": "New Guinea",
+            "points": [
+              0,
+              0,
+              60,
+              0,
+              60,
+              12,
+              0,
+              12
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Yorktown + Lexington air groups",
+            "faction": "a",
+            "unitType": "aircraft",
+            "x": 40,
+            "y": 30,
+            "w": 18,
+            "h": 4,
+            "strength": 4
+          },
+          {
+            "label": "TF 17 carriers",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 56,
+            "y": 60,
+            "w": 12,
+            "h": 6,
+            "strength": 4
+          },
+          {
+            "label": "Shōhō (sinking)",
+            "faction": "b",
+            "unitType": "ships",
+            "x": 28,
+            "y": 30,
+            "w": 6,
+            "h": 4,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "Invasion convoy (turning back)",
+            "faction": "b",
+            "unitType": "ships",
+            "x": 22,
+            "y": 26,
+            "w": 10,
+            "h": 4,
+            "strength": 2,
+            "status": "retreating"
+          }
+        ],
+        "movements": [
+          {
+            "label": "US strike",
+            "faction": "a",
+            "fromX": 56,
+            "fromY": 56,
+            "toX": 28,
+            "toY": 32,
+            "kind": "charge"
+          },
+          {
+            "label": "Convoy turning back",
+            "faction": "b",
+            "fromX": 22,
+            "fromY": 30,
+            "toX": 22,
+            "toY": 18,
+            "kind": "retreat"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Bob Dixon: \"Scratch one flattop! Dixon to carrier, scratch one flattop!\"",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      },
+      {
+        "title": "Carriers find carriers",
+        "timeMarker": "8 May 1942",
+        "narration": "At dawn each side finds the other. Both launch full strikes simultaneously. Japanese pilots score torpedo and bomb hits on Lexington and Yorktown; American pilots heavily damage Shōkaku and savage Zuikaku's air group. By afternoon all four fleet carriers are out of action — but Lexington's ruptured aviation gasoline lines spark fires that doom her. She is scuttled at sunset.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "coast",
+            "label": "Coral Sea",
+            "points": [
+              0,
+              24,
+              100,
+              24,
+              100,
+              86,
+              0,
+              86
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Lexington (mortally hit)",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 50,
+            "y": 58,
+            "w": 6,
+            "h": 4,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "Yorktown (heavily damaged)",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 58,
+            "y": 62,
+            "w": 6,
+            "h": 4,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "US air strike (returning)",
+            "faction": "a",
+            "unitType": "aircraft",
+            "x": 70,
+            "y": 50,
+            "w": 14,
+            "h": 4,
+            "strength": 3
+          },
+          {
+            "label": "Shōkaku (heavily damaged)",
+            "faction": "b",
+            "unitType": "ships",
+            "x": 78,
+            "y": 40,
+            "w": 6,
+            "h": 4,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "Zuikaku (air group savaged)",
+            "faction": "b",
+            "unitType": "ships",
+            "x": 82,
+            "y": 44,
+            "w": 6,
+            "h": 4,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "IJN air strike (returning)",
+            "faction": "b",
+            "unitType": "aircraft",
+            "x": 60,
+            "y": 48,
+            "w": 14,
+            "h": 4,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "US strike on Shōkaku",
+            "faction": "a",
+            "fromX": 56,
+            "fromY": 56,
+            "toX": 78,
+            "toY": 42,
+            "kind": "charge"
+          },
+          {
+            "label": "IJN strike on TF 17",
+            "faction": "b",
+            "fromX": 80,
+            "fromY": 42,
+            "toX": 54,
+            "toY": 60,
+            "kind": "charge"
+          }
+        ]
+      },
+      {
+        "title": "Verdict — and what Midway will mean",
+        "timeMarker": "Aftermath",
+        "narration": "Tactically Japan trades a light carrier and an air group for a fleet carrier sunk and another damaged — a tactical Japanese win on tonnage. Strategically the Allies win: Moresby is not invaded, and both Shōkaku and Zuikaku are unavailable for the Midway operation a month later. The IJN has six fleet carriers; at Midway it brings four. Coral Sea takes two off the board.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Port Moresby (held)",
+            "points": [
+              10,
+              12,
+              18,
+              18
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Yorktown (will fight at Midway)",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 58,
+            "y": 60,
+            "w": 6,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "Shōkaku (in dock)",
+            "faction": "b",
+            "unitType": "ships",
+            "x": 84,
+            "y": 22,
+            "w": 6,
+            "h": 4,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "Zuikaku (rebuilding air group)",
+            "faction": "b",
+            "unitType": "ships",
+            "x": 88,
+            "y": 22,
+            "w": 6,
+            "h": 4,
+            "strength": 1,
+            "status": "broken"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Yorktown returns to Pearl Harbor on 27 May; emergency repairs are completed in 72 hours; she sorties for Midway 30 May.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      }
+    ]
+  },
+  "okinawa-1945": {
+    "title": "Okinawa: The Typhoon of Steel",
+    "intro": "1 April 1945 — Easter Sunday and April Fool's Day. The Tenth Army lands on Okinawa, the last major Pacific island before the Japanese home islands, in the largest amphibious operation of the Pacific War. 183,000 Marines and soldiers come ashore against 100,000 dug-in defenders. The 82-day battle costs more American lives than any other in the Pacific.",
+    "battlefieldDesc": "Okinawa, 110 km long, oriented roughly NE-SW. Hagushi beaches (west), Yontan and Kadena airfields (center). Northern jungle peninsula (Motobu) light; southern Shuri massif heavily fortified.",
+    "aspectRatio": 0.7,
+    "factionA": "United States (Tenth Army)",
+    "factionB": "Empire of Japan (32nd Army)",
+    "phases": [
+      {
+        "title": "Unopposed landing",
+        "timeMarker": "L-Day, 1 April 1945",
+        "narration": "Buckner's Tenth Army — III Amphibious Corps (Marines) and XXIV Corps (Army) — lands on the Hagushi beaches against almost no resistance. Yontan and Kadena airfields fall the first day. Ushijima has deliberately ceded the beaches: he plans to bleed the Americans against fortifications on the Shuri Line in the south.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "coast",
+            "label": "Pacific Ocean",
+            "points": [
+              0,
+              0,
+              100,
+              0,
+              100,
+              100,
+              78,
+              100,
+              78,
+              14,
+              0,
+              14
+            ]
+          },
+          {
+            "kind": "coast",
+            "label": "Hagushi beaches",
+            "points": [
+              22,
+              30,
+              30,
+              40
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Yontan airfield",
+            "points": [
+              30,
+              32,
+              38,
+              36
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Kadena airfield",
+            "points": [
+              30,
+              40,
+              38,
+              44
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "Motobu (light)",
+            "points": [
+              38,
+              10,
+              52,
+              22
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "Shuri Line",
+            "points": [
+              36,
+              70,
+              60,
+              88
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "III Amphibious Corps (Marines)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 30,
+            "w": 12,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "XXIV Corps (Army)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 42,
+            "w": 12,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "5th Fleet offshore",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 6,
+            "y": 30,
+            "w": 12,
+            "h": 26,
+            "strength": 4
+          },
+          {
+            "label": "Ushijima's 32nd Army (south)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 42,
+            "y": 76,
+            "w": 18,
+            "h": 12,
+            "strength": 4
+          },
+          {
+            "label": "Northern garrisons (light)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 44,
+            "y": 14,
+            "w": 12,
+            "h": 6,
+            "strength": 1
+          }
+        ],
+        "movements": [
+          {
+            "label": "Hagushi landings",
+            "faction": "a",
+            "fromX": 16,
+            "fromY": 40,
+            "toX": 32,
+            "toY": 40,
+            "kind": "advance"
+          }
+        ]
+      },
+      {
+        "title": "Kamikaze and the picket line",
+        "timeMarker": "6 April – 22 June 1945",
+        "narration": "Operation Ten-Go unleashes the largest organized kamikaze campaign of the war — ten mass attacks (Kikusui) over twelve weeks. Radar pickets ringing the island take the brunt: 36 ships sunk, 368 damaged, ~5,000 sailors killed. The super-battleship Yamato is sent on a one-way sortie on 7 April and is sunk by US carrier aircraft before it reaches the island.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "coast",
+            "label": "Picket line",
+            "points": [
+              4,
+              14,
+              10,
+              80
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Picket destroyers",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 6,
+            "y": 30,
+            "w": 4,
+            "h": 36,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "TF 58 carriers",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 18,
+            "y": 60,
+            "w": 10,
+            "h": 10,
+            "strength": 4
+          },
+          {
+            "label": "Yamato (sunk 7 April)",
+            "faction": "b",
+            "unitType": "ships",
+            "x": 90,
+            "y": 70,
+            "w": 6,
+            "h": 6,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "Kamikaze flights",
+            "faction": "b",
+            "unitType": "aircraft",
+            "x": 60,
+            "y": 6,
+            "w": 30,
+            "h": 6,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Kikusui attacks",
+            "faction": "b",
+            "fromX": 70,
+            "fromY": 12,
+            "toX": 14,
+            "toY": 40,
+            "kind": "charge"
+          },
+          {
+            "label": "Yamato sortie",
+            "faction": "b",
+            "fromX": 96,
+            "fromY": 88,
+            "toX": 70,
+            "toY": 70,
+            "kind": "advance"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "36 US ships sunk and 368 damaged at sea; ~4,900 US Navy dead — more than the ground forces' KIA combined.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      },
+      {
+        "title": "Shuri Line and Sugar Loaf",
+        "timeMarker": "May 1945",
+        "narration": "XXIV Corps grinds south against the Shuri Line — a series of mutually supporting ridges defended by entrenched infantry and artillery. The 6th Marine Division pays for Sugar Loaf Hill seven times before they hold it. Buckner is killed on 18 June by Japanese artillery; the highest-ranking American officer to die from enemy fire in WWII. Ushijima commits ritual suicide on 22 June.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "hill",
+            "label": "Shuri Line",
+            "points": [
+              36,
+              60,
+              60,
+              80
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "Sugar Loaf",
+            "points": [
+              42,
+              62,
+              48,
+              68
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Shuri Castle",
+            "points": [
+              48,
+              70,
+              54,
+              76
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "6th Marine Division",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 38,
+            "y": 58,
+            "w": 12,
+            "h": 6,
+            "strength": 3,
+            "status": "broken"
+          },
+          {
+            "label": "1st Marine + Army divisions",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 58,
+            "w": 14,
+            "h": 6,
+            "strength": 3,
+            "status": "broken"
+          },
+          {
+            "label": "32nd Army on the ridges",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 40,
+            "y": 72,
+            "w": 22,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "IJA artillery in caves",
+            "faction": "b",
+            "unitType": "artillery",
+            "x": 50,
+            "y": 76,
+            "w": 10,
+            "h": 4,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "Yard-by-yard advance",
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 60,
+            "toX": 50,
+            "toY": 76,
+            "kind": "charge"
+          }
+        ]
+      },
+      {
+        "title": "The end of the campaign",
+        "timeMarker": "22 June 1945",
+        "narration": "Organized resistance ends on 22 June. 92,000 Japanese soldiers and ~150,000 Okinawan civilians die in the battle; American losses exceed 49,000 including 12,500 killed. Planners in Washington study the casualty figures and project a million American casualties for the invasion of Japan. Six weeks later the atomic bombs fall on Hiroshima and Nagasaki.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "hill",
+            "label": "Final pockets",
+            "points": [
+              40,
+              86,
+              60,
+              98
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Tenth Army (clearing pockets)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 38,
+            "y": 82,
+            "w": 24,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "Final IJA positions",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 44,
+            "y": 92,
+            "w": 14,
+            "h": 4,
+            "strength": 1,
+            "status": "encircled"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Okinawa's bloodletting weighs on Truman's decision on the atomic bomb. Operation Olympic — set for 1 November — never happens.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      }
+    ]
+  },
+  "chosin-reservoir-1950": {
+    "title": "Chosin Reservoir: Frozen Chosin",
+    "intro": "November 1950. After Inchon and the recapture of Seoul, MacArthur's army drives north toward the Yalu. The 1st Marine Division advances up a single mountain road to the Chosin Reservoir at the roof of Korea. Unseen, twelve PVA divisions of Song Shilun's 9th Army Group encircle them in temperatures of −37 °C.",
+    "battlefieldDesc": "Chosin Reservoir, high mountain plateau. Yudam-ni on the west side of the reservoir; Hagaru-ri at the southern tip; Koto-ri and Hungnam further down the only road south through Funchilin Pass.",
+    "aspectRatio": 0.7,
+    "factionA": "United States + UN (X Corps)",
+    "factionB": "People's Volunteer Army (China, 9th Army Group)",
+    "phases": [
+      {
+        "title": "The drive to the Yalu",
+        "timeMarker": "26 November 1950",
+        "narration": "1st Marine Division and elements of 7th Infantry Division have advanced 80 kilometers up the only road from Hungnam to the reservoir, halting at Yudam-ni on the west side and Hagaru-ri at the south. Smith, the Marine division commander, has insisted on building an airstrip at Hagaru-ri against Almond's orders — a decision that will save the division. The temperature drops to −37 °C.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "coast",
+            "label": "Sea of Japan",
+            "points": [
+              0,
+              96,
+              100,
+              96,
+              100,
+              100,
+              0,
+              100
+            ]
+          },
+          {
+            "kind": "river",
+            "label": "Chosin Reservoir",
+            "points": [
+              38,
+              14,
+              62,
+              36
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "Toktong Pass",
+            "points": [
+              40,
+              30,
+              50,
+              36
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Yudam-ni",
+            "points": [
+              30,
+              18,
+              38,
+              24
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Hagaru-ri",
+            "points": [
+              44,
+              36,
+              52,
+              42
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Koto-ri",
+            "points": [
+              44,
+              52,
+              52,
+              58
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "Funchilin Pass",
+            "points": [
+              40,
+              62,
+              50,
+              72
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Hungnam (port)",
+            "points": [
+              50,
+              88,
+              64,
+              94
+            ]
+          },
+          {
+            "kind": "road",
+            "label": "MSR (only road)",
+            "points": [
+              48,
+              24,
+              48,
+              86
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Yudam-ni (5th + 7th Marines)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 32,
+            "y": 22,
+            "w": 10,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "Hagaru-ri base",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 46,
+            "y": 38,
+            "w": 8,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "RCT-31 east of reservoir",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 60,
+            "y": 22,
+            "w": 8,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "Koto-ri / convoy",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 46,
+            "y": 54,
+            "w": 8,
+            "h": 4,
+            "strength": 1
+          },
+          {
+            "label": "PVA 9th Army Group",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 22,
+            "y": 14,
+            "w": 60,
+            "h": 10,
+            "strength": 4
+          }
+        ]
+      },
+      {
+        "title": "Ambush",
+        "timeMarker": "27 November, night",
+        "narration": "After dark on 27 November the PVA strikes simultaneously: Yudam-ni and Hagaru-ri perimeters are hit by mass infantry assaults; RCT-31 east of the reservoir (\"Task Force Faith\") is overrun in pieces and ceases to exist as a fighting force. Fox Company, 7th Marines holds Toktong Pass — the chokepoint of the only road back — with 246 men against successive battalion-scale attacks.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "hill",
+            "label": "Toktong Pass",
+            "points": [
+              40,
+              30,
+              50,
+              36
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Yudam-ni",
+            "points": [
+              30,
+              18,
+              38,
+              24
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Hagaru-ri",
+            "points": [
+              44,
+              36,
+              52,
+              42
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Yudam-ni (encircled)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 32,
+            "y": 22,
+            "w": 10,
+            "h": 4,
+            "strength": 2,
+            "status": "encircled"
+          },
+          {
+            "label": "Hagaru-ri (encircled)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 46,
+            "y": 38,
+            "w": 8,
+            "h": 4,
+            "strength": 2,
+            "status": "encircled"
+          },
+          {
+            "label": "Fox/7th holds Toktong",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 42,
+            "y": 32,
+            "w": 8,
+            "h": 4,
+            "strength": 1,
+            "status": "encircled"
+          },
+          {
+            "label": "RCT-31 (destroyed)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 60,
+            "y": 22,
+            "w": 8,
+            "h": 4,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "PVA divisions attacking",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 22,
+            "y": 22,
+            "w": 60,
+            "h": 14,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Mass infantry attacks",
+            "faction": "b",
+            "fromX": 22,
+            "fromY": 22,
+            "toX": 38,
+            "toY": 22,
+            "kind": "charge"
+          },
+          {
+            "label": "RCT-31 overrun",
+            "faction": "b",
+            "fromX": 80,
+            "fromY": 22,
+            "toX": 60,
+            "toY": 22,
+            "kind": "charge"
+          }
+        ]
+      },
+      {
+        "title": "\"Attacking in a different direction\"",
+        "timeMarker": "1–7 December 1950",
+        "narration": "The Yudam-ni regiments fight 23 km back to Hagaru-ri along the road in temperatures that disable machine guns and freeze morphine syrettes. They reach the perimeter on 4 December bringing their wounded and most of their equipment. Air resupply by C-47s onto Smith's airstrip — which Marines have widened and lengthened under fire — keeps the column going. Smith to reporters: \"Retreat hell! We're just attacking in a different direction.\"",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Yudam-ni",
+            "points": [
+              30,
+              18,
+              38,
+              24
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Hagaru-ri (airstrip)",
+            "points": [
+              44,
+              36,
+              52,
+              42
+            ]
+          },
+          {
+            "kind": "road",
+            "label": "MSR",
+            "points": [
+              48,
+              24,
+              48,
+              86
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "5th + 7th Marines breaking out",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 38,
+            "y": 30,
+            "w": 12,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "Fox/7th relieved",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 44,
+            "y": 32,
+            "w": 6,
+            "h": 4,
+            "strength": 1
+          },
+          {
+            "label": "Hagaru-ri perimeter",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 46,
+            "y": 38,
+            "w": 10,
+            "h": 4,
+            "strength": 3
+          },
+          {
+            "label": "Air resupply / casualty evac",
+            "faction": "a",
+            "unitType": "aircraft",
+            "x": 60,
+            "y": 32,
+            "w": 12,
+            "h": 4,
+            "strength": 3
+          },
+          {
+            "label": "PVA roadblocks",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 38,
+            "y": 28,
+            "w": 14,
+            "h": 4,
+            "strength": 3,
+            "status": "broken"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Breakout fighting south",
+            "faction": "a",
+            "fromX": 36,
+            "fromY": 22,
+            "toX": 48,
+            "toY": 40,
+            "kind": "advance"
+          }
+        ]
+      },
+      {
+        "title": "Funchilin Pass to the sea",
+        "timeMarker": "8–11 December 1950",
+        "narration": "Below Koto-ri the road crosses Funchilin Pass on a single bridge over a power-station penstock — which the PVA blow in three places. C-119 Boxcars airdrop eight 1,000-kg Treadway bridge sections; combat engineers reassemble two of them across the gap under fire. The division crosses on 9 December, files down to Hungnam, and is evacuated by sea. Of the original 25,000, 7,400 are casualties; only 198 are taken prisoner.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "hill",
+            "label": "Funchilin Pass",
+            "points": [
+              40,
+              62,
+              50,
+              72
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Treadway bridge",
+            "points": [
+              44,
+              70,
+              50,
+              74
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Hungnam (evacuation)",
+            "points": [
+              50,
+              88,
+              64,
+              94
+            ]
+          },
+          {
+            "kind": "coast",
+            "label": "Sea of Japan",
+            "points": [
+              0,
+              96,
+              100,
+              96,
+              100,
+              100,
+              0,
+              100
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "1st Marine Division",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 44,
+            "y": 70,
+            "w": 12,
+            "h": 6,
+            "strength": 2
+          },
+          {
+            "label": "C-119 bridge drop",
+            "faction": "a",
+            "unitType": "aircraft",
+            "x": 56,
+            "y": 64,
+            "w": 10,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "X Corps embarking",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 54,
+            "y": 90,
+            "w": 16,
+            "h": 6,
+            "strength": 4
+          },
+          {
+            "label": "PVA pursuing",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 64,
+            "w": 12,
+            "h": 6,
+            "strength": 2,
+            "status": "broken"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Breakout to the sea",
+            "faction": "a",
+            "fromX": 46,
+            "fromY": 56,
+            "toX": 54,
+            "toY": 90,
+            "kind": "withdrawal"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "9th Army Group is rendered combat-ineffective by Chosin and frostbite. Smith's division is the only major UN unit to fight intact to the coast.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      }
+    ]
+  },
+  "berlin-1945": {
+    "title": "Berlin: The Reich Capital Falls",
+    "intro": "16 April 1945. Three Soviet fronts — Zhukov in the center, Konev in the south, Rokossovsky on the right — open the final offensive of the European war. 2.3 million Red Army soldiers, 6,250 tanks, and 7,500 aircraft converge on a city whose defenders include Hitler Youth and Volkssturm pensioners. In sixteen days the Reich Chancellery flies the red flag.",
+    "battlefieldDesc": "Eastern Germany. The Oder–Neisse line runs north–south on the right; Berlin sits 60 km behind it. Zhukov's 1st Belorussian Front attacks straight from the Seelow Heights; Konev's 1st Ukrainian wheels north from the south.",
+    "aspectRatio": 1.4,
+    "factionA": "Soviet Union + Polish 1st Army",
+    "factionB": "Nazi Germany",
+    "phases": [
+      {
+        "title": "Seelow Heights",
+        "timeMarker": "16–19 April 1945",
+        "narration": "Zhukov opens with 9,000 guns and 143 searchlights aimed at the German line to blind defenders. The plan is to overwhelm the Seelow Heights at first light. It does not work: German defenders have withdrawn from the front trench overnight; the barrage falls on empty ground; the searchlights silhouette Soviet infantry rather than blinding Germans. Three days and 30,000 Soviet casualties are needed to break through.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "river",
+            "label": "Oder River",
+            "points": [
+              48,
+              4,
+              52,
+              96
+            ]
+          },
+          {
+            "kind": "ridge",
+            "label": "Seelow Heights",
+            "points": [
+              54,
+              30,
+              64,
+              38
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Berlin",
+            "points": [
+              22,
+              48,
+              32,
+              58
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "1st Belorussian (Zhukov)",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 64,
+            "y": 30,
+            "w": 14,
+            "h": 14,
+            "strength": 4
+          },
+          {
+            "label": "1st Ukrainian (Konev)",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 72,
+            "y": 70,
+            "w": 14,
+            "h": 10,
+            "strength": 4
+          },
+          {
+            "label": "9th Army (Busse)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 32,
+            "w": 12,
+            "h": 14,
+            "strength": 3,
+            "status": "broken"
+          },
+          {
+            "label": "4th Panzer (south)",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 58,
+            "y": 72,
+            "w": 10,
+            "h": 6,
+            "strength": 2
+          }
+        ],
+        "movements": [
+          {
+            "label": "Seelow assault",
+            "faction": "a",
+            "fromX": 70,
+            "fromY": 36,
+            "toX": 56,
+            "toY": 34,
+            "kind": "charge"
+          },
+          {
+            "label": "Konev's southern push",
+            "faction": "a",
+            "fromX": 78,
+            "fromY": 76,
+            "toX": 62,
+            "toY": 72,
+            "kind": "charge"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Zhukov to Stalin: \"The Seelow Heights are taken.\" Stalin to Zhukov: \"You should have taken them on the first day.\"",
+            "x": 50,
+            "y": 95
+          }
+        ]
+      },
+      {
+        "title": "Encirclement",
+        "timeMarker": "20–25 April",
+        "narration": "Konev wheels north toward Berlin; Zhukov drives west; on 25 April the two fronts link up at Ketzin west of the city, completing the encirclement. The same day, Soviet and American patrols meet at Torgau on the Elbe. The Reich is cut in half. Inside the Berlin perimeter, Heinrici's Army Group Vistula has dissolved; what defends the city is a patchwork of Hitler Youth, Waffen-SS, and the LVI Panzer Corps under General Weidling.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Berlin (encircled)",
+            "points": [
+              22,
+              48,
+              32,
+              58
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Ketzin (linkup)",
+            "points": [
+              16,
+              52,
+              22,
+              58
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Zhukov closing west",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 26,
+            "y": 44,
+            "w": 22,
+            "h": 6,
+            "strength": 4
+          },
+          {
+            "label": "Konev closing west",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 26,
+            "y": 60,
+            "w": 22,
+            "h": 6,
+            "strength": 4
+          },
+          {
+            "label": "Berlin defenders (Weidling)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 24,
+            "y": 52,
+            "w": 8,
+            "h": 4,
+            "strength": 1,
+            "status": "encircled"
+          },
+          {
+            "label": "9th Army pocket (Halbe)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 64,
+            "w": 10,
+            "h": 6,
+            "strength": 1,
+            "status": "encircled"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Pincers close at Ketzin",
+            "faction": "a",
+            "fromX": 40,
+            "fromY": 46,
+            "toX": 20,
+            "toY": 54,
+            "kind": "flank"
+          },
+          {
+            "label": "Pincers close at Ketzin",
+            "faction": "a",
+            "fromX": 40,
+            "fromY": 60,
+            "toX": 20,
+            "toY": 54,
+            "kind": "flank"
+          }
+        ]
+      },
+      {
+        "title": "Inside the city",
+        "timeMarker": "26 April – 1 May",
+        "narration": "Eight Soviet armies enter Berlin from all sides. Street fighting moves block by block toward the government district — the Tiergarten, the Reichstag, the Reich Chancellery. Both sides use flamethrowers and direct-fire artillery at point-blank range. The 3rd Shock Army takes the Reichstag on 30 April after a night of fighting inside the building. Yegorov and Kantaria raise the flag at dawn on 1 May.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Government quarter",
+            "points": [
+              42,
+              46,
+              56,
+              56
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Reichstag",
+            "points": [
+              46,
+              46,
+              50,
+              50
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Reich Chancellery",
+            "points": [
+              48,
+              52,
+              52,
+              56
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Tiergarten flak tower",
+            "points": [
+              38,
+              50,
+              42,
+              54
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "3rd Shock Army (Reichstag)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 38,
+            "y": 38,
+            "w": 14,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "8th Guards Army (Chuikov)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 38,
+            "y": 60,
+            "w": 14,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "Soviet armor in the streets",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 30,
+            "y": 50,
+            "w": 12,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "Defenders in the Chancellery",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 48,
+            "y": 52,
+            "w": 6,
+            "h": 4,
+            "strength": 1,
+            "status": "encircled"
+          },
+          {
+            "label": "Hitler Youth + Volkssturm",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 40,
+            "y": 48,
+            "w": 18,
+            "h": 8,
+            "strength": 1,
+            "status": "broken"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Push to the Reichstag",
+            "faction": "a",
+            "fromX": 38,
+            "fromY": 38,
+            "toX": 48,
+            "toY": 48,
+            "kind": "charge"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Hitler commits suicide on 30 April. Goebbels follows on 1 May.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      },
+      {
+        "title": "Surrender",
+        "timeMarker": "2 May 1945",
+        "narration": "Weidling, Berlin's last commandant, surrenders the garrison at 06:00 on 2 May. ~92,000 German soldiers are dead in the battle for the city, 480,000 captured; ~81,000 Soviet soldiers killed. Six days later, on 8 May, the unconditional surrender of all German forces is signed at Karlshorst — in Zhukov's headquarters in the suburbs of the city he has just taken.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Berlin (surrendered)",
+            "points": [
+              22,
+              48,
+              32,
+              58
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Soviet occupiers",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 24,
+            "y": 52,
+            "w": 10,
+            "h": 6,
+            "strength": 4
+          },
+          {
+            "label": "Captured garrison",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 26,
+            "y": 54,
+            "w": 8,
+            "h": 4,
+            "strength": 1,
+            "status": "encircled"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Konev's troops link with Patton's 3rd Army outside Prague three days later. The European war is over.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      }
+    ]
+  },
+  "somme-1916": {
+    "title": "The Somme: A Storm of Steel",
+    "intro": "1 July 1916. After a week of preparatory bombardment, eighteen British and French divisions go over the top along a 30-kilometer front in Picardy. Haig expects a breakthrough; he gets the worst day in British military history. The campaign drags into November, costs over a million casualties on both sides, and barely moves the line.",
+    "battlefieldDesc": "Picardy chalk plateau. River Somme runs west; British line in the north against Thiepval, Beaumont-Hamel, La Boisselle; French line in the south against Maricourt and the Frise salient.",
+    "aspectRatio": 1.7,
+    "factionA": "Allies (British Empire + France)",
+    "factionB": "German Empire",
+    "phases": [
+      {
+        "title": "The week-long bombardment",
+        "timeMarker": "24 June – 1 July 1916",
+        "narration": "1,500 British guns fire 1.6 million shells in the seven days before the assault — the largest preparation in the war so far. Plans assume the wire will be cut and German trenches will be unhabitable when the infantry steps off. Both assumptions are false: a third of British shells are duds, the wire stands in many sectors, and the Germans wait in 12-meter-deep dugouts.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "river",
+            "label": "River Somme",
+            "points": [
+              10,
+              78,
+              90,
+              86
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Albert",
+            "points": [
+              22,
+              38,
+              30,
+              46
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Thiepval Ridge",
+            "points": [
+              40,
+              22,
+              56,
+              32
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Beaumont-Hamel",
+            "points": [
+              42,
+              18,
+              50,
+              24
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "La Boisselle",
+            "points": [
+              42,
+              38,
+              48,
+              44
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Maricourt (Anglo-French boundary)",
+            "points": [
+              54,
+              60,
+              62,
+              66
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "German first line",
+            "points": [
+              38,
+              16,
+              80,
+              70
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "British Fourth Army",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 20,
+            "y": 38,
+            "w": 18,
+            "h": 22,
+            "strength": 4
+          },
+          {
+            "label": "French Sixth Army",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 24,
+            "y": 64,
+            "w": 18,
+            "h": 14,
+            "strength": 3
+          },
+          {
+            "label": "Royal Artillery (massed)",
+            "faction": "a",
+            "unitType": "artillery",
+            "x": 10,
+            "y": 50,
+            "w": 10,
+            "h": 20,
+            "strength": 4
+          },
+          {
+            "label": "German 2nd Army (dug in)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 60,
+            "y": 18,
+            "w": 22,
+            "h": 60,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Preparatory barrage",
+            "faction": "a",
+            "fromX": 14,
+            "fromY": 50,
+            "toX": 60,
+            "toY": 40,
+            "kind": "advance"
+          }
+        ]
+      },
+      {
+        "title": "1 July — the worst day",
+        "timeMarker": "07:30, 1 July 1916",
+        "narration": "Whistles blow at 07:30. British infantry climb out of trenches and walk forward in ordered lines through gaps in their own wire. German machine gunners emerge from dugouts as the barrage lifts, set up, and open fire. By nightfall the British Army has 57,470 casualties — 19,240 killed — for almost no ground. The French in the south, attacking with creeping barrages and surprise, take their objectives.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "fort",
+            "label": "British no man's land",
+            "points": [
+              38,
+              16,
+              56,
+              70
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Mametz (taken)",
+            "points": [
+              44,
+              50,
+              50,
+              56
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Beaumont-Hamel (held)",
+            "points": [
+              42,
+              18,
+              50,
+              24
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "British north (catastrophic)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 40,
+            "y": 22,
+            "w": 14,
+            "h": 18,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "British center (mixed gains)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 42,
+            "y": 44,
+            "w": 14,
+            "h": 12,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "French south (succeed)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 44,
+            "y": 64,
+            "w": 14,
+            "h": 12,
+            "strength": 3
+          },
+          {
+            "label": "German machine-gun nests",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 56,
+            "y": 22,
+            "w": 6,
+            "h": 50,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "Walking advance",
+            "faction": "a",
+            "fromX": 38,
+            "fromY": 30,
+            "toX": 56,
+            "toY": 30,
+            "kind": "charge"
+          },
+          {
+            "label": "MG enfilade",
+            "faction": "b",
+            "fromX": 58,
+            "fromY": 24,
+            "toX": 44,
+            "toY": 24,
+            "kind": "advance"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "57,470 British casualties — single bloodiest day in British military history.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      },
+      {
+        "title": "Bite-and-hold",
+        "timeMarker": "July – September 1916",
+        "narration": "Haig switches to limited objective attacks behind creeping barrages. High Wood, Delville Wood, Pozières — each ridge is taken in costly local fighting. The 1st Australian Division loses 23,000 in seven weeks at Pozières. On 15 September Haig debuts tanks at Flers-Courcelette; 32 of 49 reach the start line, three reach the second German trench.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "wood",
+            "label": "Delville Wood",
+            "points": [
+              48,
+              36,
+              54,
+              42
+            ]
+          },
+          {
+            "kind": "wood",
+            "label": "High Wood",
+            "points": [
+              50,
+              40,
+              56,
+              46
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Pozières (Australians)",
+            "points": [
+              44,
+              30,
+              50,
+              36
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Flers (tanks)",
+            "points": [
+              56,
+              38,
+              62,
+              44
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Australian Corps",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 42,
+            "y": 32,
+            "w": 10,
+            "h": 6,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "South African Brigade — Delville",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 48,
+            "y": 38,
+            "w": 8,
+            "h": 4,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "First tanks",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 54,
+            "y": 40,
+            "w": 6,
+            "h": 4,
+            "strength": 1
+          },
+          {
+            "label": "Creeping barrage",
+            "faction": "a",
+            "unitType": "artillery",
+            "x": 30,
+            "y": 36,
+            "w": 16,
+            "h": 8,
+            "strength": 4
+          },
+          {
+            "label": "German trench systems",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 58,
+            "y": 30,
+            "w": 14,
+            "h": 18,
+            "strength": 3,
+            "status": "broken"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Bite-and-hold attacks",
+            "faction": "a",
+            "fromX": 40,
+            "fromY": 38,
+            "toX": 56,
+            "toY": 40,
+            "kind": "advance"
+          }
+        ]
+      },
+      {
+        "title": "Mud and the end",
+        "timeMarker": "October – 18 November 1916",
+        "narration": "Autumn rain turns the battlefield into liquid chalk. The final phase — Beaumont-Hamel and Ancre — gains a few kilometers in the north. Haig calls off the offensive on 18 November. Total casualties: ~419,000 British, ~204,000 French, ~465,000 German. The line has moved 10 kilometers. The British have, however, bled the Imperial German Army's pre-war professionals beyond replacement.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "marsh",
+            "label": "Mud-filled craters",
+            "points": [
+              38,
+              22,
+              70,
+              60
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Beaumont-Hamel (finally taken)",
+            "points": [
+              42,
+              18,
+              50,
+              24
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "British final attacks",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 44,
+            "y": 24,
+            "w": 12,
+            "h": 8,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "Exhausted German line",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 58,
+            "y": 22,
+            "w": 14,
+            "h": 22,
+            "strength": 1,
+            "status": "broken"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Erich von Falkenhayn: \"The Somme bled the German army white as Verdun did the French.\"",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      }
+    ]
+  },
+  "gallipoli-1915": {
+    "title": "Gallipoli: The Lost Gamble",
+    "intro": "25 April 1915. After the Royal Navy fails to force the Dardanelles in March, Kitchener authorizes a land invasion of the Gallipoli peninsula. The aim: knock Ottoman Turkey out of the war and open a supply route to Russia. 17,000 Australians and New Zealanders land at what becomes ANZAC Cove; British and French at Helles. By January 1916 the campaign is over — a strategic failure that consumes 100,000 lives.",
+    "battlefieldDesc": "Gallipoli Peninsula. Aegean to the west, Dardanelles Strait to the east. Cape Helles at the southern tip; ANZAC Cove and the Sari Bair range in the middle; Suvla Bay further north (August attempt).",
+    "aspectRatio": 0.7,
+    "factionA": "Allies (UK, ANZAC, France)",
+    "factionB": "Ottoman Empire + Germany",
+    "phases": [
+      {
+        "title": "The naval attempt fails",
+        "timeMarker": "18 March 1915",
+        "narration": "Eighteen Allied battleships try to force the Dardanelles to threaten Constantinople. They run into uncharted Ottoman mines; three battleships sink and three more are crippled in a single afternoon. The naval option is dead. Kitchener authorizes a land campaign — but tells no one until troops are already at Lemnos.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "coast",
+            "label": "Aegean Sea",
+            "points": [
+              0,
+              0,
+              30,
+              0,
+              30,
+              100,
+              0,
+              100
+            ]
+          },
+          {
+            "kind": "coast",
+            "label": "Dardanelles Strait",
+            "points": [
+              50,
+              14,
+              64,
+              14,
+              64,
+              100,
+              50,
+              100
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Ottoman forts",
+            "points": [
+              50,
+              26,
+              64,
+              90
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Ottoman minefield",
+            "points": [
+              54,
+              60,
+              64,
+              78
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Royal Navy task force",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 60,
+            "y": 86,
+            "w": 8,
+            "h": 8,
+            "strength": 3,
+            "status": "broken"
+          },
+          {
+            "label": "Ottoman shore batteries",
+            "faction": "b",
+            "unitType": "artillery",
+            "x": 54,
+            "y": 36,
+            "w": 8,
+            "h": 50,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "Push into the Narrows",
+            "faction": "a",
+            "fromX": 60,
+            "fromY": 92,
+            "toX": 60,
+            "toY": 60,
+            "kind": "advance"
+          },
+          {
+            "label": "Mines + shore fire",
+            "faction": "b",
+            "fromX": 56,
+            "fromY": 70,
+            "toX": 60,
+            "toY": 72,
+            "kind": "advance"
+          }
+        ]
+      },
+      {
+        "title": "Landings on 25 April",
+        "timeMarker": "25 April 1915",
+        "narration": "The 29th Division lands at the five beaches around Cape Helles. At V Beach, the SS River Clyde — converted into a Trojan-horse landing ship — drops her ramps directly under Ottoman machine guns; the first 200 men ashore are killed within minutes. Further north, the ANZAC Corps lands 1.6 km off-course at a steep cove below razor-back ridges. They take the high ground at Plugge's Plateau by midday but cannot push further.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "coast",
+            "label": "Cape Helles beaches",
+            "points": [
+              38,
+              86,
+              52,
+              96
+            ]
+          },
+          {
+            "kind": "coast",
+            "label": "ANZAC Cove",
+            "points": [
+              32,
+              50,
+              38,
+              56
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "Sari Bair range",
+            "points": [
+              38,
+              44,
+              52,
+              60
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "Plugge's Plateau",
+            "points": [
+              36,
+              52,
+              42,
+              56
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "British 29th Div (Helles)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 44,
+            "y": 86,
+            "w": 10,
+            "h": 4,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "ANZAC Corps",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 36,
+            "y": 54,
+            "w": 8,
+            "h": 6,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "French at Kum Kale (diversion)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 70,
+            "y": 90,
+            "w": 6,
+            "h": 4,
+            "strength": 1
+          },
+          {
+            "label": "19th Ottoman Division (Mustafa Kemal)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 46,
+            "y": 58,
+            "w": 10,
+            "h": 6,
+            "strength": 2
+          },
+          {
+            "label": "Ottoman southern garrisons",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 90,
+            "w": 10,
+            "h": 4,
+            "strength": 2
+          }
+        ],
+        "movements": [
+          {
+            "label": "ANZAC landing",
+            "faction": "a",
+            "fromX": 22,
+            "fromY": 54,
+            "toX": 36,
+            "toY": 54,
+            "kind": "charge"
+          },
+          {
+            "label": "Mustafa Kemal counter-attacks",
+            "faction": "b",
+            "fromX": 50,
+            "fromY": 56,
+            "toX": 38,
+            "toY": 54,
+            "kind": "charge"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Mustafa Kemal: \"I do not order you to attack — I order you to die.\" His regiment buys the time that costs the campaign.",
+            "x": 50,
+            "y": 95
+          }
+        ]
+      },
+      {
+        "title": "Suvla and the August offensive",
+        "timeMarker": "6–10 August 1915",
+        "narration": "After three months of stalemate, the Allies try again: a new corps lands at Suvla Bay to outflank the Ottoman line, while the ANZACs break out toward Sari Bair. Stopford's IX Corps lands almost unopposed at Suvla — and then sits on the beach for three days. The Ottoman reserve under Mustafa Kemal arrives, retakes the heights, and the window closes.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "coast",
+            "label": "Suvla Bay",
+            "points": [
+              32,
+              24,
+              42,
+              32
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "Sari Bair",
+            "points": [
+              38,
+              44,
+              52,
+              60
+            ]
+          },
+          {
+            "kind": "coast",
+            "label": "ANZAC Cove",
+            "points": [
+              32,
+              50,
+              38,
+              56
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "IX Corps at Suvla (paralyzed)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 36,
+            "y": 28,
+            "w": 10,
+            "h": 4,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "ANZAC breakout attempt",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 38,
+            "y": 50,
+            "w": 10,
+            "h": 6,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "Mustafa Kemal's reserve",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 48,
+            "w": 10,
+            "h": 6,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "Sari Bair attack",
+            "faction": "a",
+            "fromX": 38,
+            "fromY": 54,
+            "toX": 50,
+            "toY": 52,
+            "kind": "charge"
+          },
+          {
+            "label": "Ottoman counterattack",
+            "faction": "b",
+            "fromX": 56,
+            "fromY": 50,
+            "toX": 44,
+            "toY": 50,
+            "kind": "charge"
+          }
+        ]
+      },
+      {
+        "title": "Evacuation",
+        "timeMarker": "20 December 1915 – 9 January 1916",
+        "narration": "Cold-weather casualties exceed combat losses by November. Kitchener inspects the peninsula and recommends withdrawal. The evacuation — meticulously planned, with rifles rigged to fire on water-trigger delays — is the most successful operation of the entire campaign: 80,000 men withdrawn from ANZAC and Suvla in two nights without a single combat casualty. The final Helles evacuation follows on 8–9 January 1916.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "coast",
+            "label": "Embarkation beaches",
+            "points": [
+              22,
+              24,
+              38,
+              56
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Allied troops embarking",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 40,
+            "w": 10,
+            "h": 16,
+            "strength": 3,
+            "status": "retreating"
+          },
+          {
+            "label": "Royal Navy lifters",
+            "faction": "a",
+            "unitType": "ships",
+            "x": 14,
+            "y": 40,
+            "w": 10,
+            "h": 16,
+            "strength": 4
+          },
+          {
+            "label": "Ottoman line (intact)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 40,
+            "w": 14,
+            "h": 20,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "Withdrawal to ships",
+            "faction": "a",
+            "fromX": 36,
+            "fromY": 50,
+            "toX": 22,
+            "toY": 50,
+            "kind": "withdrawal"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "100,000 dead. Churchill resigns from the cabinet. Australia and New Zealand date their national identities to 25 April.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      }
+    ]
+  },
+  "shiloh-1862": {
+    "title": "Shiloh: The Hornet's Nest",
+    "intro": "April 1862. Grant's Army of the Tennessee camps at Pittsburg Landing on the Tennessee River, waiting for Buell's Army of the Ohio to march up from Nashville. Albert Sidney Johnston attacks first. Two days of fighting around a small Methodist meeting house — Shiloh — produce 23,746 American casualties, more than all previous American wars combined.",
+    "battlefieldDesc": "Tennessee River bends east of Pittsburg Landing. Federal camps spread west across rolling farm country toward Shiloh Church and Owl Creek. Snake Creek separates the Federal right from the river.",
+    "aspectRatio": 1.4,
+    "factionA": "Union (Armies of the Tennessee + Ohio)",
+    "factionB": "Confederate (Army of Mississippi)",
+    "phases": [
+      {
+        "title": "Surprise at Shiloh",
+        "timeMarker": "Dawn, 6 April 1862",
+        "narration": "Johnston's 40,000 march 22 miles in three rainy days from Corinth and form for attack within a mile of Sherman's pickets. At dawn the Confederate corps strike Sherman's and Prentiss's camps. Federal regiments break and run for the Landing; others — Prentiss's, B. M. Prentiss in the center — pull back to a sunken farm lane and hold.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "river",
+            "label": "Tennessee River",
+            "points": [
+              80,
+              10,
+              84,
+              90
+            ]
+          },
+          {
+            "kind": "river",
+            "label": "Owl Creek",
+            "points": [
+              10,
+              22,
+              50,
+              36
+            ]
+          },
+          {
+            "kind": "river",
+            "label": "Snake Creek",
+            "points": [
+              10,
+              36,
+              60,
+              48
+            ]
+          },
+          {
+            "kind": "river",
+            "label": "Lick Creek",
+            "points": [
+              10,
+              80,
+              60,
+              68
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Pittsburg Landing",
+            "points": [
+              72,
+              50,
+              80,
+              58
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Shiloh Church",
+            "points": [
+              30,
+              50,
+              38,
+              56
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Hornet's Nest (sunken road)",
+            "points": [
+              48,
+              50,
+              60,
+              56
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Peach Orchard",
+            "points": [
+              50,
+              56,
+              58,
+              62
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Sherman's division",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 32,
+            "y": 50,
+            "w": 10,
+            "h": 6,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "Prentiss in the Hornet's Nest",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 52,
+            "y": 52,
+            "w": 10,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "Federal reserves at the Landing",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 74,
+            "y": 52,
+            "w": 10,
+            "h": 6,
+            "strength": 2
+          },
+          {
+            "label": "Confederate corps attacking",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 22,
+            "y": 60,
+            "w": 14,
+            "h": 12,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Dawn attack",
+            "faction": "b",
+            "fromX": 24,
+            "fromY": 64,
+            "toX": 36,
+            "toY": 56,
+            "kind": "charge"
+          },
+          {
+            "label": "Federal collapse",
+            "faction": "a",
+            "fromX": 32,
+            "fromY": 50,
+            "toX": 60,
+            "toY": 50,
+            "kind": "rout"
+          }
+        ]
+      },
+      {
+        "title": "The Hornet's Nest",
+        "timeMarker": "11 a.m. – 5:30 p.m., 6 April",
+        "narration": "Prentiss and W. H. L. Wallace hold a sunken farm road against eleven Confederate frontal assaults. The dense thicket and concentrated rifle fire give the position its name. Around 14:30 Johnston is hit in the leg by a stray ball — the femoral artery — and bleeds to death in minutes. Beauregard takes over and shifts to envelopment. Prentiss surrenders 2,200 men at sundown, having bought Grant the day.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "fort",
+            "label": "Hornet's Nest",
+            "points": [
+              48,
+              50,
+              60,
+              56
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Peach Orchard",
+            "points": [
+              50,
+              56,
+              58,
+              62
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Prentiss + Wallace (holding)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 52,
+            "y": 52,
+            "w": 10,
+            "h": 4,
+            "strength": 1,
+            "status": "encircled"
+          },
+          {
+            "label": "Confederate envelopment",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 44,
+            "y": 56,
+            "w": 22,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "62-gun \"Ruggles's battery\"",
+            "faction": "b",
+            "unitType": "artillery",
+            "x": 44,
+            "y": 48,
+            "w": 18,
+            "h": 4,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Massed artillery fire",
+            "faction": "b",
+            "fromX": 50,
+            "fromY": 48,
+            "toX": 54,
+            "toY": 54,
+            "kind": "advance"
+          },
+          {
+            "label": "Envelopment closes",
+            "faction": "b",
+            "fromX": 44,
+            "fromY": 60,
+            "toX": 60,
+            "toY": 54,
+            "kind": "flank"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Johnston dies of a wound he might have survived if a tourniquet had been applied. The Confederacy loses its most senior western commander.",
+            "x": 50,
+            "y": 95
+          }
+        ]
+      },
+      {
+        "title": "Buell arrives",
+        "timeMarker": "Night of 6–7 April",
+        "narration": "In the rain after dark, Buell's lead division crosses the Tennessee on a captured ferry. Lew Wallace's Federal division finally arrives from upriver. Grant now has 25,000 fresh troops. Beauregard's army sleeps in Federal camps in the Shiloh fields. Grant, asked by Sherman whether to retreat: \"Retreat? No. Lick 'em tomorrow.\"",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "river",
+            "label": "Tennessee River",
+            "points": [
+              80,
+              10,
+              84,
+              90
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Pittsburg Landing",
+            "points": [
+              72,
+              50,
+              80,
+              58
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Grant's army (regrouping)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 70,
+            "y": 50,
+            "w": 14,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "Buell's army (arriving)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 80,
+            "y": 64,
+            "w": 12,
+            "h": 10,
+            "strength": 4
+          },
+          {
+            "label": "Lew Wallace from upriver",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 64,
+            "y": 40,
+            "w": 10,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "Beauregard (in Federal camps)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 40,
+            "y": 56,
+            "w": 16,
+            "h": 8,
+            "strength": 2,
+            "status": "broken"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Buell across the river",
+            "faction": "a",
+            "fromX": 88,
+            "fromY": 80,
+            "toX": 80,
+            "toY": 60,
+            "kind": "advance"
+          },
+          {
+            "label": "Lew Wallace from Crump's Landing",
+            "faction": "a",
+            "fromX": 60,
+            "fromY": 30,
+            "toX": 64,
+            "toY": 44,
+            "kind": "advance"
+          }
+        ]
+      },
+      {
+        "title": "The counterattack",
+        "timeMarker": "7 April 1862",
+        "narration": "At dawn Grant attacks. Refreshed Federal divisions push the exhausted Confederates back across the same ground they took the day before. By midafternoon Beauregard, his line crumbling, orders withdrawal to Corinth. Grant — who lost 13,000 in two days, more than the country has ever lost — keeps the field, but the political cost almost ends his career. Lincoln defends him: \"I can't spare this man. He fights.\"",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "town",
+            "label": "Shiloh Church (retaken)",
+            "points": [
+              30,
+              50,
+              38,
+              56
+            ]
+          },
+          {
+            "kind": "town",
+            "label": "Pittsburg Landing",
+            "points": [
+              72,
+              50,
+              80,
+              58
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Federal counterattack (Buell + Grant)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 50,
+            "w": 22,
+            "h": 10,
+            "strength": 4
+          },
+          {
+            "label": "Confederate withdrawal",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 28,
+            "y": 56,
+            "w": 16,
+            "h": 8,
+            "strength": 1,
+            "status": "retreating"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Drive west",
+            "faction": "a",
+            "fromX": 70,
+            "fromY": 52,
+            "toX": 32,
+            "toY": 54,
+            "kind": "charge"
+          },
+          {
+            "label": "Confederate withdrawal to Corinth",
+            "faction": "b",
+            "fromX": 30,
+            "fromY": 56,
+            "toX": 8,
+            "toY": 70,
+            "kind": "retreat"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "23,746 American casualties — more than all previous American wars combined. The country realizes the war will not be brief.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      }
+    ]
+  },
+  "dien-bien-phu-1954": {
+    "title": "Dien Bien Phu: The End of an Empire",
+    "intro": "March 1954. French paratroopers build a fortified airhead in the remote Dien Bien Phu valley near Laos — bait to draw the Viet Minh into a set-piece battle on French terms. Giap surprises everyone by dragging artillery up the surrounding mountains. After 56 days of siege, France's eight-year war in Indochina ends — and so does French Indochina.",
+    "battlefieldDesc": "Saucer-shaped valley in northwest Vietnam. French strongpoints form a ring around the central airstrip; named (per the legend) after Colonel de Castries's mistresses — Béatrice, Gabrielle, Anne-Marie, Dominique, Eliane, Claudine, Huguette, Isabelle to the south.",
+    "aspectRatio": 1.1,
+    "factionA": "French Union",
+    "factionB": "Viet Minh (Democratic Republic of Vietnam)",
+    "phases": [
+      {
+        "title": "The valley fortress",
+        "timeMarker": "November 1953 – 12 March 1954",
+        "narration": "Operation Castor drops 16,000 French troops into the valley to interdict Viet Minh supply lines toward Laos. Colonel de Castries fortifies a ring of strongpoints around the airstrip. The French expect Giap to attack with infantry through low ground where airpower and artillery will destroy him. Giap has other plans: he has spent four months dragging 200 artillery pieces up the surrounding ridges by hand and pulley.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "hill",
+            "label": "Surrounding ridges",
+            "points": [
+              4,
+              4,
+              96,
+              4,
+              96,
+              18,
+              4,
+              18
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "Surrounding ridges",
+            "points": [
+              4,
+              82,
+              96,
+              82,
+              96,
+              98,
+              4,
+              98
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "West ridge",
+            "points": [
+              4,
+              18,
+              18,
+              82
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "East ridge",
+            "points": [
+              82,
+              18,
+              96,
+              82
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Airstrip",
+            "points": [
+              40,
+              44,
+              60,
+              52
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Béatrice",
+            "points": [
+              62,
+              28,
+              70,
+              36
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Gabrielle",
+            "points": [
+              44,
+              22,
+              52,
+              30
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Anne-Marie",
+            "points": [
+              28,
+              30,
+              36,
+              38
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Dominique",
+            "points": [
+              60,
+              46,
+              68,
+              54
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Eliane",
+            "points": [
+              60,
+              56,
+              68,
+              64
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Isabelle (south)",
+            "points": [
+              44,
+              76,
+              56,
+              82
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "French infantry in the strongpoints",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 50,
+            "w": 12,
+            "h": 12,
+            "strength": 3
+          },
+          {
+            "label": "Foreign Legion (Béatrice)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 64,
+            "y": 30,
+            "w": 6,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "Algerian / Moroccan tirailleurs",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 46,
+            "y": 26,
+            "w": 8,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "Viet Minh divisions (on ridges)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 8,
+            "y": 20,
+            "w": 84,
+            "h": 8,
+            "strength": 4
+          },
+          {
+            "label": "Viet Minh artillery (hidden)",
+            "faction": "b",
+            "unitType": "artillery",
+            "x": 8,
+            "y": 8,
+            "w": 84,
+            "h": 6,
+            "strength": 4
+          }
+        ]
+      },
+      {
+        "title": "Béatrice and Gabrielle fall",
+        "timeMarker": "13–15 March 1954",
+        "narration": "At 17:00 on 13 March a single Viet Minh shell decapitates the Foreign Legion battalion command on Béatrice. The strongpoint falls in six hours. Gabrielle falls the next night. The airstrip is now under direct fire and unusable in daylight. The French artillery commander, Colonel Piroth, can find no targets — Giap's guns are in pits and caves — and commits suicide with a grenade in his bunker.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "fort",
+            "label": "Béatrice (lost)",
+            "points": [
+              62,
+              28,
+              70,
+              36
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Gabrielle (lost)",
+            "points": [
+              44,
+              22,
+              52,
+              30
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "French (losing the north)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 32,
+            "w": 14,
+            "h": 6,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "Viet Minh 312th Div",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 60,
+            "y": 22,
+            "w": 14,
+            "h": 8,
+            "strength": 4
+          },
+          {
+            "label": "Viet Minh 308th Div",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 36,
+            "y": 14,
+            "w": 14,
+            "h": 8,
+            "strength": 4
+          },
+          {
+            "label": "Viet Minh artillery (firing)",
+            "faction": "b",
+            "unitType": "artillery",
+            "x": 8,
+            "y": 10,
+            "w": 84,
+            "h": 4,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Béatrice assault",
+            "faction": "b",
+            "fromX": 80,
+            "fromY": 24,
+            "toX": 66,
+            "toY": 32,
+            "kind": "charge"
+          },
+          {
+            "label": "Gabrielle assault",
+            "faction": "b",
+            "fromX": 50,
+            "fromY": 10,
+            "toX": 48,
+            "toY": 26,
+            "kind": "charge"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "Piroth: \"I am completely dishonored.\" He pulls the pin lying on his cot.",
+            "x": 50,
+            "y": 95
+          }
+        ]
+      },
+      {
+        "title": "The five hills — and air supply",
+        "timeMarker": "30 March – 5 May 1954",
+        "narration": "Giap launches a five-week assault on the central ring of strongpoints — Dominique, Eliane, Huguette, Claudine. Trenches creep forward at night, Vauban-style. Resupply is by parachute from C-47 Dakotas flying through anti-aircraft fire; thousands of containers drift into Viet Minh lines. American C-119s flown by CIA-contracted pilots take heavy losses. French reinforcements parachute in until the perimeter shrinks too far to receive them.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "fort",
+            "label": "Dominique",
+            "points": [
+              60,
+              46,
+              68,
+              54
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Eliane",
+            "points": [
+              60,
+              56,
+              68,
+              64
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Huguette",
+            "points": [
+              36,
+              50,
+              44,
+              58
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Claudine",
+            "points": [
+              40,
+              60,
+              48,
+              68
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Viet Minh trenches",
+            "points": [
+              50,
+              36,
+              80,
+              70
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "French defenders (shrinking)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 48,
+            "y": 56,
+            "w": 14,
+            "h": 8,
+            "strength": 1,
+            "status": "encircled"
+          },
+          {
+            "label": "C-47 / C-119 paradrops",
+            "faction": "a",
+            "unitType": "aircraft",
+            "x": 14,
+            "y": 6,
+            "w": 24,
+            "h": 4,
+            "strength": 2
+          },
+          {
+            "label": "Viet Minh saps closing",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 52,
+            "y": 44,
+            "w": 24,
+            "h": 24,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Air supply runs",
+            "faction": "a",
+            "fromX": 14,
+            "fromY": 8,
+            "toX": 50,
+            "toY": 50,
+            "kind": "advance"
+          },
+          {
+            "label": "Sapping forward",
+            "faction": "b",
+            "fromX": 78,
+            "fromY": 50,
+            "toX": 62,
+            "toY": 52,
+            "kind": "advance"
+          }
+        ]
+      },
+      {
+        "title": "Surrender",
+        "timeMarker": "7 May 1954, 17:30",
+        "narration": "On 7 May the last strongpoints — Eliane 2, Claudine 5 — fall to direct assault. De Castries radios Hanoi: \"The Viets are everywhere. The situation is very grave. Au revoir, mon général.\" His command bunker is overrun at 17:30. 10,000 French Union troops walk out as prisoners; only 3,000 will survive the march to Viet Minh camps. The next morning the Geneva Conference opens.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "fort",
+            "label": "De Castries's bunker",
+            "points": [
+              46,
+              50,
+              54,
+              56
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "French (surrendering)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 52,
+            "w": 12,
+            "h": 6,
+            "strength": 1,
+            "status": "encircled"
+          },
+          {
+            "label": "Viet Minh (everywhere)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 40,
+            "y": 30,
+            "w": 30,
+            "h": 40,
+            "strength": 4
+          }
+        ],
+        "annotations": [
+          {
+            "text": "The Geneva Accords partition Vietnam at the 17th parallel. The US position deepens, ten years later becoming the war we now call Vietnam.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      }
+    ]
+  },
+  "pharsalus-48bc": {
+    "title": "Pharsalus: Caesar's Fourth Line",
+    "intro": "9 August 48 BC. Caesar's veteran army of 22,000 faces Pompey's 45,000 — fed by the Republic's senatorial faction — on the plain of Pharsalus in Thessaly. Pompey plans to crush Caesar's right wing with cavalry. Caesar conceals a fourth line of infantry to receive that very charge.",
+    "battlefieldDesc": "Plain near Pharsalus in Thessaly, between the Enipeus River to the south and rising ground to the north.",
+    "aspectRatio": 1.6,
+    "factionA": "Caesarian forces (Roman Republic)",
+    "factionB": "Pompeian / Senatorial faction (Roman Republic)",
+    "phases": [
+      {
+        "title": "Deployment",
+        "timeMarker": "Dawn, 9 August 48 BC",
+        "narration": "Pompey's right anchors on the Enipeus; he sets his strongest legions on his left, supported by 7,000 cavalry under Labienus. Caesar mirrors with his own anchor on the river but his left, opposite Labienus's cavalry, is dangerously thin. Behind his right Caesar quietly forms a fourth line — six cohorts pulled from each of his three legions there — held in reserve at a right angle to the main line.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "river",
+            "label": "Enipeus River",
+            "points": [
+              10,
+              84,
+              90,
+              86
+            ]
+          },
+          {
+            "kind": "hill",
+            "label": "Rising ground",
+            "points": [
+              10,
+              6,
+              90,
+              18
+            ]
+          },
+          {
+            "kind": "fort",
+            "label": "Hidden fourth line",
+            "points": [
+              68,
+              56,
+              84,
+              64
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Caesar's left (vs cavalry)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 24,
+            "y": 48,
+            "w": 14,
+            "h": 8,
+            "strength": 2
+          },
+          {
+            "label": "Caesar's center",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 42,
+            "y": 48,
+            "w": 18,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "Caesar's right (river anchor)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 64,
+            "y": 50,
+            "w": 14,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "Fourth line (concealed)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 70,
+            "y": 60,
+            "w": 14,
+            "h": 4,
+            "strength": 3
+          },
+          {
+            "label": "Caesar's cavalry (token)",
+            "faction": "a",
+            "unitType": "cavalry",
+            "x": 14,
+            "y": 44,
+            "w": 8,
+            "h": 4,
+            "strength": 1
+          },
+          {
+            "label": "Pompey's left",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 24,
+            "y": 28,
+            "w": 14,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "Pompey's center",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 42,
+            "y": 28,
+            "w": 18,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "Pompey's right",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 64,
+            "y": 30,
+            "w": 14,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "Labienus's cavalry (left)",
+            "faction": "b",
+            "unitType": "cavalry",
+            "x": 10,
+            "y": 22,
+            "w": 12,
+            "h": 6,
+            "strength": 4
+          }
+        ]
+      },
+      {
+        "title": "The cavalry charge",
+        "timeMarker": "Mid-morning",
+        "narration": "Pompey orders Labienus's cavalry forward to sweep Caesar's left, then loop behind the line and roll it up from the rear. The mass of horse breaks Caesar's token cavalry and turns the flank. Pompey's plan is working. Just then Caesar's hidden fourth line stands up — and Caesar has given them an unusual order: drive your pila at the cavalry's faces.",
+        "durationMs": 7000,
+        "terrain": [
+          {
+            "kind": "fort",
+            "label": "Caesar's fourth line (revealed)",
+            "points": [
+              68,
+              56,
+              84,
+              64
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Labienus's cavalry (charging)",
+            "faction": "b",
+            "unitType": "cavalry",
+            "x": 18,
+            "y": 32,
+            "w": 14,
+            "h": 6,
+            "strength": 4
+          },
+          {
+            "label": "Caesar's broken cavalry",
+            "faction": "a",
+            "unitType": "cavalry",
+            "x": 14,
+            "y": 42,
+            "w": 8,
+            "h": 4,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "Fourth line (springing up)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 22,
+            "y": 56,
+            "w": 14,
+            "h": 4,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "Cavalry sweep",
+            "faction": "b",
+            "fromX": 14,
+            "fromY": 24,
+            "toX": 24,
+            "toY": 50,
+            "kind": "flank"
+          },
+          {
+            "label": "Fourth line into the cavalry",
+            "faction": "a",
+            "fromX": 70,
+            "fromY": 60,
+            "toX": 26,
+            "toY": 46,
+            "kind": "charge"
+          }
+        ]
+      },
+      {
+        "title": "Pila in the face",
+        "timeMarker": "Late morning",
+        "narration": "Caesar's veterans use their pila as thrusting spears, aimed at the riders' faces — knowing well-born young Roman cavalrymen will recoil from being scarred. Labienus's horse breaks. The fourth line keeps going and rolls up Pompey's exposed infantry left wing, while Caesar's main line — held back to be fresh — advances frontally across the plain.",
+        "durationMs": 6500,
+        "units": [
+          {
+            "label": "Fourth line advancing",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 28,
+            "y": 36,
+            "w": 16,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "Main line advance",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 40,
+            "y": 44,
+            "w": 26,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "Pompey's left collapsing",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 26,
+            "y": 30,
+            "w": 14,
+            "h": 8,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "Pompey's center holding (briefly)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 44,
+            "y": 30,
+            "w": 18,
+            "h": 8,
+            "strength": 2,
+            "status": "broken"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Fourth line rolls the flank",
+            "faction": "a",
+            "fromX": 28,
+            "fromY": 42,
+            "toX": 40,
+            "toY": 34,
+            "kind": "flank"
+          },
+          {
+            "label": "Main line advance",
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 44,
+            "toX": 50,
+            "toY": 36,
+            "kind": "advance"
+          }
+        ]
+      },
+      {
+        "title": "Flight",
+        "timeMarker": "Afternoon",
+        "narration": "Pompey, watching his line collapse from the rear, rides off to his camp, takes off his general's cloak, and flees east. His army disintegrates. Caesar walks the field and famously says, looking at the senatorial dead: \"They wanted it this way.\" Pompey reaches Egypt seeking refuge; he is murdered on the beach by Ptolemy's courtiers as he steps from the boat.",
+        "durationMs": 6500,
+        "terrain": [
+          {
+            "kind": "fort",
+            "label": "Pompey's camp (overrun)",
+            "points": [
+              8,
+              12,
+              22,
+              22
+            ]
+          }
+        ],
+        "units": [
+          {
+            "label": "Caesar's army victorious",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 36,
+            "y": 36,
+            "w": 34,
+            "h": 10,
+            "strength": 4
+          },
+          {
+            "label": "Pompeian army in rout",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 22,
+            "y": 22,
+            "w": 40,
+            "h": 10,
+            "strength": 1,
+            "status": "rout"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Rout to the rear",
+            "faction": "b",
+            "fromX": 30,
+            "fromY": 24,
+            "toX": 84,
+            "toY": 14,
+            "kind": "rout"
+          }
+        ],
+        "annotations": [
+          {
+            "text": "The end of the Roman Republic in fact, if not yet in name. Caesar rules alone from 48 BC to the Ides of March 44 BC.",
+            "x": 50,
+            "y": 96
+          }
+        ]
+      }
+    ]
   }
 }

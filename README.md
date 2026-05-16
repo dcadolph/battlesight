@@ -11,20 +11,33 @@ tactical replay map.
   details. Era colors, search, year-range timeline, war stories playback.
 - **Phased replays** — hand-crafted tactical reenactments for landmark
   battles, with narrated phases, animated unit movements, and terrain.
-- **Curated dataset** — battles with verified sides, commanders, casualties,
-  and published-work references.
-- **Bulk dataset** — thousands of additional battles imported from Wikidata
-  and Wikipedia, gated behind a trust filter that hides records with broken
-  metadata by default.
+- **Three-tier trust contract** — every battle is classified as
+  **Reconstructed** (hand-built phase replay), **Documented** (curated or
+  Wikipedia-enriched with full sides and a clean war attribution), or
+  **Indexed** (sparse Wikidata pointer — treat as a deep link to Wikipedia).
+  The tier badge is visible in the panel, the globe tooltip, and the filter.
+- **Bulk dataset** — ~12,000 battle records harvested from Wikidata and
+  enriched from Wikipedia infoboxes. Filtered by tier so you always know
+  what kind of record you are looking at.
 
 ## Replays included
 
-Marathon · Cannae · Gaugamela · Hastings · Agincourt · Trafalgar · Austerlitz ·
-Waterloo · Gettysburg · Stalingrad · Midway
+41 hand-crafted phase replays spanning every era:
 
-Each replay is broken into 5–9 narrated phases with movement arrows, faction
-labels, terrain features, and time markers. Built from scholarly sources;
-phase data lives in `data/phases.json` and is hand-editable.
+- **Ancient:** Marathon, Thermopylae, Salamis, Gaugamela, Cannae, Alesia
+- **Medieval:** Hastings, Agincourt, Constantinople
+- **Early modern:** Spanish Armada
+- **Revolution / Napoleonic:** Bunker Hill, Trenton, Saratoga, Yorktown, Trafalgar, Austerlitz, Waterloo
+- **19th c. industrial:** Balaclava, Antietam, Gettysburg, Vicksburg
+- **World War I:** First Marne, Tannenberg, Verdun
+- **World War II:** Battle of France, Battle of Britain, Pearl Harbor, Coral Sea, Midway, Stalingrad, Kursk, El Alamein, Normandy (D-Day), Battle of the Bulge, Iwo Jima, Okinawa, Berlin
+- **Korean:** Inchon, Chosin Reservoir
+- **Vietnam:** Khe Sanh
+- **Modern:** Mogadishu
+
+Each replay is broken into 4–6 narrated phases with movement arrows, faction
+labels, terrain features, and time markers. Phase data lives in
+`data/phases.json` and is hand-editable.
 
 ## Running locally
 
@@ -47,28 +60,45 @@ larger Wikidata/Wikipedia dataset:
 go run ./cmd/import -all
 ```
 
-This will fetch ~12,000 additional battle records (mostly auto-enriched and
-gated behind the "Trusted" filter by default).
+This will fetch ~12,000 additional battle records (mostly Wikipedia-enriched
+and shown under the **Documented** and **Indexed** tiers in the filter UI).
 
 ## Data sources
 
-| Source       | License             | Use                                                  |
-|--------------|---------------------|------------------------------------------------------|
-| Curated      | Project authors     | 29 landmark battles, full sides + references         |
-| Phase data   | Project authors     | Hand-crafted phased replays for 11 battles           |
-| Wikidata     | CC0                 | Battle list, coordinates, dates, parent conflicts    |
-| Wikipedia    | CC BY-SA 3.0        | Summaries, infobox-derived sides and casualties      |
-| world-atlas  | Public domain       | Country polygon overlays (110m TopoJSON)             |
+BattleTrace stands on the shoulders of open knowledge and open mapping. Every
+record in the system is traceable to one of these sources. We are grateful to
+each project and its contributors.
 
-See `DATA_SOURCES.md` for full attribution.
+| Source           | License        | Use                                                                       |
+|------------------|----------------|---------------------------------------------------------------------------|
+| **Curated set**  | Project authors | 95 hand-verified battles with sides, commanders, casualties, references |
+| **Phase replays**| Project authors | 41 hand-crafted phase-by-phase tactical reconstructions                 |
+| **Wikidata**     | CC0 1.0        | Battle list, coordinates, dates, parent-conflict graph (~12,000 records)  |
+| **Wikipedia**    | CC BY-SA 4.0   | Article infoboxes (sides, commanders, strength, casualties), GeoData coords |
+| **CDB90**        | U.S. gov't (PD) | Concepts Analysis Agency Database of Battles, 1600–1973                  |
+| **world-atlas**  | ISC (M. Bostock) | Country polygon overlays (110m TopoJSON)                                |
+| **NASA Blue Marble** | Public domain | Earth surface texture rendered on the globe                            |
+| **three-globe** examples | MIT      | Night-sky background texture                                              |
+
+For replay narration, the prose draws from standard scholarly accounts —
+encyclopedia entries, military history surveys, and primary-source-based
+campaign studies in the public record. Specific book and film references for
+individual battles are cataloged in `data/references.json` and rendered on
+each battle's panel.
+
+See [DATA_SOURCES.md](DATA_SOURCES.md) for full attribution, license texts,
+and the third-party libraries that make the front end possible (React,
+react-globe.gl, three.js, Tailwind, Vite) and the back end fast (the
+modernc.org pure-Go SQLite port and google/go-cmp).
 
 ## Data quality caveats
 
 Auto-imported battles are best-effort. Coordinate accuracy, war attribution,
 and casualty figures from Wikipedia infoboxes are heuristic and may be wrong
-in individual cases. The **Trusted** filter is the default and excludes
-records with broken war metadata or missing coordinates. **Curated only** is
-also available for the hand-verified subset.
+in individual cases. The **Documented** filter is the default and excludes
+records with broken war metadata or missing coordinates; **Reconstructed**
+restricts to the hand-curated subset that has a full phase replay; **Indexed**
+exposes the sparser Wikidata pointers for completeness.
 
 The casualty parser picks a representative number from freeform strings
 ("50,000 killed/wounded" → 50000; "15,000–20,000" → 17500). It is conservative

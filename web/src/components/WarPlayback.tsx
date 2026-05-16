@@ -130,7 +130,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose }:
       <div className="bg-[#12131a] border border-slate-700/50 rounded-2xl shadow-2xl">
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-800/50">
           <h3 className="text-xs font-semibold text-white tracking-wide uppercase">
-            {selectedWar || 'War Story'}
+            {selectedWar || 'Choose a war'}
           </h3>
           <div className="flex items-center gap-2">
             {selectedWar && <span className="text-[10px] text-slate-500">{battles.length} battles</span>}

@@ -35,6 +35,25 @@ type wikiCoordResponse struct {
 	} `json:"query"`
 }
 
+// wikidataPointRe extracts (lng, lat) from a WKT-encoded "Point(lng lat)"
+// literal as returned by Wikidata SPARQL for P625 (coordinate location).
+var wikidataPointRe = regexp.MustCompile(`Point\(([\-0-9.]+)\s+([\-0-9.]+)\)`)
+
+// wikidataSPARQLResponse mirrors the SELECT ?article ?coords result shape.
+type wikidataSPARQLResponse struct {
+	Results struct {
+		Bindings []struct {
+			Article struct {
+				Value string `json:"value"`
+			} `json:"article"`
+			Coords struct {
+				Type  string `json:"type"`
+				Value string `json:"value"`
+			} `json:"coords"`
+		} `json:"bindings"`
+	} `json:"results"`
+}
+
 // EnrichCoordinates fetches Wikipedia articles for battles with no coordinates
 // (lat=0, lng=0) and extracts coordinates from the {{coord}} template.
 func EnrichCoordinates(ctx context.Context, db *sql.DB) (int, error) {
@@ -111,8 +130,52 @@ func EnrichCoordinates(ctx context.Context, db *sql.DB) (int, error) {
 			}
 		}
 
-		if len(fallbackTitles) > 0 {
-			pages, err := fetchWikitext(ctx, fallbackTitles)
+		// Secondary path: query Wikidata SPARQL for the same titles. Many
+		// battles whose Wikipedia article omits a coord template still have
+		// P625 set on their Wikidata entity (often via the place-of-battle
+		// P276 link). One SPARQL query covers both cases.
+		var sparqlTitles []string
+		titleForArticle := make(map[string]string, len(batch))
+		for _, r := range batch {
+			if resolved[r.title] {
+				continue
+			}
+			underscore := strings.ReplaceAll(r.title, " ", "_")
+			sparqlTitles = append(sparqlTitles, underscore)
+			titleForArticle["https://en.wikipedia.org/wiki/"+underscore] = r.title
+		}
+		if len(sparqlTitles) > 0 {
+			wd, err := fetchWikidataCoords(ctx, sparqlTitles)
+			if err != nil {
+				log.Printf("wikidata SPARQL batch %d-%d failed: %v", i, end, err)
+			}
+			for articleURL, c := range wd {
+				origTitle, ok := titleForArticle[articleURL]
+				if !ok || resolved[origTitle] {
+					continue
+				}
+				r, ok := titleMap[origTitle]
+				if !ok || !isValidCoord(c.lat, c.lng) {
+					continue
+				}
+				stmt.ExecContext(ctx, c.lat, c.lng, r.id)
+				enriched++
+				resolved[origTitle] = true
+			}
+		}
+
+		// Tertiary path: any titles still unresolved get re-tried via the
+		// wikitext {{coord}} regex. Cheap and worth keeping for outliers
+		// that have coord templates not registered with GeoData.
+		var wikitextTitles []string
+		for _, r := range batch {
+			if resolved[r.title] {
+				continue
+			}
+			wikitextTitles = append(wikitextTitles, strings.ReplaceAll(r.title, " ", "_"))
+		}
+		if len(wikitextTitles) > 0 {
+			pages, err := fetchWikitext(ctx, wikitextTitles)
 			if err == nil {
 				for pageTitle, wikitext := range pages {
 					normalTitle := strings.ReplaceAll(pageTitle, "_", " ")
@@ -146,6 +209,85 @@ func EnrichCoordinates(ctx context.Context, db *sql.DB) (int, error) {
 	}
 
 	return enriched, nil
+}
+
+// fetchWikidataCoords queries the Wikidata SPARQL endpoint for the coordinate
+// location (P625) of each Wikipedia article. Falls back to the place-of-battle
+// (P276) entity's P625 when the battle entity itself has no direct coords.
+// Returns a map keyed by article URL.
+func fetchWikidataCoords(ctx context.Context, underscoreTitles []string) (map[string]coordPair, error) {
+	if len(underscoreTitles) == 0 {
+		return nil, nil
+	}
+
+	var values strings.Builder
+	for _, t := range underscoreTitles {
+		// Inline-escape only the rare characters that would break the IRI:
+		// angle brackets and whitespace. Wikipedia titles do not contain
+		// double quotes or backslashes in practice.
+		safe := strings.ReplaceAll(t, ">", "%3E")
+		safe = strings.ReplaceAll(safe, "<", "%3C")
+		safe = strings.ReplaceAll(safe, " ", "_")
+		values.WriteString("<https://en.wikipedia.org/wiki/")
+		values.WriteString(safe)
+		values.WriteString("> ")
+	}
+
+	query := "SELECT ?article ?coords WHERE { " +
+		"VALUES ?article { " + values.String() + "} " +
+		"?article schema:about ?item . " +
+		"OPTIONAL { ?item wdt:P625 ?coords . } " +
+		"OPTIONAL { ?item wdt:P276 ?place . ?place wdt:P625 ?coords . } }"
+
+	params := url.Values{"query": {query}}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, wikidataSPARQL,
+		strings.NewReader(params.Encode()))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Accept", "application/sparql-results+json")
+	req.Header.Set("User-Agent", "BattleTrace/1.0 (https://github.com/dcadolph/battletrace)")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("wikidata SPARQL returned %d", resp.StatusCode)
+	}
+
+	var result wikidataSPARQLResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	out := make(map[string]coordPair)
+	for _, b := range result.Results.Bindings {
+		if b.Coords.Type != "literal" {
+			// Anonymous-node placeholders from un-matched OPTIONAL.
+			continue
+		}
+		m := wikidataPointRe.FindStringSubmatch(b.Coords.Value)
+		if len(m) != 3 {
+			continue
+		}
+		lng, err1 := strconv.ParseFloat(m[1], 64)
+		lat, err2 := strconv.ParseFloat(m[2], 64)
+		if err1 != nil || err2 != nil {
+			continue
+		}
+		if !isValidCoord(lat, lng) {
+			continue
+		}
+		// Prefer the first hit per article (direct P625 beats P276→P625).
+		if _, exists := out[b.Article.Value]; exists {
+			continue
+		}
+		out[b.Article.Value] = coordPair{lat: lat, lng: lng}
+	}
+	return out, nil
 }
 
 // coordPair holds a single (lat, lng) result from the coordinates API.

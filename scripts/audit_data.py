@@ -198,6 +198,128 @@ def main():
             ids = [b['id'] for b in battles if b.get('wikipediaTitle') == wt]
             findings['error'].append(f'duplicate wikipediaTitle "{wt}": {ids}')
 
+    # War-name canonicalization: catch near-duplicate war names that differ only
+    # in dash style (en/em/hyphen) or in a leading "The " article. These tend to
+    # drift when adding new entries by hand and split the war's battle list.
+    def canon_war(w: str) -> str:
+        s = w.lower().strip()
+        # Normalize all dash variants to a single hyphen for comparison.
+        for d in ('–', '—', '−'):  # en-dash, em-dash, minus
+            s = s.replace(d, '-')
+        if s.startswith('the '):
+            s = s[4:]
+        return s
+
+    war_groups = defaultdict(set)
+    for b in battles:
+        w = b.get('war', '')
+        if w:
+            war_groups[canon_war(w)].add(w)
+    for key, variants in war_groups.items():
+        if len(variants) > 1:
+            findings['warn'].append(
+                f'war "{key}" has multiple spellings: {sorted(variants)}')
+
+    # Casualty sanity: when both strength and casualties are present as numbers,
+    # casualties should not exceed strength by more than a tolerance. Catches
+    # transcription errors and unit-of-measure mistakes. Skip when strength is
+    # expressed in non-personnel units (ships, tanks, aircraft) or when the
+    # numbers are not strictly comparable (M-suffixed totals, "and total" etc.).
+    # Number-with-optional-magnitude-suffix. The suffix must be the next token
+    # — not just any uppercase letter — so "31,000 killed (mostly disease)"
+    # does NOT see "M" of "Mostly" as a million suffix.
+    num_re = re.compile(r'([\d,]+)\s*(M\b|million\b|k\b|thousand\b)?', re.IGNORECASE)
+    suffix_scale = {'m': 1_000_000, 'million': 1_000_000, 'k': 1_000, 'thousand': 1_000}
+    non_personnel = ('ship', 'tank', 'aircraft', 'plane', 'vessel', 'cannon',
+                     'gun', 'piece of artillery', 'artillery piece')
+
+    def all_ints(s: str) -> list:
+        out = []
+        for m in num_re.finditer(s or ''):
+            digits = m.group(1).replace(',', '')
+            if not digits:
+                continue
+            try:
+                n = int(digits)
+            except ValueError:
+                continue
+            suffix = (m.group(2) or '').lower()
+            if suffix in suffix_scale:
+                n *= suffix_scale[suffix]
+            out.append(n)
+        return out
+
+    for b in battles:
+        bid = b['id']
+        for i, side in enumerate(b.get('sides', [])):
+            strength_str = side.get('strength', '')
+            casualties_str = side.get('casualties', '')
+            # Skip if strength is in non-personnel units.
+            if any(term in strength_str.lower() for term in non_personnel):
+                continue
+            strengths = all_ints(strength_str)
+            casualties = all_ints(casualties_str)
+            if not strengths or not casualties:
+                continue
+            # When casualties include a civilian-death tally, that number is
+            # not comparable to military strength. Casualty strings typically
+            # separate military and civilian counts with a semicolon
+            # ("~110,000 killed; 100,000-150,000 civilian dead"). Use only the
+            # prefix up to the first semicolon when "civilian" appears later.
+            cas_lower = casualties_str.lower()
+            if 'civilian' in cas_lower:
+                semi = casualties_str.find(';')
+                military_part = casualties_str[:semi] if semi >= 0 else casualties_str[:cas_lower.index('civilian')]
+                military_nums = all_ints(military_part)
+                if military_nums:
+                    casualties = military_nums
+            # Use the largest plausible number from each so multi-figure entries
+            # like "156,000 on D-Day, 2M+ total" compare against the larger one.
+            strength_max = max(strengths)
+            casualties_max = max(casualties)
+            if strength_max <= 50:
+                continue
+            # 1.2x tolerance: surrenders + reinforcements pushed siege losses
+            # slightly over initial defender count in some real cases.
+            if casualties_max > int(strength_max * 1.2):
+                findings['warn'].append(
+                    f'{bid} side {i} ({side.get("name","?")}): casualties {casualties_max:,} > strength {strength_max:,}')
+
+    # Era taxonomy: every era used must be a value in the year_to_era table.
+    valid_eras = {'ancient', 'medieval', 'early-modern', 'napoleonic',
+                  'industrial', 'world-war-1', 'interwar', 'world-war-2',
+                  'modern'}
+    for b in battles:
+        era = b.get('era', '')
+        if era and era not in valid_eras:
+            findings['error'].append(
+                f'{b["id"]}: era="{era}" is not in the standard taxonomy')
+
+    # Phase replay faction label sanity: factionA/B should loosely correspond
+    # to the battle's first two sides. Catches drift when the battle's side
+    # list is rewritten without updating the replay.
+    for phase_id, replay in phases.items():
+        battle = by_id.get(phase_id)
+        if not battle:
+            continue
+        sides = battle.get('sides', [])
+        if len(sides) < 2:
+            continue
+        a = replay.get('factionA', '').lower()
+        b_lab = replay.get('factionB', '').lower()
+        s0 = sides[0].get('name', '').lower()
+        s1 = sides[1].get('name', '').lower()
+        def tokens(s: str) -> set:
+            return set(re.findall(r'[a-z]+', s))
+        # Require at least one shared keyword between each replay label and
+        # its corresponding side, otherwise the labels likely drifted.
+        if a and s0 and not (tokens(a) & tokens(s0)):
+            findings['info'].append(
+                f'replay {phase_id}: factionA="{replay["factionA"]}" shares no word with side 0 "{sides[0].get("name","")}"')
+        if b_lab and s1 and not (tokens(b_lab) & tokens(s1)):
+            findings['info'].append(
+                f'replay {phase_id}: factionB="{replay["factionB"]}" shares no word with side 1 "{sides[1].get("name","")}"')
+
     # Print findings
     for severity in ('error', 'warn', 'info'):
         items = findings[severity]

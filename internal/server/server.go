@@ -46,6 +46,31 @@ func Run(cfg Config) error {
 		}
 	}
 
+	// Re-parse date_start / date_end for every row using the current
+	// ParseDateRange. Idempotent; rewrites only rows that disagree. This is
+	// where chronological order comes from for both curated and
+	// Wikidata-imported battles, so any fix to the parser propagates the
+	// next time the server starts without needing a full data re-import.
+	if updated, err := importer.MigrateDates(context.Background(), database); err != nil {
+		return fmt.Errorf("migrate dates: %w", err)
+	} else if updated > 0 {
+		log.Printf("repaired date_start/date_end for %d battles", updated)
+	}
+
+	// Cleanse: strip wiki/HTML markup leftovers, back-fill missing date
+	// strings, align off-by-one BC years to the prose date, recompute era,
+	// canonicalise war-name spelling variants, and drop duplicate Wikipedia
+	// rows. Idempotent. Drives the audit error count toward zero on every
+	// start.
+	if rep, err := importer.Cleanse(context.Background(), database); err != nil {
+		return fmt.Errorf("cleanse data: %w", err)
+	} else if rep.Total() > 0 {
+		log.Printf("cleansed data: %d battle text, %d sides, %d missing-date backfilled, %d years aligned, %d eras recomputed, %d war-name variants merged, %d duplicates removed",
+			rep.BattleTextFixed, rep.SideTextFixed, rep.MissingDatesBackfilled,
+			rep.YearsAligned, rep.ErasRecomputed, rep.WarNamesCanonicalised,
+			rep.DuplicatesRemoved)
+	}
+
 	replays := battles.NewReplays()
 	if cfg.PhasesPath != "" {
 		n, err := replays.Load(cfg.PhasesPath)

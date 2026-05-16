@@ -215,6 +215,26 @@ export default function App() {
     setReplayPhase(0);
   }, []);
 
+  // Stable references for WarPlayback's cinematic auto-step. Inline arrows
+  // would get a fresh identity on every App render, which thrashes the dwell
+  // timer in WarPlayback's playing effect (the effect's deps include these
+  // callbacks; new identity => effect tears down and re-arms the timer on
+  // every render, so advances never fire and "playback" looks frozen).
+  const handleWarOpenReplay = useCallback((b: Battle) => {
+    setReplayBattle(b);
+    setReplayPhase(0);
+  }, []);
+  const handleWarCloseReplay = useCallback(() => {
+    setReplayBattle(null);
+    setReplayPhase(0);
+  }, []);
+  const handleWarSelected = useCallback((name: string) => {
+    if (name) {
+      setSelectedBattle(null);
+      setIsolatedBattle(null);
+    }
+  }, []);
+
   const handleShareSelected = useCallback(async () => {
     if (!selectedBattle) return;
     const url = `${window.location.origin}${window.location.pathname}#b=${encodeURIComponent(selectedBattle.id)}`;
@@ -470,17 +490,9 @@ export default function App() {
           onBattleFocus={handleBattleClick}
           onBattlesLoaded={setPlaybackBattles}
           onClose={handlePlaybackClose}
-          onWarSelected={(name) => {
-            // Fresh war pick: drop the detail panel and any single-battle
-            // isolation so the user sees the whole war on the globe before
-            // diving into a specific battle.
-            if (name) {
-              setSelectedBattle(null);
-              setIsolatedBattle(null);
-            }
-          }}
-          onPlayReplay={(b) => { setReplayBattle(b); setReplayPhase(0); }}
-          onCloseReplay={() => { setReplayBattle(null); setReplayPhase(0); }}
+          onWarSelected={handleWarSelected}
+          onPlayReplay={handleWarOpenReplay}
+          onCloseReplay={handleWarCloseReplay}
         />
       )}
 

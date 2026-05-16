@@ -92,6 +92,9 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     fetch(`/api/battles?war=${encodeURIComponent(selectedWar)}&limit=2000`)
       .then((r) => r.json())
       .then((d) => {
+        // The backend now orders by (year, date_start) so any consumer of
+        // the battles API receives chronological order. Trust it; do not
+        // re-sort here.
         const b: Battle[] = d.battles || [];
         setBattles(b);
         setGroups(groupConcurrentBattles(b));
@@ -220,173 +223,183 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   const currentBattle = currentGroup?.battles[subIndex];
   const totalIdx = groups.slice(0, groupIndex).reduce((s, g) => s + g.battles.length, 0) + subIndex;
 
-  return (
-    <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-30 w-[540px] max-w-[95vw]">
-      <div className="bg-[#12131a] border border-slate-700/50 rounded-2xl shadow-2xl">
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-800/50">
-          <h3 className="text-xs font-semibold text-white tracking-wide uppercase">
-            {selectedWar || 'Choose a war'}
-          </h3>
-          <div className="flex items-center gap-2">
-            {selectedWar && <span className="text-[10px] text-slate-500">{battles.length} battles</span>}
+  // Two distinct shells: a centered modal while the user is browsing the war
+  // list (the globe doesn't help here, the list is what matters), and a slim
+  // right-side pane once a war is chosen (the globe takes the stage and the
+  // pane carries the controls and metadata out of the way).
+  if (!selectedWar) {
+    return (
+      <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/45 backdrop-blur-sm p-6">
+        <div className="w-[480px] max-w-[92vw] bg-[#0f1019]/95 border border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[78vh]">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/60 flex-shrink-0">
+            <h3 className="text-xs font-semibold text-white tracking-wide uppercase">Choose a war</h3>
             <button onClick={onClose} className="w-6 h-6 flex items-center justify-center rounded-full text-slate-500 hover:text-white hover:bg-slate-700 transition-all text-xs">&times;</button>
+          </div>
+          <div className="p-4 overflow-y-auto flex-1">
+            <input
+              type="text"
+              value={warSearch}
+              onChange={(e) => setWarSearch(e.target.value)}
+              placeholder="Find a war..."
+              className="w-full h-9 px-3 mb-2 bg-[#1e2030] border border-slate-600/40 rounded-lg text-[13px] text-white placeholder-slate-500 focus:outline-none focus:border-blue-400/60"
+            />
+            <div className="flex gap-1 mb-2">
+              {([['casualties', 'Bloodiest'], ['battles', 'Most Battles'], ['chrono', 'Oldest First'], ['alpha', 'A-Z']] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setWarSort(key)}
+                  className={`h-6 px-2 rounded text-[10px] font-medium transition-colors ${
+                    warSort === key
+                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      : 'bg-[#1e2030] text-slate-500 border border-slate-700/30 hover:text-slate-300'
+                  }`}
+                >{label}</button>
+              ))}
+            </div>
+            <div className="space-y-0.5 pr-1">
+              {filteredWars.map((w) => {
+                const showVal =
+                  warSort === 'casualties'
+                    ? (w.depth === 0 ? w.rolledCasualties : w.casualties)
+                    : warSort === 'chrono'
+                    ? w.minYear
+                    : (w.depth === 0 ? w.rolledCount : w.count);
+                return (
+                  <button
+                    key={w.name}
+                    onClick={() => setSelectedWar(w.name)}
+                    className={`w-full text-left rounded-lg text-[13px] hover:bg-slate-800/50 hover:text-white transition-colors flex justify-between items-center ${
+                      w.depth === 0
+                        ? 'px-3 py-2 text-slate-300 font-medium'
+                        : 'pl-7 pr-3 py-1.5 text-slate-400 text-[12px]'
+                    }`}
+                  >
+                    <span className="truncate pr-2">
+                      {w.depth > 0 && (
+                        <span className="text-slate-700 mr-1" aria-hidden="true">└</span>
+                      )}
+                      {w.name}
+                    </span>
+                    <span className="text-[10px] text-slate-600 flex-shrink-0 tabular-nums">
+                      {warSort === 'casualties' && showVal > 0
+                        ? `${(showVal / 1000).toFixed(0)}k`
+                        : warSort === 'chrono'
+                        ? formatYear(showVal)
+                        : `${showVal}`}
+                    </span>
+                  </button>
+                );
+              })}
+              {filteredWars.length === 0 && (
+                <p className="text-center text-[12px] text-slate-600 py-4">No wars match</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed top-0 right-0 h-full w-[420px] max-w-[92vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 flex flex-col">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/60 flex-shrink-0">
+        <h3 className="text-xs font-semibold text-white tracking-wide uppercase truncate pr-2">
+          {selectedWar}
+        </h3>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-[10px] text-slate-500">{battles.length} battles</span>
+          <button onClick={onClose} className="w-6 h-6 flex items-center justify-center rounded-full text-slate-500 hover:text-white hover:bg-slate-700 transition-all text-xs">&times;</button>
+        </div>
+      </div>
+
+      <div className="p-4 overflow-y-auto flex-1">
+        <button
+          onClick={() => { setSelectedWar(''); setPlaying(false); setDetail(null); }}
+          className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors mb-3 block"
+        >&larr; Pick a different war</button>
+
+        {currentBattle && (
+          <div className="mb-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ERA_COLORS[currentBattle.era] || '#fff' }} />
+              <span className="text-[15px] font-semibold text-white">{currentBattle.name}</span>
+            </div>
+            <p className="text-[12px] text-slate-400 mb-2">{currentBattle.date} &middot; {formatYear(currentBattle.year)}</p>
+
+            {currentGroup?.concurrent && (
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/25">
+                  {currentGroup.battles.length} simultaneous
+                </span>
+                <div className="flex gap-1">
+                  {currentGroup.battles.map((b, i) => (
+                    <button key={b.id} onClick={() => { setSubIndex(i); focusBattle(b); }}
+                      className={`w-2 h-2 rounded-full transition-all ${i === subIndex ? 'bg-amber-400 scale-125' : 'bg-slate-600'}`} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {detail?.summary && (
+              <p className="text-[12px] text-slate-400 leading-relaxed line-clamp-3">{detail.summary}</p>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => goTo(groupIndex - 1)} disabled={groupIndex === 0}
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all text-xs">&larr;</button>
+            <button onClick={() => setPlaying(!playing)}
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-all">
+              {playing ? '⏸' : '▶'}
+            </button>
+            <button onClick={() => goTo(groupIndex + 1)} disabled={groupIndex >= groups.length - 1}
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all text-xs">&rarr;</button>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setCinematic((c) => !c)}
+              title="Cinematic mode: when the next battle has a phase replay, open it and play through before advancing."
+              className={`h-7 px-2.5 rounded text-[10px] font-medium tracking-wide transition-colors ${
+                cinematic
+                  ? 'bg-blue-500/25 text-blue-200 border border-blue-500/40'
+                  : 'bg-[#1e2030] text-slate-400 border border-slate-700/30 hover:text-slate-300'
+              }`}
+            >Cinematic</button>
+            <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}
+              className="bg-[#1e2030] border border-slate-700/30 rounded px-2 py-1 text-[10px] text-slate-400">
+              <option value={6000}>Slow</option>
+              <option value={4000}>Normal</option>
+              <option value={2500}>Fast</option>
+              <option value={1200}>Rapid</option>
+            </select>
           </div>
         </div>
 
-        <div className="p-4">
-          {!selectedWar ? (
-            <div>
-              <input
-                type="text"
-                value={warSearch}
-                onChange={(e) => setWarSearch(e.target.value)}
-                placeholder="Find a war..."
-                className="w-full h-9 px-3 mb-2 bg-[#1e2030] border border-slate-600/40 rounded-lg text-[13px] text-white placeholder-slate-500 focus:outline-none focus:border-blue-400/60"
-              />
-              <div className="flex gap-1 mb-2">
-                {([['casualties', 'Bloodiest'], ['battles', 'Most Battles'], ['chrono', 'Oldest First'], ['alpha', 'A-Z']] as const).map(([key, label]) => (
-                  <button
-                    key={key}
-                    onClick={() => setWarSort(key)}
-                    className={`h-6 px-2 rounded text-[10px] font-medium transition-colors ${
-                      warSort === key
-                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                        : 'bg-[#1e2030] text-slate-500 border border-slate-700/30 hover:text-slate-300'
-                    }`}
-                  >{label}</button>
-                ))}
-              </div>
-              <div className="max-h-52 overflow-y-auto space-y-0.5 pr-1">
-                {filteredWars.map((w) => {
-                  const showVal =
-                    warSort === 'casualties'
-                      ? (w.depth === 0 ? w.rolledCasualties : w.casualties)
-                      : warSort === 'chrono'
-                      ? w.minYear
-                      : (w.depth === 0 ? w.rolledCount : w.count);
-                  return (
-                    <button
-                      key={w.name}
-                      onClick={() => setSelectedWar(w.name)}
-                      className={`w-full text-left rounded-lg text-[13px] hover:bg-slate-800/50 hover:text-white transition-colors flex justify-between items-center ${
-                        w.depth === 0
-                          ? 'px-3 py-2 text-slate-300 font-medium'
-                          : 'pl-7 pr-3 py-1.5 text-slate-400 text-[12px]'
-                      }`}
-                    >
-                      <span className="truncate pr-2">
-                        {w.depth > 0 && (
-                          <span className="text-slate-700 mr-1" aria-hidden="true">└</span>
-                        )}
-                        {w.name}
-                      </span>
-                      <span className="text-[10px] text-slate-600 flex-shrink-0 tabular-nums">
-                        {warSort === 'casualties' && showVal > 0
-                          ? `${(showVal / 1000).toFixed(0)}k`
-                          : warSort === 'chrono'
-                          ? formatYear(showVal)
-                          : `${showVal}`}
-                      </span>
-                    </button>
-                  );
-                })}
-                {filteredWars.length === 0 && (
-                  <p className="text-center text-[12px] text-slate-600 py-4">No wars match</p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div>
-              <button
-                onClick={() => { setSelectedWar(''); setPlaying(false); setDetail(null); }}
-                className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors mb-3 block"
-              >&larr; Back</button>
-
-              {currentBattle && (
-                <div className="mb-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ERA_COLORS[currentBattle.era] || '#fff' }} />
-                    <span className="text-[15px] font-semibold text-white">{currentBattle.name}</span>
-                  </div>
-                  <p className="text-[12px] text-slate-400 mb-2">{currentBattle.date} &middot; {formatYear(currentBattle.year)}</p>
-
-                  {currentGroup?.concurrent && (
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/25">
-                        {currentGroup.battles.length} simultaneous
-                      </span>
-                      <div className="flex gap-1">
-                        {currentGroup.battles.map((b, i) => (
-                          <button key={b.id} onClick={() => { setSubIndex(i); focusBattle(b); }}
-                            className={`w-2 h-2 rounded-full transition-all ${i === subIndex ? 'bg-amber-400 scale-125' : 'bg-slate-600'}`} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {detail?.summary && (
-                    <p className="text-[12px] text-slate-400 leading-relaxed line-clamp-3">{detail.summary}</p>
-                  )}
-                </div>
-              )}
-
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-1.5">
-                  <button onClick={() => goTo(groupIndex - 1)} disabled={groupIndex === 0}
-                    className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all text-xs">&larr;</button>
-                  <button onClick={() => setPlaying(!playing)}
-                    className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-all">
-                    {playing ? '⏸' : '▶'}
-                  </button>
-                  <button onClick={() => goTo(groupIndex + 1)} disabled={groupIndex >= groups.length - 1}
-                    className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all text-xs">&rarr;</button>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setCinematic((c) => !c)}
-                    title="Cinematic mode: when the next battle has a phase replay, open it and play through before advancing."
-                    className={`h-7 px-2.5 rounded text-[10px] font-medium tracking-wide transition-colors ${
-                      cinematic
-                        ? 'bg-blue-500/25 text-blue-200 border border-blue-500/40'
-                        : 'bg-[#1e2030] text-slate-400 border border-slate-700/30 hover:text-slate-300'
-                    }`}
-                  >Cinematic</button>
-                  <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}
-                    className="bg-[#1e2030] border border-slate-700/30 rounded px-2 py-1 text-[10px] text-slate-400">
-                    <option value={6000}>Slow</option>
-                    <option value={4000}>Normal</option>
-                    <option value={2500}>Fast</option>
-                    <option value={1200}>Rapid</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-slate-600 w-14 tabular-nums">{totalIdx + 1}/{battles.length}</span>
-                <input type="range" min={0} max={Math.max(0, groups.length - 1)} value={groupIndex}
-                  onChange={(e) => { setPlaying(false); goTo(parseInt(e.target.value)); }}
-                  className="flex-1 accent-blue-500 h-1 bg-slate-800 rounded-full appearance-none cursor-pointer" />
-              </div>
-
-              {/* How-it-ended card. Always visible while browsing a war so the
-                  outcome and stats are an anchor for the user. Auto-emphasized
-                  (expanded + blue border) when playback reaches the last
-                  battle, fulfilling the "every war story ends with how the war
-                  was won" rule. */}
-              <WarSummaryCard
-                warName={selectedWar}
-                emphasize={
-                  groupIndex >= groups.length - 1 &&
-                  subIndex >= (groups[groupIndex]?.battles.length ?? 1) - 1
-                }
-                onEndingBattleClick={(id) => {
-                  const battle = battles.find((b) => b.id === id);
-                  if (battle) focusBattle(battle);
-                }}
-              />
-            </div>
-          )}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-slate-600 w-14 tabular-nums">{totalIdx + 1}/{battles.length}</span>
+          <input type="range" min={0} max={Math.max(0, groups.length - 1)} value={groupIndex}
+            onChange={(e) => { setPlaying(false); goTo(parseInt(e.target.value)); }}
+            className="flex-1 accent-blue-500 h-1 bg-slate-800 rounded-full appearance-none cursor-pointer" />
         </div>
+
+        {/* How-it-ended card. Always visible while browsing a war so the
+            outcome and stats are an anchor for the user. Auto-emphasized
+            (expanded + blue border) when playback reaches the last
+            battle, fulfilling the "every war story ends with how the war
+            was won" rule. */}
+        <WarSummaryCard
+          warName={selectedWar}
+          emphasize={
+            groupIndex >= groups.length - 1 &&
+            subIndex >= (groups[groupIndex]?.battles.length ?? 1) - 1
+          }
+          onEndingBattleClick={(id) => {
+            const battle = battles.find((b) => b.id === id);
+            if (battle) focusBattle(battle);
+          }}
+        />
       </div>
     </div>
   );

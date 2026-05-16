@@ -87,18 +87,6 @@ function escapeHTML(s: string): string {
     .replace(/'/g, '&#39;');
 }
 
-// hexWithAlpha returns the input #rrggbb hex with the given alpha as an rgba()
-// string. Used by overlays where transparency is safe (rings, vignettes).
-// Avoid for merged point colors because mixing alpha into the merged buffer
-// breaks depth sorting and causes z-fight flicker when the globe rotates.
-function hexWithAlpha(hex: string, alpha: number): string {
-  if (!hex.startsWith('#') || hex.length !== 7) return hex;
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
 // darkenHex returns a solid darker variant of an #rrggbb color by scaling
 // each channel by factor (0..1). Solid output keeps the merged point buffer
 // fully opaque so depth sorting stays stable.

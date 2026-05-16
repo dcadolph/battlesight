@@ -116,8 +116,12 @@ func (s *Store) List(ctx context.Context, f Filter) ([]Battle, int, error) {
 		limit = 10000
 	}
 
+	// Sort by year first so empty date_start values (year-only records) stay
+	// grouped with the rest of their year instead of bubbling to the top of
+	// the whole result set. Within a year, the ISO date_start orders day by
+	// day so playback reads chronologically.
 	query := "SELECT " + battleColumns + " FROM battles" +
-		where + " ORDER BY date_start ASC, year ASC LIMIT ? OFFSET ?"
+		where + " ORDER BY year ASC, date_start ASC LIMIT ? OFFSET ?"
 	args = append(args, limit, f.Offset)
 
 	rows, err := s.db.QueryContext(ctx, query, args...)

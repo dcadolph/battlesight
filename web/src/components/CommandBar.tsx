@@ -138,11 +138,11 @@ export default function CommandBar({
         {soundOn ? '♪ Sound' : '♪ Muted'}
       </button>
 
-      {/* Search. The container is z-50 so its dropdown sits on top of the
-          mode tab row below it. Both used to live at z-40 in separate fixed
-          stacking contexts and the later-rendered tabs painted over the
-          dropdown results. */}
-      <div className="fixed top-12 left-5 z-50 w-64">
+      {/* Search. The container is z-[100] so the dropdown is unambiguously
+          above the mode-tab row below it. Tabs sit at z-30; this gives the
+          dropdown a clear two-rank lead so no future stacking-context tweak
+          can paint tabs back through the search results. */}
+      <div className="fixed top-12 left-5 z-[100] w-64">
         <div className="relative">
           <input
             ref={inputRef}
@@ -162,7 +162,7 @@ export default function CommandBar({
 
         {/* Search results dropdown */}
         {searchOpen && results.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-[#16171f] border border-slate-700/60 rounded-lg overflow-hidden shadow-xl z-50">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-[#16171f] border border-slate-700/60 rounded-lg overflow-hidden shadow-xl z-[100]">
             {results.map((b, i) => (
               <button
                 key={b.id}
@@ -185,14 +185,14 @@ export default function CommandBar({
         )}
 
         {searchOpen && query.length >= 2 && results.length === 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-[#16171f] border border-slate-700/60 rounded-lg p-3 text-center text-[12px] text-slate-600 shadow-xl z-50">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-[#16171f] border border-slate-700/60 rounded-lg p-3 text-center text-[12px] text-slate-600 shadow-xl z-[100]">
             No results
           </div>
         )}
       </div>
 
       {/* Mode tabs */}
-      <div className="fixed top-[88px] left-5 z-40">
+      <div className="fixed top-[88px] left-5 z-30">
         <div className="flex items-center gap-5 px-1">
           <button
             onClick={() => { setPanel('none'); }}
@@ -253,7 +253,7 @@ export default function CommandBar({
 
       {/* Filter panel */}
       {!playbackActive && panel === 'filters' && stats && (
-        <div className="fixed top-[130px] left-5 z-40 w-64 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3">
+        <div className="fixed top-[130px] left-5 z-30 w-64 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3">
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-[10px] text-slate-600 uppercase tracking-wider">Tier</label>

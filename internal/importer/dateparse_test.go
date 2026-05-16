@@ -39,6 +39,17 @@ func TestParseDateRange(t *testing.T) {
 		{Name: "long siege", In: "18 May - 4 July 1863", Want: DateRange{Start: "1863-05-18", End: "1863-07-04"}},
 		{Name: "early 5th c bc", In: "August 480 BC", Want: DateRange{Start: "-0480-01-01", End: "-0480-12-31"}},
 		{Name: "iso date passthrough", In: "1939-09-01", Want: DateRange{Start: "1939-09-01", End: "1939-09-01"}},
+		// Wikidata cross-month ranges joined with a comma instead of a dash.
+		// Without dedicated handling, the plain DMY pattern picks up the
+		// second date and reports the end of the engagement as the start,
+		// which makes the war playback show Dunkirk before Battle of France.
+		{Name: "comma cross-month range, dunkirk", In: "26 May, 4 June 1940", Want: DateRange{Start: "1940-05-26", End: "1940-06-04"}},
+		{Name: "comma cross-month range, battle of france", In: "10 May, 25 June 1940", Want: DateRange{Start: "1940-05-10", End: "1940-06-25"}},
+		// Without the word-boundary fix on dayRangeRe2, this matched "14 – 11
+		// July 1915" by stealing the trailing "14" out of "1914" and produced
+		// date_start=1915-07-14, date_end=1915-07-11 (inverted).
+		{Name: "month-year start to dmy end, rufiji delta", In: "October 1914 – 11 July 1915", Want: DateRange{Start: "1914-10-01", End: "1915-07-11"}},
+		{Name: "dmy start to month-year end", In: "11 July 1914 – October 1915", Want: DateRange{Start: "1914-07-11", End: "1915-10-28"}},
 	}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {

@@ -17,7 +17,7 @@ interface BattleReplayProps {
 export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange }: BattleReplayProps) {
   const [replay, setReplay] = useState<Replay | null>(null);
   const [phaseIdx, setPhaseIdx] = useState(initialPhase);
-  // Auto-play on open. Opening "Watch the battle" implies "play it" — making
+  // Auto-play on open. Opening "Watch the battle" implies "play it". Making
   // the user hunt for a play button to see anything happen is a poor default.
   const [playing, setPlaying] = useState(true);
   const [speed, setSpeed] = useState(1);
@@ -175,7 +175,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           </span>
           <h2 className="text-base font-semibold text-white truncate">{replay.title}</h2>
           {replay.battlefieldDesc && (
-            <span className="hidden md:block text-xs text-slate-500 truncate max-w-[40ch]">— {replay.battlefieldDesc}</span>
+            <span className="hidden md:block text-xs text-slate-500 truncate max-w-[40ch]">{replay.battlefieldDesc}</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -199,7 +199,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         {/* Battle stage: globe-based view by default, with the tactical SVG
             available as a fallback toggle. The globe puts the action in real
             geography so the viewer sees Belgium, the Ardennes, the Channel,
-            etc. when watching Battle of France — not an abstract grid. */}
+            etc. when watching Battle of France, not an abstract grid. */}
         <div className="flex-1 flex items-center justify-center p-2 relative">
           <div className="w-full h-full relative">
             {view === 'globe' ? (
@@ -289,8 +289,8 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             <div className="mt-5 pt-4 border-t border-slate-800/40 text-[11px] text-slate-500 leading-relaxed">
               {replay.schematic ? (
                 <>
-                  Auto-generated from this battle's metadata. Force positions are illustrative —
-                  the goal is to convey shape, not surveyed coordinates. The metadata itself comes
+                  Auto-generated from this battle's metadata. Force positions are illustrative.
+                  The goal is to convey shape, not surveyed coordinates. The metadata itself comes
                   from imported sources and has not been hand-verified.
                 </>
               ) : (
@@ -332,7 +332,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
               }`}
               title="Back to battle story (Esc)"
             >
-              {phaseIdx === replay.phases.length - 1 ? 'Done — back to story' : '← Back to story'}
+              {phaseIdx === replay.phases.length - 1 ? 'Done, back to story' : '← Back to story'}
             </button>
           </div>
         </aside>

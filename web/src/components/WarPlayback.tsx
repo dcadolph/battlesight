@@ -75,7 +75,13 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     fetch('/api/battles/stats')
       .then((r) => r.json())
       .then((d) => {
-        setWars((d.wars || []).filter((w: WarCount) => w.count >= 3));
+        // Filter out wars with too few battles. The Wikidata import sweeps in
+        // a long tail of "theaters" and "campaigns" with one to three thin
+        // entries, often with broken sides data left over from the infobox
+        // parse ("| combatant2 = ..."). Raising the threshold to 8 cuts
+        // those without losing real wars: the wars list still has hundreds
+        // of substantive entries.
+        setWars((d.wars || []).filter((w: WarCount) => w.count >= 8));
       })
       .catch(() => {});
   }, []);

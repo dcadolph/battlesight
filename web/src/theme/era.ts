@@ -12,7 +12,7 @@ export interface EraTheme {
   // Accent color used by story-opening surfaces. Same hue as the era marker
   // dot but rebalanced for type and chrome.
   accent: string;
-  // Display font for cinematic headings. System fonts only — no network cost.
+  // Display font for cinematic headings. System fonts only, no network cost.
   titleFont: string;
   // One-word mood descriptor shown in the era stamp on the dossier.
   mood: string;
@@ -43,7 +43,7 @@ const ERA_RANGES: Array<[string, number, number]> = [
   ['modern', 1946, 2025],
 ];
 
-// Serif display face for periods that feel literary — manuscripts, dispatches,
+// Serif display face for periods that feel literary: manuscripts, dispatches,
 // classical histories. Modern eras get a tight technical sans to match the
 // cold-war / satellite-imagery feel of their atmosphere palette.
 const SERIF = "'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif";

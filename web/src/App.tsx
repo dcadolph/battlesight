@@ -7,6 +7,9 @@ import WarPlayback from './components/WarPlayback';
 import BattleReplay from './components/replay/BattleReplay';
 import IntroOverlay from './components/IntroOverlay';
 import HistoryPlayhead from './components/HistoryPlayhead';
+import BattleTitleCard from './components/BattleTitleCard';
+import HistoryBeatCard from './components/HistoryBeatCard';
+import { HISTORY_BEATS, type HistoryBeat } from './data/history-beats';
 import type { Battle } from './types/battle';
 import { themeForEra, themeForYear } from './theme/era';
 import { enableSound, disableSound, soundEnabled, setSoundEra, playSelect } from './audio/sound';
@@ -66,6 +69,14 @@ export default function App() {
   const [historyMode, setHistoryMode] = useState(false);
   const [historyPaused, setHistoryPaused] = useState(false);
   const [historyYear, setHistoryYear] = useState<number>(MIN_YEAR);
+  // historyBeat is the currently flashing title card during a sweep. The
+  // RAF loop sets it when the playhead crosses a beat year and clears it
+  // after BEAT_CARD_MS. The advance is paused while a beat is on screen.
+  const [historyBeat, setHistoryBeat] = useState<HistoryBeat | null>(null);
+  // firedBeats tracks beat years already shown in this run so a single sweep
+  // does not flash the same beat twice. Cleared whenever history mode
+  // restarts. Held in a ref so we don't re-fire on each state change.
+  const firedBeatsRef = useRef<Set<number>>(new Set());
   const [soundOn, setSoundOn] = useState(false);
   const rafRef = useRef<number | null>(null);
   const lastTickRef = useRef<number | null>(null);
@@ -159,13 +170,21 @@ export default function App() {
           setIntroVisible(false);
           return;
         }
+        // History mode takes priority over panel close so the user can bail
+        // out of a long sweep with a single keystroke.
+        if (historyMode) {
+          setHistoryMode(false);
+          setHistoryPaused(false);
+          setHistoryYear(MIN_YEAR);
+          return;
+        }
         setSelectedBattle(null);
         setIsolatedBattle(null);
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [replayBattle, introVisible]);
+  }, [replayBattle, introVisible, historyMode]);
 
   const handleBattleClick = useCallback((battle: Battle) => {
     setSelectedBattle(battle);
@@ -227,13 +246,17 @@ export default function App() {
     lastTickRef.current = null;
   }, []);
 
+  // BEAT_CARD_MS is how long a history-beat title card stays on screen while
+  // the sweep pauses. Tuned for "see the headline, read the dossier line".
+  const BEAT_CARD_MS = 3200;
+
   // Year advance loop: roughly 2525 years over 90 seconds, so ~28 years/sec.
-  // We pin the cadence to wall-clock dt rather than fixed-per-frame increments
-  // so the playback rate stays consistent regardless of the user's frame rate.
-  // The loop runs only when historyMode is on and not paused; pausing keeps
-  // the playhead visible at the current year.
+  // We pin the cadence to wall-clock dt rather than fixed-per-frame
+  // increments so the playback rate stays consistent regardless of frame
+  // rate. The loop runs only when history mode is on, not paused, and no
+  // beat card is currently on screen.
   useEffect(() => {
-    if (!historyMode || historyPaused) {
+    if (!historyMode || historyPaused || historyBeat) {
       stopHistoryRaf();
       return;
     }
@@ -244,9 +267,20 @@ export default function App() {
       lastTickRef.current = ts;
       setHistoryYear((y) => {
         const next = y + (dt / 1000) * YEARS_PER_SECOND;
+        // Check whether the advance just crossed a curated beat. We snap the
+        // playhead to the beat's year and surface the title card so the
+        // sweep feels like a guided tour rather than years flashing past.
+        for (const beat of HISTORY_BEATS) {
+          if (firedBeatsRef.current.has(beat.year)) continue;
+          if (y < beat.year && next >= beat.year) {
+            firedBeatsRef.current.add(beat.year);
+            setHistoryBeat(beat);
+            return beat.year;
+          }
+        }
         if (next >= MAX_YEAR) {
           // Reached the end of history. Pause at the final year and let the
-          // user choose to Stop from the playhead controls.
+          // user choose to exit from the playhead controls.
           setHistoryPaused(true);
           return MAX_YEAR;
         }
@@ -256,7 +290,15 @@ export default function App() {
     };
     rafRef.current = requestAnimationFrame(tick);
     return stopHistoryRaf;
-  }, [historyMode, historyPaused, stopHistoryRaf]);
+  }, [historyMode, historyPaused, historyBeat, stopHistoryRaf]);
+
+  // Beat card auto-dismiss. When a beat fires we sleep for BEAT_CARD_MS,
+  // then clear it so the advance loop resumes.
+  useEffect(() => {
+    if (!historyBeat) return;
+    const t = setTimeout(() => setHistoryBeat(null), BEAT_CARD_MS);
+    return () => clearTimeout(t);
+  }, [historyBeat]);
 
   const handleHistoryStart = useCallback(() => {
     setSelectedBattle(null);
@@ -399,7 +441,22 @@ export default function App() {
         battles={battles}
       />
 
-      {selectedBattle && (
+      {/* Cinematic title card. Keyed on battle id so each new selection
+          remounts and re-fires the appear / hold / clear animation. Suppressed
+          during war playback because the WarPlayback panel handles its own
+          battle UI and rapid focus changes there caused the card to re-fire
+          mid-animation, which read as flashing. Also suppressed during
+          history mode for the same reason. */}
+      {selectedBattle && !replayBattle && !showPlayback && !historyMode && (
+        <BattleTitleCard key={`tc-${selectedBattle.id}`} battle={selectedBattle} />
+      )}
+
+      {/* The right-edge battle dossier only mounts when the user is browsing
+          the globe directly, not while a war story or history sweep is on
+          screen. Both of those have their own primary panels and rendering
+          BattlePanel on top of them caused the right column to flicker as
+          focus changed. */}
+      {selectedBattle && !showPlayback && !historyMode && (
         <BattlePanel
           battle={selectedBattle}
           onClose={handleClosePanel}
@@ -444,13 +501,46 @@ export default function App() {
         />
       )}
 
-      {historyMode && (
+      {/* The playhead and the beat card occupy the same top zone, so the
+          playhead steps aside while a beat card is on screen. The card
+          already shows the year and era mood, so no info is lost. */}
+      {historyMode && !historyBeat && (
         <HistoryPlayhead
           year={Math.floor(historyYear)}
           theme={activeTheme}
           playing={!historyPaused}
           onToggle={handleHistoryToggle}
           onClose={handleHistoryClose}
+        />
+      )}
+
+      {/* Beat title card. Mounts whenever the sweep crosses a curated year
+          and pauses the advance loop while it is visible so the user can
+          read the dossier. The optional jump button exits history mode and
+          opens the linked replay. Keyed on year so consecutive beats
+          remount cleanly and re-fire the appear animation. */}
+      {historyBeat && (
+        <HistoryBeatCard
+          key={`hb-${historyBeat.year}`}
+          beat={historyBeat}
+          onJump={(battleId) => {
+            setHistoryMode(false);
+            setHistoryPaused(false);
+            setHistoryBeat(null);
+            firedBeatsRef.current.clear();
+            fetch(`/api/battles/${battleId}`)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((b: Battle | null) => {
+                if (!b) return;
+                setSelectedBattle(b);
+                setIsolatedBattle(b);
+                if (b.hasReplay) {
+                  setReplayBattle(b);
+                  setReplayPhase(0);
+                }
+              })
+              .catch(() => {});
+          }}
         />
       )}
     </div>

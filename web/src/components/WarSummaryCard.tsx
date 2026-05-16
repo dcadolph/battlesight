@@ -45,7 +45,7 @@ function formatYearLabel(year: number): string {
 }
 
 function formatCasualties(n: number): string {
-  if (n <= 0) return '—';
+  if (n <= 0) return 'Unknown';
   if (n >= 1_000_000) return `~${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 10_000) return `~${(n / 1000).toFixed(0)}k`;
   return `~${n.toLocaleString('en-US')}`;
@@ -53,7 +53,9 @@ function formatCasualties(n: number): string {
 
 export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick }: WarSummaryCardProps) {
   const [summary, setSummary] = useState<WarSummary | null>(null);
-  const [expanded, setExpanded] = useState<boolean>(!!emphasize);
+  // Always start collapsed so the war playback panel does not blow up to fill
+  // the whole screen on first open. The user opens this on demand.
+  const [expanded, setExpanded] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

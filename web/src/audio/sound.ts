@@ -4,7 +4,7 @@
 // initialised lazily on the first user gesture, since browsers suspend audio
 // contexts until user interaction.
 //
-// Public API is a small singleton mirroring SoundEngine — callers do not
+// Public API is a small singleton mirroring SoundEngine. Callers do not
 // construct the engine themselves, they call the wrapper functions.
 
 import { themeForEra } from '../theme/era';
@@ -52,7 +52,7 @@ class SoundEngine {
     setTimeout(() => this.stopAmbient(), 350);
   }
 
-  // setEra colors the ambient drone for a given era — warm low-pass for
+  // setEra colors the ambient drone for a given era: warm low-pass for
   // antiquity, cooler highs for modern. The crossfade is short but audible.
   setEra(era: string): void {
     this.currentEra = era;

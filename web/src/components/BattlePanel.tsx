@@ -100,31 +100,51 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
           &times;
         </button>
 
-        {/* Era stamp: a single line of "Mood · Year" set in tracked small caps,
-            colored by the era. Reads as a movie title card opener. */}
+        {/* Era stamp: tracked small caps in the era accent. Sits above the
+            hero title like a chapter mark. */}
         <div
-          className="text-[10px] font-semibold uppercase tracking-[0.28em] mb-3"
+          className="text-[11px] font-semibold uppercase tracking-[0.32em] mb-4"
           style={{ color: theme.accent }}
         >
           {theme.mood}
-          {yearKnown && <span className="opacity-70"> · {formatYear(battle.year)}</span>}
+          {yearKnown && <span className="opacity-75"> · {formatYear(battle.year)}</span>}
         </div>
 
-        {/* Hero title in the era's display font. Serif for antiquity through
-            Napoleon, condensed sans for industrial onward. */}
+        {/* Hero title. Much larger than a standard panel heading so the
+            dossier reads as the opening of a story, not a sidebar header.
+            Era font (serif for antiquity through Napoleon, condensed sans
+            for industrial onward) carries period feel without changing
+            layout per battle. */}
         <h2
-          className="text-[28px] leading-[1.1] text-white mb-2 tracking-tight"
-          style={{ fontFamily: theme.titleFont, fontWeight: 600 }}
+          className="text-white mb-3 tracking-tight"
+          style={{
+            fontFamily: theme.titleFont,
+            fontWeight: 600,
+            fontSize: '42px',
+            lineHeight: 1.02,
+            letterSpacing: '-0.01em',
+          }}
         >
           {battle.name}
         </h2>
+
+        {/* Accent rule under the hero so the title visually owns its own
+            column. Subtle. Same gradient idea as the title card. */}
+        <div
+          className="mb-4 h-px"
+          style={{
+            width: 64,
+            background: `linear-gradient(90deg, ${theme.accent} 0%, transparent 100%)`,
+            opacity: 0.7,
+          }}
+        />
 
         {/* Stake line: the one-sentence punch that frames why this battle
             matters. Drops cleanly when no usable prose is available. */}
         {stake && (
           <p
-            className="mb-4 text-[15px] leading-relaxed text-slate-200/95"
-            style={{ fontFamily: theme.titleFont }}
+            className="mb-5 text-[16px] leading-[1.55] text-slate-200/95"
+            style={{ fontFamily: theme.titleFont, fontStyle: 'italic' }}
           >
             {stake}
           </p>
@@ -279,15 +299,15 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div>
                     <div className="text-slate-500 mb-0.5">Commander</div>
-                    <div className="text-slate-300">{side.commander || '—'}</div>
+                    <div className="text-slate-300">{side.commander || 'Unknown'}</div>
                   </div>
                   <div>
                     <div className="text-slate-500 mb-0.5">Strength</div>
-                    <div className="text-slate-300">{side.strength || '—'}</div>
+                    <div className="text-slate-300">{side.strength || 'Unknown'}</div>
                   </div>
                   <div>
                     <div className="text-slate-500 mb-0.5">Casualties</div>
-                    <div className="text-slate-300">{side.casualties || '—'}</div>
+                    <div className="text-slate-300">{side.casualties || 'Unknown'}</div>
                   </div>
                 </div>
               </div>

@@ -19,45 +19,70 @@ html, body, #root {
  * visually, so we hide the input's own track and let only the thumbs show.
  * pointer-events: none on the input itself so the two overlapping inputs
  * don't fight each other, and pointer-events: auto on the thumb so the
- * thumb is still draggable. */
+ * thumb is still draggable. The thumb is shaped as a thin vertical pin so
+ * it reads as a cursor riding inside the track, not a balloon floating
+ * outside it. */
 .timeline-range {
   pointer-events: none;
-  height: 22px;
+  height: 100%;
 }
 .timeline-range::-webkit-slider-runnable-track {
   background: transparent;
-  height: 22px;
+  height: 100%;
 }
 .timeline-range::-moz-range-track {
   background: transparent;
-  height: 22px;
+  height: 100%;
 }
 .timeline-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   pointer-events: auto;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: #f8fafc;
-  border: 2px solid #3b82f6;
+  width: 8px;
+  height: 36px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%);
+  border: 1px solid #60a5fa;
   cursor: grab;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-  margin-top: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.5);
+  margin-top: -3px;
+}
+.timeline-range::-webkit-slider-thumb:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+  border-color: #93c5fd;
 }
 .timeline-range::-webkit-slider-thumb:active {
   cursor: grabbing;
 }
 .timeline-range::-moz-range-thumb {
   pointer-events: auto;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: #f8fafc;
-  border: 2px solid #3b82f6;
+  width: 8px;
+  height: 36px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%);
+  border: 1px solid #60a5fa;
   cursor: grab;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.timeline-range::-moz-range-thumb:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+  border-color: #93c5fd;
 }
 .timeline-range::-moz-range-thumb:active {
   cursor: grabbing;
+}
+
+/* Battle title card animations. The veil keyframe is the backdrop fade and
+ * the block keyframe drives the title content's appear / hold / clear arc.
+ * Two separate keyframes so the inner block can scale subtly while the outer
+ * wrapper governs only opacity. */
+@keyframes title-card-veil {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes title-card-block {
+  0%   { opacity: 0; transform: translateY(-8px) scale(0.97); filter: blur(2px); }
+  18%  { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  70%  { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: translateY(0) scale(1.02); filter: blur(0); }
 }

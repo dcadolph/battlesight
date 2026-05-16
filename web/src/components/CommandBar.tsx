@@ -138,8 +138,11 @@ export default function CommandBar({
         {soundOn ? '♪ Sound' : '♪ Muted'}
       </button>
 
-      {/* Search */}
-      <div className="fixed top-12 left-5 z-40 w-64">
+      {/* Search. The container is z-50 so its dropdown sits on top of the
+          mode tab row below it. Both used to live at z-40 in separate fixed
+          stacking contexts and the later-rendered tabs painted over the
+          dropdown results. */}
+      <div className="fixed top-12 left-5 z-50 w-64">
         <div className="relative">
           <input
             ref={inputRef}
@@ -278,7 +281,7 @@ export default function CommandBar({
               ))}
             </div>
             <p className="mt-1.5 text-[10px] leading-snug text-slate-600">
-              Reconstructed has phase-by-phase animation. Documented has verified sides and dates. Indexed entries are just a name and coordinates — open Wikipedia for the story.
+              Reconstructed has phase-by-phase animation. Documented has verified sides and dates. Indexed entries are just a name and coordinates. Open Wikipedia for the story.
             </p>
           </div>
 

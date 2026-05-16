@@ -1,6 +1,6 @@
 // Curated list of major world cities used to label the globe. The list is
-// chosen for geographic orientation — capitals + a handful of historic war
-// cities — not exhaustiveness. Labels fade in at lower altitudes so they
+// chosen for geographic orientation (capitals plus a handful of historic war
+// cities), not for exhaustiveness. Labels fade in at lower altitudes so they
 // don't crowd the global view.
 
 export interface CityLabel {
@@ -13,7 +13,7 @@ export interface CityLabel {
 }
 
 export const CITIES: CityLabel[] = [
-  // Tier 0 — always-on anchors, one or two per continent
+  // Tier 0: always-on anchors, one or two per continent
   { name: 'New York', lat: 40.7128, lng: -74.006, tier: 0 },
   { name: 'London', lat: 51.5074, lng: -0.1278, tier: 0 },
   { name: 'Moscow', lat: 55.7558, lng: 37.6173, tier: 0 },
@@ -24,7 +24,7 @@ export const CITIES: CityLabel[] = [
   { name: 'Sydney', lat: -33.8688, lng: 151.2093, tier: 0 },
   { name: 'Buenos Aires', lat: -34.6037, lng: -58.3816, tier: 0 },
 
-  // Tier 1 — major capitals
+  // Tier 1: major capitals
   { name: 'Washington', lat: 38.9072, lng: -77.0369, tier: 1 },
   { name: 'Paris', lat: 48.8566, lng: 2.3522, tier: 1 },
   { name: 'Berlin', lat: 52.52, lng: 13.405, tier: 1 },
@@ -55,7 +55,7 @@ export const CITIES: CityLabel[] = [
   { name: 'Budapest', lat: 47.4979, lng: 19.0402, tier: 1 },
   { name: 'Lisbon', lat: 38.7223, lng: -9.1393, tier: 1 },
 
-  // Tier 2 — war-relevant geography, only visible when zoomed in
+  // Tier 2: war-relevant geography, only visible when zoomed in
   { name: 'Volgograd (Stalingrad)', lat: 48.708, lng: 44.5133, tier: 2 },
   { name: 'Sedan', lat: 49.7, lng: 4.9444, tier: 2 },
   { name: 'Dunkirk', lat: 51.0344, lng: 2.3768, tier: 2 },
@@ -94,7 +94,7 @@ export const CITIES: CityLabel[] = [
 // a pixel smear.
 export const HI_RES_EARTH = '/textures/earth-blue-marble-5k.jpg';
 
-// TOPOLOGY_BUMP gives the globe a relief feel — bumpy mountains and ocean
+// TOPOLOGY_BUMP gives the globe a relief feel. Bumpy mountains and ocean
 // floor. Used as bump map on top of HI_RES_EARTH.
 export const TOPOLOGY_BUMP =
   'https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-topology.png';

@@ -20,8 +20,8 @@ interface GlobeReplayProps {
 }
 
 // Default geographic extent in degrees per 100 units of normalized 0-100 phase
-// space. 3° ≈ 330 km wide — campaign / operational scale, wide enough that
-// arrows traverse visible geography.
+// space. 3° is about 330 km wide, a campaign / operational scale wide enough
+// that arrows traverse visible geography.
 const DEFAULT_EXTENT_DEG = 3.0;
 
 const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
@@ -47,7 +47,7 @@ function projectToLatLng(
 }
 
 // geoOrProject returns geographic coordinates for a phase point. When (lat,
-// lng) are set on the source, they win directly — hand-curated phases pin
+// lng) are set on the source, they win directly. Hand-curated phases pin
 // arrows to real geography. Otherwise the normalized x/y is projected around
 // the battle center using the replay's extent.
 function geoOrProject(
@@ -465,8 +465,8 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
             arrow={a}
           />
         ))}
-        {/* Impact flashes triggered shortly after each arrow appears — burst
-            of color at the destination signals "force has arrived." */}
+        {/* Impact flashes triggered shortly after each arrow appears. A
+            burst of color at the destination signals "force has arrived." */}
         {arrows.filter((a) => a.visible).map((a) => (
           <ImpactFlash
             key={`flash-${phaseIdx}-${a.index}`}

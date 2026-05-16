@@ -493,7 +493,7 @@ function UnitBlock({ unit, viewW }: UnitProps) {
   const inset = Math.min(rx, ry) * 0.55;
   let glyph: React.ReactNode = null;
   if (unitType === 'infantry') {
-    // Diagonal cross — the infantry "X".
+    // Diagonal cross. The infantry "X".
     glyph = (
       <g stroke={color} strokeWidth="0.7" strokeLinecap="round" opacity={dim ? 0.45 : 0.95}>
         <line x1={-inset} y1={-inset * 0.7} x2={inset} y2={inset * 0.7} />
@@ -508,15 +508,15 @@ function UnitBlock({ unit, viewW }: UnitProps) {
       </g>
     );
   } else if (unitType === 'armor') {
-    // Filled oval — armored / mechanized.
+    // Filled oval. Armored / mechanized.
     glyph = (
       <ellipse cx={0} cy={0} rx={inset * 1.15} ry={inset * 0.6} fill={color} fillOpacity={dim ? 0.55 : 0.9} />
     );
   } else if (unitType === 'artillery') {
-    // Filled circle — artillery battery.
+    // Filled circle. Artillery battery.
     glyph = <circle cx={0} cy={0} r={Math.min(inset * 0.7, 0.9)} fill={color} fillOpacity={dim ? 0.55 : 0.95} />;
   } else if (unitType === 'archers') {
-    // Two thin chevrons fanning up — archery / missile fire.
+    // Two thin chevrons fanning up. Archery / missile fire.
     glyph = (
       <g stroke={color} strokeWidth="0.55" fill="none" strokeLinecap="round" opacity={dim ? 0.45 : 0.95}>
         <path d={`M ${-inset} ${inset * 0.6} L 0 ${-inset * 0.7} L ${inset} ${inset * 0.6}`} />
@@ -524,7 +524,7 @@ function UnitBlock({ unit, viewW }: UnitProps) {
       </g>
     );
   } else if (unitType === 'aircraft') {
-    // Triangle pointing up — aircraft / aerial.
+    // Triangle pointing up. Aircraft / aerial.
     glyph = (
       <polygon
         points={`${0},${-inset * 1.0} ${inset * 0.95},${inset * 0.7} ${-inset * 0.95},${inset * 0.7}`}
@@ -542,7 +542,7 @@ function UnitBlock({ unit, viewW }: UnitProps) {
       />
     );
   } else if (unitType === 'command') {
-    // Pennant on a staff — headquarters / command.
+    // Pennant on a staff. Headquarters / command.
     glyph = (
       <g stroke={color} strokeWidth="0.6" fill="none" opacity={dim ? 0.5 : 0.95}>
         <line x1={-inset * 0.5} y1={inset * 0.7} x2={-inset * 0.5} y2={-inset * 1.0} />
@@ -717,7 +717,7 @@ function MovementArrow({ movement, viewW, index, total }: MovementProps) {
 
   // Style by kind: solid sweeping arc by default, dashed for retreats and
   // routs, thicker for charge/flank. Far heavier than the old 1.2-unit
-  // pencil stroke — these should read at a glance as army movement, not
+  // pencil stroke. These should read at a glance as army movement, not
   // a graph plot.
   let dash: string | undefined;
   let strokeWidth = 2.4;

@@ -88,14 +88,27 @@ function escapeHTML(s: string): string {
 }
 
 // hexWithAlpha returns the input #rrggbb hex with the given alpha as an rgba()
-// string. Used to dim lower-tier markers without changing their underlying era
-// color. Pass-through for non-hex input.
+// string. Used by overlays where transparency is safe (rings, vignettes).
+// Avoid for merged point colors because mixing alpha into the merged buffer
+// breaks depth sorting and causes z-fight flicker when the globe rotates.
 function hexWithAlpha(hex: string, alpha: number): string {
   if (!hex.startsWith('#') || hex.length !== 7) return hex;
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// darkenHex returns a solid darker variant of an #rrggbb color by scaling
+// each channel by factor (0..1). Solid output keeps the merged point buffer
+// fully opaque so depth sorting stays stable.
+function darkenHex(hex: string, factor: number): string {
+  if (!hex.startsWith('#') || hex.length !== 7) return hex;
+  const r = Math.round(parseInt(hex.slice(1, 3), 16) * factor);
+  const g = Math.round(parseInt(hex.slice(3, 5), 16) * factor);
+  const b = Math.round(parseInt(hex.slice(5, 7), 16) * factor);
+  const pad = (n: number) => n.toString(16).padStart(2, '0');
+  return `#${pad(r)}${pad(g)}${pad(b)}`;
 }
 
 // battleMagnitude estimates the scale of a battle from its sides' casualties.
@@ -272,11 +285,13 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
 
   const pointColor = useCallback((point: object) => {
     const b = point as Battle;
-    if (selectedBattle && selectedBattle.id !== b.id) return 'rgba(100,100,120,0.12)';
+    // Keep every color path opaque. Mixing alpha into the merged points
+    // buffer flips the whole mesh to transparent, which causes pillars to
+    // flicker as the depth sort swaps under camera motion.
+    if (selectedBattle && selectedBattle.id !== b.id) return '#2a2a36';
     const base = ERA_COLORS[b.era] || '#ffffff';
     const tier = b.tier ?? (b.verified ? 'documented' : 'indexed');
-    // Indexed entries are dimmed to surface the trust tier visually.
-    if (tier === 'indexed') return hexWithAlpha(base, 0.45);
+    if (tier === 'indexed') return darkenHex(base, 0.55);
     return base;
   }, [selectedBattle]);
 
@@ -396,9 +411,9 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       pointRadius={pointRadius}
       pointLabel={pointLabel}
       onPointClick={handleBattleClick}
-      pointsMerge={false}
-      pointsTransitionDuration={300}
-      pointResolution={8}
+      pointsMerge={true}
+      pointsTransitionDuration={0}
+      pointResolution={6}
       ringsData={replayRings}
       ringLat="lat"
       ringLng="lng"

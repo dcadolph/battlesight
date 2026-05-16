@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -174,6 +175,25 @@ func (w *Wars) Get(name string) (WarNarrative, bool) {
 // is used). Cap at 10M per token to ignore unreasonable parses.
 var casualtyPattern = regexp.MustCompile(`\d[\d,]*`)
 
+// hasBrokenSide reports whether any of the battle's sides contains residue
+// from a half-parsed Wikipedia infobox template, e.g. "| combatant2 =" or
+// "| strength1 =". These records are noise in war-summary tallies because
+// their victor and casualty fields are unreliable, so we skip them when
+// computing victor distribution and total casualties.
+func hasBrokenSide(b Battle) bool {
+	for _, s := range b.Sides {
+		if strings.Contains(s.Name, "| combatant") ||
+			strings.Contains(s.Name, "|combatant") ||
+			strings.Contains(s.Strength, "| strength") ||
+			strings.Contains(s.Strength, "|strength") ||
+			strings.Contains(s.Casualties, "| casualties") ||
+			strings.Contains(s.Casualties, "|casualties") {
+			return true
+		}
+	}
+	return false
+}
+
 // parseCasualties returns the summed casualty figure from a free-form
 // "X killed, Y wounded" string. Returns 0 when no numbers are found.
 func parseCasualties(s string) int {
@@ -234,6 +254,15 @@ func SummarizeWar(ctx context.Context, store *Store, wars *Wars, name string) (W
 	yearSeen := false
 	for i := range results {
 		b := &results[i]
+		// Skip battles whose sides data is half-parsed infobox residue. These
+		// records pollute the victor and casualty tallies (the "Battle of Los
+		// Angeles" with "Japanese" as victor is the canonical example, where
+		// no battle actually happened and no Japanese aircraft were present).
+		// They still count toward BattleCount because they're in the catalog,
+		// but they don't drive the war's "how it ended" narrative.
+		if hasBrokenSide(*b) {
+			continue
+		}
 		for _, side := range b.Sides {
 			total += parseCasualties(side.Casualties)
 		}

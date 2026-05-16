@@ -44,7 +44,7 @@ export default function HistoryPlayhead({ year, theme, playing, onToggle, onClos
         <div className="mt-3 flex items-center justify-center gap-2">
           <button
             onClick={onToggle}
-            className="h-7 px-3 rounded-full text-[11px] font-semibold text-white/90 hover:text-white transition-colors"
+            className="h-8 px-4 rounded-full text-[12px] font-semibold text-white/95 hover:text-white transition-colors"
             style={{
               backgroundColor: `${theme.accent}25`,
               border: `1px solid ${theme.accent}55`,
@@ -54,10 +54,16 @@ export default function HistoryPlayhead({ year, theme, playing, onToggle, onClos
           </button>
           <button
             onClick={onClose}
-            className="h-7 px-3 rounded-full text-[11px] font-medium text-slate-300 hover:text-white bg-slate-800/70 border border-slate-700/60 transition-colors"
+            className="h-8 px-4 rounded-full text-[12px] font-semibold text-rose-200 hover:text-white bg-rose-500/20 border border-rose-400/40 hover:bg-rose-500/30 transition-colors inline-flex items-center gap-1.5"
+            aria-label="Exit history mode (Esc)"
+            title="Exit history mode (Esc)"
           >
-            Stop
+            <span className="text-base leading-none">✕</span>
+            Exit history
           </button>
+        </div>
+        <div className="mt-2 text-[10px] uppercase tracking-[0.22em] text-slate-500">
+          Press Esc to exit
         </div>
       </div>
     </div>

@@ -42,12 +42,22 @@ type NameCount struct {
 type WarCount struct {
 	// Name is the war name.
 	Name string `json:"name"`
-	// Count is how many battles belong to this war.
+	// Count is how many battles belong to this war (own battles only — does not
+	// include nested children counts).
 	Count int `json:"count"`
 	// MinYear is the earliest battle year in this war.
 	MinYear int `json:"minYear"`
-	// Casualties is the estimated total casualties across all battles.
+	// Casualties is the estimated total casualties across all battles in this
+	// war (own battles only).
 	Casualties int `json:"casualties"`
+	// Parent is the canonical name of the parent war when this row is a
+	// theater or campaign of a larger conflict. Empty for top-level wars.
+	Parent string `json:"parent,omitempty"`
+	// RolledCount sums own count plus the count of every nested descendant.
+	// For leaf rows this equals Count.
+	RolledCount int `json:"rolledCount"`
+	// RolledCasualties sums casualties across own row and all descendants.
+	RolledCasualties int `json:"rolledCasualties"`
 }
 
 // Filter holds query parameters for listing battles.

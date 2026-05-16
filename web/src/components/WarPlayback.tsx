@@ -8,7 +8,15 @@ interface WarPlaybackProps {
   onClose: () => void;
 }
 
-interface WarCount { name: string; count: number; minYear: number; casualties: number; }
+interface WarCount {
+  name: string;
+  count: number;
+  minYear: number;
+  casualties: number;
+  parent?: string;
+  rolledCount: number;
+  rolledCasualties: number;
+}
 
 interface BattleGroup {
   battles: Battle[];
@@ -110,16 +118,46 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose }:
     return () => clearTimeout(timerRef.current);
   }, [playing, groupIndex, subIndex, groups, speed, focusBattle, goTo]);
 
-  const sortedWars = [...wars].sort((a, b) => {
-    if (warSort === 'alpha') return a.name.localeCompare(b.name);
-    if (warSort === 'chrono') return a.minYear - b.minYear;
-    if (warSort === 'casualties') return b.casualties - a.casualties;
-    return b.count - a.count;
-  });
+  // Build a hierarchical tree: top-level wars at depth 0, child theaters and
+  // campaigns nested below their parent. The "Bloodiest" and "Most Battles"
+  // sorts use the rolled totals so parents always rank above their children.
+  const sortKey = (w: WarCount): number => {
+    if (warSort === 'casualties') return -(w.rolledCasualties || w.casualties);
+    if (warSort === 'battles') return -(w.rolledCount || w.count);
+    if (warSort === 'chrono') return w.minYear;
+    return 0;
+  };
+
+  const tree = (() => {
+    const parents = wars.filter((w) => !w.parent);
+    const childrenByParent = new Map<string, WarCount[]>();
+    for (const w of wars) {
+      if (!w.parent) continue;
+      const list = childrenByParent.get(w.parent) ?? [];
+      list.push(w);
+      childrenByParent.set(w.parent, list);
+    }
+    // Sort top-level wars by the chosen mode.
+    const topSorted = [...parents].sort((a, b) => {
+      if (warSort === 'alpha') return a.name.localeCompare(b.name);
+      return sortKey(a) - sortKey(b);
+    });
+    // Sort children alphabetically inside each parent group to keep the tree
+    // stable regardless of which sort the user picked at the top level.
+    const flat: Array<WarCount & { depth: number }> = [];
+    for (const p of topSorted) {
+      flat.push({ ...p, depth: 0 });
+      const kids = (childrenByParent.get(p.name) ?? []).slice().sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
+      for (const k of kids) flat.push({ ...k, depth: 1 });
+    }
+    return flat;
+  })();
 
   const filteredWars = warSearch
-    ? sortedWars.filter((w) => w.name.toLowerCase().includes(warSearch.toLowerCase()))
-    : sortedWars;
+    ? tree.filter((w) => w.name.toLowerCase().includes(warSearch.toLowerCase()))
+    : tree;
 
   const currentGroup = groups[groupIndex];
   const currentBattle = currentGroup?.battles[subIndex];
@@ -162,22 +200,39 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose }:
                 ))}
               </div>
               <div className="max-h-52 overflow-y-auto space-y-0.5 pr-1">
-                {filteredWars.map((w) => (
-                  <button
-                    key={w.name}
-                    onClick={() => setSelectedWar(w.name)}
-                    className="w-full text-left px-3 py-2 rounded-lg text-[13px] text-slate-300 hover:bg-slate-800/50 hover:text-white transition-colors flex justify-between items-center"
-                  >
-                    <span className="truncate pr-2">{w.name}</span>
-                    <span className="text-[10px] text-slate-600 flex-shrink-0 tabular-nums">
-                      {warSort === 'casualties' && w.casualties > 0
-                        ? `${(w.casualties / 1000).toFixed(0)}k`
-                        : warSort === 'chrono'
-                        ? formatYear(w.minYear)
-                        : `${w.count}`}
-                    </span>
-                  </button>
-                ))}
+                {filteredWars.map((w) => {
+                  const showVal =
+                    warSort === 'casualties'
+                      ? (w.depth === 0 ? w.rolledCasualties : w.casualties)
+                      : warSort === 'chrono'
+                      ? w.minYear
+                      : (w.depth === 0 ? w.rolledCount : w.count);
+                  return (
+                    <button
+                      key={w.name}
+                      onClick={() => setSelectedWar(w.name)}
+                      className={`w-full text-left rounded-lg text-[13px] hover:bg-slate-800/50 hover:text-white transition-colors flex justify-between items-center ${
+                        w.depth === 0
+                          ? 'px-3 py-2 text-slate-300 font-medium'
+                          : 'pl-7 pr-3 py-1.5 text-slate-400 text-[12px]'
+                      }`}
+                    >
+                      <span className="truncate pr-2">
+                        {w.depth > 0 && (
+                          <span className="text-slate-700 mr-1" aria-hidden="true">└</span>
+                        )}
+                        {w.name}
+                      </span>
+                      <span className="text-[10px] text-slate-600 flex-shrink-0 tabular-nums">
+                        {warSort === 'casualties' && showVal > 0
+                          ? `${(showVal / 1000).toFixed(0)}k`
+                          : warSort === 'chrono'
+                          ? formatYear(showVal)
+                          : `${showVal}`}
+                      </span>
+                    </button>
+                  );
+                })}
                 {filteredWars.length === 0 && (
                   <p className="text-center text-[12px] text-slate-600 py-4">No wars match</p>
                 )}

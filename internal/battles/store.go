@@ -298,6 +298,114 @@ func (s *Store) loadSides(ctx context.Context, battles []Battle) error {
 	return rows.Err()
 }
 
+// warParent returns the canonical parent-war name for a sub-war label, or
+// empty when the war stands alone. The classification is deliberately
+// conservative: only catches the noisy WWI/WWII/Civil War fragmentation
+// from Wikidata where the same conflict appears under dozens of theater
+// and campaign aliases.
+func warParent(name string) string {
+	if name == "" {
+		return ""
+	}
+	n := strings.ToLower(name)
+	// Order matters: WWII patterns are checked first because their substrings
+	// would otherwise be caught by the WWI rule ("world war i" ⊂ "world war ii").
+	switch {
+	case strings.Contains(n, "world war ii"),
+		strings.Contains(n, "world war 2"),
+		strings.Contains(n, "second world war"),
+		n == "pacific war",
+		n == "invasion of poland":
+		if name == "World War II" {
+			return ""
+		}
+		return "World War II"
+	case strings.Contains(n, "world war i"),
+		strings.Contains(n, "world war 1"),
+		strings.Contains(n, "first world war"):
+		if name == "World War I" {
+			return ""
+		}
+		return "World War I"
+	case strings.Contains(n, "american civil war"):
+		if name == "American Civil War" {
+			return ""
+		}
+		return "American Civil War"
+	case strings.Contains(n, "napoleonic war"),
+		strings.Contains(n, "war of the first coalition"),
+		strings.Contains(n, "war of the second coalition"),
+		strings.Contains(n, "war of the third coalition"),
+		strings.Contains(n, "war of the fourth coalition"),
+		strings.Contains(n, "war of the fifth coalition"),
+		strings.Contains(n, "war of the sixth coalition"),
+		strings.Contains(n, "war of the seventh coalition"),
+		strings.Contains(n, "peninsular war"):
+		if name == "Napoleonic Wars" {
+			return ""
+		}
+		return "Napoleonic Wars"
+	case strings.Contains(n, "syrian civil war"):
+		if name == "Syrian Civil War" {
+			return ""
+		}
+		return "Syrian Civil War"
+	case strings.Contains(n, "russo-ukrainian"),
+		strings.Contains(n, "russian invasion of ukraine"):
+		if name == "Russo-Ukrainian War" {
+			return ""
+		}
+		return "Russo-Ukrainian War"
+	}
+	return ""
+}
+
+// rollupWarHierarchy injects synthetic parent rows and populates the rolled
+// totals so the bloodiest-wars sort surfaces canonical conflicts above their
+// theaters even when the parent has few or no direct battles of its own.
+func rollupWarHierarchy(counts []WarCount) []WarCount {
+	byName := make(map[string]*WarCount, len(counts))
+	for i := range counts {
+		counts[i].Parent = warParent(counts[i].Name)
+		counts[i].RolledCount = counts[i].Count
+		counts[i].RolledCasualties = counts[i].Casualties
+		byName[counts[i].Name] = &counts[i]
+	}
+
+	// Ensure every parent referenced from a child exists as its own row.
+	for _, c := range counts {
+		if c.Parent == "" {
+			continue
+		}
+		if _, ok := byName[c.Parent]; !ok {
+			synth := WarCount{Name: c.Parent, MinYear: c.MinYear}
+			counts = append(counts, synth)
+			byName[c.Parent] = &counts[len(counts)-1]
+		}
+	}
+
+	// Roll up children into parents. One level of nesting is sufficient for
+	// the patterns warParent classifies today; if hierarchy ever goes deeper
+	// this loop would need transitive closure.
+	for i := range counts {
+		c := &counts[i]
+		if c.Parent == "" {
+			continue
+		}
+		p := byName[c.Parent]
+		if p == nil {
+			continue
+		}
+		p.RolledCount += c.Count
+		p.RolledCasualties += c.Casualties
+		if c.MinYear != 0 && (p.MinYear == 0 || c.MinYear < p.MinYear) {
+			p.MinYear = c.MinYear
+		}
+	}
+
+	return counts
+}
+
 // warCounts returns wars with their battle counts, earliest year, and total casualties.
 // Only returns wars that pass the trust filter.
 func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
@@ -344,7 +452,7 @@ func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
 		}
 	}
 
-	return counts, nil
+	return rollupWarHierarchy(counts), nil
 }
 
 // ParseCasualtyNumber extracts a representative casualty number from a freeform

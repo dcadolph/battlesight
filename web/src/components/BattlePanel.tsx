@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Battle, Reference } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS, TIER_LABELS, TIER_DESCRIPTIONS } from '../types/battle';
+import { themeForEra } from '../theme/era';
 
 interface BattlePanelProps {
   battle: Battle;
@@ -31,8 +32,41 @@ function formatYear(year: number): string {
   return year < 0 ? `${Math.abs(year)} BC` : `${year}`;
 }
 
+// firstSentence pulls the first complete sentence out of a longer prose block.
+// Used to surface a "stake" line that reads like a film opening: short,
+// declarative, and visually distinct from the running summary below. Falls
+// back to the whole string when no terminator is found.
+function firstSentence(s: string): string {
+  const trimmed = s.trim();
+  if (!trimmed) return '';
+  const m = trimmed.match(/^[^.!?]*[.!?]/);
+  if (!m) return trimmed;
+  return m[0].trim();
+}
+
+// stakeLine builds the dossier's hero line. Preference order: a short
+// summary, the first sentence of a longer summary, the first sentence of
+// significance, then a synthetic "two sides at a place" fallback. Returns
+// empty string if nothing usable is available, in which case the dossier
+// silently drops the section rather than rendering an empty card.
+function stakeLine(b: Battle): string {
+  const summary = (b.summary || '').trim();
+  if (summary && summary.length <= 180) return summary;
+  if (summary) return firstSentence(summary);
+  const sig = (b.significance || '').trim();
+  if (sig) return firstSentence(sig);
+  if (b.sides && b.sides.length >= 2 && b.war) {
+    const names = b.sides.slice(0, 2).map((s) => s.name).filter(Boolean);
+    if (names.length === 2) {
+      return `${names[0]} meets ${names[1]} in the ${b.war}.`;
+    }
+  }
+  return '';
+}
+
 export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }: BattlePanelProps) {
   const color = ERA_COLORS[battle.era] || '#ffffff';
+  const theme = themeForEra(battle.era);
   const [detail, setDetail] = useState<Battle>(battle);
 
   useEffect(() => {
@@ -49,6 +83,11 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
   const hasSchematic = (detail.hasSchematic ?? battle.hasSchematic) && !hasReplay;
   const showDate = battle.date && battle.date !== '0';
   const yearKnown = battle.year !== 0;
+  const stake = stakeLine(detail);
+  // Summary repeats if it's already shorter than the stake threshold (stakeLine
+  // would have returned the whole summary verbatim). Suppress the dedicated
+  // summary section in that case so the dossier doesn't read twice.
+  const stakeReusesSummary = !!stake && !!detail.summary && stake.trim() === detail.summary.trim();
 
   return (
     <div className="fixed top-0 right-0 h-full w-[420px] max-w-[90vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 overflow-y-auto">
@@ -61,10 +100,40 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
           &times;
         </button>
 
+        {/* Era stamp: a single line of "Mood · Year" set in tracked small caps,
+            colored by the era. Reads as a movie title card opener. */}
+        <div
+          className="text-[10px] font-semibold uppercase tracking-[0.28em] mb-3"
+          style={{ color: theme.accent }}
+        >
+          {theme.mood}
+          {yearKnown && <span className="opacity-70"> · {formatYear(battle.year)}</span>}
+        </div>
+
+        {/* Hero title in the era's display font. Serif for antiquity through
+            Napoleon, condensed sans for industrial onward. */}
+        <h2
+          className="text-[28px] leading-[1.1] text-white mb-2 tracking-tight"
+          style={{ fontFamily: theme.titleFont, fontWeight: 600 }}
+        >
+          {battle.name}
+        </h2>
+
+        {/* Stake line: the one-sentence punch that frames why this battle
+            matters. Drops cleanly when no usable prose is available. */}
+        {stake && (
+          <p
+            className="mb-4 text-[15px] leading-relaxed text-slate-200/95"
+            style={{ fontFamily: theme.titleFont }}
+          >
+            {stake}
+          </p>
+        )}
+
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           {battle.era && (
             <span
-              className="inline-block px-3 py-1 rounded-full text-xs font-semibold"
+              className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold"
               style={{ backgroundColor: `${color}20`, color }}
             >
               {ERA_LABELS[battle.era] || battle.era}
@@ -89,7 +158,9 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
           })()}
         </div>
 
-        <h2 className="text-2xl font-bold text-white mb-1">{battle.name}</h2>
+        {/* Compact metadata strip: date + war + outbound links. Lives under the
+            hero so the dossier opens cinematically and the chrome stays out
+            of the way until the reader wants it. */}
         <p className="text-slate-400 text-sm mb-1">
           {showDate ? battle.date : yearKnown ? formatYear(battle.year) : 'Date unknown'}
         </p>
@@ -224,7 +295,7 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
           })}
         </div>
 
-        {detail.summary && (
+        {detail.summary && !stakeReusesSummary && (
           <div className="mb-5">
             <h3 className="text-xs text-slate-500 uppercase tracking-wider mb-2">Summary</h3>
             <p className="text-slate-300 text-sm leading-relaxed">{detail.summary}</p>

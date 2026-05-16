@@ -9,6 +9,8 @@ import type { Battle } from '../../types/battle';
 import type { Phase, Replay, Faction, ControlRegion } from '../../types/replay';
 import { FACTION_COLOR } from '../../types/replay';
 import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../../data/cities';
+import { themeForEra } from '../../theme/era';
+import { playImpact } from '../../audio/sound';
 
 interface GlobeReplayProps {
   battle: Battle;
@@ -194,16 +196,75 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
   const cameraAlt = phase.cameraAltitude ?? defaultAltitude;
   const tweenMs = phase.cameraTweenMs ?? 1400;
 
-  // Camera tween fires every time the target changes — i.e. every phase, when
-  // the curated camera fields differ. The slight ease of pointOfView gives
-  // the cinematic "fly to next scene" feel.
+  // Movement centroid: average destination of this phase's arrows. The camera
+  // drifts toward it after the main flythrough lands, so the framing visibly
+  // leans into the direction of action rather than staring at the geometric
+  // center the whole time.
+  const movementCentroid = useMemo(() => {
+    const ms = phase.movements ?? [];
+    if (ms.length === 0) return null;
+    let latSum = 0, lngSum = 0, n = 0;
+    for (const m of ms) {
+      const [endLat, endLng] = geoOrProject(
+        m.toX, m.toY, m.toLat, m.toLng,
+        battle.lat, battle.lng,
+        replay.aspectRatio ?? 1.6, extentLatDeg, extentLngDeg,
+      );
+      latSum += endLat;
+      lngSum += endLng;
+      n++;
+    }
+    if (n === 0) return null;
+    return { lat: latSum / n, lng: lngSum / n };
+  }, [phase, battle.lat, battle.lng, extentLatDeg, extentLngDeg, replay.aspectRatio]);
+
+  // Camera choreography per phase:
+  //   1. Cut to the curated phase target on a long ease (the establishing shot).
+  //   2. After it lands, drift the framing toward the action centroid and
+  //      push in slightly so the climax feels closer than the setup.
+  //   3. Run a near-imperceptible auto-rotate during the hold so the globe
+  //      never freezes between phases. That tiny drift is what reads as
+  //      "alive" versus "screenshot."
   useEffect(() => {
     if (!globeRef.current) return;
-    globeRef.current.pointOfView(
+    const globe = globeRef.current;
+    const controls = globe.controls();
+    controls.autoRotate = false;
+
+    globe.pointOfView(
       { lat: cameraLat, lng: cameraLng, altitude: cameraAlt },
       tweenMs,
     );
-  }, [cameraLat, cameraLng, cameraAlt, tweenMs]);
+
+    const driftTimer = setTimeout(() => {
+      if (!globeRef.current) return;
+      const targetLat = movementCentroid
+        ? cameraLat + (movementCentroid.lat - cameraLat) * 0.4
+        : cameraLat;
+      const targetLng = movementCentroid
+        ? cameraLng + (movementCentroid.lng - cameraLng) * 0.4
+        : cameraLng;
+      const tighter = Math.max(0.08, cameraAlt * 0.85);
+      globeRef.current.pointOfView(
+        { lat: targetLat, lng: targetLng, altitude: tighter },
+        2400,
+      );
+    }, tweenMs);
+
+    const breatheTimer = setTimeout(() => {
+      const c = globeRef.current?.controls();
+      if (!c) return;
+      c.autoRotate = true;
+      c.autoRotateSpeed = 0.05;
+    }, tweenMs + 800);
+
+    return () => {
+      clearTimeout(driftTimer);
+      clearTimeout(breatheTimer);
+      const c = globeRef.current?.controls();
+      if (c) c.autoRotate = false;
+    };
+  }, [cameraLat, cameraLng, cameraAlt, tweenMs, movementCentroid]);
 
   // Pre-compute lat/lng for each movement. Geographic coordinates take
   // precedence; normalized x/y is the fallback for legacy / auto-generated
@@ -361,7 +422,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
         globeImageUrl={HI_RES_EARTH}
         bumpImageUrl={TOPOLOGY_BUMP}
         backgroundImageUrl={NIGHT_SKY}
-        atmosphereColor="#7ab9ff"
+        atmosphereColor={themeForEra(battle.era).atmosphere}
         atmosphereAltitude={0.16}
         polygonsData={polygonData}
         polygonCapColor={(d: object) => (d as PolygonDatum).capColor}
@@ -509,7 +570,7 @@ interface UnitMarkerProps {
 // projected screen position. The marker is a faction-colored disk with a
 // pale rim and a unit-type glyph in the center (X for infantry, slash for
 // cavalry, oval for armor, etc.). Sized by relative strength.
-function UnitMarker({ phaseIdx, unit }: UnitMarkerProps) {
+function UnitMarker({ unit }: UnitMarkerProps) {
   const { x, y, faction, radius, unitType, status, index, label } = unit;
   const color = FACTION_COLOR[faction];
   const isBroken = status === 'broken' || status === 'routed' || status === 'destroyed';
@@ -601,8 +662,13 @@ interface ImpactFlashProps {
 
 // ImpactFlash renders a single expanding ring + bright core at (x, y), keyed
 // so it plays once per phase per arrow. It signals "the arrow has arrived"
-// in the same way a hit-effect telegraphs contact in a real-time map.
+// in the same way a hit-effect telegraphs contact in a real-time map. The
+// associated low-frequency thump is scheduled in lockstep with the visual.
 function ImpactFlash({ x, y, color, delay }: ImpactFlashProps) {
+  useEffect(() => {
+    const id = setTimeout(() => playImpact(), delay);
+    return () => clearTimeout(id);
+  }, [delay]);
   return (
     <g transform={`translate(${x} ${y})`} style={{ pointerEvents: 'none' }}>
       <circle

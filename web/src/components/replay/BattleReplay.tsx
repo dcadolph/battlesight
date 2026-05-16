@@ -4,6 +4,8 @@ import type { Replay } from '../../types/replay';
 import { FACTION_COLOR } from '../../types/replay';
 import TacticalMap from './TacticalMap';
 import GlobeReplay from './GlobeReplay';
+import { themeForEra } from '../../theme/era';
+import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
 
 interface BattleReplayProps {
   battle: Battle;
@@ -52,7 +54,14 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
 
   useEffect(() => {
     onPhaseChange?.(phaseIdx);
+    // Soft thump on every phase advance. No-op when sound is disabled.
+    playPhaseAdvance();
   }, [phaseIdx, onPhaseChange]);
+
+  // Tint the ambient bed to the battle's era while the replay is open.
+  useEffect(() => {
+    setSoundEra(battle.era || '');
+  }, [battle.era]);
 
   const goto = useCallback((i: number) => {
     if (!replay) return;
@@ -97,6 +106,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
 
   const phase = replay.phases[phaseIdx];
   const aspectRatio = replay.aspectRatio ?? 1.6;
+  const theme = themeForEra(battle.era);
 
   return (
     <div className="fixed inset-0 bg-[#070912] z-50 flex flex-col">
@@ -216,13 +226,22 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
               key={`chapter-${phaseIdx}`}
               className="chapter-card pointer-events-none absolute inset-0 flex items-center justify-center"
             >
-              <div className="px-6 py-3 rounded-xl bg-black/55 backdrop-blur-sm border border-white/10 shadow-2xl text-center">
+              <div
+                className="px-7 py-4 rounded-xl bg-black/55 backdrop-blur-sm border shadow-2xl text-center"
+                style={{ borderColor: `${theme.accent}40` }}
+              >
                 {phase.timeMarker && (
-                  <div className="text-[10px] uppercase tracking-[0.32em] text-slate-300 mb-1">
+                  <div
+                    className="text-[10px] uppercase tracking-[0.32em] mb-1"
+                    style={{ color: theme.accent }}
+                  >
                     {phase.timeMarker}
                   </div>
                 )}
-                <div className="text-2xl font-semibold text-white tracking-tight">
+                <div
+                  className="text-3xl text-white tracking-tight"
+                  style={{ fontFamily: theme.titleFont, fontWeight: 600 }}
+                >
                   {phase.title}
                 </div>
               </div>

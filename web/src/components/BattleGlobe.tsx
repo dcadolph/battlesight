@@ -14,6 +14,9 @@ interface BattleGlobeProps {
   onBattleClick: (battle: Battle) => void;
   selectedBattle: Battle | null;
   dramatic: boolean;
+  // atmosphereColor lets the parent shift the globe's atmosphere hue to match
+  // the active era. Falls back to the default cyan when unset.
+  atmosphereColor?: string;
 }
 
 const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
@@ -110,7 +113,7 @@ function battleMagnitude(b: Battle): number {
   return Math.max(0, Math.min(1, (v - 2) / 4));
 }
 
-export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic }: BattleGlobeProps) {
+export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor }: BattleGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>([]);
@@ -180,12 +183,25 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     el.addEventListener('wheel', stopRotation);
     el.addEventListener('touchstart', stopRotation);
 
-    // Initial point of view is set once on mount; subsequent battle selections
-    // pan smoothly via the dedicated effect below.
-    globe.pointOfView({ lat: 30, lng: 10, altitude: 2.2 });
+    // Cold-open cinematography: snap to a high oblique vantage instantly,
+    // then ease into the resting frame over a few seconds. The "tilt" is
+    // implicit because the destination lat differs from the start lat, so
+    // the camera pitches as it descends. Auto-rotate is paused during the
+    // intro so the move reads as a directed shot rather than two motions
+    // competing for the eye.
+    controls.autoRotate = false;
+    globe.pointOfView({ lat: 12, lng: -8, altitude: 3.4 });
+    const introTimer = setTimeout(() => {
+      globe.pointOfView({ lat: 32, lng: 14, altitude: 2.15 }, 3400);
+    }, 220);
+    const resumeRotateTimer = setTimeout(() => {
+      if (!selectedBattleRef.current) controls.autoRotate = true;
+    }, 4200);
 
     return () => {
       clearTimeout(idleTimer);
+      clearTimeout(introTimer);
+      clearTimeout(resumeRotateTimer);
       el.removeEventListener('mousedown', stopRotation);
       el.removeEventListener('wheel', stopRotation);
       el.removeEventListener('touchstart', stopRotation);
@@ -194,11 +210,24 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
 
   useEffect(() => {
     if (!selectedBattle || !globeRef.current) return;
-    globeRef.current.controls().autoRotate = false;
-    globeRef.current.pointOfView(
-      { lat: selectedBattle.lat, lng: selectedBattle.lng, altitude: 1.8 },
-      1000
-    );
+    const globe = globeRef.current;
+    globe.controls().autoRotate = false;
+    // Directed swoop: arc the camera to an off-axis vantage, hold for a
+    // breath, then settle directly over the target at low altitude. The
+    // offset on lng pitches the approach so the move reads as a slow arc
+    // rather than a vertical drop. Holding briefly before the final descent
+    // gives the panel slide-in something to land against.
+    const arcLng = selectedBattle.lng + (selectedBattle.lng < 0 ? 14 : -14);
+    const arcLat = selectedBattle.lat + (selectedBattle.lat < 0 ? -8 : 8);
+    globe.pointOfView({ lat: arcLat, lng: arcLng, altitude: 1.6 }, 900);
+    const settle = setTimeout(() => {
+      if (!globeRef.current) return;
+      globeRef.current.pointOfView(
+        { lat: selectedBattle.lat, lng: selectedBattle.lng, altitude: 1.1 },
+        1100,
+      );
+    }, 1000);
+    return () => clearTimeout(settle);
   }, [selectedBattle]);
 
   // Frame-the-war camera move. When the visible battle set narrows to a
@@ -357,7 +386,7 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       globeImageUrl={HI_RES_EARTH}
       bumpImageUrl={TOPOLOGY_BUMP}
       backgroundImageUrl={NIGHT_SKY}
-      atmosphereColor="#7ab9ff"
+      atmosphereColor={atmosphereColor || '#7ab9ff'}
       atmosphereAltitude={0.15}
       pointsData={visibleBattles}
       pointLat="lat"

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import BattleGlobe from './components/BattleGlobe';
 import TimelineSlider from './components/TimelineSlider';
 import BattlePanel from './components/BattlePanel';
@@ -6,7 +6,10 @@ import CommandBar from './components/CommandBar';
 import WarPlayback from './components/WarPlayback';
 import BattleReplay from './components/replay/BattleReplay';
 import IntroOverlay from './components/IntroOverlay';
+import HistoryPlayhead from './components/HistoryPlayhead';
 import type { Battle } from './types/battle';
+import { themeForEra, themeForYear } from './theme/era';
+import { enableSound, disableSound, soundEnabled, setSoundEra, playSelect } from './audio/sound';
 
 const MIN_YEAR = -500;
 const MAX_YEAR = 2025;
@@ -57,6 +60,15 @@ export default function App() {
   const [replayPhase, setReplayPhase] = useState(0);
   const [introVisible, setIntroVisible] = useState(false);
   const [featured, setFeatured] = useState<Battle | null>(null);
+  // historyMode is true whenever the user is in the play-history overlay,
+  // even when paused. historyPaused gates the RAF loop without exiting the
+  // mode, so the playhead stays on screen and the Resume button works.
+  const [historyMode, setHistoryMode] = useState(false);
+  const [historyPaused, setHistoryPaused] = useState(false);
+  const [historyYear, setHistoryYear] = useState<number>(MIN_YEAR);
+  const [soundOn, setSoundOn] = useState(false);
+  const rafRef = useRef<number | null>(null);
+  const lastTickRef = useRef<number | null>(null);
 
   const fetchBattles = useCallback(() => {
     const params = new URLSearchParams();
@@ -64,8 +76,12 @@ export default function App() {
     if (filters.war) params.set('war', filters.war);
     if (filters.battleType) params.set('battleType', filters.battleType);
     if (filters.quality) params.set('quality', filters.quality);
-    if (yearRange[0] !== MIN_YEAR) params.set('yearMin', String(yearRange[0]));
-    if (yearRange[1] !== MAX_YEAR) params.set('yearMax', String(yearRange[1]));
+    // During history playback we want the full timeline, ignoring the user's
+    // slider range, so battles light up as the playhead reaches their year.
+    if (!historyMode) {
+      if (yearRange[0] !== MIN_YEAR) params.set('yearMin', String(yearRange[0]));
+      if (yearRange[1] !== MAX_YEAR) params.set('yearMax', String(yearRange[1]));
+    }
 
     const qs = params.toString();
     const url = `/api/battles${qs ? '?' + qs : ''}`;
@@ -85,7 +101,7 @@ export default function App() {
         setError('Failed to load battles');
         setLoading(false);
       });
-  }, [filters, yearRange]);
+  }, [filters, yearRange, historyMode]);
 
   useEffect(() => {
     fetchBattles();
@@ -190,6 +206,91 @@ export default function App() {
     }
   }, [selectedBattle]);
 
+  // The active theme drives the globe's atmosphere color, the screen-edge
+  // vignette, and the ambient sound bed. Priority: a selected battle wins,
+  // history playback follows next, otherwise we use the neutral default.
+  const activeTheme = useMemo(() => {
+    if (selectedBattle) return themeForEra(selectedBattle.era);
+    if (historyMode) return themeForYear(historyYear);
+    return themeForEra('');
+  }, [selectedBattle, historyMode, historyYear]);
+
+  useEffect(() => {
+    setSoundEra(activeTheme.era);
+  }, [activeTheme.era]);
+
+  const stopHistoryRaf = useCallback(() => {
+    if (rafRef.current != null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    lastTickRef.current = null;
+  }, []);
+
+  // Year advance loop: roughly 2525 years over 90 seconds, so ~28 years/sec.
+  // We pin the cadence to wall-clock dt rather than fixed-per-frame increments
+  // so the playback rate stays consistent regardless of the user's frame rate.
+  // The loop runs only when historyMode is on and not paused; pausing keeps
+  // the playhead visible at the current year.
+  useEffect(() => {
+    if (!historyMode || historyPaused) {
+      stopHistoryRaf();
+      return;
+    }
+    const YEARS_PER_SECOND = (MAX_YEAR - MIN_YEAR) / 90;
+    const tick = (ts: number) => {
+      if (lastTickRef.current == null) lastTickRef.current = ts;
+      const dt = ts - lastTickRef.current;
+      lastTickRef.current = ts;
+      setHistoryYear((y) => {
+        const next = y + (dt / 1000) * YEARS_PER_SECOND;
+        if (next >= MAX_YEAR) {
+          // Reached the end of history. Pause at the final year and let the
+          // user choose to Stop from the playhead controls.
+          setHistoryPaused(true);
+          return MAX_YEAR;
+        }
+        return next;
+      });
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return stopHistoryRaf;
+  }, [historyMode, historyPaused, stopHistoryRaf]);
+
+  const handleHistoryStart = useCallback(() => {
+    setSelectedBattle(null);
+    setIsolatedBattle(null);
+    setShowPlayback(false);
+    setPlaybackBattles(null);
+    setIntroVisible(false);
+    setHistoryYear(MIN_YEAR);
+    setHistoryPaused(false);
+    setHistoryMode(true);
+  }, []);
+
+  const handleHistoryToggle = useCallback(() => {
+    setHistoryPaused((p) => !p);
+  }, []);
+
+  const handleHistoryClose = useCallback(() => {
+    setHistoryMode(false);
+    setHistoryPaused(false);
+    setHistoryYear(MIN_YEAR);
+  }, []);
+
+  const handleToggleSound = useCallback(() => {
+    if (soundEnabled()) {
+      disableSound();
+      setSoundOn(false);
+    } else {
+      enableSound();
+      setSoundOn(true);
+      // Soft confirmation so the user hears that audio came online.
+      playSelect();
+    }
+  }, []);
+
   const handleDismissIntro = useCallback(() => {
     setIntroVisible(false);
     localStorage.setItem('bt.intro_seen', '1');
@@ -215,6 +316,14 @@ export default function App() {
   } else if (playbackBattles) {
     globeBattles = playbackBattles;
   }
+
+  // Effective year window: during history playback this is a trailing range
+  // from the very start of recorded history up to the current playhead, so
+  // battles light up as we cross their year. Outside playback it's whatever
+  // the user has dialed in on the timeline.
+  const effectiveYearRange: [number, number] = historyMode
+    ? [MIN_YEAR, Math.floor(historyYear) + 1]
+    : yearRange;
 
   if (loading) {
     return (
@@ -255,20 +364,36 @@ export default function App() {
         onPlaybackOpen={() => setShowPlayback(true)}
         playbackActive={showPlayback}
         battleCount={battles.length}
+        onHistoryPlay={handleHistoryStart}
+        historyActive={historyMode}
+        soundOn={soundOn}
+        onToggleSound={handleToggleSound}
       />
 
       <BattleGlobe
         battles={globeBattles}
-        yearRange={yearRange}
+        yearRange={effectiveYearRange}
         onBattleClick={handleBattleClick}
         selectedBattle={selectedBattle}
         dramatic={showPillars}
+        atmosphereColor={activeTheme.atmosphere}
+      />
+
+      {/* Era-tinted screen vignette. A full-bleed overlay with a soft radial
+          gradient that pulls the eye toward the center while staining the
+          edges with the era's mood color. CSS transition smooths the cross
+          between eras during history playback. */}
+      <div
+        className="pointer-events-none fixed inset-0 z-10 transition-[background] duration-[1500ms] ease-out"
+        style={{
+          background: `radial-gradient(ellipse at center, transparent 55%, ${activeTheme.vignette} 100%)`,
+        }}
       />
 
       <TimelineSlider
         min={MIN_YEAR}
         max={MAX_YEAR}
-        value={yearRange}
+        value={effectiveYearRange}
         onChange={setYearRange}
         battleCount={globeBattles.length}
         battles={battles}
@@ -316,6 +441,16 @@ export default function App() {
           featured={featured}
           onDismiss={handleDismissIntro}
           onStart={handleStartWithFeatured}
+        />
+      )}
+
+      {historyMode && (
+        <HistoryPlayhead
+          year={Math.floor(historyYear)}
+          theme={activeTheme}
+          playing={!historyPaused}
+          onToggle={handleHistoryToggle}
+          onClose={handleHistoryClose}
         />
       )}
     </div>

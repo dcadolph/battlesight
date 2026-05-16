@@ -91,22 +91,14 @@ export default function TimelineSlider({ min, max, value, onChange, battleCount,
   return (
     <div className="fixed bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-[#070912] via-[#070912ee] to-transparent pt-6 pb-3 px-6">
       <div className="max-w-5xl mx-auto">
-        {/* Top row: handles, counts, ranges */}
-        <div className="flex items-end justify-between mb-2 text-[11px] tracking-wide">
-          <div className="flex flex-col items-start min-w-[5ch]">
-            <span className="text-[9px] uppercase text-slate-500 tracking-[0.2em]">From</span>
-            <span className="text-slate-200 font-mono tabular-nums text-[13px]">{formatYear(value[0])}</span>
-          </div>
-          <div className="text-center">
-            <div className="text-[9px] uppercase text-slate-500 tracking-[0.2em]">In window</div>
-            <div className="text-blue-300 tabular-nums text-[13px] font-semibold">
-              {battleCount.toLocaleString('en-US')} battle{battleCount !== 1 ? 's' : ''}
-            </div>
-          </div>
-          <div className="flex flex-col items-end min-w-[5ch]">
-            <span className="text-[9px] uppercase text-slate-500 tracking-[0.2em]">To</span>
-            <span className="text-slate-200 font-mono tabular-nums text-[13px]">{formatYear(value[1])}</span>
-          </div>
+        {/* Single quiet readout, centered. The handle positions imply the
+            range visually so we don't need separate From / To labels above. */}
+        <div className="mb-2 text-center text-[11px] text-slate-500 tabular-nums tracking-wide">
+          <span className="text-slate-300">{formatYear(value[0])}</span>
+          <span className="mx-1.5 text-slate-700">→</span>
+          <span className="text-slate-300">{formatYear(value[1])}</span>
+          <span className="mx-2 text-slate-700">·</span>
+          <span className="text-blue-300/90">{battleCount.toLocaleString('en-US')}</span>
         </div>
 
         {/* Track + histogram + handles */}

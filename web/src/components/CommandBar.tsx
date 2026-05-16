@@ -21,13 +21,32 @@ interface CommandBarProps {
   onPlaybackOpen: () => void;
   playbackActive: boolean;
   battleCount: number;
+  // onHistoryPlay starts the cinematic year-sweep overlay.
+  onHistoryPlay: () => void;
+  // historyActive reflects whether the year-sweep is currently on screen.
+  historyActive: boolean;
+  // soundOn / onToggleSound expose the ambient audio toggle in the chrome.
+  soundOn: boolean;
+  onToggleSound: () => void;
 }
 
 function formatYear(year: number): string {
   return year < 0 ? `${Math.abs(year)} BC` : `${year}`;
 }
 
-export default function CommandBar({ filters, onFiltersChange, onBattleSelect, onIsolate, onPlaybackOpen, playbackActive, battleCount }: CommandBarProps) {
+export default function CommandBar({
+  filters,
+  onFiltersChange,
+  onBattleSelect,
+  onIsolate,
+  onPlaybackOpen,
+  playbackActive,
+  battleCount,
+  onHistoryPlay,
+  historyActive,
+  soundOn,
+  onToggleSound,
+}: CommandBarProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Battle[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -108,6 +127,17 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
         </div>
       </div>
 
+      {/* Sound toggle: small, discreet, top-right. Muted by default so the
+          first impression of the page is silent; users opt in. The icon is
+          plain text so we don't pay for an icon font. */}
+      <button
+        onClick={onToggleSound}
+        className="fixed top-4 right-5 z-40 h-8 px-3 rounded-full text-[11px] font-medium tracking-wide bg-slate-800/70 border border-slate-700/50 text-slate-300 hover:text-white hover:bg-slate-700/80 transition-colors"
+        title={soundOn ? 'Sound on. Click to mute.' : 'Sound off. Click for ambient audio.'}
+      >
+        {soundOn ? '♪ Sound' : '♪ Muted'}
+      </button>
+
       {/* Search */}
       <div className="fixed top-12 left-5 z-40 w-64">
         <div className="relative">
@@ -164,7 +194,7 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
           <button
             onClick={() => { setPanel('none'); }}
             className={`h-8 text-[12px] font-medium tracking-wide transition-colors border-b-2 ${
-              !playbackActive
+              !playbackActive && !historyActive
                 ? 'text-white border-blue-400'
                 : 'text-slate-500 hover:text-slate-300 border-transparent'
             }`}
@@ -180,6 +210,17 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
             }`}
           >
             Wars
+          </button>
+          <button
+            onClick={onHistoryPlay}
+            className={`h-8 text-[12px] font-medium tracking-wide transition-colors border-b-2 ${
+              historyActive
+                ? 'text-white border-blue-400'
+                : 'text-slate-500 hover:text-slate-300 border-transparent'
+            }`}
+            title="Play 2,500 years of history in 90 seconds"
+          >
+            ▶ History
           </button>
         </div>
 

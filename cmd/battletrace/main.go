@@ -12,6 +12,7 @@ func main() {
 	dbPath := flag.String("db", "data/battletrace.db", "path to SQLite database")
 	seed := flag.String("seed", "data/battles.json", "path to JSON file to seed on startup (empty to skip)")
 	phases := flag.String("phases", "data/phases.json", "path to JSON file of battle replays (empty to skip)")
+	wars := flag.String("wars", "data/wars.json", "path to JSON file of curated war narratives (empty to skip)")
 	flag.Parse()
 
 	cfg := server.Config{
@@ -19,6 +20,7 @@ func main() {
 		DBPath:     *dbPath,
 		SeedPath:   *seed,
 		PhasesPath: *phases,
+		WarsPath:   *wars,
 	}
 
 	if err := server.Run(cfg); err != nil {

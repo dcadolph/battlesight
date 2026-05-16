@@ -15,18 +15,24 @@ type Handler struct {
 	store *Store
 	// replays is the in-memory phase registry.
 	replays *Replays
+	// wars is the in-memory curated war narrative registry. Optional.
+	wars *Wars
 }
 
 // NewHandler creates a handler backed by the given store and replay registry.
-// A nil replay registry is treated as empty.
-func NewHandler(store *Store, replays *Replays) *Handler {
+// A nil replay registry is treated as empty. A nil wars registry yields
+// summaries with computed stats only (no curated narrative).
+func NewHandler(store *Store, replays *Replays, wars *Wars) *Handler {
 	if store == nil {
 		panic("battles.NewHandler: store required")
 	}
 	if replays == nil {
 		replays = NewReplays()
 	}
-	return &Handler{store: store, replays: replays}
+	if wars == nil {
+		wars = NewWars()
+	}
+	return &Handler{store: store, replays: replays, wars: wars}
 }
 
 // RegisterRoutes mounts battle endpoints on the given mux.
@@ -38,6 +44,27 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/battles/{id}/replay", h.getReplay)
 	mux.HandleFunc("GET /api/battles/{id}", h.getBattle)
 	mux.HandleFunc("GET /api/battles", h.listBattles)
+	mux.HandleFunc("GET /api/wars/summary", h.warSummary)
+}
+
+// warSummary returns aggregate stats and optional curated narrative for the
+// war named in the ?name=... query string.
+func (h *Handler) warSummary(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
+	if name == "" {
+		writeError(w, http.StatusBadRequest, "war name required")
+		return
+	}
+	sum, err := SummarizeWar(r.Context(), h.store, h.wars, name)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to summarize war")
+		return
+	}
+	if sum.BattleCount == 0 {
+		writeError(w, http.StatusNotFound, "no battles found for that war")
+		return
+	}
+	writeJSON(w, http.StatusOK, sum)
 }
 
 // listBattles returns battles matching optional filter parameters.

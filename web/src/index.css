@@ -14,3 +14,50 @@ html, body, #root {
   color: #e2e8f0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
+
+/* Dual-range slider for the timeline. Both range inputs share a track
+ * visually, so we hide the input's own track and let only the thumbs show.
+ * pointer-events: none on the input itself so the two overlapping inputs
+ * don't fight each other, and pointer-events: auto on the thumb so the
+ * thumb is still draggable. */
+.timeline-range {
+  pointer-events: none;
+  height: 22px;
+}
+.timeline-range::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 22px;
+}
+.timeline-range::-moz-range-track {
+  background: transparent;
+  height: 22px;
+}
+.timeline-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 2px solid #3b82f6;
+  cursor: grab;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  margin-top: 2px;
+}
+.timeline-range::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+.timeline-range::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 2px solid #3b82f6;
+  cursor: grab;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+.timeline-range::-moz-range-thumb:active {
+  cursor: grabbing;
+}

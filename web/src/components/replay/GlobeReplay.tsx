@@ -136,6 +136,7 @@ interface ProjectedUnit {
   radius: number;
   unitType?: string;
   status?: string;
+  label: string;
   visible: boolean;
 }
 
@@ -339,6 +340,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
             radius: 6 + Math.min(8, u.strength * 0.6),
             unitType: u.unitType,
             status: u.status,
+            label: u.label,
             visible: ok,
           };
         });
@@ -508,12 +510,13 @@ interface UnitMarkerProps {
 // pale rim and a unit-type glyph in the center (X for infantry, slash for
 // cavalry, oval for armor, etc.). Sized by relative strength.
 function UnitMarker({ phaseIdx, unit }: UnitMarkerProps) {
-  const { x, y, faction, radius, unitType, status, index } = unit;
+  const { x, y, faction, radius, unitType, status, index, label } = unit;
   const color = FACTION_COLOR[faction];
   const isBroken = status === 'broken' || status === 'routed' || status === 'destroyed';
   const fill = isBroken ? hexWithAlpha(color, 0.35) : hexWithAlpha(color, 0.75);
   const stroke = isBroken ? hexWithAlpha(color, 0.55) : '#f8fafc';
   const appearDelay = index * 80;
+  const titleText = status ? `${label} (${status})` : label;
 
   return (
     <g
@@ -521,9 +524,12 @@ function UnitMarker({ phaseIdx, unit }: UnitMarkerProps) {
       style={{
         opacity: 0,
         animation: `arrow-fade-in 600ms ${appearDelay}ms ease-out forwards`,
+        pointerEvents: 'auto',
       }}
     >
-      {/* Soft halo so units pop on dark satellite terrain. */}
+      {/* Native SVG tooltip for hover. Keeps labels off the map so they
+          don't clutter, but available on demand. */}
+      <title>{titleText}</title>
       <circle r={radius + 3} fill={hexWithAlpha(color, 0.18)} style={{ filter: 'blur(2.5px)' }} />
       <circle r={radius} fill={fill} stroke={stroke} strokeWidth={1.4} />
       <UnitGlyph radius={radius} unitType={unitType} />

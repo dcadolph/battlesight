@@ -271,6 +271,7 @@ export default function App() {
         value={yearRange}
         onChange={setYearRange}
         battleCount={globeBattles.length}
+        battles={battles}
       />
 
       {selectedBattle && (
@@ -287,6 +288,15 @@ export default function App() {
           onBattleFocus={handleBattleClick}
           onBattlesLoaded={setPlaybackBattles}
           onClose={handlePlaybackClose}
+          onWarSelected={(name) => {
+            // Fresh war pick: drop the detail panel and any single-battle
+            // isolation so the user sees the whole war on the globe before
+            // diving into a specific battle.
+            if (name) {
+              setSelectedBattle(null);
+              setIsolatedBattle(null);
+            }
+          }}
           onPlayReplay={(b) => { setReplayBattle(b); setReplayPhase(0); }}
           onCloseReplay={() => { setReplayBattle(null); setReplayPhase(0); }}
         />

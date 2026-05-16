@@ -201,6 +201,40 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     );
   }, [selectedBattle]);
 
+  // Frame-the-war camera move. When the visible battle set narrows to a
+  // single war (a few up to a few hundred entries) and nothing specific is
+  // selected, fly the camera to a vantage that frames every battle of that
+  // war. The full unfiltered set (~12k battles) is skipped via the length
+  // threshold so the initial load stays at its default vantage.
+  useEffect(() => {
+    if (selectedBattle) return;
+    if (!globeRef.current) return;
+    if (visibleBattles.length === 0 || visibleBattles.length > 400) return;
+
+    let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+    for (const b of visibleBattles) {
+      if (b.lat < minLat) minLat = b.lat;
+      if (b.lat > maxLat) maxLat = b.lat;
+      if (b.lng < minLng) minLng = b.lng;
+      if (b.lng > maxLng) maxLng = b.lng;
+    }
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLng = (minLng + maxLng) / 2;
+    const latSpan = maxLat - minLat;
+    const lngSpan = (maxLng - minLng) * Math.max(0.2, Math.cos((centerLat * Math.PI) / 180));
+    const span = Math.max(latSpan, lngSpan, 2);
+    // Altitude scales with angular span. A 5° war frames at ~0.45 (close);
+    // a 100° war frames at ~1.9 (continental); clamped so we never zoom
+    // ridiculously close or float past the moon.
+    const altitude = Math.max(0.35, Math.min(2.6, 0.18 + span * 0.018));
+
+    globeRef.current.controls().autoRotate = false;
+    globeRef.current.pointOfView(
+      { lat: centerLat, lng: centerLng, altitude },
+      1500,
+    );
+  }, [visibleBattles, selectedBattle]);
+
   const handleBattleClick = useCallback((point: object) => {
     const battle = point as Battle;
     const match = battles.find((b) => b.id === battle.id);

@@ -1,14 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS } from '../types/battle';
+import WarSummaryCard from './WarSummaryCard';
 
 interface WarPlaybackProps {
   onBattleFocus: (battle: Battle) => void;
   onBattlesLoaded: (battles: Battle[] | null) => void;
   onClose: () => void;
+  // onWarSelected fires whenever the user picks a war from the war list. App
+  // uses it to clear any open battle detail panel and any single-battle
+  // isolation so the user can take in every battle of the chosen war on the
+  // globe at once before clicking into one.
+  onWarSelected?: (warName: string) => void;
   // onPlayReplay is fired in cinematic mode when the auto-step lands on a
   // battle that has a hand-crafted phase replay. App opens the replay
-  // overlay; WarPlayback continues its own timer and fires onCloseReplay
+  // overlay. WarPlayback continues its own timer and fires onCloseReplay
   // when ready to advance to the next battle.
   onPlayReplay?: (battle: Battle) => void;
   onCloseReplay?: () => void;
@@ -50,7 +56,7 @@ function groupConcurrentBattles(battles: Battle[]): BattleGroup[] {
   return groups;
 }
 
-export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onPlayReplay, onCloseReplay }: WarPlaybackProps) {
+export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onPlayReplay, onCloseReplay }: WarPlaybackProps) {
   const [wars, setWars] = useState<WarCount[]>([]);
   const [warSearch, setWarSearch] = useState('');
   const [warSort, setWarSort] = useState<'casualties' | 'battles' | 'alpha' | 'chrono'>('casualties');
@@ -75,6 +81,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   }, []);
 
   useEffect(() => {
+    onWarSelected?.(selectedWar);
     if (!selectedWar) { setBattles([]); setGroups([]); onBattlesLoaded(null); return; }
     fetch(`/api/battles?war=${encodeURIComponent(selectedWar)}&limit=2000`)
       .then((r) => r.json())
@@ -89,7 +96,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         onBattlesLoaded(b);
       })
       .catch(() => {});
-  }, [selectedWar, onBattlesLoaded]);
+  }, [selectedWar, onBattlesLoaded, onWarSelected]);
 
   const focusBattle = useCallback((battle: Battle) => {
     onBattleFocus(battle);
@@ -104,14 +111,28 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     focusBattle(groups[gi].battles[s]);
   }, [groups, focusBattle]);
 
+  // Do NOT auto-focus the first battle when a war is freshly selected. The
+  // user wants a beat to take in every battle of the war on the globe before
+  // diving into one. We only auto-focus once the user advances the timeline
+  // manually (groupIndex > 0 or subIndex > 0) or hits Play (handled in the
+  // playback effect below).
   useEffect(() => {
-    if (groups.length > 0 && groupIndex === 0 && subIndex === 0) focusBattle(groups[0].battles[0]);
+    if (groups.length === 0) return;
+    if (groupIndex === 0 && subIndex === 0) return;
+    focusBattle(groups[groupIndex].battles[subIndex]);
   }, [groups, groupIndex, subIndex, focusBattle]);
 
   useEffect(() => {
     if (!playing || groups.length === 0) return;
     const group = groups[groupIndex];
     const battle = group.battles[subIndex];
+
+    // Focus the current battle the moment Play starts. Without this the user
+    // hits Play, the globe stays parked at the war centroid, and nothing
+    // visibly happens until the first dwell timer expires, which reads as
+    // "playback is broken". Focusing here means the camera flies to the
+    // first battle immediately and the panel opens.
+    focusBattle(battle);
 
     // Cinematic mode: when the current battle has a hand-crafted replay,
     // open it and dwell long enough for the phases to play before advancing.
@@ -142,7 +163,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       }
     }, dwellMs);
     return () => clearTimeout(timerRef.current);
-  }, [playing, groupIndex, subIndex, groups, speed, cinematic, onPlayReplay, onCloseReplay, focusBattle, goTo]);
+    // focusBattle and goTo are intentionally omitted from deps. They are
+    // stable callbacks built from props, but adding them re-runs this effect
+    // on every render and breaks the dwell timer mid-flight.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, groupIndex, subIndex, groups, speed, cinematic, onPlayReplay, onCloseReplay]);
 
   // Build a hierarchical tree: top-level wars at depth 0, child theaters and
   // campaigns nested below their parent. The "Bloodiest" and "Most Battles"
@@ -336,6 +361,23 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                   onChange={(e) => { setPlaying(false); goTo(parseInt(e.target.value)); }}
                   className="flex-1 accent-blue-500 h-1 bg-slate-800 rounded-full appearance-none cursor-pointer" />
               </div>
+
+              {/* How-it-ended card. Always visible while browsing a war so the
+                  outcome and stats are an anchor for the user. Auto-emphasized
+                  (expanded + blue border) when playback reaches the last
+                  battle, fulfilling the "every war story ends with how the war
+                  was won" rule. */}
+              <WarSummaryCard
+                warName={selectedWar}
+                emphasize={
+                  groupIndex >= groups.length - 1 &&
+                  subIndex >= (groups[groupIndex]?.battles.length ?? 1) - 1
+                }
+                onEndingBattleClick={(id) => {
+                  const battle = battles.find((b) => b.id === id);
+                  if (battle) focusBattle(battle);
+                }}
+              />
             </div>
           )}
         </div>

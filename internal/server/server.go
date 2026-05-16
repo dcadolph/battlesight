@@ -22,6 +22,10 @@ type Config struct {
 	SeedPath string
 	// PhasesPath is the path to the battle replay JSON file.
 	PhasesPath string
+	// WarsPath is an optional path to a JSON file of curated war narratives
+	// (Outcome, Aftermath, KeyTerms). Wars without an entry still get
+	// computed stats; this file only adds curated prose on top.
+	WarsPath string
 }
 
 // Run starts the HTTP server and blocks until it exits.
@@ -50,6 +54,21 @@ func Run(cfg Config) error {
 		} else if n > 0 {
 			log.Printf("loaded %d battle replays from %s", n, cfg.PhasesPath)
 		}
+		// Hot-reload phases.json on edit. Lets curators iterate on battle
+		// content without restarting the server, save the file, reload the
+		// browser, see the change. The poll interval is 1s.
+		go replays.Watch(context.Background(), cfg.PhasesPath, time.Second)
+	}
+
+	wars := battles.NewWars()
+	if cfg.WarsPath != "" {
+		n, err := wars.Load(cfg.WarsPath)
+		if err != nil {
+			log.Printf("warning: failed to load wars narratives from %s: %v", cfg.WarsPath, err)
+		} else if n > 0 {
+			log.Printf("loaded %d war narratives from %s", n, cfg.WarsPath)
+		}
+		go wars.Watch(context.Background(), cfg.WarsPath, time.Second)
 	}
 
 	store := battles.NewStore(database)
@@ -63,7 +82,7 @@ func Run(cfg Config) error {
 
 	mux := http.NewServeMux()
 
-	bh := battles.NewHandler(store, replays)
+	bh := battles.NewHandler(store, replays, wars)
 	bh.RegisterRoutes(mux)
 
 	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {

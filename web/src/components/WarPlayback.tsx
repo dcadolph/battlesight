@@ -6,6 +6,12 @@ interface WarPlaybackProps {
   onBattleFocus: (battle: Battle) => void;
   onBattlesLoaded: (battles: Battle[] | null) => void;
   onClose: () => void;
+  // onPlayReplay is fired in cinematic mode when the auto-step lands on a
+  // battle that has a hand-crafted phase replay. App opens the replay
+  // overlay; WarPlayback continues its own timer and fires onCloseReplay
+  // when ready to advance to the next battle.
+  onPlayReplay?: (battle: Battle) => void;
+  onCloseReplay?: () => void;
 }
 
 interface WarCount {
@@ -44,7 +50,7 @@ function groupConcurrentBattles(battles: Battle[]): BattleGroup[] {
   return groups;
 }
 
-export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose }: WarPlaybackProps) {
+export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onPlayReplay, onCloseReplay }: WarPlaybackProps) {
   const [wars, setWars] = useState<WarCount[]>([]);
   const [warSearch, setWarSearch] = useState('');
   const [warSort, setWarSort] = useState<'casualties' | 'battles' | 'alpha' | 'chrono'>('casualties');
@@ -54,6 +60,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose }:
   const [groupIndex, setGroupIndex] = useState(0);
   const [subIndex, setSubIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [cinematic, setCinematic] = useState(false);
   const [speed, setSpeed] = useState(4000);
   const [detail, setDetail] = useState<Battle | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -104,7 +111,26 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose }:
   useEffect(() => {
     if (!playing || groups.length === 0) return;
     const group = groups[groupIndex];
+    const battle = group.battles[subIndex];
+
+    // Cinematic mode: when the current battle has a hand-crafted replay,
+    // open it and dwell long enough for the phases to play before advancing.
+    // Battles without a replay dwell at the normal speed.
+    const isCinematic = cinematic && !!onPlayReplay && battle?.hasReplay;
+    if (isCinematic && onPlayReplay) {
+      onPlayReplay(battle);
+    }
+    // ~7s per phase is what BattleReplay plays at the default speed.
+    // Approximate replay length without round-tripping for the phases JSON:
+    // most replays we hand-craft run 4-5 phases, so ~30s gives a full pass.
+    const dwellMs = isCinematic
+      ? 32000
+      : group.concurrent && subIndex < group.battles.length - 1
+      ? Math.max(speed / 2, 1500)
+      : speed;
+
     timerRef.current = setTimeout(() => {
+      if (isCinematic && onCloseReplay) onCloseReplay();
       if (group.concurrent && subIndex < group.battles.length - 1) {
         const next = subIndex + 1;
         setSubIndex(next);
@@ -114,9 +140,9 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose }:
       } else {
         setPlaying(false);
       }
-    }, group.concurrent && subIndex < group.battles.length - 1 ? Math.max(speed / 2, 1500) : speed);
+    }, dwellMs);
     return () => clearTimeout(timerRef.current);
-  }, [playing, groupIndex, subIndex, groups, speed, focusBattle, goTo]);
+  }, [playing, groupIndex, subIndex, groups, speed, cinematic, onPlayReplay, onCloseReplay, focusBattle, goTo]);
 
   // Build a hierarchical tree: top-level wars at depth 0, child theaters and
   // campaigns nested below their parent. The "Bloodiest" and "Most Battles"
@@ -284,13 +310,24 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose }:
                   <button onClick={() => goTo(groupIndex + 1)} disabled={groupIndex >= groups.length - 1}
                     className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all text-xs">&rarr;</button>
                 </div>
-                <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}
-                  className="bg-[#1e2030] border border-slate-700/30 rounded px-2 py-1 text-[10px] text-slate-400">
-                  <option value={6000}>Slow</option>
-                  <option value={4000}>Normal</option>
-                  <option value={2500}>Fast</option>
-                  <option value={1200}>Rapid</option>
-                </select>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setCinematic((c) => !c)}
+                    title="Cinematic mode: when the next battle has a phase replay, open it and play through before advancing."
+                    className={`h-7 px-2.5 rounded text-[10px] font-medium tracking-wide transition-colors ${
+                      cinematic
+                        ? 'bg-blue-500/25 text-blue-200 border border-blue-500/40'
+                        : 'bg-[#1e2030] text-slate-400 border border-slate-700/30 hover:text-slate-300'
+                    }`}
+                  >Cinematic</button>
+                  <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}
+                    className="bg-[#1e2030] border border-slate-700/30 rounded px-2 py-1 text-[10px] text-slate-400">
+                    <option value={6000}>Slow</option>
+                    <option value={4000}>Normal</option>
+                    <option value={2500}>Fast</option>
+                    <option value={1200}>Rapid</option>
+                  </select>
+                </div>
               </div>
 
               <div className="flex items-center gap-2">

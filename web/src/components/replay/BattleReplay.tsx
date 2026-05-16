@@ -3,6 +3,7 @@ import type { Battle } from '../../types/battle';
 import type { Replay } from '../../types/replay';
 import { FACTION_COLOR } from '../../types/replay';
 import TacticalMap from './TacticalMap';
+import GlobeReplay from './GlobeReplay';
 
 interface BattleReplayProps {
   battle: Battle;
@@ -17,6 +18,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<'globe' | 'tactical'>('globe');
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
@@ -100,12 +102,24 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         @keyframes dash-in {
           to { stroke-dashoffset: 0; }
         }
+        @keyframes arrow-fade-in {
+          to { opacity: 1; }
+        }
         .replay-fade-in {
           animation: fade-in 0.6s ease-out;
         }
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        .chapter-card {
+          animation: chapter-flash 3.2s ease-out forwards;
+        }
+        @keyframes chapter-flash {
+          0% { opacity: 0; transform: translateY(-8px) scale(0.98); }
+          15% { opacity: 1; transform: translateY(0) scale(1); }
+          70% { opacity: 1; }
+          100% { opacity: 0; transform: translateY(-4px); }
         }
       `}</style>
 
@@ -147,11 +161,62 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
 
       {/* Main */}
       <div className="flex-1 flex min-h-0">
-        {/* Tactical map */}
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-6xl">
-            <div className="rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
-              <TacticalMap key={phaseIdx} phase={phase} aspectRatio={aspectRatio} />
+        {/* Battle stage: globe-based view by default, with the tactical SVG
+            available as a fallback toggle. The globe puts the action in real
+            geography so the viewer sees Belgium, the Ardennes, the Channel,
+            etc. when watching Battle of France — not an abstract grid. */}
+        <div className="flex-1 flex items-center justify-center p-2 relative">
+          <div className="w-full h-full relative">
+            {view === 'globe' ? (
+              <GlobeReplay
+                battle={battle}
+                replay={replay}
+                phase={phase}
+                phaseIdx={phaseIdx}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="w-full max-w-6xl">
+                  <div className="rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
+                    <TacticalMap key={phaseIdx} phase={phase} aspectRatio={aspectRatio} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Chapter card: flashes the phase title centered over the map at
+                the start of each phase, then fades. Keyed on phaseIdx so it
+                replays on every advance. */}
+            <div
+              key={`chapter-${phaseIdx}`}
+              className="chapter-card pointer-events-none absolute inset-0 flex items-center justify-center"
+            >
+              <div className="px-6 py-3 rounded-xl bg-black/55 backdrop-blur-sm border border-white/10 shadow-2xl text-center">
+                {phase.timeMarker && (
+                  <div className="text-[10px] uppercase tracking-[0.32em] text-slate-300 mb-1">
+                    {phase.timeMarker}
+                  </div>
+                )}
+                <div className="text-2xl font-semibold text-white tracking-tight">
+                  {phase.title}
+                </div>
+              </div>
+            </div>
+
+            {/* View toggle (pinned bottom-left over the stage). */}
+            <div className="absolute bottom-3 left-3 flex bg-black/60 border border-white/10 rounded-full overflow-hidden text-[10px] uppercase tracking-wider">
+              <button
+                onClick={() => setView('globe')}
+                className={`px-3 py-1 transition-colors ${
+                  view === 'globe' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >Globe</button>
+              <button
+                onClick={() => setView('tactical')}
+                className={`px-3 py-1 transition-colors ${
+                  view === 'tactical' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >Tactical</button>
             </div>
           </div>
         </div>

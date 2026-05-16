@@ -287,6 +287,8 @@ export default function App() {
           onBattleFocus={handleBattleClick}
           onBattlesLoaded={setPlaybackBattles}
           onClose={handlePlaybackClose}
+          onPlayReplay={(b) => { setReplayBattle(b); setReplayPhase(0); }}
+          onCloseReplay={() => { setReplayBattle(null); setReplayPhase(0); }}
         />
       )}
 

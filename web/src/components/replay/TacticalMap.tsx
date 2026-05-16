@@ -19,6 +19,25 @@ const VIEW_H = 100;
 export default function TacticalMap({ phase, aspectRatio }: TacticalMapProps) {
   const viewW = useMemo(() => Math.round(VIEW_H * aspectRatio), [aspectRatio]);
 
+  // Camera transform: when the phase declares a focus rect, scale+translate
+  // the contents group so the focus area fills the viewBox. SVG transitions
+  // the transform attribute smoothly. Phases with no focus render full-field.
+  const cameraTransform = useMemo(() => {
+    const f = phase.focus;
+    if (!f) return 'translate(0 0) scale(1)';
+    const fx = (f.x / 100) * viewW;
+    const fy = f.y;
+    const fw = (f.w / 100) * viewW;
+    const fh = f.h;
+    if (fw <= 0 || fh <= 0) return 'translate(0 0) scale(1)';
+    // Uniform scale to fit the focus rect inside the viewBox while preserving
+    // proportions. Cap zoom so even tiny focus rects don't pixelate.
+    const scale = Math.min(viewW / fw, VIEW_H / fh, 4);
+    const tx = (viewW - fw * scale) / 2 - fx * scale;
+    const ty = (VIEW_H - fh * scale) / 2 - fy * scale;
+    return `translate(${tx} ${ty}) scale(${scale})`;
+  }, [phase.focus, viewW]);
+
   return (
     <div className="w-full h-full relative" style={{ aspectRatio: `${aspectRatio} / 1` }}>
       <svg
@@ -27,47 +46,61 @@ export default function TacticalMap({ phase, aspectRatio }: TacticalMapProps) {
         className="w-full h-full"
       >
         <defs>
-          <pattern id="bg-grid" width="6" height="6" patternUnits="userSpaceOnUse">
-            <path d="M 6 0 L 0 0 0 6" fill="none" stroke="rgba(148,163,184,0.06)" strokeWidth="0.2" />
+          {/* Faint topographic-feel pattern: thin diagonal contour lines
+              evoke a map without the graph-paper feel of a square grid. */}
+          <pattern id="bg-topo" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+            <path d="M 0 7 L 14 7" fill="none" stroke="rgba(148,163,184,0.05)" strokeWidth="0.18" />
           </pattern>
-          <radialGradient id="bg-glow" cx="50%" cy="50%" r="60%">
-            <stop offset="0%" stopColor="#1a2235" stopOpacity="1" />
-            <stop offset="100%" stopColor="#0a0d18" stopOpacity="1" />
+          <radialGradient id="bg-glow" cx="50%" cy="50%" r="75%">
+            <stop offset="0%" stopColor="#1d2740" stopOpacity="1" />
+            <stop offset="55%" stopColor="#10162a" stopOpacity="1" />
+            <stop offset="100%" stopColor="#070a14" stopOpacity="1" />
+          </radialGradient>
+          {/* Subtle vignette for cinematic edge falloff. */}
+          <radialGradient id="bg-vignette" cx="50%" cy="50%" r="80%">
+            <stop offset="60%" stopColor="rgba(0,0,0,0)" />
+            <stop offset="100%" stopColor="rgba(0,0,0,0.5)" />
           </radialGradient>
           {(['a', 'b', 'c'] as Faction[]).map((f) => (
             <marker
               key={f}
               id={`arrow-${f}`}
-              viewBox="0 0 10 10"
-              refX="9"
-              refY="5"
-              markerWidth="4"
-              markerHeight="4"
+              viewBox="0 0 14 14"
+              refX="11"
+              refY="7"
+              markerWidth="6"
+              markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path d="M 0 0 L 10 5 L 0 10 z" fill={FACTION_COLOR[f]} />
+              <path d="M 0 0 L 14 7 L 0 14 L 4 7 z" fill={FACTION_COLOR[f]} />
             </marker>
           ))}
         </defs>
 
         <rect x="0" y="0" width={viewW} height={VIEW_H} fill="url(#bg-glow)" />
-        <rect x="0" y="0" width={viewW} height={VIEW_H} fill="url(#bg-grid)" />
+        <rect x="0" y="0" width={viewW} height={VIEW_H} fill="url(#bg-topo)" />
+        <rect x="0" y="0" width={viewW} height={VIEW_H} fill="url(#bg-vignette)" pointerEvents="none" />
 
-        {(phase.terrain ?? []).map((t, i) => (
-          <TerrainShape key={`terrain-${i}`} terrain={t} viewW={viewW} />
-        ))}
+        <g
+          transform={cameraTransform}
+          style={{ transition: 'transform 1.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
+        >
+          {(phase.terrain ?? []).map((t, i) => (
+            <TerrainShape key={`terrain-${i}`} terrain={t} viewW={viewW} />
+          ))}
 
-        {(phase.movements ?? []).map((m, i) => (
-          <MovementArrow key={`mv-${i}-${phase.index}`} movement={m} viewW={viewW} />
-        ))}
+          {(phase.movements ?? []).map((m, i, all) => (
+            <MovementArrow key={`mv-${i}-${phase.index}`} movement={m} viewW={viewW} index={i} total={all.length} />
+          ))}
 
-        {phase.units.map((u, i) => (
-          <UnitBlock key={`unit-${i}-${phase.index}`} unit={u} viewW={viewW} />
-        ))}
+          {phase.units.map((u) => (
+            <UnitBlock key={`unit-${u.label}`} unit={u} viewW={viewW} />
+          ))}
 
-        {(phase.annotations ?? []).map((a, i) => (
-          <AnnotationText key={`ann-${i}`} annotation={a} viewW={viewW} />
-        ))}
+          {(phase.annotations ?? []).map((a, i) => (
+            <AnnotationText key={`ann-${i}`} annotation={a} viewW={viewW} />
+          ))}
+        </g>
       </svg>
     </div>
   );
@@ -426,158 +459,133 @@ function UnitBlock({ unit, viewW }: UnitProps) {
   const opacity = dim ? 0.35 : unit.status === 'destroyed' ? 0.18 : 1;
   const unitType = unit.unitType ?? 'infantry';
 
-  const cx = x;
-  const cy = y;
+  // All inner shapes are positioned relative to the unit center (0,0). An
+  // outer <g> applies translate(x, y) and CSS-transitions the transform so a
+  // unit re-rendered at a new position in the next phase slides smoothly.
+  const cx = 0;
+  const cy = 0;
   const rx = w / 2;
   const ry = h / 2;
   const left = cx - rx;
   const top = cy - ry;
 
-  let body: React.ReactNode = (
+  // Plate: the unit's bounding container. NATO map symbols use a hollow
+  // rectangle frame; we fill it lightly with the faction color so the team
+  // identity is unmistakable, then layer the type glyph on top.
+  const plate = (
     <rect
       x={left}
       y={top}
       width={w}
       height={h}
+      rx={Math.min(1.2, h * 0.18)}
       fill={color}
-      fillOpacity={dim ? 0.2 : 0.55}
+      fillOpacity={dim ? 0.12 : 0.28}
       stroke={color}
-      strokeWidth={dashed ? 0.4 : 0.6}
+      strokeWidth={dashed ? 0.55 : 0.85}
       strokeDasharray={dashed ? '0.8,0.8' : undefined}
     />
   );
 
-  if (unitType === 'cavalry') {
-    // Chevrons on top
-    body = (
-      <g opacity={opacity}>
-        <rect
-          x={left}
-          y={top}
-          width={w}
-          height={h}
-          fill={color}
-          fillOpacity={dim ? 0.2 : 0.55}
-          stroke={color}
-          strokeWidth="0.5"
-        />
-        <path
-          d={`M ${left + 0.5} ${top + 0.4} L ${cx} ${top - 1.2} L ${left + w - 0.5} ${top + 0.4}`}
-          fill="none"
-          stroke={color}
-          strokeWidth="0.5"
-        />
+  // Glyph: a single bold mark inside the plate that identifies the unit type.
+  // Modeled on the NATO 2525 friendly-forces convention so anyone who has
+  // seen a military map recognizes the shape at a glance.
+  const inset = Math.min(rx, ry) * 0.55;
+  let glyph: React.ReactNode = null;
+  if (unitType === 'infantry') {
+    // Diagonal cross — the infantry "X".
+    glyph = (
+      <g stroke={color} strokeWidth="0.7" strokeLinecap="round" opacity={dim ? 0.45 : 0.95}>
+        <line x1={-inset} y1={-inset * 0.7} x2={inset} y2={inset * 0.7} />
+        <line x1={-inset} y1={inset * 0.7} x2={inset} y2={-inset * 0.7} />
       </g>
     );
-  } else if (unitType === 'archers') {
-    body = (
-      <g opacity={opacity}>
-        <rect
-          x={left}
-          y={top}
-          width={w}
-          height={h}
-          fill={color}
-          fillOpacity={dim ? 0.2 : 0.5}
-          stroke={color}
-          strokeWidth="0.5"
-        />
-        <path
-          d={`M ${cx} ${top - 0.4} L ${cx} ${top - 2.2} M ${cx - 0.8} ${top - 0.4} L ${cx + 0.8} ${top - 0.4}`}
-          stroke={color}
-          strokeWidth="0.4"
-          fill="none"
-        />
-      </g>
-    );
-  } else if (unitType === 'artillery') {
-    body = (
-      <g opacity={opacity}>
-        <rect
-          x={left}
-          y={top}
-          width={w}
-          height={h}
-          fill={color}
-          fillOpacity={dim ? 0.18 : 0.45}
-          stroke={color}
-          strokeWidth="0.5"
-        />
-        {[0.25, 0.5, 0.75].map((f) => (
-          <circle key={f} cx={left + w * f} cy={cy} r="0.5" fill={color} fillOpacity="0.9" />
-        ))}
-      </g>
-    );
-  } else if (unitType === 'ships') {
-    // pointed hexagon
-    body = (
-      <polygon
-        points={`${left + 1.5},${top} ${left + w - 1.5},${top} ${left + w},${cy} ${left + w - 1.5},${top + h} ${left + 1.5},${top + h} ${left},${cy}`}
-        fill={color}
-        fillOpacity={dim ? 0.2 : 0.55}
-        stroke={color}
-        strokeWidth="0.5"
-        opacity={opacity}
-      />
-    );
-  } else if (unitType === 'command') {
-    body = (
-      <g opacity={opacity}>
-        <rect
-          x={left}
-          y={top}
-          width={w}
-          height={h}
-          fill={color}
-          fillOpacity={dim ? 0.18 : 0.55}
-          stroke={color}
-          strokeWidth="0.7"
-        />
-        <polygon
-          points={`${cx - 1.2},${top - 1.8} ${cx + 1.2},${top - 0.6} ${cx - 1.2},${top - 0.2}`}
-          fill={color}
-          opacity="0.9"
-        />
-      </g>
-    );
-  } else if (unitType === 'aircraft') {
-    body = (
-      <g opacity={opacity}>
-        <polygon
-          points={`${cx},${top} ${left + w},${top + h} ${cx},${top + h * 0.7} ${left},${top + h}`}
-          fill={color}
-          fillOpacity={dim ? 0.2 : 0.55}
-          stroke={color}
-          strokeWidth="0.5"
-        />
+  } else if (unitType === 'cavalry') {
+    // Single thick diagonal slash, NATO convention for cavalry / recon.
+    glyph = (
+      <g stroke={color} strokeWidth="0.9" strokeLinecap="round" opacity={dim ? 0.45 : 0.95}>
+        <line x1={-inset} y1={inset * 0.75} x2={inset} y2={-inset * 0.75} />
       </g>
     );
   } else if (unitType === 'armor') {
-    body = (
-      <g opacity={opacity}>
-        <rect
-          x={left - 0.5}
-          y={top - 0.5}
-          width={w + 1}
-          height={h + 1}
-          fill="none"
-          stroke={color}
-          strokeOpacity="0.5"
-          strokeWidth="0.3"
-        />
-        <rect
-          x={left}
-          y={top}
-          width={w}
-          height={h}
+    // Filled oval — armored / mechanized.
+    glyph = (
+      <ellipse cx={0} cy={0} rx={inset * 1.15} ry={inset * 0.6} fill={color} fillOpacity={dim ? 0.55 : 0.9} />
+    );
+  } else if (unitType === 'artillery') {
+    // Filled circle — artillery battery.
+    glyph = <circle cx={0} cy={0} r={Math.min(inset * 0.7, 0.9)} fill={color} fillOpacity={dim ? 0.55 : 0.95} />;
+  } else if (unitType === 'archers') {
+    // Two thin chevrons fanning up — archery / missile fire.
+    glyph = (
+      <g stroke={color} strokeWidth="0.55" fill="none" strokeLinecap="round" opacity={dim ? 0.45 : 0.95}>
+        <path d={`M ${-inset} ${inset * 0.6} L 0 ${-inset * 0.7} L ${inset} ${inset * 0.6}`} />
+        <path d={`M ${-inset * 0.55} ${inset * 0.85} L 0 ${0} L ${inset * 0.55} ${inset * 0.85}`} />
+      </g>
+    );
+  } else if (unitType === 'aircraft') {
+    // Triangle pointing up — aircraft / aerial.
+    glyph = (
+      <polygon
+        points={`${0},${-inset * 1.0} ${inset * 0.95},${inset * 0.7} ${-inset * 0.95},${inset * 0.7}`}
+        fill={color}
+        fillOpacity={dim ? 0.5 : 0.9}
+      />
+    );
+  } else if (unitType === 'ships') {
+    // Stylized hull silhouette.
+    glyph = (
+      <path
+        d={`M ${-inset * 1.0} ${inset * 0.2} Q 0 ${inset * 0.95} ${inset * 1.0} ${inset * 0.2} L ${inset * 0.7} ${-inset * 0.3} L ${-inset * 0.7} ${-inset * 0.3} Z`}
+        fill={color}
+        fillOpacity={dim ? 0.55 : 0.9}
+      />
+    );
+  } else if (unitType === 'command') {
+    // Pennant on a staff — headquarters / command.
+    glyph = (
+      <g stroke={color} strokeWidth="0.6" fill="none" opacity={dim ? 0.5 : 0.95}>
+        <line x1={-inset * 0.5} y1={inset * 0.7} x2={-inset * 0.5} y2={-inset * 1.0} />
+        <polygon
+          points={`${-inset * 0.5},${-inset * 1.0} ${inset * 0.8},${-inset * 0.6} ${-inset * 0.5},${-inset * 0.25}`}
           fill={color}
-          fillOpacity={dim ? 0.22 : 0.6}
-          stroke={color}
-          strokeWidth="0.7"
+          fillOpacity={dim ? 0.55 : 0.95}
+          strokeWidth="0"
         />
       </g>
     );
   }
+
+  // Strength bars on the plate's top edge: each bar is one "X" segment in
+  // NATO convention (battalion / regiment / brigade / division indicators).
+  const strengthMarks = (() => {
+    const n = Math.max(0, Math.min(unit.strength ?? 0, 5));
+    if (n === 0) return null;
+    const totalWidth = Math.min(w * 0.6, n * 1.2);
+    const gap = totalWidth / Math.max(n, 1);
+    const startX = -totalWidth / 2 + gap / 2;
+    return (
+      <g stroke={color} strokeWidth="0.5" opacity={dim ? 0.45 : 0.9}>
+        {Array.from({ length: n }).map((_, i) => (
+          <line
+            key={i}
+            x1={startX + i * gap}
+            y1={top - 1.4}
+            x2={startX + i * gap}
+            y2={top - 0.2}
+          />
+        ))}
+      </g>
+    );
+  })();
+
+  const body = (
+    <g opacity={opacity}>
+      {plate}
+      {glyph}
+      {strengthMarks}
+    </g>
+  );
 
   // Status overlays
   let statusOverlay: React.ReactNode = null;
@@ -643,7 +651,14 @@ function UnitBlock({ unit, viewW }: UnitProps) {
   }
 
   return (
-    <g style={{ filter: dim ? undefined : `drop-shadow(0 0 1.2px ${glow})` }} opacity={opacity}>
+    <g
+      transform={`translate(${x} ${y})`}
+      style={{
+        filter: dim ? undefined : `drop-shadow(0 0 1.2px ${glow})`,
+        transition: 'transform 0.9s cubic-bezier(0.4, 0, 0.2, 1)',
+      }}
+      opacity={opacity}
+    >
       {body}
       {statusOverlay}
       <text
@@ -664,67 +679,127 @@ function UnitBlock({ unit, viewW }: UnitProps) {
 interface MovementProps {
   movement: Movement;
   viewW: number;
+  // index is the position of this movement within the phase's movements[]
+  // list; used to stagger the dash-in animation so the eye reads the arrows
+  // in narration order.
+  index: number;
+  // total is the number of movements in the phase, used to scale per-arrow
+  // delay so the full choreography always finishes before the next phase.
+  total: number;
 }
 
-function MovementArrow({ movement, viewW }: MovementProps) {
+function MovementArrow({ movement, viewW, index, total }: MovementProps) {
   const color = FACTION_COLOR[movement.faction];
   const x1 = scaleX(movement.fromX, viewW);
   const y1 = movement.fromY;
   const x2 = scaleX(movement.toX, viewW);
   const y2 = movement.toY;
   const kind = movement.kind ?? 'advance';
+  // Stagger: pace arrows ~600ms apart but cap so a phase with many movements
+  // still completes inside its 6-7s window.
+  const stagger = total <= 1 ? 0 : Math.min(0.6, 4 / Math.max(total, 1)) * index;
 
-  // Compute curved control point (perpendicular offset) for flank/rout
+  // Curve depth tuned per movement kind for visual drama. Flank arrows bend
+  // hard; charges drive nearly straight; retreats and routs curve outward
+  // to feel like flight.
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  const offset = kind === 'flank' ? 8 : kind === 'rout' ? -4 : 2;
-  const cx = (x1 + x2) / 2 - (dy / len) * offset;
-  const cy = (y1 + y2) / 2 + (dx / len) * offset;
+  const offsetMag =
+    kind === 'flank' ? 14 :
+    kind === 'rout' ? -8 :
+    kind === 'retreat' || kind === 'withdrawal' ? -5 :
+    kind === 'charge' ? 4 :
+    6;
+  const cx = (x1 + x2) / 2 - (dy / len) * offsetMag;
+  const cy = (y1 + y2) / 2 + (dx / len) * offsetMag;
   const path = `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
 
+  // Style by kind: solid sweeping arc by default, dashed for retreats and
+  // routs, thicker for charge/flank. Far heavier than the old 1.2-unit
+  // pencil stroke — these should read at a glance as army movement, not
+  // a graph plot.
   let dash: string | undefined;
-  let strokeWidth = 1.2;
-  let opacity = 0.95;
+  let strokeWidth = 2.4;
+  let opacity = 0.92;
   if (kind === 'retreat' || kind === 'withdrawal') {
-    dash = '2,1';
-    strokeWidth = 1;
+    dash = '3,1.5';
+    strokeWidth = 2.2;
+    opacity = 0.85;
   } else if (kind === 'rout') {
-    dash = '0.6,0.6';
-    strokeWidth = 0.9;
-    opacity = 0.7;
+    dash = '1.2,1.2';
+    strokeWidth = 1.8;
+    opacity = 0.75;
   } else if (kind === 'charge') {
-    strokeWidth = 1.6;
+    strokeWidth = 3.2;
   } else if (kind === 'flank') {
-    strokeWidth = 1.4;
+    strokeWidth = 2.8;
   }
 
+  // Each arrow gets its own gradient + flow-id so colors blend along the
+  // path direction and the dashed flow animation is unique per arrow.
+  const gradId = `arrow-grad-${movement.faction}-${index}`;
+  const flowId = `arrow-flow-${movement.faction}-${index}`;
+
   return (
-    <g className="movement-arrow">
+    <g className="movement-arrow" style={{ opacity: 0, animation: `arrow-fade-in 0.35s ease-out ${stagger}s forwards` }}>
+      <defs>
+        <linearGradient id={gradId} x1={x1} y1={y1} x2={x2} y2={y2} gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+          <stop offset="55%" stopColor={color} stopOpacity="0.85" />
+          <stop offset="100%" stopColor={color} stopOpacity="1" />
+        </linearGradient>
+      </defs>
+
+      {/* Soft glow under the stroke for atmospheric depth. */}
       <path
         d={path}
         fill="none"
         stroke={color}
+        strokeWidth={strokeWidth + 1.6}
+        strokeLinecap="round"
+        opacity={0.18}
+        style={{
+          strokeDasharray: dash ?? '180',
+          strokeDashoffset: 180,
+          animation: `dash-in 1.6s ease-out ${stagger}s forwards`,
+        }}
+      />
+
+      {/* Primary stroke draws in along the path, with a moving dash flow
+          once drawn for the kinetic feel of an advancing column. */}
+      <path
+        id={flowId}
+        d={path}
+        fill="none"
+        stroke={`url(#${gradId})`}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeDasharray={dash}
         markerEnd={`url(#arrow-${movement.faction})`}
         opacity={opacity}
         style={{
-          strokeDasharray: dash ?? '120',
-          strokeDashoffset: 120,
-          animation: `dash-in 1.4s ease-out forwards`,
+          strokeDasharray: dash ?? '180',
+          strokeDashoffset: 180,
+          animation: `dash-in 1.4s ease-out ${stagger}s forwards`,
         }}
       />
+
       {movement.label && (
         <text
           x={cx}
-          y={cy - 1.2}
-          fontSize="1.4"
+          y={cy - 1.8}
+          fontSize="1.6"
+          fontWeight="600"
           textAnchor="middle"
           fill={color}
-          opacity="0.9"
-          style={{ paintOrder: 'stroke', stroke: 'rgba(10,13,24,0.85)', strokeWidth: 0.8 }}
+          opacity="0.95"
+          style={{
+            paintOrder: 'stroke',
+            stroke: 'rgba(8,11,20,0.92)',
+            strokeWidth: 1.1,
+            letterSpacing: '0.04em',
+          }}
         >
           {movement.label}
         </text>

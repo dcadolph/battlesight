@@ -45,6 +45,24 @@ type Phase struct {
 	Terrain []Terrain `json:"terrain,omitempty"`
 	// Annotations are free-form text labels overlaid on the field.
 	Annotations []Annotation `json:"annotations,omitempty"`
+	// Focus optionally constrains the visible area for this phase. When set,
+	// the tactical viewport pans and zooms to this rect, framing the action
+	// (e.g. a tight zoom on Bloody Lane, then a wide pull-back for the
+	// army's race to the sea). x/y/w/h are normalized 0-100.
+	Focus *FocusRect `json:"focus,omitempty"`
+}
+
+// FocusRect is the rectangular area of the tactical map that the camera
+// frames during a phase. All four values are in the normalized 0-100 space.
+type FocusRect struct {
+	// X is the left edge.
+	X float64 `json:"x"`
+	// Y is the top edge.
+	Y float64 `json:"y"`
+	// W is the width.
+	W float64 `json:"w"`
+	// H is the height.
+	H float64 `json:"h"`
 }
 
 // Unit is a force unit positioned on the tactical map.

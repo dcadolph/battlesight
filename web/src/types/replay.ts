@@ -11,6 +11,13 @@ export interface Replay {
   phases: Phase[];
 }
 
+export interface FocusRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 export interface Phase {
   index: number;
   title: string;
@@ -21,6 +28,7 @@ export interface Phase {
   movements?: Movement[];
   terrain?: Terrain[];
   annotations?: Annotation[];
+  focus?: FocusRect;
 }
 
 export type Faction = 'a' | 'b' | 'c';

@@ -64,4 +64,14 @@ type Battle struct {
 	Source string `json:"source,omitempty"`
 	// HasReplay is true when a hand-crafted phased replay exists for this battle.
 	HasReplay bool `json:"hasReplay"`
+	// HasSchematic is true when an auto-generated replay can be produced from
+	// the battle's metadata (sides present). Always false when HasReplay is true.
+	HasSchematic bool `json:"hasSchematic"`
+	// WikipediaTitle is the article title on en.wikipedia.org for this battle.
+	WikipediaTitle string `json:"wikipediaTitle,omitempty"`
+	// Tier is the data-quality tier the battle currently occupies. One of:
+	//   "reconstructed" - hand-crafted phase replay exists.
+	//   "documented"    - curated entry, or non-curated with clean war and sides.
+	//   "indexed"       - sparse Wikidata-harvested entry; trust Wikipedia link.
+	Tier string `json:"tier"`
 }

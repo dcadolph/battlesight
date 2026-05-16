@@ -3,8 +3,15 @@ import type { Battle } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 
 interface NameCount { name: string; count: number; }
-interface StatsData { totalBattles: number; eras: NameCount[]; wars: NameCount[]; battleTypes: NameCount[]; }
-interface Filters { era: string; war: string; battleType: string; }
+interface StatsData {
+  totalBattles: number;
+  verifiedBattles: number;
+  replayCount: number;
+  eras: NameCount[];
+  wars: NameCount[];
+  battleTypes: NameCount[];
+}
+interface Filters { era: string; war: string; battleType: string; quality: string }
 
 interface CommandBarProps {
   filters: Filters;
@@ -28,7 +35,7 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
   const [panel, setPanel] = useState<'none' | 'filters'>('none');
   const [stats, setStats] = useState<StatsData | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     fetch('/api/battles/stats').then((r) => r.json()).then(setStats).catch(() => {});
@@ -36,7 +43,7 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
 
   const search = useCallback((q: string) => {
     if (q.length < 2) { setResults([]); setSearchOpen(false); return; }
-    fetch(`/api/battles/search?q=${encodeURIComponent(q)}&limit=6`)
+    fetch(`/api/battles/search?q=${encodeURIComponent(q)}&limit=8`)
       .then((r) => r.json())
       .then((d) => { setResults(d.battles || []); setSearchOpen(true); setActiveIndex(-1); })
       .catch(() => setResults([]));
@@ -82,7 +89,7 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
     return () => window.removeEventListener('keydown', fn);
   }, []);
 
-  const hasFilters = !!(filters.era || filters.war || filters.battleType);
+  const hasFilters = !!(filters.era || filters.war || filters.battleType || filters.quality);
 
   return (
     <>
@@ -92,7 +99,12 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
           <h1 className="text-xl font-bold text-white tracking-tight">
             Battle<span className="text-blue-400">Trace</span>
           </h1>
-          <span className="text-[11px] text-slate-600 tabular-nums">{battleCount.toLocaleString()} battles</span>
+          <span className="text-[11px] text-slate-600 tabular-nums">
+            {battleCount.toLocaleString()} battles
+            {stats && stats.replayCount > 0 && (
+              <span className="ml-2 text-blue-400/80">· {stats.replayCount} replays</span>
+            )}
+          </span>
         </div>
       </div>
 
@@ -129,6 +141,9 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: ERA_COLORS[b.era] || '#666' }} />
                   <span className="text-slate-200 truncate flex-1">{b.name}</span>
+                  {b.hasReplay && (
+                    <span className="text-[9px] text-blue-300 px-1 rounded bg-blue-500/20" title="Has phase replay">▶</span>
+                  )}
                   <span className="text-[10px] text-slate-600 flex-shrink-0">{formatYear(b.year)}</span>
                 </div>
               </button>
@@ -178,11 +193,11 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
                   : 'bg-[#1e2030] text-slate-400 border border-slate-600/50 hover:text-white hover:border-slate-500/60'
               }`}
             >
-              Filters{hasFilters ? ` (${[filters.era, filters.war, filters.battleType].filter(Boolean).length})` : ''}
+              Filters{hasFilters ? ` (${[filters.era, filters.war, filters.battleType, filters.quality].filter(Boolean).length})` : ''}
             </button>
             {hasFilters && (
               <button
-                onClick={() => onFiltersChange({ era: '', war: '', battleType: '' })}
+                onClick={() => onFiltersChange({ era: '', war: '', battleType: '', quality: '' })}
                 className="h-7 px-2 rounded-md text-[10px] text-slate-600 hover:text-slate-300 transition-colors"
               >
                 Clear
@@ -194,7 +209,38 @@ export default function CommandBar({ filters, onFiltersChange, onBattleSelect, o
 
       {/* Filter panel */}
       {!playbackActive && panel === 'filters' && stats && (
-        <div className="fixed top-[130px] left-5 z-40 w-56 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-2">
+        <div className="fixed top-[130px] left-5 z-40 w-64 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3">
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[10px] text-slate-600 uppercase tracking-wider">Tier</label>
+              <span className="text-[9px] text-slate-700 normal-case">Trust contract</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1">
+              {([
+                { v: 'reconstructed', label: 'Reconstructed', desc: `${stats.replayCount} battles with hand-built phase replays` },
+                { v: '', label: 'Documented', desc: `Curated + clean Wikidata. The default; ${stats.totalBattles.toLocaleString()} max.` },
+                { v: 'indexed', label: 'Indexed', desc: 'Sparse Wikidata entries. Treat as a pointer to Wikipedia.' },
+                { v: 'all', label: 'All', desc: 'No quality gate, including messy records.' },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.v}
+                  onClick={() => onFiltersChange({ ...filters, quality: opt.v })}
+                  className={`h-7 px-2 rounded text-[10px] transition-colors ${
+                    (filters.quality || '') === opt.v
+                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      : 'bg-[#1c1d27] text-slate-500 border border-slate-700/30 hover:text-slate-300'
+                  }`}
+                  title={opt.desc}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1.5 text-[10px] leading-snug text-slate-600">
+              Reconstructed has phase-by-phase animation. Documented has verified sides and dates. Indexed entries are just a name and coordinates — open Wikipedia for the story.
+            </p>
+          </div>
+
           <div>
             <label className="block text-[10px] text-slate-600 uppercase tracking-wider mb-1">Era</label>
             <select

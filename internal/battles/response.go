@@ -69,10 +69,14 @@ type Filter struct {
 	// IncludeNoCoord forces inclusion of records where lat=0 and lng=0; by
 	// default these are filtered because they cannot appear on the globe.
 	IncludeNoCoord bool
-	// Quality picks a trust level. Values:
-	//   "verified"  - only hand-curated battles
-	//   "trusted"   - verified plus records with non-empty sides and clean war
-	//   "all"       - everything (no quality gate)
-	// Empty string defaults to "trusted".
+	// Quality picks a data-quality tier. Values:
+	//   "reconstructed" - only battles with a hand-crafted phase replay.
+	//   "documented"    - curated battles plus non-curated with clean war field.
+	//   "indexed"       - sparse Wikidata-harvested entries only.
+	//   "all"           - everything (no quality gate).
+	// Empty string defaults to "documented".
 	Quality string
+	// IDs restricts results to this set. Combines with all other filters via AND.
+	// Empty slice means no restriction.
+	IDs []string
 }

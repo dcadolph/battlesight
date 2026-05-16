@@ -267,7 +267,9 @@ func parseInfobox(wikitext string) parsedInfobox {
 	}
 }
 
-// cleanWikitext strips wiki markup, HTML tags, and templates from a field value.
+// cleanWikitext strips wiki markup, HTML tags, and templates from a field
+// value and decodes the common named HTML entities that appear in raw
+// Wikipedia infobox text.
 func cleanWikitext(s string) string {
 	s = refTag.ReplaceAllString(s, "")
 	s = brTag.ReplaceAllString(s, ", ")
@@ -278,7 +280,14 @@ func cleanWikitext(s string) string {
 	s = htmlTag.ReplaceAllString(s, "")
 	s = strings.ReplaceAll(s, "'''", "")
 	s = strings.ReplaceAll(s, "''", "")
+	// Decode the named entities that appear in date/result/place fields.
 	s = strings.ReplaceAll(s, "&nbsp;", " ")
+	s = strings.ReplaceAll(s, "&ndash;", "–")
+	s = strings.ReplaceAll(s, "&mdash;", "—")
+	s = strings.ReplaceAll(s, "&amp;", "&")
+	s = strings.ReplaceAll(s, "&quot;", "\"")
+	s = strings.ReplaceAll(s, "&#39;", "'")
+	s = strings.ReplaceAll(s, "&apos;", "'")
 	s = strings.ReplaceAll(s, "  ", " ")
 	s = strings.TrimSpace(s)
 	// Strip leading "the " from partof fields.

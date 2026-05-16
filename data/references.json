@@ -1,149 +1,678 @@
 {
-  "marathon": [
-    {"type": "book", "title": "The Battle of Marathon", "author": "Peter Krentz", "year": 2010, "note": "Definitive modern account with battlefield archaeology"},
-    {"type": "book", "title": "The Histories", "author": "Herodotus", "note": "Primary ancient source, Book VI"},
-    {"type": "film", "title": "The 300 Spartans", "author": "Rudolph Mate (dir.)", "year": 1962, "note": "Covers the broader Greco-Persian Wars including Marathon"}
+  "marathon-490bc": [
+    {
+      "type": "book",
+      "title": "The Battle of Marathon",
+      "author": "Peter Krentz",
+      "year": 2010,
+      "note": "Definitive modern account with battlefield archaeology"
+    },
+    {
+      "type": "book",
+      "title": "The Histories",
+      "author": "Herodotus",
+      "note": "Primary ancient source, Book VI"
+    },
+    {
+      "type": "film",
+      "title": "The 300 Spartans",
+      "author": "Rudolph Mate (dir.)",
+      "year": 1962,
+      "note": "Covers the broader Greco-Persian Wars including Marathon"
+    }
   ],
-  "thermopylae": [
-    {"type": "book", "title": "Gates of Fire", "author": "Steven Pressfield", "year": 1998, "note": "Historical novel widely read at military academies"},
-    {"type": "book", "title": "Thermopylae: The Battle That Changed the World", "author": "Paul Cartledge", "year": 2006, "note": "Scholarly but accessible account"},
-    {"type": "film", "title": "300", "author": "Zack Snyder (dir.)", "year": 2006, "note": "Stylized adaptation of Frank Miller's graphic novel"},
-    {"type": "film", "title": "The 300 Spartans", "author": "Rudolph Mate (dir.)", "year": 1962, "note": "Classic dramatization of the battle"}
+  "thermopylae-480bc": [
+    {
+      "type": "book",
+      "title": "Gates of Fire",
+      "author": "Steven Pressfield",
+      "year": 1998,
+      "note": "Historical novel widely read at military academies"
+    },
+    {
+      "type": "book",
+      "title": "Thermopylae: The Battle That Changed the World",
+      "author": "Paul Cartledge",
+      "year": 2006,
+      "note": "Scholarly but accessible account"
+    },
+    {
+      "type": "film",
+      "title": "300",
+      "author": "Zack Snyder (dir.)",
+      "year": 2006,
+      "note": "Stylized adaptation of Frank Miller's graphic novel"
+    },
+    {
+      "type": "film",
+      "title": "The 300 Spartans",
+      "author": "Rudolph Mate (dir.)",
+      "year": 1962,
+      "note": "Classic dramatization of the battle"
+    }
   ],
-  "salamis": [
-    {"type": "book", "title": "Salamis: The Greatest Naval Battle of the Ancient World", "author": "Barry Strauss", "year": 2004, "note": "Narrative history of the naval engagement"},
-    {"type": "book", "title": "The Persians", "author": "Aeschylus", "note": "Contemporary play by a veteran of the battle, oldest surviving Greek drama"}
+  "salamis-480bc": [
+    {
+      "type": "book",
+      "title": "Salamis: The Greatest Naval Battle of the Ancient World",
+      "author": "Barry Strauss",
+      "year": 2004,
+      "note": "Narrative history of the naval engagement"
+    },
+    {
+      "type": "book",
+      "title": "The Persians",
+      "author": "Aeschylus",
+      "note": "Contemporary play by a veteran of the battle, oldest surviving Greek drama"
+    }
   ],
-  "gaugamela": [
-    {"type": "book", "title": "Alexander the Great", "author": "Robin Lane Fox", "year": 1973, "note": "Comprehensive biography covering all major campaigns"},
-    {"type": "book", "title": "The Campaigns of Alexander", "author": "Arrian", "note": "Best ancient source, written from lost eyewitness accounts"},
-    {"type": "film", "title": "Alexander", "author": "Oliver Stone (dir.)", "year": 2004, "note": "Features a detailed recreation of Gaugamela"}
+  "gaugamela-331bc": [
+    {
+      "type": "book",
+      "title": "Alexander the Great",
+      "author": "Robin Lane Fox",
+      "year": 1973,
+      "note": "Comprehensive biography covering all major campaigns"
+    },
+    {
+      "type": "book",
+      "title": "The Campaigns of Alexander",
+      "author": "Arrian",
+      "note": "Best ancient source, written from lost eyewitness accounts"
+    },
+    {
+      "type": "film",
+      "title": "Alexander",
+      "author": "Oliver Stone (dir.)",
+      "year": 2004,
+      "note": "Features a detailed recreation of Gaugamela"
+    }
   ],
-  "cannae": [
-    {"type": "book", "title": "Cannae: The Experience of Battle in the Second Punic War", "author": "Gregory Daly", "year": 2002, "note": "Focused account of the battle mechanics"},
-    {"type": "book", "title": "Hannibal", "author": "Patrick N. Hunt", "year": 2017, "note": "Modern biography covering Cannae in detail"},
-    {"type": "book", "title": "The Histories", "author": "Polybius", "note": "Primary ancient source, Book III"}
+  "cannae-216bc": [
+    {
+      "type": "book",
+      "title": "Cannae: The Experience of Battle in the Second Punic War",
+      "author": "Gregory Daly",
+      "year": 2002,
+      "note": "Focused account of the battle mechanics"
+    },
+    {
+      "type": "book",
+      "title": "Hannibal",
+      "author": "Patrick N. Hunt",
+      "year": 2017,
+      "note": "Modern biography covering Cannae in detail"
+    },
+    {
+      "type": "book",
+      "title": "The Histories",
+      "author": "Polybius",
+      "note": "Primary ancient source, Book III"
+    }
   ],
-  "alesia": [
-    {"type": "book", "title": "Caesar: Life of a Colossus", "author": "Adrian Goldsworthy", "year": 2006, "note": "Thorough biography with detailed siege analysis"},
-    {"type": "book", "title": "The Gallic War", "author": "Julius Caesar", "note": "Caesar's own account, Book VII"},
-    {"type": "documentary", "title": "Decisive Battles: Alesia", "author": "History Channel", "year": 2004, "note": "CGI recreation of the double siege"}
+  "alesia-52bc": [
+    {
+      "type": "book",
+      "title": "Caesar: Life of a Colossus",
+      "author": "Adrian Goldsworthy",
+      "year": 2006,
+      "note": "Thorough biography with detailed siege analysis"
+    },
+    {
+      "type": "book",
+      "title": "The Gallic War",
+      "author": "Julius Caesar",
+      "note": "Caesar's own account, Book VII"
+    },
+    {
+      "type": "documentary",
+      "title": "Decisive Battles: Alesia",
+      "author": "History Channel",
+      "year": 2004,
+      "note": "CGI recreation of the double siege"
+    }
   ],
-  "actium": [
-    {"type": "book", "title": "Actium: The Battle That Made the Roman Empire", "author": "Barry Strauss", "year": 2022, "note": "Definitive modern account"},
-    {"type": "film", "title": "Cleopatra", "author": "Joseph L. Mankiewicz (dir.)", "year": 1963, "note": "Epic film depicting the lead-up and battle"}
+  "actium-31bc": [
+    {
+      "type": "book",
+      "title": "Actium: The Battle That Made the Roman Empire",
+      "author": "Barry Strauss",
+      "year": 2022,
+      "note": "Definitive modern account"
+    },
+    {
+      "type": "film",
+      "title": "Cleopatra",
+      "author": "Joseph L. Mankiewicz (dir.)",
+      "year": 1963,
+      "note": "Epic film depicting the lead-up and battle"
+    }
   ],
-  "hastings": [
-    {"type": "book", "title": "1066: The Year of the Conquest", "author": "David Howarth", "year": 1977, "note": "Accessible narrative of the invasion year"},
-    {"type": "book", "title": "The Norman Conquest", "author": "Marc Morris", "year": 2012, "note": "Comprehensive modern account"},
-    {"type": "documentary", "title": "1066: A Year to Conquer England", "author": "BBC", "year": 2017, "note": "Three-part dramatized documentary"}
+  "hastings-1066": [
+    {
+      "type": "book",
+      "title": "1066: The Year of the Conquest",
+      "author": "David Howarth",
+      "year": 1977,
+      "note": "Accessible narrative of the invasion year"
+    },
+    {
+      "type": "book",
+      "title": "The Norman Conquest",
+      "author": "Marc Morris",
+      "year": 2012,
+      "note": "Comprehensive modern account"
+    },
+    {
+      "type": "documentary",
+      "title": "1066: A Year to Conquer England",
+      "author": "BBC",
+      "year": 2017,
+      "note": "Three-part dramatized documentary"
+    }
   ],
-  "agincourt": [
-    {"type": "book", "title": "Agincourt: Henry V and the Battle That Made England", "author": "Juliet Barker", "year": 2005, "note": "Detailed scholarly account with primary sources"},
-    {"type": "book", "title": "The Face of Battle", "author": "John Keegan", "year": 1976, "note": "Pioneering battle history, Agincourt is one of three case studies"},
-    {"type": "film", "title": "Henry V", "author": "Kenneth Branagh (dir.)", "year": 1989, "note": "Award-winning Shakespeare adaptation featuring the battle"},
-    {"type": "film", "title": "The King", "author": "David Michod (dir.)", "year": 2019, "note": "Netflix adaptation of the Henriad with Agincourt climax"}
+  "agincourt-1415": [
+    {
+      "type": "book",
+      "title": "Agincourt: Henry V and the Battle That Made England",
+      "author": "Juliet Barker",
+      "year": 2005,
+      "note": "Detailed scholarly account with primary sources"
+    },
+    {
+      "type": "book",
+      "title": "The Face of Battle",
+      "author": "John Keegan",
+      "year": 1976,
+      "note": "Pioneering battle history, Agincourt is one of three case studies"
+    },
+    {
+      "type": "film",
+      "title": "Henry V",
+      "author": "Kenneth Branagh (dir.)",
+      "year": 1989,
+      "note": "Award-winning Shakespeare adaptation featuring the battle"
+    },
+    {
+      "type": "film",
+      "title": "The King",
+      "author": "David Michod (dir.)",
+      "year": 2019,
+      "note": "Netflix adaptation of the Henriad with Agincourt climax"
+    }
   ],
-  "constantinople": [
-    {"type": "book", "title": "1453: The Holy War for Constantinople", "author": "Roger Crowley", "year": 2005, "note": "Gripping narrative of the siege"},
-    {"type": "book", "title": "The Fall of Constantinople 1453", "author": "Steven Runciman", "year": 1965, "note": "Classic scholarly account"},
-    {"type": "film", "title": "Fetih 1453", "author": "Faruk Aksoy (dir.)", "year": 2012, "note": "Turkish production depicting the siege from the Ottoman perspective"}
+  "constantinople-1453": [
+    {
+      "type": "book",
+      "title": "1453: The Holy War for Constantinople",
+      "author": "Roger Crowley",
+      "year": 2005,
+      "note": "Gripping narrative of the siege"
+    },
+    {
+      "type": "book",
+      "title": "The Fall of Constantinople 1453",
+      "author": "Steven Runciman",
+      "year": 1965,
+      "note": "Classic scholarly account"
+    },
+    {
+      "type": "film",
+      "title": "Fetih 1453",
+      "author": "Faruk Aksoy (dir.)",
+      "year": 2012,
+      "note": "Turkish production depicting the siege from the Ottoman perspective"
+    }
   ],
-  "spanish-armada": [
-    {"type": "book", "title": "The Armada", "author": "Garrett Mattingly", "year": 1959, "note": "Pulitzer Prize-winning account"},
-    {"type": "book", "title": "Armada: The Spanish Enterprise and England's Deliverance in 1588", "author": "Colin Martin & Geoffrey Parker", "year": 1988, "note": "Uses archaeological evidence from wreck sites"},
-    {"type": "documentary", "title": "Armada: 12 Days to Save England", "author": "BBC", "year": 2015, "note": "Three-part dramatized documentary"}
+  "spanish-armada-1588": [
+    {
+      "type": "book",
+      "title": "The Armada",
+      "author": "Garrett Mattingly",
+      "year": 1959,
+      "note": "Pulitzer Prize-winning account"
+    },
+    {
+      "type": "book",
+      "title": "Armada: The Spanish Enterprise and England's Deliverance in 1588",
+      "author": "Colin Martin & Geoffrey Parker",
+      "year": 1988,
+      "note": "Uses archaeological evidence from wreck sites"
+    },
+    {
+      "type": "documentary",
+      "title": "Armada: 12 Days to Save England",
+      "author": "BBC",
+      "year": 2015,
+      "note": "Three-part dramatized documentary"
+    }
   ],
-  "breitenfeld": [
-    {"type": "book", "title": "The Thirty Years War", "author": "C.V. Wedgwood", "year": 1938, "note": "Classic comprehensive history of the conflict"},
-    {"type": "book", "title": "Gustavus Adolphus and the Struggle of Protestantism for Existence", "author": "C.R.L. Fletcher", "year": 1890, "note": "Covers the Swedish king's campaigns in detail"}
+  "breitenfeld-1631": [
+    {
+      "type": "book",
+      "title": "The Thirty Years War",
+      "author": "C.V. Wedgwood",
+      "year": 1938,
+      "note": "Classic comprehensive history of the conflict"
+    },
+    {
+      "type": "book",
+      "title": "Gustavus Adolphus and the Struggle of Protestantism for Existence",
+      "author": "C.R.L. Fletcher",
+      "year": 1890,
+      "note": "Covers the Swedish king's campaigns in detail"
+    }
   ],
-  "trafalgar": [
-    {"type": "book", "title": "Trafalgar: The Nelson Touch", "author": "David Howarth", "year": 1969, "note": "Readable account from multiple perspectives"},
-    {"type": "book", "title": "Nelson: A Dream of Glory", "author": "John Sugden", "year": 2004, "note": "Authoritative two-volume Nelson biography"},
-    {"type": "film", "title": "Master and Commander: The Far Side of the World", "author": "Peter Weir (dir.)", "year": 2003, "note": "Set during the Napoleonic naval wars, captures the era authentically"}
+  "trafalgar-1805": [
+    {
+      "type": "book",
+      "title": "Trafalgar: The Nelson Touch",
+      "author": "David Howarth",
+      "year": 1969,
+      "note": "Readable account from multiple perspectives"
+    },
+    {
+      "type": "book",
+      "title": "Nelson: A Dream of Glory",
+      "author": "John Sugden",
+      "year": 2004,
+      "note": "Authoritative two-volume Nelson biography"
+    },
+    {
+      "type": "film",
+      "title": "Master and Commander: The Far Side of the World",
+      "author": "Peter Weir (dir.)",
+      "year": 2003,
+      "note": "Set during the Napoleonic naval wars, captures the era authentically"
+    }
   ],
-  "austerlitz": [
-    {"type": "book", "title": "Austerlitz: Napoleon and the Destruction of the Third Coalition", "author": "Robert Goetz", "year": 2005, "note": "Detailed operational-level account"},
-    {"type": "book", "title": "War and Peace", "author": "Leo Tolstoy", "year": 1869, "note": "Classic novel featuring the battle from the Russian perspective"},
-    {"type": "film", "title": "Austerlitz", "author": "Abel Gance (dir.)", "year": 1960, "note": "French-language epic focused on the battle"}
+  "austerlitz-1805": [
+    {
+      "type": "book",
+      "title": "Austerlitz: Napoleon and the Destruction of the Third Coalition",
+      "author": "Robert Goetz",
+      "year": 2005,
+      "note": "Detailed operational-level account"
+    },
+    {
+      "type": "book",
+      "title": "War and Peace",
+      "author": "Leo Tolstoy",
+      "year": 1869,
+      "note": "Classic novel featuring the battle from the Russian perspective"
+    },
+    {
+      "type": "film",
+      "title": "Austerlitz",
+      "author": "Abel Gance (dir.)",
+      "year": 1960,
+      "note": "French-language epic focused on the battle"
+    }
   ],
-  "waterloo": [
-    {"type": "book", "title": "Waterloo: The History of Four Days, Three Armies, and Three Battles", "author": "Bernard Cornwell", "year": 2014, "note": "Vivid narrative from the Sharpe author"},
-    {"type": "book", "title": "The Face of Battle", "author": "John Keegan", "year": 1976, "note": "Waterloo is one of three battles analyzed in this landmark work"},
-    {"type": "film", "title": "Waterloo", "author": "Sergei Bondarchuk (dir.)", "year": 1970, "note": "Epic recreation using 15,000 Soviet soldiers as extras"},
-    {"type": "film", "title": "Napoleon", "author": "Ridley Scott (dir.)", "year": 2023, "note": "Features the Waterloo campaign as a climactic sequence"}
+  "waterloo-1815": [
+    {
+      "type": "book",
+      "title": "Waterloo: The History of Four Days, Three Armies, and Three Battles",
+      "author": "Bernard Cornwell",
+      "year": 2014,
+      "note": "Vivid narrative from the Sharpe author"
+    },
+    {
+      "type": "book",
+      "title": "The Face of Battle",
+      "author": "John Keegan",
+      "year": 1976,
+      "note": "Waterloo is one of three battles analyzed in this landmark work"
+    },
+    {
+      "type": "film",
+      "title": "Waterloo",
+      "author": "Sergei Bondarchuk (dir.)",
+      "year": 1970,
+      "note": "Epic recreation using 15,000 Soviet soldiers as extras"
+    },
+    {
+      "type": "film",
+      "title": "Napoleon",
+      "author": "Ridley Scott (dir.)",
+      "year": 2023,
+      "note": "Features the Waterloo campaign as a climactic sequence"
+    }
   ],
-  "gettysburg": [
-    {"type": "book", "title": "The Killer Angels", "author": "Michael Shaara", "year": 1974, "note": "Pulitzer Prize-winning historical novel of the battle"},
-    {"type": "book", "title": "Gettysburg: The Last Invasion", "author": "Allen C. Guelzo", "year": 2013, "note": "Comprehensive modern scholarly account"},
-    {"type": "film", "title": "Gettysburg", "author": "Ronald F. Maxwell (dir.)", "year": 1993, "note": "Four-hour adaptation of The Killer Angels with large-scale reenactments"}
+  "gettysburg-1863": [
+    {
+      "type": "book",
+      "title": "The Killer Angels",
+      "author": "Michael Shaara",
+      "year": 1974,
+      "note": "Pulitzer Prize-winning historical novel of the battle"
+    },
+    {
+      "type": "book",
+      "title": "Gettysburg: The Last Invasion",
+      "author": "Allen C. Guelzo",
+      "year": 2013,
+      "note": "Comprehensive modern scholarly account"
+    },
+    {
+      "type": "film",
+      "title": "Gettysburg",
+      "author": "Ronald F. Maxwell (dir.)",
+      "year": 1993,
+      "note": "Four-hour adaptation of The Killer Angels with large-scale reenactments"
+    }
   ],
-  "antietam": [
-    {"type": "book", "title": "Landscape Turned Red: The Battle of Antietam", "author": "Stephen W. Sears", "year": 1983, "note": "Definitive account of the bloodiest day"},
-    {"type": "book", "title": "Crossroads of Freedom: Antietam", "author": "James McPherson", "year": 2002, "note": "Concise account focused on the battle's political consequences"}
+  "antietam-1862": [
+    {
+      "type": "book",
+      "title": "Landscape Turned Red: The Battle of Antietam",
+      "author": "Stephen W. Sears",
+      "year": 1983,
+      "note": "Definitive account of the bloodiest day"
+    },
+    {
+      "type": "book",
+      "title": "Crossroads of Freedom: Antietam",
+      "author": "James McPherson",
+      "year": 2002,
+      "note": "Concise account focused on the battle's political consequences"
+    }
   ],
-  "gallipoli": [
-    {"type": "book", "title": "Gallipoli", "author": "Les Carlyon", "year": 2001, "note": "Comprehensive account from the Australian perspective"},
-    {"type": "book", "title": "Gallipoli", "author": "Alan Moorehead", "year": 1956, "note": "Classic narrative history"},
-    {"type": "film", "title": "Gallipoli", "author": "Peter Weir (dir.)", "year": 1981, "note": "Mel Gibson stars in this film about Australian soldiers at the campaign"}
+  "gallipoli-1915": [
+    {
+      "type": "book",
+      "title": "Gallipoli",
+      "author": "Les Carlyon",
+      "year": 2001,
+      "note": "Comprehensive account from the Australian perspective"
+    },
+    {
+      "type": "book",
+      "title": "Gallipoli",
+      "author": "Alan Moorehead",
+      "year": 1956,
+      "note": "Classic narrative history"
+    },
+    {
+      "type": "film",
+      "title": "Gallipoli",
+      "author": "Peter Weir (dir.)",
+      "year": 1981,
+      "note": "Mel Gibson stars in this film about Australian soldiers at the campaign"
+    }
   ],
-  "somme": [
-    {"type": "book", "title": "The First Day on the Somme", "author": "Martin Middlebrook", "year": 1971, "note": "Pioneering account using hundreds of veteran testimonies"},
-    {"type": "book", "title": "The Somme: The Darkest Hour on the Western Front", "author": "Peter Hart", "year": 2005, "note": "Uses Imperial War Museum oral history archives"},
-    {"type": "documentary", "title": "The Battle of the Somme", "author": "British War Office", "year": 1916, "note": "Actual wartime documentary footage, screened to millions in 1916"},
-    {"type": "film", "title": "They Shall Not Grow Old", "author": "Peter Jackson (dir.)", "year": 2018, "note": "Restored and colorized WWI footage including Somme material"}
+  "somme-1916": [
+    {
+      "type": "book",
+      "title": "The First Day on the Somme",
+      "author": "Martin Middlebrook",
+      "year": 1971,
+      "note": "Pioneering account using hundreds of veteran testimonies"
+    },
+    {
+      "type": "book",
+      "title": "The Somme: The Darkest Hour on the Western Front",
+      "author": "Peter Hart",
+      "year": 2005,
+      "note": "Uses Imperial War Museum oral history archives"
+    },
+    {
+      "type": "documentary",
+      "title": "The Battle of the Somme",
+      "author": "British War Office",
+      "year": 1916,
+      "note": "Actual wartime documentary footage, screened to millions in 1916"
+    },
+    {
+      "type": "film",
+      "title": "They Shall Not Grow Old",
+      "author": "Peter Jackson (dir.)",
+      "year": 2018,
+      "note": "Restored and colorized WWI footage including Somme material"
+    }
   ],
-  "verdun": [
-    {"type": "book", "title": "The Price of Glory: Verdun 1916", "author": "Alistair Horne", "year": 1962, "note": "Classic account of the longest battle of WWI"},
-    {"type": "book", "title": "Verdun: The Longest Battle of the Great War", "author": "Paul Jankowski", "year": 2013, "note": "Modern reassessment using French and German archives"}
+  "verdun-1916": [
+    {
+      "type": "book",
+      "title": "The Price of Glory: Verdun 1916",
+      "author": "Alistair Horne",
+      "year": 1962,
+      "note": "Classic account of the longest battle of WWI"
+    },
+    {
+      "type": "book",
+      "title": "Verdun: The Longest Battle of the Great War",
+      "author": "Paul Jankowski",
+      "year": 2013,
+      "note": "Modern reassessment using French and German archives"
+    }
   ],
-  "battle-of-britain": [
-    {"type": "book", "title": "The Most Dangerous Enemy: A History of the Battle of Britain", "author": "Stephen Bungay", "year": 2000, "note": "Thorough operational history"},
-    {"type": "book", "title": "First Light", "author": "Geoffrey Wellum", "year": 2002, "note": "Memoir of the youngest Spitfire pilot in the battle"},
-    {"type": "film", "title": "Battle of Britain", "author": "Guy Hamilton (dir.)", "year": 1969, "note": "All-star cast with real Spitfires and Messerschmitts"},
-    {"type": "film", "title": "Dunkirk", "author": "Christopher Nolan (dir.)", "year": 2017, "note": "Covers the evacuation that immediately preceded the battle"}
+  "battle-of-britain-1940": [
+    {
+      "type": "book",
+      "title": "The Most Dangerous Enemy: A History of the Battle of Britain",
+      "author": "Stephen Bungay",
+      "year": 2000,
+      "note": "Thorough operational history"
+    },
+    {
+      "type": "book",
+      "title": "First Light",
+      "author": "Geoffrey Wellum",
+      "year": 2002,
+      "note": "Memoir of the youngest Spitfire pilot in the battle"
+    },
+    {
+      "type": "film",
+      "title": "Battle of Britain",
+      "author": "Guy Hamilton (dir.)",
+      "year": 1969,
+      "note": "All-star cast with real Spitfires and Messerschmitts"
+    },
+    {
+      "type": "film",
+      "title": "Dunkirk",
+      "author": "Christopher Nolan (dir.)",
+      "year": 2017,
+      "note": "Covers the evacuation that immediately preceded the battle"
+    }
   ],
-  "stalingrad": [
-    {"type": "book", "title": "Stalingrad", "author": "Antony Beevor", "year": 1998, "note": "Landmark account using newly opened Soviet archives"},
-    {"type": "book", "title": "Life and Fate", "author": "Vasily Grossman", "year": 1960, "note": "Epic novel by a war correspondent who was at Stalingrad"},
-    {"type": "film", "title": "Enemy at the Gates", "author": "Jean-Jacques Annaud (dir.)", "year": 2001, "note": "Depicts sniper warfare during the battle"},
-    {"type": "film", "title": "Stalingrad", "author": "Joseph Vilsmaier (dir.)", "year": 1993, "note": "German-language film following Wehrmacht soldiers"}
+  "stalingrad-1942": [
+    {
+      "type": "book",
+      "title": "Stalingrad",
+      "author": "Antony Beevor",
+      "year": 1998,
+      "note": "Landmark account using newly opened Soviet archives"
+    },
+    {
+      "type": "book",
+      "title": "Life and Fate",
+      "author": "Vasily Grossman",
+      "year": 1960,
+      "note": "Epic novel by a war correspondent who was at Stalingrad"
+    },
+    {
+      "type": "film",
+      "title": "Enemy at the Gates",
+      "author": "Jean-Jacques Annaud (dir.)",
+      "year": 2001,
+      "note": "Depicts sniper warfare during the battle"
+    },
+    {
+      "type": "film",
+      "title": "Stalingrad",
+      "author": "Joseph Vilsmaier (dir.)",
+      "year": 1993,
+      "note": "German-language film following Wehrmacht soldiers"
+    }
   ],
-  "midway": [
-    {"type": "book", "title": "Shattered Sword: The Untold Story of the Battle of Midway", "author": "Jonathan Parshall & Anthony Tully", "year": 2005, "note": "Groundbreaking account from the Japanese perspective"},
-    {"type": "book", "title": "Incredible Victory", "author": "Walter Lord", "year": 1967, "note": "Classic narrative of the battle"},
-    {"type": "film", "title": "Midway", "author": "Roland Emmerich (dir.)", "year": 2019, "note": "Modern recreation of the battle with CGI naval combat"},
-    {"type": "film", "title": "Midway", "author": "Jack Smight (dir.)", "year": 1976, "note": "Classic film starring Charlton Heston with archival footage"}
+  "midway-1942": [
+    {
+      "type": "book",
+      "title": "Shattered Sword: The Untold Story of the Battle of Midway",
+      "author": "Jonathan Parshall & Anthony Tully",
+      "year": 2005,
+      "note": "Groundbreaking account from the Japanese perspective"
+    },
+    {
+      "type": "book",
+      "title": "Incredible Victory",
+      "author": "Walter Lord",
+      "year": 1967,
+      "note": "Classic narrative of the battle"
+    },
+    {
+      "type": "film",
+      "title": "Midway",
+      "author": "Roland Emmerich (dir.)",
+      "year": 2019,
+      "note": "Modern recreation of the battle with CGI naval combat"
+    },
+    {
+      "type": "film",
+      "title": "Midway",
+      "author": "Jack Smight (dir.)",
+      "year": 1976,
+      "note": "Classic film starring Charlton Heston with archival footage"
+    }
   ],
-  "kursk": [
-    {"type": "book", "title": "Kursk 1943: The Greatest Battle of the Second World War", "author": "Dennis Showalter", "year": 2013, "note": "Comprehensive operational account"},
-    {"type": "book", "title": "The Battle of Kursk", "author": "David Glantz & Jonathan House", "year": 1999, "note": "Uses Soviet military archives"}
+  "kursk-1943": [
+    {
+      "type": "book",
+      "title": "Kursk 1943: The Greatest Battle of the Second World War",
+      "author": "Dennis Showalter",
+      "year": 2013,
+      "note": "Comprehensive operational account"
+    },
+    {
+      "type": "book",
+      "title": "The Battle of Kursk",
+      "author": "David Glantz & Jonathan House",
+      "year": 1999,
+      "note": "Uses Soviet military archives"
+    }
   ],
-  "normandy": [
-    {"type": "book", "title": "D-Day: June 6, 1944", "author": "Stephen Ambrose", "year": 1994, "note": "Bestselling narrative from hundreds of veteran interviews"},
-    {"type": "book", "title": "The Longest Day", "author": "Cornelius Ryan", "year": 1959, "note": "Classic account from all sides"},
-    {"type": "film", "title": "Saving Private Ryan", "author": "Steven Spielberg (dir.)", "year": 1998, "note": "Opening sequence is the definitive cinematic depiction of Omaha Beach"},
-    {"type": "film", "title": "The Longest Day", "author": "Ken Annakin et al. (dir.)", "year": 1962, "note": "All-star epic adapted from Ryan's book"},
-    {"type": "film", "title": "Band of Brothers", "author": "Steven Spielberg & Tom Hanks (prod.)", "year": 2001, "note": "HBO miniseries following Easy Company from D-Day through the war"}
+  "normandy-1944": [
+    {
+      "type": "book",
+      "title": "D-Day: June 6, 1944",
+      "author": "Stephen Ambrose",
+      "year": 1994,
+      "note": "Bestselling narrative from hundreds of veteran interviews"
+    },
+    {
+      "type": "book",
+      "title": "The Longest Day",
+      "author": "Cornelius Ryan",
+      "year": 1959,
+      "note": "Classic account from all sides"
+    },
+    {
+      "type": "film",
+      "title": "Saving Private Ryan",
+      "author": "Steven Spielberg (dir.)",
+      "year": 1998,
+      "note": "Opening sequence is the definitive cinematic depiction of Omaha Beach"
+    },
+    {
+      "type": "film",
+      "title": "The Longest Day",
+      "author": "Ken Annakin et al. (dir.)",
+      "year": 1962,
+      "note": "All-star epic adapted from Ryan's book"
+    },
+    {
+      "type": "film",
+      "title": "Band of Brothers",
+      "author": "Steven Spielberg & Tom Hanks (prod.)",
+      "year": 2001,
+      "note": "HBO miniseries following Easy Company from D-Day through the war"
+    }
   ],
-  "bulge": [
-    {"type": "book", "title": "A Time for Trumpets: The Untold Story of the Battle of the Bulge", "author": "Charles B. MacDonald", "year": 1985, "note": "By a veteran of the battle who became the Army's official historian"},
-    {"type": "book", "title": "The Ardennes: Battle of the Bulge", "author": "Hugh M. Cole", "year": 1965, "note": "Official U.S. Army history"},
-    {"type": "film", "title": "Battle of the Bulge", "author": "Ken Annakin (dir.)", "year": 1965, "note": "Classic war film depicting the German offensive"}
+  "bulge-1944": [
+    {
+      "type": "book",
+      "title": "A Time for Trumpets: The Untold Story of the Battle of the Bulge",
+      "author": "Charles B. MacDonald",
+      "year": 1985,
+      "note": "By a veteran of the battle who became the Army's official historian"
+    },
+    {
+      "type": "book",
+      "title": "The Ardennes: Battle of the Bulge",
+      "author": "Hugh M. Cole",
+      "year": 1965,
+      "note": "Official U.S. Army history"
+    },
+    {
+      "type": "film",
+      "title": "Battle of the Bulge",
+      "author": "Ken Annakin (dir.)",
+      "year": 1965,
+      "note": "Classic war film depicting the German offensive"
+    }
   ],
-  "inchon": [
-    {"type": "book", "title": "The Coldest Winter: America and the Korean War", "author": "David Halberstam", "year": 2007, "note": "Pulitzer winner's last book covers Inchon and its aftermath"},
-    {"type": "book", "title": "Inchon: MacArthur's Last Triumph", "author": "Russ Gugeler", "year": 2005, "note": "Focused operational account of the landing"}
+  "inchon-1950": [
+    {
+      "type": "book",
+      "title": "The Coldest Winter: America and the Korean War",
+      "author": "David Halberstam",
+      "year": 2007,
+      "note": "Pulitzer winner's last book covers Inchon and its aftermath"
+    },
+    {
+      "type": "book",
+      "title": "Inchon: MacArthur's Last Triumph",
+      "author": "Russ Gugeler",
+      "year": 2005,
+      "note": "Focused operational account of the landing"
+    }
   ],
-  "dien-bien-phu": [
-    {"type": "book", "title": "Hell in a Very Small Place", "author": "Bernard Fall", "year": 1966, "note": "Definitive account by a journalist who later died in Vietnam"},
-    {"type": "book", "title": "Valley of Death: The Tragedy at Dien Bien Phu", "author": "Ted Morgan", "year": 2010, "note": "Comprehensive narrative using French and Vietnamese sources"},
-    {"type": "film", "title": "Dien Bien Phu", "author": "Pierre Schoendoerffer (dir.)", "year": 1992, "note": "By a French cameraman captured at the battle"}
+  "dien-bien-phu-1954": [
+    {
+      "type": "book",
+      "title": "Hell in a Very Small Place",
+      "author": "Bernard Fall",
+      "year": 1966,
+      "note": "Definitive account by a journalist who later died in Vietnam"
+    },
+    {
+      "type": "book",
+      "title": "Valley of Death: The Tragedy at Dien Bien Phu",
+      "author": "Ted Morgan",
+      "year": 2010,
+      "note": "Comprehensive narrative using French and Vietnamese sources"
+    },
+    {
+      "type": "film",
+      "title": "Dien Bien Phu",
+      "author": "Pierre Schoendoerffer (dir.)",
+      "year": 1992,
+      "note": "By a French cameraman captured at the battle"
+    }
   ],
-  "73-easting": [
-    {"type": "book", "title": "Eagle Troop and the Battle of 73 Easting", "author": "H.R. McMaster", "year": 1991, "note": "After-action report by the troop commander"},
-    {"type": "book", "title": "Dereliction of Duty", "author": "H.R. McMaster", "year": 1997, "note": "McMaster's broader military analysis, provides context for Gulf War doctrine"},
-    {"type": "documentary", "title": "The Battle of 73 Easting", "author": "National Geographic", "year": 2001, "note": "Uses CGI reconstructions from the U.S. Army's digital recreation"}
+  "73-easting-1991": [
+    {
+      "type": "book",
+      "title": "Eagle Troop and the Battle of 73 Easting",
+      "author": "H.R. McMaster",
+      "year": 1991,
+      "note": "After-action report by the troop commander"
+    },
+    {
+      "type": "book",
+      "title": "Dereliction of Duty",
+      "author": "H.R. McMaster",
+      "year": 1997,
+      "note": "McMaster's broader military analysis, provides context for Gulf War doctrine"
+    },
+    {
+      "type": "documentary",
+      "title": "The Battle of 73 Easting",
+      "author": "National Geographic",
+      "year": 2001,
+      "note": "Uses CGI reconstructions from the U.S. Army's digital recreation"
+    }
   ]
 }

@@ -22,7 +22,7 @@ func NewStore(db *sql.DB) *Store {
 }
 
 // battleColumns is the canonical SELECT clause for a battle row.
-const battleColumns = "id, name, year, date, lat, lng, era, war, battle_type, victor, summary, significance, COALESCE(verified, 0), COALESCE(source, '')"
+const battleColumns = "id, name, year, date, lat, lng, era, war, battle_type, victor, summary, significance, COALESCE(verified, 0), COALESCE(source, ''), COALESCE(wikipedia_title, '')"
 
 // trustedWarSQL produces a SQL fragment that keeps only rows whose war field
 // looks usable. Pass the column reference (e.g. "war" or "b.war").
@@ -33,6 +33,16 @@ func trustedWarSQL(col string) string {
 		col + ` NOT LIKE '%<%' AND ` + col + ` NOT LIKE '%>%' AND ` +
 		`LENGTH(` + col + `) <= 120))`
 }
+
+// documentedSQL is the SQL predicate that defines the "documented" tier:
+// curated battles plus non-curated battles that have at least one side and a
+// clean war attribution. Mirrors classifyTier in handler.go.
+const documentedSQL = `(verified = 1 OR (` +
+	`(war = '' OR (war NOT LIKE '%|%' AND war NOT LIKE '%{%' AND war NOT LIKE '%}%' AND ` +
+	`war NOT LIKE '%=%' AND war NOT LIKE '%image%' AND war NOT LIKE '%<%' AND war NOT LIKE '%>%' AND ` +
+	`LENGTH(war) <= 120)) ` +
+	`AND EXISTS (SELECT 1 FROM battle_sides s WHERE s.battle_id = battles.id)` +
+	`))`
 
 // All returns every battle sorted by year.
 func (s *Store) All(ctx context.Context) ([]Battle, int, error) {
@@ -136,11 +146,12 @@ func (s *Store) Search(ctx context.Context, query string, limit, offset int) ([]
 
 	ftsQuery := sanitizeFTS(query)
 
+	bTrusted := trustedWarSQL("b.war")
 	countSQL := `SELECT COUNT(*) FROM battles b
 		JOIN battles_fts fts ON b.rowid = fts.rowid
 		WHERE fts.battles_fts MATCH ?
 		  AND (b.lat != 0 OR b.lng != 0)
-		  AND ` + trustedSQL
+		  AND ` + bTrusted
 	var total int
 	if err := s.db.QueryRowContext(ctx, countSQL, ftsQuery).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("count search results: %w", err)
@@ -151,7 +162,7 @@ func (s *Store) Search(ctx context.Context, query string, limit, offset int) ([]
 		JOIN battles_fts fts ON b.rowid = fts.rowid
 		WHERE fts.battles_fts MATCH ?
 		  AND (b.lat != 0 OR b.lng != 0)
-		  AND ` + prefixCols("b", "") + trustedSQL + `
+		  AND ` + bTrusted + `
 		ORDER BY b.verified DESC, rank
 		LIMIT ? OFFSET ?`
 
@@ -292,7 +303,7 @@ func (s *Store) loadSides(ctx context.Context, battles []Battle) error {
 func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
 	rows, err := s.db.QueryContext(ctx,
 		`SELECT war, COUNT(*), MIN(year) FROM battles
-		 WHERE war != '' AND `+trustedSQL+` AND LENGTH(war) > 3
+		 WHERE war != '' AND `+trustedWarSQL("war")+` AND LENGTH(war) > 3
 		 GROUP BY war ORDER BY COUNT(*) DESC LIMIT 500`)
 	if err != nil {
 		return nil, fmt.Errorf("query war counts: %w", err)
@@ -319,7 +330,7 @@ func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
 	casRows, err := s.db.QueryContext(ctx,
 		`SELECT b.war, bs.casualties FROM battle_sides bs
 		 JOIN battles b ON b.id = bs.battle_id
-		 WHERE b.war != '' AND bs.casualties != '' AND `+strings.ReplaceAll(trustedSQL, "war ", "b.war ")+``)
+		 WHERE b.war != '' AND bs.casualties != '' AND `+trustedWarSQL("b.war"))
 	if err != nil {
 		return counts, nil
 	}
@@ -463,12 +474,28 @@ func buildWhere(f Filter) (string, []any) {
 	}
 
 	switch f.Quality {
-	case "verified":
-		conditions = append(conditions, "verified = 1")
+	case "reconstructed":
+		// Reconstructed-only is applied by the handler via the IDs filter
+		// (the replays registry is not visible to the store). Nothing to add
+		// here; the handler short-circuits and never sets Quality=reconstructed
+		// without also supplying IDs.
+	case "indexed":
+		// Sparse Wikidata-harvested entries: not curated, and missing either
+		// a clean war attribution or any sides data.
+		conditions = append(conditions, "verified = 0 AND NOT ("+documentedSQL+")")
 	case "all":
 		// no quality gate
-	default: // "" or "trusted"
-		conditions = append(conditions, trustedSQL)
+	default: // "" or "documented"
+		conditions = append(conditions, documentedSQL)
+	}
+
+	if len(f.IDs) > 0 {
+		placeholders := make([]string, len(f.IDs))
+		for i, id := range f.IDs {
+			placeholders[i] = "?"
+			args = append(args, id)
+		}
+		conditions = append(conditions, "id IN ("+strings.Join(placeholders, ",")+")")
 	}
 
 	if len(conditions) == 0 {
@@ -495,7 +522,7 @@ func scanBattles(rows *sql.Rows) ([]Battle, error) {
 		var verified int
 		if err := rows.Scan(&b.ID, &b.Name, &b.Year, &b.Date, &b.Lat, &b.Lng,
 			&b.Era, &b.War, &b.BattleType, &b.Victor, &b.Summary, &b.Significance,
-			&verified, &b.Source); err != nil {
+			&verified, &b.Source, &b.WikipediaTitle); err != nil {
 			return nil, fmt.Errorf("scan battle: %w", err)
 		}
 		b.Verified = verified == 1
@@ -509,20 +536,38 @@ func scanBattle(row *sql.Row, b *Battle) error {
 	var verified int
 	err := row.Scan(&b.ID, &b.Name, &b.Year, &b.Date, &b.Lat, &b.Lng,
 		&b.Era, &b.War, &b.BattleType, &b.Victor, &b.Summary, &b.Significance,
-		&verified, &b.Source)
+		&verified, &b.Source, &b.WikipediaTitle)
 	if err == nil {
 		b.Verified = verified == 1
 	}
 	return err
 }
 
-// prefixCols copies a comma-separated column list and prefixes each with
-// the given table alias. If cols is empty, returns the empty string.
+// prefixCols copies a comma-separated column list and prefixes each column
+// with the given table alias. Splits on top-level commas only — commas
+// inside function arguments (e.g. COALESCE(x, '')) are preserved.
 func prefixCols(prefix, cols string) string {
 	if cols == "" {
 		return ""
 	}
-	parts := strings.Split(cols, ",")
+	var parts []string
+	depth := 0
+	start := 0
+	for i, ch := range cols {
+		switch ch {
+		case '(':
+			depth++
+		case ')':
+			depth--
+		case ',':
+			if depth == 0 {
+				parts = append(parts, cols[start:i])
+				start = i + 1
+			}
+		}
+	}
+	parts = append(parts, cols[start:])
+
 	out := make([]string, 0, len(parts))
 	for _, p := range parts {
 		p = strings.TrimSpace(p)
@@ -530,7 +575,6 @@ func prefixCols(prefix, cols string) string {
 			continue
 		}
 		if strings.HasPrefix(p, "COALESCE(") {
-			// Inject prefix into the inner column reference.
 			out = append(out, strings.Replace(p, "COALESCE(", "COALESCE("+prefix+".", 1))
 			continue
 		}

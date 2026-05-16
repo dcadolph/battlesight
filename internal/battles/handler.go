@@ -2,9 +2,11 @@ package battles
 
 import (
 	"encoding/json"
+	"log"
 	"math/rand/v2"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // Handler serves the battle API endpoints.
@@ -53,6 +55,16 @@ func (h *Handler) listBattles(w http.ResponseWriter, r *http.Request) {
 		Quality:        q.Get("quality"),
 	}
 
+	// The reconstructed tier is a strict subset defined by the replays
+	// registry; constrain to that ID set before hitting the store.
+	if f.Quality == "reconstructed" {
+		f.IDs = h.replays.IDs()
+		if len(f.IDs) == 0 {
+			writeJSON(w, http.StatusOK, ListResponse{Battles: []Battle{}, Total: 0, Limit: f.Limit, Offset: f.Offset})
+			return
+		}
+	}
+
 	results, total, err := h.store.List(r.Context(), f)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to list battles")
@@ -61,7 +73,7 @@ func (h *Handler) listBattles(w http.ResponseWriter, r *http.Request) {
 	if results == nil {
 		results = []Battle{}
 	}
-	h.markHasReplay(results)
+	h.markTier(results)
 
 	limit := f.Limit
 	if limit <= 0 {
@@ -92,13 +104,14 @@ func (h *Handler) searchBattles(w http.ResponseWriter, r *http.Request) {
 
 	results, total, err := h.store.Search(r.Context(), q, limit, offset)
 	if err != nil {
+		log.Printf("search failed for query %q: %v", q, err)
 		writeError(w, http.StatusInternalServerError, "search failed")
 		return
 	}
 	if results == nil {
 		results = []Battle{}
 	}
-	h.markHasReplay(results)
+	h.markTier(results)
 
 	writeJSON(w, http.StatusOK, ListResponse{
 		Battles: results,
@@ -132,17 +145,34 @@ func (h *Handler) getBattle(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "battle not found")
 		return
 	}
-	battle.HasReplay = h.replays.Has(battle.ID)
-
-	writeJSON(w, http.StatusOK, battle)
+	one := []Battle{battle}
+	h.markTier(one)
+	writeJSON(w, http.StatusOK, one[0])
 }
 
-// getReplay returns the phase data for a battle, if any exists.
+// getReplay returns the phase data for a battle. If no hand-crafted replay
+// exists, falls back to a schematic auto-generated one built from the
+// battle's sides/commander/casualty metadata.
 func (h *Handler) getReplay(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	rep, ok := h.replays.Get(id)
+	if rep, ok := h.replays.Get(id); ok {
+		writeJSON(w, http.StatusOK, rep)
+		return
+	}
+
+	battle, ok, err := h.store.ByID(r.Context(), id)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to load battle")
+		return
+	}
 	if !ok {
-		writeError(w, http.StatusNotFound, "no replay for this battle")
+		writeError(w, http.StatusNotFound, "battle not found")
+		return
+	}
+
+	rep, ok := GenerateReplay(battle)
+	if !ok {
+		writeError(w, http.StatusNotFound, "no replay available for this battle")
 		return
 	}
 	writeJSON(w, http.StatusOK, rep)
@@ -167,8 +197,9 @@ func (h *Handler) featured(w http.ResponseWriter, r *http.Request) {
 		idx := dailyIndex(len(ids))
 		battle, ok, err := h.store.ByID(r.Context(), ids[idx])
 		if err == nil && ok {
-			battle.HasReplay = true
-			writeJSON(w, http.StatusOK, battle)
+			one := []Battle{battle}
+			h.markTier(one)
+			writeJSON(w, http.StatusOK, one[0])
 			return
 		}
 	}
@@ -183,15 +214,56 @@ func (h *Handler) featured(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "no featured battle available")
 		return
 	}
-	battle.HasReplay = h.replays.Has(battle.ID)
-	writeJSON(w, http.StatusOK, battle)
+	one := []Battle{battle}
+	h.markTier(one)
+	writeJSON(w, http.StatusOK, one[0])
 }
 
-// markHasReplay sets HasReplay on each battle in the slice based on the registry.
-func (h *Handler) markHasReplay(battles []Battle) {
+// markTier sets HasReplay, HasSchematic, and Tier on each battle in the slice.
+// HasSchematic is true whenever the battle has sides data but no hand-crafted
+// replay; it lets the UI surface an auto-generated tactical view. Tier captures
+// the trust contract: reconstructed (phase replay), documented (curated or
+// non-curated with full data), indexed (sparse Wikidata).
+func (h *Handler) markTier(battles []Battle) {
 	for i := range battles {
 		battles[i].HasReplay = h.replays.Has(battles[i].ID)
+		if !battles[i].HasReplay && len(battles[i].Sides) > 0 {
+			battles[i].HasSchematic = true
+		}
+		battles[i].Tier = classifyTier(battles[i])
 	}
+}
+
+// classifyTier returns the data-quality tier for a battle. The order is
+// strict: reconstructed beats documented beats indexed.
+func classifyTier(b Battle) string {
+	if b.HasReplay {
+		return "reconstructed"
+	}
+	if b.Verified {
+		return "documented"
+	}
+	if len(b.Sides) > 0 && isTrustedWar(b.War) {
+		return "documented"
+	}
+	return "indexed"
+}
+
+// isTrustedWar mirrors the SQL trustedWarSQL predicate so Go-side
+// classification matches the store-side filter.
+func isTrustedWar(war string) bool {
+	if war == "" {
+		return true
+	}
+	if len(war) > 120 {
+		return false
+	}
+	for _, bad := range []string{"|", "{", "}", "=", "image", "<", ">"} {
+		if strings.Contains(war, bad) {
+			return false
+		}
+	}
+	return true
 }
 
 // dailyIndex picks a stable index that rotates once per day.

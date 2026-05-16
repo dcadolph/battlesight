@@ -282,8 +282,13 @@ func formatWikidataDate(raw string, year int) string {
 	return fmt.Sprintf("%d", year)
 }
 
-// yearToEra maps a year to a historical era string.
+// yearToEra maps a year to a historical era string. Year 0 means "unknown"
+// in this dataset (the date never parsed) and intentionally returns the empty
+// string so unknown-date records do not pollute the ancient era filter.
 func yearToEra(year int) string {
+	if year == 0 {
+		return ""
+	}
 	switch {
 	case year < 500:
 		return "ancient"

@@ -1,6 +1,6 @@
 [
   {
-    "id": "marathon",
+    "id": "marathon-490bc",
     "name": "Battle of Marathon",
     "year": -490,
     "date": "September 490 BC",
@@ -10,15 +10,26 @@
     "war": "Greco-Persian Wars",
     "battleType": "land",
     "sides": [
-      {"name": "Athens", "commander": "Miltiades", "strength": "10,000", "casualties": "192 killed"},
-      {"name": "Persian Empire", "commander": "Datis", "strength": "25,000", "casualties": "6,400 killed"}
+      {
+        "name": "Athens",
+        "commander": "Miltiades",
+        "strength": "10,000",
+        "casualties": "192 killed"
+      },
+      {
+        "name": "Persian Empire",
+        "commander": "Datis",
+        "strength": "25,000",
+        "casualties": "6,400 killed"
+      }
     ],
     "victor": "Athens",
     "summary": "Athenian hoplites charged across the plain and routed a larger Persian invasion force, proving that Persian armies could be beaten in open battle.",
-    "significance": "Preserved Greek independence and democratic institutions. The messenger run to Athens inspired the modern marathon race."
+    "significance": "Preserved Greek independence and democratic institutions. The messenger run to Athens inspired the modern marathon race.",
+    "wikipediaTitle": "Battle of Marathon"
   },
   {
-    "id": "thermopylae",
+    "id": "thermopylae-480bc",
     "name": "Battle of Thermopylae",
     "year": -480,
     "date": "August 480 BC",
@@ -28,33 +39,55 @@
     "war": "Greco-Persian Wars",
     "battleType": "land",
     "sides": [
-      {"name": "Greek City-States", "commander": "Leonidas I", "strength": "7,000", "casualties": "4,000 killed"},
-      {"name": "Persian Empire", "commander": "Xerxes I", "strength": "70,000-300,000", "casualties": "20,000 killed"}
+      {
+        "name": "Greek City-States",
+        "commander": "Leonidas I",
+        "strength": "7,000",
+        "casualties": "4,000 killed"
+      },
+      {
+        "name": "Persian Empire",
+        "commander": "Xerxes I",
+        "strength": "70,000-300,000",
+        "casualties": "20,000 killed"
+      }
     ],
     "victor": "Persian Empire",
     "summary": "A small Greek force led by 300 Spartans held the narrow coastal pass for three days against a vastly larger Persian army before being outflanked via a mountain path.",
-    "significance": "The stand became a symbol of courage against overwhelming odds. It delayed Xerxes long enough for Greece to organize its naval defense at Salamis."
+    "significance": "The stand became a symbol of courage against overwhelming odds. It delayed Xerxes long enough for Greece to organize its naval defense at Salamis.",
+    "wikipediaTitle": "Battle of Thermopylae"
   },
   {
-    "id": "salamis",
+    "id": "salamis-480bc",
     "name": "Battle of Salamis",
     "year": -480,
     "date": "September 480 BC",
-    "lat": 37.9500,
+    "lat": 37.95,
     "lng": 23.5833,
     "era": "ancient",
     "war": "Greco-Persian Wars",
     "battleType": "naval",
     "sides": [
-      {"name": "Greek City-States", "commander": "Themistocles", "strength": "371 triremes", "casualties": "40 ships lost"},
-      {"name": "Persian Empire", "commander": "Xerxes I", "strength": "500-1,200 ships", "casualties": "200-300 ships lost"}
+      {
+        "name": "Greek City-States",
+        "commander": "Themistocles",
+        "strength": "371 triremes",
+        "casualties": "40 ships lost"
+      },
+      {
+        "name": "Persian Empire",
+        "commander": "Xerxes I",
+        "strength": "500-1,200 ships",
+        "casualties": "200-300 ships lost"
+      }
     ],
     "victor": "Greek City-States",
     "summary": "Themistocles lured the Persian fleet into the narrow straits near Salamis, where their numerical advantage was negated. Greek triremes rammed and sank the larger Persian vessels.",
-    "significance": "Destroyed Persian naval superiority and ended the invasion threat. Often cited as one of the most consequential naval battles in history."
+    "significance": "Destroyed Persian naval superiority and ended the invasion threat. Often cited as one of the most consequential naval battles in history.",
+    "wikipediaTitle": "Battle of Salamis"
   },
   {
-    "id": "gaugamela",
+    "id": "gaugamela-331bc",
     "name": "Battle of Gaugamela",
     "year": -331,
     "date": "1 October 331 BC",
@@ -64,15 +97,26 @@
     "war": "Wars of Alexander the Great",
     "battleType": "land",
     "sides": [
-      {"name": "Macedon", "commander": "Alexander the Great", "strength": "47,000", "casualties": "1,200 killed"},
-      {"name": "Persian Empire", "commander": "Darius III", "strength": "50,000-100,000", "casualties": "40,000-90,000 killed"}
+      {
+        "name": "Macedon",
+        "commander": "Alexander the Great",
+        "strength": "47,000",
+        "casualties": "1,200 killed"
+      },
+      {
+        "name": "Persian Empire",
+        "commander": "Darius III",
+        "strength": "50,000-100,000",
+        "casualties": "40,000-90,000 killed"
+      }
     ],
     "victor": "Macedon",
     "summary": "Alexander led a decisive cavalry charge through a gap in the Persian line, driving straight at Darius, who fled the field. The Persian army collapsed.",
-    "significance": "Ended the Achaemenid Persian Empire. Alexander became ruler of the largest empire the world had seen."
+    "significance": "Ended the Achaemenid Persian Empire. Alexander became ruler of the largest empire the world had seen.",
+    "wikipediaTitle": "Battle of Gaugamela"
   },
   {
-    "id": "cannae",
+    "id": "cannae-216bc",
     "name": "Battle of Cannae",
     "year": -216,
     "date": "2 August 216 BC",
@@ -82,51 +126,84 @@
     "war": "Second Punic War",
     "battleType": "land",
     "sides": [
-      {"name": "Carthage", "commander": "Hannibal Barca", "strength": "50,000", "casualties": "5,700 killed"},
-      {"name": "Roman Republic", "commander": "Varro & Paullus", "strength": "86,000", "casualties": "50,000-70,000 killed"}
+      {
+        "name": "Carthage",
+        "commander": "Hannibal Barca",
+        "strength": "50,000",
+        "casualties": "5,700 killed"
+      },
+      {
+        "name": "Roman Republic",
+        "commander": "Varro & Paullus",
+        "strength": "86,000",
+        "casualties": "50,000-70,000 killed"
+      }
     ],
     "victor": "Carthage",
     "summary": "Hannibal executed a double envelopment, allowing his center to bend inward while cavalry encircled the Roman flanks and rear, annihilating the Roman army.",
-    "significance": "The textbook example of tactical encirclement studied in military academies to this day. Rome's worst single-day loss."
+    "significance": "The textbook example of tactical encirclement studied in military academies to this day. Rome's worst single-day loss.",
+    "wikipediaTitle": "Battle of Cannae"
   },
   {
-    "id": "alesia",
+    "id": "alesia-52bc",
     "name": "Siege of Alesia",
     "year": -52,
     "date": "September 52 BC",
     "lat": 47.5367,
-    "lng": 4.5000,
+    "lng": 4.5,
     "era": "ancient",
     "war": "Gallic Wars",
     "battleType": "siege",
     "sides": [
-      {"name": "Roman Republic", "commander": "Julius Caesar", "strength": "60,000", "casualties": "12,800 killed"},
-      {"name": "Gallic Tribes", "commander": "Vercingetorix", "strength": "80,000 besieged + 250,000 relief", "casualties": "Unknown, mass surrender"}
+      {
+        "name": "Roman Republic",
+        "commander": "Julius Caesar",
+        "strength": "60,000",
+        "casualties": "12,800 killed"
+      },
+      {
+        "name": "Gallic Tribes",
+        "commander": "Vercingetorix",
+        "strength": "80,000 besieged + 250,000 relief",
+        "casualties": "Unknown, mass surrender"
+      }
     ],
     "victor": "Roman Republic",
     "summary": "Caesar built two rings of fortifications: one facing inward to contain Vercingetorix, another facing outward to repel the Gallic relief army. He defeated both forces simultaneously.",
-    "significance": "Ended organized Gallic resistance. Gaul became a Roman province, fundamentally shaping Western European civilization."
+    "significance": "Ended organized Gallic resistance. Gaul became a Roman province, fundamentally shaping Western European civilization.",
+    "wikipediaTitle": "Battle of Alesia"
   },
   {
-    "id": "actium",
+    "id": "actium-31bc",
     "name": "Battle of Actium",
     "year": -31,
     "date": "2 September 31 BC",
-    "lat": 38.9500,
+    "lat": 38.95,
     "lng": 20.7167,
     "era": "ancient",
     "war": "Final War of the Roman Republic",
     "battleType": "naval",
     "sides": [
-      {"name": "Octavian", "commander": "Agrippa", "strength": "400 ships", "casualties": "Minimal"},
-      {"name": "Antony & Cleopatra", "commander": "Mark Antony", "strength": "500 ships", "casualties": "200+ ships lost"}
+      {
+        "name": "Octavian",
+        "commander": "Agrippa",
+        "strength": "400 ships",
+        "casualties": "Minimal"
+      },
+      {
+        "name": "Antony & Cleopatra",
+        "commander": "Mark Antony",
+        "strength": "500 ships",
+        "casualties": "200+ ships lost"
+      }
     ],
     "victor": "Octavian",
     "summary": "Agrippa's lighter, more maneuverable fleet trapped Antony's heavier ships. Cleopatra broke through with her squadron and fled; Antony followed, abandoning his fleet.",
-    "significance": "Ended the Roman Republic. Octavian became Augustus, the first Roman Emperor, beginning the Pax Romana."
+    "significance": "Ended the Roman Republic. Octavian became Augustus, the first Roman Emperor, beginning the Pax Romana.",
+    "wikipediaTitle": "Battle of Actium"
   },
   {
-    "id": "hastings",
+    "id": "hastings-1066",
     "name": "Battle of Hastings",
     "year": 1066,
     "date": "14 October 1066",
@@ -136,15 +213,26 @@
     "war": "Norman Conquest of England",
     "battleType": "land",
     "sides": [
-      {"name": "Normandy", "commander": "William the Conqueror", "strength": "10,000", "casualties": "2,000 killed"},
-      {"name": "Anglo-Saxon England", "commander": "Harold Godwinson", "strength": "7,000", "casualties": "4,000 killed including Harold"}
+      {
+        "name": "Normandy",
+        "commander": "William the Conqueror",
+        "strength": "10,000",
+        "casualties": "2,000 killed"
+      },
+      {
+        "name": "Anglo-Saxon England",
+        "commander": "Harold Godwinson",
+        "strength": "7,000",
+        "casualties": "4,000 killed including Harold"
+      }
     ],
     "victor": "Normandy",
     "summary": "After a full day of fighting, Norman cavalry feigned retreat to draw the Anglo-Saxons off Senlac Hill. Harold was killed, reportedly struck by an arrow, and his army broke.",
-    "significance": "Replaced the Anglo-Saxon ruling class with a Norman-French aristocracy. Transformed the English language, law, and culture permanently."
+    "significance": "Replaced the Anglo-Saxon ruling class with a Norman-French aristocracy. Transformed the English language, law, and culture permanently.",
+    "wikipediaTitle": "Battle of Hastings"
   },
   {
-    "id": "agincourt",
+    "id": "agincourt-1415",
     "name": "Battle of Agincourt",
     "year": 1415,
     "date": "25 October 1415",
@@ -154,15 +242,26 @@
     "war": "Hundred Years' War",
     "battleType": "land",
     "sides": [
-      {"name": "England", "commander": "Henry V", "strength": "6,000-9,000", "casualties": "112-600 killed"},
-      {"name": "France", "commander": "Charles d'Albret", "strength": "12,000-36,000", "casualties": "6,000-10,000 killed"}
+      {
+        "name": "England",
+        "commander": "Henry V",
+        "strength": "6,000-9,000",
+        "casualties": "112-600 killed"
+      },
+      {
+        "name": "France",
+        "commander": "Charles d'Albret",
+        "strength": "12,000-36,000",
+        "casualties": "6,000-10,000 killed"
+      }
     ],
     "victor": "England",
     "summary": "English longbowmen devastated waves of French knights and men-at-arms who advanced through muddy, narrow terrain. The heavily armored French were cut down in the mire.",
-    "significance": "Demonstrated that disciplined infantry with ranged weapons could destroy mounted knights. A turning point in the decline of heavy cavalry warfare."
+    "significance": "Demonstrated that disciplined infantry with ranged weapons could destroy mounted knights. A turning point in the decline of heavy cavalry warfare.",
+    "wikipediaTitle": "Battle of Agincourt"
   },
   {
-    "id": "constantinople",
+    "id": "constantinople-1453",
     "name": "Fall of Constantinople",
     "year": 1453,
     "date": "29 May 1453",
@@ -172,87 +271,142 @@
     "war": "Ottoman Wars in Europe",
     "battleType": "siege",
     "sides": [
-      {"name": "Ottoman Empire", "commander": "Mehmed II", "strength": "80,000-200,000", "casualties": "Unknown"},
-      {"name": "Byzantine Empire", "commander": "Constantine XI", "strength": "7,000-10,000", "casualties": "4,000 killed including the Emperor"}
+      {
+        "name": "Ottoman Empire",
+        "commander": "Mehmed II",
+        "strength": "80,000-200,000",
+        "casualties": "Unknown"
+      },
+      {
+        "name": "Byzantine Empire",
+        "commander": "Constantine XI",
+        "strength": "7,000-10,000",
+        "casualties": "4,000 killed including the Emperor"
+      }
     ],
     "victor": "Ottoman Empire",
     "summary": "After a 53-day siege using massive cannons, the Ottomans breached the Theodosian Walls. Emperor Constantine XI died fighting. The city fell in a final dawn assault.",
-    "significance": "Ended the 1,100-year Byzantine Empire and the last direct link to ancient Rome. Shifted trade routes and contributed to the Age of Exploration."
+    "significance": "Ended the 1,100-year Byzantine Empire and the last direct link to ancient Rome. Shifted trade routes and contributed to the Age of Exploration.",
+    "wikipediaTitle": "Fall of Constantinople"
   },
   {
-    "id": "spanish-armada",
+    "id": "spanish-armada-1588",
     "name": "Defeat of the Spanish Armada",
     "year": 1588,
     "date": "August 1588",
-    "lat": 50.3500,
-    "lng": -4.1500,
+    "lat": 50.35,
+    "lng": -4.15,
     "era": "early-modern",
     "war": "Anglo-Spanish War",
     "battleType": "naval",
     "sides": [
-      {"name": "England", "commander": "Drake & Howard", "strength": "197 ships", "casualties": "Minimal"},
-      {"name": "Spain", "commander": "Duke of Medina Sidonia", "strength": "130 ships", "casualties": "60+ ships lost, 20,000 dead"}
+      {
+        "name": "England",
+        "commander": "Drake & Howard",
+        "strength": "197 ships",
+        "casualties": "Minimal"
+      },
+      {
+        "name": "Spain",
+        "commander": "Duke of Medina Sidonia",
+        "strength": "130 ships",
+        "casualties": "60+ ships lost, 20,000 dead"
+      }
     ],
     "victor": "England",
     "summary": "English fireships scattered the Armada at Gravelines. Faster English galleons harassed the larger Spanish vessels. Storms destroyed much of the fleet on its retreat around Scotland and Ireland.",
-    "significance": "Ended Spain's attempt to invade England and shifted naval power toward England, setting the stage for the British Empire."
+    "significance": "Ended Spain's attempt to invade England and shifted naval power toward England, setting the stage for the British Empire.",
+    "wikipediaTitle": "Spanish Armada"
   },
   {
-    "id": "breitenfeld",
+    "id": "breitenfeld-1631",
     "name": "Battle of Breitenfeld",
     "year": 1631,
     "date": "17 September 1631",
-    "lat": 51.4000,
+    "lat": 51.4,
     "lng": 12.3333,
     "era": "early-modern",
     "war": "Thirty Years' War",
     "battleType": "land",
     "sides": [
-      {"name": "Sweden", "commander": "Gustavus Adolphus", "strength": "42,000", "casualties": "3,500 killed"},
-      {"name": "Holy Roman Empire", "commander": "Tilly", "strength": "35,000", "casualties": "7,600 killed, 6,000 captured"}
+      {
+        "name": "Sweden",
+        "commander": "Gustavus Adolphus",
+        "strength": "42,000",
+        "casualties": "3,500 killed"
+      },
+      {
+        "name": "Holy Roman Empire",
+        "commander": "Tilly",
+        "strength": "35,000",
+        "casualties": "7,600 killed, 6,000 captured"
+      }
     ],
     "victor": "Sweden",
     "summary": "Despite the rout of his Saxon allies, Gustavus Adolphus rallied his Swedish forces using mobile artillery and flexible combined-arms tactics to crush Tilly's tercios.",
-    "significance": "First major Protestant victory in the Thirty Years' War. Demonstrated that the Spanish tercio formation could be defeated by mobile, combined-arms warfare."
+    "significance": "First major Protestant victory in the Thirty Years' War. Demonstrated that the Spanish tercio formation could be defeated by mobile, combined-arms warfare.",
+    "wikipediaTitle": "Battle of Breitenfeld (1631)"
   },
   {
-    "id": "trafalgar",
+    "id": "trafalgar-1805",
     "name": "Battle of Trafalgar",
     "year": 1805,
     "date": "21 October 1805",
     "lat": 36.1833,
-    "lng": -6.2500,
+    "lng": -6.25,
     "era": "napoleonic",
     "war": "Napoleonic Wars",
     "battleType": "naval",
     "sides": [
-      {"name": "Great Britain", "commander": "Horatio Nelson", "strength": "27 ships of the line", "casualties": "449 killed, 1,214 wounded"},
-      {"name": "France & Spain", "commander": "Villeneuve", "strength": "33 ships of the line", "casualties": "4,408 killed, 2,545 wounded, 22 ships captured"}
+      {
+        "name": "Great Britain",
+        "commander": "Horatio Nelson",
+        "strength": "27 ships of the line",
+        "casualties": "449 killed, 1,214 wounded"
+      },
+      {
+        "name": "France & Spain",
+        "commander": "Villeneuve",
+        "strength": "33 ships of the line",
+        "casualties": "4,408 killed, 2,545 wounded, 22 ships captured"
+      }
     ],
     "victor": "Great Britain",
     "summary": "Nelson split the enemy line with two columns attacking perpendicular to the Franco-Spanish formation. He was killed by a sniper during the battle but the British won decisively.",
-    "significance": "Established British naval supremacy for over a century. Napoleon abandoned his plans to invade Britain."
+    "significance": "Established British naval supremacy for over a century. Napoleon abandoned his plans to invade Britain.",
+    "wikipediaTitle": "Battle of Trafalgar"
   },
   {
-    "id": "austerlitz",
+    "id": "austerlitz-1805",
     "name": "Battle of Austerlitz",
     "year": 1805,
     "date": "2 December 1805",
-    "lat": 49.1500,
+    "lat": 49.15,
     "lng": 16.7667,
     "era": "napoleonic",
     "war": "Napoleonic Wars",
     "battleType": "land",
     "sides": [
-      {"name": "France", "commander": "Napoleon Bonaparte", "strength": "67,000", "casualties": "1,305 killed, 6,991 wounded"},
-      {"name": "Russia & Austria", "commander": "Kutuzov & Alexander I", "strength": "85,000", "casualties": "16,000 killed/wounded, 20,000 captured"}
+      {
+        "name": "France",
+        "commander": "Napoleon Bonaparte",
+        "strength": "67,000",
+        "casualties": "1,305 killed, 6,991 wounded"
+      },
+      {
+        "name": "Russia & Austria",
+        "commander": "Kutuzov & Alexander I",
+        "strength": "85,000",
+        "casualties": "16,000 killed/wounded, 20,000 captured"
+      }
     ],
     "victor": "France",
     "summary": "Napoleon deliberately weakened his right flank to bait the Allies into overextending, then drove through their weakened center at the Pratzen Heights, splitting their army in two.",
-    "significance": "Napoleon's masterpiece. Dissolved the Third Coalition and the Holy Roman Empire. Often ranked as the greatest tactical victory in military history."
+    "significance": "Napoleon's masterpiece. Dissolved the Third Coalition and the Holy Roman Empire. Often ranked as the greatest tactical victory in military history.",
+    "wikipediaTitle": "Battle of Austerlitz"
   },
   {
-    "id": "waterloo",
+    "id": "waterloo-1815",
     "name": "Battle of Waterloo",
     "year": 1815,
     "date": "18 June 1815",
@@ -262,33 +416,55 @@
     "war": "Napoleonic Wars",
     "battleType": "land",
     "sides": [
-      {"name": "Britain & Allies", "commander": "Duke of Wellington", "strength": "68,000 + 50,000 Prussians", "casualties": "22,000 killed/wounded"},
-      {"name": "France", "commander": "Napoleon Bonaparte", "strength": "72,000", "casualties": "25,000 killed/wounded, 8,000 captured"}
+      {
+        "name": "Britain & Allies",
+        "commander": "Duke of Wellington",
+        "strength": "68,000 + 50,000 Prussians",
+        "casualties": "22,000 killed/wounded"
+      },
+      {
+        "name": "France",
+        "commander": "Napoleon Bonaparte",
+        "strength": "72,000",
+        "casualties": "25,000 killed/wounded, 8,000 captured"
+      }
     ],
     "victor": "Britain & Allies",
     "summary": "Wellington's army held defensive positions all day against repeated French assaults. The late arrival of Blucher's Prussian army on Napoleon's right flank decided the battle.",
-    "significance": "Ended Napoleon's rule permanently and the Napoleonic Wars. Ushered in nearly a century of relative European peace."
+    "significance": "Ended Napoleon's rule permanently and the Napoleonic Wars. Ushered in nearly a century of relative European peace.",
+    "wikipediaTitle": "Battle of Waterloo"
   },
   {
-    "id": "gettysburg",
+    "id": "gettysburg-1863",
     "name": "Battle of Gettysburg",
     "year": 1863,
     "date": "1-3 July 1863",
-    "lat": 39.8110,
+    "lat": 39.811,
     "lng": -77.2255,
     "era": "industrial",
     "war": "American Civil War",
     "battleType": "land",
     "sides": [
-      {"name": "Union", "commander": "George Meade", "strength": "85,000", "casualties": "23,000 killed/wounded/captured"},
-      {"name": "Confederacy", "commander": "Robert E. Lee", "strength": "75,000", "casualties": "23,000-28,000 killed/wounded/captured"}
+      {
+        "name": "Union",
+        "commander": "George Meade",
+        "strength": "85,000",
+        "casualties": "23,000 killed/wounded/captured"
+      },
+      {
+        "name": "Confederacy",
+        "commander": "Robert E. Lee",
+        "strength": "75,000",
+        "casualties": "23,000-28,000 killed/wounded/captured"
+      }
     ],
     "victor": "Union",
     "summary": "Three days of fighting culminated in Pickett's Charge, a disastrous frontal assault across open ground against entrenched Union positions on Cemetery Ridge.",
-    "significance": "Turned the tide of the Civil War. The Confederacy never again mounted a major offensive into the North."
+    "significance": "Turned the tide of the Civil War. The Confederacy never again mounted a major offensive into the North.",
+    "wikipediaTitle": "Battle of Gettysburg"
   },
   {
-    "id": "antietam",
+    "id": "antietam-1862",
     "name": "Battle of Antietam",
     "year": 1862,
     "date": "17 September 1862",
@@ -298,15 +474,26 @@
     "war": "American Civil War",
     "battleType": "land",
     "sides": [
-      {"name": "Union", "commander": "George McClellan", "strength": "87,000", "casualties": "12,400 killed/wounded/missing"},
-      {"name": "Confederacy", "commander": "Robert E. Lee", "strength": "38,000", "casualties": "10,300 killed/wounded/missing"}
+      {
+        "name": "Union",
+        "commander": "George McClellan",
+        "strength": "87,000",
+        "casualties": "12,400 killed/wounded/missing"
+      },
+      {
+        "name": "Confederacy",
+        "commander": "Robert E. Lee",
+        "strength": "38,000",
+        "casualties": "10,300 killed/wounded/missing"
+      }
     ],
     "victor": "Union",
     "summary": "The bloodiest single day in American military history. Union attacks progressed from north to south across Antietam Creek in three phases but failed to destroy Lee's army.",
-    "significance": "Gave Lincoln the political opening to issue the Emancipation Proclamation, transforming the war into a fight against slavery."
+    "significance": "Gave Lincoln the political opening to issue the Emancipation Proclamation, transforming the war into a fight against slavery.",
+    "wikipediaTitle": "Battle of Antietam"
   },
   {
-    "id": "gallipoli",
+    "id": "gallipoli-1915",
     "name": "Battle of Gallipoli",
     "year": 1915,
     "date": "February 1915 - January 1916",
@@ -316,15 +503,26 @@
     "war": "World War I",
     "battleType": "land",
     "sides": [
-      {"name": "Ottoman Empire", "commander": "Mustafa Kemal", "strength": "315,000", "casualties": "250,000 killed/wounded"},
-      {"name": "British Empire & France", "commander": "Ian Hamilton", "strength": "490,000", "casualties": "250,000 killed/wounded"}
+      {
+        "name": "Ottoman Empire",
+        "commander": "Mustafa Kemal",
+        "strength": "315,000",
+        "casualties": "250,000 killed/wounded"
+      },
+      {
+        "name": "British Empire & France",
+        "commander": "Ian Hamilton",
+        "strength": "490,000",
+        "casualties": "250,000 killed/wounded"
+      }
     ],
     "victor": "Ottoman Empire",
     "summary": "Allied forces attempted to seize the Dardanelles strait by amphibious landing. Turkish forces under Kemal held the high ground and repelled every advance over eight months.",
-    "significance": "Made Mustafa Kemal a national hero; he later founded modern Turkey. Churchill, who championed the campaign, was forced to resign."
+    "significance": "Made Mustafa Kemal a national hero; he later founded modern Turkey. Churchill, who championed the campaign, was forced to resign.",
+    "wikipediaTitle": "Gallipoli campaign"
   },
   {
-    "id": "somme",
+    "id": "somme-1916",
     "name": "Battle of the Somme",
     "year": 1916,
     "date": "1 July - 18 November 1916",
@@ -334,33 +532,55 @@
     "war": "World War I",
     "battleType": "land",
     "sides": [
-      {"name": "British Empire & France", "commander": "Haig & Foch", "strength": "1,500,000", "casualties": "620,000 killed/wounded"},
-      {"name": "German Empire", "commander": "Fritz von Below", "strength": "1,000,000", "casualties": "465,000 killed/wounded"}
+      {
+        "name": "British Empire & France",
+        "commander": "Haig & Foch",
+        "strength": "1,500,000",
+        "casualties": "620,000 killed/wounded"
+      },
+      {
+        "name": "German Empire",
+        "commander": "Fritz von Below",
+        "strength": "1,000,000",
+        "casualties": "465,000 killed/wounded"
+      }
     ],
     "victor": "Inconclusive",
     "summary": "The British suffered 57,000 casualties on the first day alone. Over four months of attrition, the Allies advanced just six miles through mud and wire.",
-    "significance": "Became a symbol of the futility of World War I trench warfare. The tank saw its first combat use during this battle."
+    "significance": "Became a symbol of the futility of World War I trench warfare. The tank saw its first combat use during this battle.",
+    "wikipediaTitle": "Battle of the Somme"
   },
   {
-    "id": "verdun",
+    "id": "verdun-1916",
     "name": "Battle of Verdun",
     "year": 1916,
     "date": "21 February - 18 December 1916",
-    "lat": 49.1600,
+    "lat": 49.16,
     "lng": 5.3914,
     "era": "world-war-1",
     "war": "World War I",
     "battleType": "land",
     "sides": [
-      {"name": "France", "commander": "Philippe Petain", "strength": "1,140,000 rotated", "casualties": "377,000 killed/wounded"},
-      {"name": "German Empire", "commander": "Erich von Falkenhayn", "strength": "1,250,000 rotated", "casualties": "337,000 killed/wounded"}
+      {
+        "name": "France",
+        "commander": "Philippe Petain",
+        "strength": "1,140,000 rotated",
+        "casualties": "377,000 killed/wounded"
+      },
+      {
+        "name": "German Empire",
+        "commander": "Erich von Falkenhayn",
+        "strength": "1,250,000 rotated",
+        "casualties": "337,000 killed/wounded"
+      }
     ],
     "victor": "France",
     "summary": "Germany aimed to bleed France white through attrition at a point the French could not abandon. Petain organized a rotation system and supply road that sustained the defense for ten months.",
-    "significance": "The longest and one of the costliest battles in history. 'They shall not pass' became a French national rallying cry."
+    "significance": "The longest and one of the costliest battles in history. 'They shall not pass' became a French national rallying cry.",
+    "wikipediaTitle": "Battle of Verdun"
   },
   {
-    "id": "battle-of-britain",
+    "id": "battle-of-britain-1940",
     "name": "Battle of Britain",
     "year": 1940,
     "date": "10 July - 31 October 1940",
@@ -370,33 +590,55 @@
     "war": "World War II",
     "battleType": "aerial",
     "sides": [
-      {"name": "Great Britain", "commander": "Hugh Dowding", "strength": "1,963 aircraft", "casualties": "1,547 aircraft lost, 544 aircrew killed"},
-      {"name": "Nazi Germany", "commander": "Hermann Goring", "strength": "2,550 aircraft", "casualties": "1,887 aircraft lost, 2,585 aircrew killed"}
+      {
+        "name": "Great Britain",
+        "commander": "Hugh Dowding",
+        "strength": "1,963 aircraft",
+        "casualties": "1,547 aircraft lost, 544 aircrew killed"
+      },
+      {
+        "name": "Nazi Germany",
+        "commander": "Hermann Goring",
+        "strength": "2,550 aircraft",
+        "casualties": "1,887 aircraft lost, 2,585 aircrew killed"
+      }
     ],
     "victor": "Great Britain",
     "summary": "The Luftwaffe attempted to destroy the RAF as a precondition for invasion. Radar, Spitfires, and Hurricanes held. Hitler postponed Operation Sea Lion indefinitely.",
-    "significance": "The first major campaign fought entirely by air forces. Proved that air power alone could not force a nation to surrender. 'Never was so much owed by so many to so few.'"
+    "significance": "The first major campaign fought entirely by air forces. Proved that air power alone could not force a nation to surrender. 'Never was so much owed by so many to so few.'",
+    "wikipediaTitle": "Battle of Britain"
   },
   {
-    "id": "stalingrad",
+    "id": "stalingrad-1942",
     "name": "Battle of Stalingrad",
     "year": 1942,
     "date": "23 August 1942 - 2 February 1943",
-    "lat": 48.7080,
+    "lat": 48.708,
     "lng": 44.5133,
     "era": "world-war-2",
     "war": "World War II",
     "battleType": "land",
     "sides": [
-      {"name": "Soviet Union", "commander": "Zhukov & Chuikov", "strength": "1,143,000", "casualties": "478,000 killed, 651,000 wounded"},
-      {"name": "Nazi Germany", "commander": "Friedrich Paulus", "strength": "1,040,000", "casualties": "800,000 killed/wounded/captured"}
+      {
+        "name": "Soviet Union",
+        "commander": "Zhukov & Chuikov",
+        "strength": "1,143,000",
+        "casualties": "478,000 killed, 651,000 wounded"
+      },
+      {
+        "name": "Nazi Germany",
+        "commander": "Friedrich Paulus",
+        "strength": "1,040,000",
+        "casualties": "800,000 killed/wounded/captured"
+      }
     ],
     "victor": "Soviet Union",
     "summary": "Months of brutal urban fighting culminated in Operation Uranus, a Soviet double envelopment that trapped the German 6th Army. Paulus surrendered 91,000 survivors.",
-    "significance": "The turning point of the Eastern Front and arguably the entire war. Germany never recovered the strategic initiative."
+    "significance": "The turning point of the Eastern Front and arguably the entire war. Germany never recovered the strategic initiative.",
+    "wikipediaTitle": "Battle of Stalingrad"
   },
   {
-    "id": "midway",
+    "id": "midway-1942",
     "name": "Battle of Midway",
     "year": 1942,
     "date": "4-7 June 1942",
@@ -406,33 +648,55 @@
     "war": "World War II",
     "battleType": "naval",
     "sides": [
-      {"name": "United States", "commander": "Chester Nimitz", "strength": "3 carriers, 50 support ships", "casualties": "307 killed, 1 carrier lost"},
-      {"name": "Japan", "commander": "Isoroku Yamamoto", "strength": "4 carriers, 150+ support ships", "casualties": "3,057 killed, 4 carriers lost"}
+      {
+        "name": "United States",
+        "commander": "Chester Nimitz",
+        "strength": "3 carriers, 50 support ships",
+        "casualties": "307 killed, 1 carrier lost"
+      },
+      {
+        "name": "Japan",
+        "commander": "Isoroku Yamamoto",
+        "strength": "4 carriers, 150+ support ships",
+        "casualties": "3,057 killed, 4 carriers lost"
+      }
     ],
     "victor": "United States",
     "summary": "US codebreakers identified the target. Dive bombers caught three Japanese carriers with fueled aircraft on deck and sank them in minutes. A fourth was sunk later that day.",
-    "significance": "Shifted the balance of naval power in the Pacific permanently. Japan lost four irreplaceable fleet carriers and its most experienced pilots."
+    "significance": "Shifted the balance of naval power in the Pacific permanently. Japan lost four irreplaceable fleet carriers and its most experienced pilots.",
+    "wikipediaTitle": "Battle of Midway"
   },
   {
-    "id": "kursk",
+    "id": "kursk-1943",
     "name": "Battle of Kursk",
     "year": 1943,
     "date": "5 July - 23 August 1943",
-    "lat": 51.7500,
+    "lat": 51.75,
     "lng": 36.1833,
     "era": "world-war-2",
     "war": "World War II",
     "battleType": "land",
     "sides": [
-      {"name": "Soviet Union", "commander": "Zhukov & Rokossovsky", "strength": "1,910,000", "casualties": "254,000 killed/missing"},
-      {"name": "Nazi Germany", "commander": "Manstein & Model", "strength": "780,000", "casualties": "200,000 killed/wounded"}
+      {
+        "name": "Soviet Union",
+        "commander": "Zhukov & Rokossovsky",
+        "strength": "1,910,000",
+        "casualties": "254,000 killed/missing"
+      },
+      {
+        "name": "Nazi Germany",
+        "commander": "Manstein & Model",
+        "strength": "780,000",
+        "casualties": "200,000 killed/wounded"
+      }
     ],
     "victor": "Soviet Union",
     "summary": "Germany's last major offensive on the Eastern Front. Soviet defenses in depth absorbed the armored assault, then counterattacked. Included the largest tank battle in history at Prokhorovka.",
-    "significance": "Permanently ended German offensive capability in the East. From Kursk on, the Wehrmacht was in continuous retreat toward Berlin."
+    "significance": "Permanently ended German offensive capability in the East. From Kursk on, the Wehrmacht was in continuous retreat toward Berlin.",
+    "wikipediaTitle": "Battle of Kursk"
   },
   {
-    "id": "normandy",
+    "id": "normandy-1944",
     "name": "D-Day / Battle of Normandy",
     "year": 1944,
     "date": "6 June - 25 August 1944",
@@ -442,33 +706,55 @@
     "war": "World War II",
     "battleType": "land",
     "sides": [
-      {"name": "Western Allies", "commander": "Dwight Eisenhower", "strength": "156,000 on D-Day, 2M+ total", "casualties": "226,000 killed/wounded"},
-      {"name": "Nazi Germany", "commander": "Erwin Rommel", "strength": "380,000 initial", "casualties": "240,000 killed/wounded, 200,000 captured"}
+      {
+        "name": "Western Allies",
+        "commander": "Dwight Eisenhower",
+        "strength": "156,000 on D-Day, 2M+ total",
+        "casualties": "226,000 killed/wounded"
+      },
+      {
+        "name": "Nazi Germany",
+        "commander": "Erwin Rommel",
+        "strength": "380,000 initial",
+        "casualties": "240,000 killed/wounded, 200,000 captured"
+      }
     ],
     "victor": "Western Allies",
     "summary": "The largest amphibious invasion in history. Five beaches, three airborne divisions, and a massive deception operation opened a second front in Western Europe.",
-    "significance": "Began the liberation of Western Europe. Combined with the Eastern Front, it sealed Nazi Germany's defeat."
+    "significance": "Began the liberation of Western Europe. Combined with the Eastern Front, it sealed Nazi Germany's defeat.",
+    "wikipediaTitle": "Normandy landings"
   },
   {
-    "id": "bulge",
+    "id": "bulge-1944",
     "name": "Battle of the Bulge",
     "year": 1944,
     "date": "16 December 1944 - 25 January 1945",
-    "lat": 50.0500,
-    "lng": 5.7500,
+    "lat": 50.05,
+    "lng": 5.75,
     "era": "world-war-2",
     "war": "World War II",
     "battleType": "land",
     "sides": [
-      {"name": "Western Allies", "commander": "Eisenhower & Patton", "strength": "610,000", "casualties": "89,000 killed/wounded/captured"},
-      {"name": "Nazi Germany", "commander": "Gerd von Rundstedt", "strength": "410,000", "casualties": "100,000 killed/wounded/captured"}
+      {
+        "name": "Western Allies",
+        "commander": "Eisenhower & Patton",
+        "strength": "610,000",
+        "casualties": "89,000 killed/wounded/captured"
+      },
+      {
+        "name": "Nazi Germany",
+        "commander": "Gerd von Rundstedt",
+        "strength": "410,000",
+        "casualties": "100,000 killed/wounded/captured"
+      }
     ],
     "victor": "Western Allies",
     "summary": "Germany's last major offensive in the West. A surprise attack through the Ardennes created a bulge in Allied lines, but Patton's Third Army relieved Bastogne and the offensive collapsed.",
-    "significance": "Exhausted Germany's last strategic reserves. The road to the Rhine and into Germany was open."
+    "significance": "Exhausted Germany's last strategic reserves. The road to the Rhine and into Germany was open.",
+    "wikipediaTitle": "Battle of the Bulge"
   },
   {
-    "id": "inchon",
+    "id": "inchon-1950",
     "name": "Battle of Inchon",
     "year": 1950,
     "date": "15-19 September 1950",
@@ -478,33 +764,55 @@
     "war": "Korean War",
     "battleType": "land",
     "sides": [
-      {"name": "United Nations", "commander": "Douglas MacArthur", "strength": "75,000", "casualties": "566 killed"},
-      {"name": "North Korea", "commander": "Wan Yong", "strength": "6,500", "casualties": "1,350 killed, 2,500 captured"}
+      {
+        "name": "United Nations",
+        "commander": "Douglas MacArthur",
+        "strength": "75,000",
+        "casualties": "566 killed"
+      },
+      {
+        "name": "North Korea",
+        "commander": "Wan Yong",
+        "strength": "6,500",
+        "casualties": "1,350 killed, 2,500 captured"
+      }
     ],
     "victor": "United Nations",
     "summary": "MacArthur launched a daring amphibious assault 150 miles behind enemy lines at Inchon, a port with extreme tidal variations that most planners considered too risky.",
-    "significance": "Cut North Korean supply lines and recaptured Seoul within two weeks. Reversed the entire momentum of the Korean War."
+    "significance": "Cut North Korean supply lines and recaptured Seoul within two weeks. Reversed the entire momentum of the Korean War.",
+    "wikipediaTitle": "Battle of Inchon"
   },
   {
-    "id": "dien-bien-phu",
+    "id": "dien-bien-phu-1954",
     "name": "Battle of Dien Bien Phu",
     "year": 1954,
     "date": "13 March - 7 May 1954",
-    "lat": 21.3830,
+    "lat": 21.383,
     "lng": 103.0158,
     "era": "modern",
     "war": "First Indochina War",
     "battleType": "siege",
     "sides": [
-      {"name": "Viet Minh", "commander": "Vo Nguyen Giap", "strength": "50,000", "casualties": "8,000 killed, 15,000 wounded"},
-      {"name": "France", "commander": "Christian de Castries", "strength": "16,000", "casualties": "2,300 killed, 11,700 captured"}
+      {
+        "name": "Viet Minh",
+        "commander": "Vo Nguyen Giap",
+        "strength": "50,000",
+        "casualties": "8,000 killed, 15,000 wounded"
+      },
+      {
+        "name": "France",
+        "commander": "Christian de Castries",
+        "strength": "16,000",
+        "casualties": "2,300 killed, 11,700 captured"
+      }
     ],
     "victor": "Viet Minh",
     "summary": "Giap hauled artillery through jungle mountains to surround the French garrison in a valley. Systematic siege warfare overran French positions one by one over 56 days.",
-    "significance": "Ended French colonial rule in Indochina. Led directly to the Geneva Accords and the partition of Vietnam."
+    "significance": "Ended French colonial rule in Indochina. Led directly to the Geneva Accords and the partition of Vietnam.",
+    "wikipediaTitle": "Battle of Dien Bien Phu"
   },
   {
-    "id": "73-easting",
+    "id": "73-easting-1991",
     "name": "Battle of 73 Easting",
     "year": 1991,
     "date": "26 February 1991",
@@ -514,11 +822,1942 @@
     "war": "Gulf War",
     "battleType": "land",
     "sides": [
-      {"name": "United States", "commander": "H.R. McMaster", "strength": "12 M1A1 tanks, 13 Bradleys", "casualties": "1 killed, 0 vehicles lost"},
-      {"name": "Iraq", "commander": "Tawakalna Division", "strength": "300+ vehicles", "casualties": "160+ vehicles destroyed"}
+      {
+        "name": "United States",
+        "commander": "H.R. McMaster",
+        "strength": "12 M1A1 tanks, 13 Bradleys",
+        "casualties": "1 killed, 0 vehicles lost"
+      },
+      {
+        "name": "Iraq",
+        "commander": "Tawakalna Division",
+        "strength": "300+ vehicles",
+        "casualties": "160+ vehicles destroyed"
+      }
     ],
     "victor": "United States",
     "summary": "Eagle Troop of the 2nd Armored Cavalry Regiment attacked through a sandstorm and destroyed an entire Iraqi brigade in 23 minutes using superior thermal sights and GPS navigation.",
-    "significance": "Demonstrated the overwhelming advantage of modern combined-arms doctrine, GPS navigation, and thermal optics. The most studied tank battle of the modern era."
+    "significance": "Demonstrated the overwhelming advantage of modern combined-arms doctrine, GPS navigation, and thermal optics. The most studied tank battle of the modern era.",
+    "wikipediaTitle": "Battle of 73 Easting"
+  },
+  {
+    "id": "plataea-479bc",
+    "name": "Battle of Plataea",
+    "year": -479,
+    "date": "August 479 BC",
+    "lat": 38.3203,
+    "lng": 23.2614,
+    "era": "ancient",
+    "war": "Greco-Persian Wars",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Plataea",
+    "sides": [
+      {
+        "name": "Greek City-States",
+        "commander": "Pausanias",
+        "strength": "~38,700 hoplites + light troops",
+        "casualties": "1,360 killed (Herodotus)"
+      },
+      {
+        "name": "Persian Empire",
+        "commander": "Mardonius",
+        "strength": "70,000-120,000 (modern estimate)",
+        "casualties": "tens of thousands killed; Mardonius killed"
+      }
+    ],
+    "victor": "Greek City-States",
+    "summary": "Spartan-led Greek alliance defeats Persian land forces under Mardonius. A Greek withdrawal at dawn is misread as flight; the Persian pursuit is caught extended and shattered by the Spartan counter-charge. Mardonius is killed in the melee.",
+    "significance": "Fought the same day as the naval action at Mycale. Together the two battles end the Persian invasion of Greece for good."
+  },
+  {
+    "id": "mycale-479bc",
+    "name": "Battle of Mycale",
+    "year": -479,
+    "date": "August 479 BC",
+    "lat": 37.6783,
+    "lng": 27.0833,
+    "era": "ancient",
+    "war": "Greco-Persian Wars",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Mycale",
+    "sides": [
+      {
+        "name": "Greek Allied Fleet",
+        "commander": "Leotychides, Xanthippus",
+        "strength": "110 ships + landed hoplites",
+        "casualties": "Light"
+      },
+      {
+        "name": "Persian Empire",
+        "commander": "Mardontes, Tigranes",
+        "strength": "~60,000 land force, 60+ beached ships",
+        "casualties": "Heavy; fleet burned"
+      }
+    ],
+    "victor": "Greek Allied Fleet",
+    "summary": "Greek fleet lands and attacks the beached Persian fleet on the Ionian coast. Persian land forces are destroyed and the ships burned. Word of victory at Plataea reaches the Greeks mid-battle.",
+    "significance": "Eliminates Persian naval power in the Aegean. Ionian Greek cities revolt against Persia. Final action of the Persian invasions."
+  },
+  {
+    "id": "leuctra-371bc",
+    "name": "Battle of Leuctra",
+    "year": -371,
+    "date": "6 July 371 BC",
+    "lat": 38.3239,
+    "lng": 23.025,
+    "era": "ancient",
+    "war": "Theban-Spartan War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Leuctra",
+    "sides": [
+      {
+        "name": "Thebes",
+        "commander": "Epaminondas, Pelopidas",
+        "strength": "~7,000 hoplites, 600 cavalry",
+        "casualties": "~300 killed"
+      },
+      {
+        "name": "Sparta",
+        "commander": "Cleombrotus I",
+        "strength": "~10,000 hoplites, 1,000 cavalry",
+        "casualties": "1,000+ killed including King Cleombrotus"
+      }
+    ],
+    "victor": "Thebes",
+    "summary": "Epaminondas weights his left wing fifty deep and angles his right back, refusing it from contact. The Theban left smashes the Spartan elite right where King Cleombrotus is killed; the rest of the Spartan line then breaks.",
+    "significance": "First defeat of a Spartan hoplite army in open battle. Ends Spartan supremacy. The oblique order influences Philip of Macedon, Frederick the Great, and Napoleon."
+  },
+  {
+    "id": "chaeronea-338bc",
+    "name": "Battle of Chaeronea",
+    "year": -338,
+    "date": "2 August 338 BC",
+    "lat": 38.4928,
+    "lng": 22.8478,
+    "era": "ancient",
+    "war": "Rise of Macedon",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Chaeronea (338 BC)",
+    "sides": [
+      {
+        "name": "Macedon",
+        "commander": "Philip II, Alexander",
+        "strength": "~30,000",
+        "casualties": "~1,000 killed (modern estimate)"
+      },
+      {
+        "name": "Athenian-Theban Alliance",
+        "commander": "Chares, Theagenes",
+        "strength": "~35,000",
+        "casualties": "~1,000 Athenian killed, 2,000 captured; Theban Sacred Band destroyed (300 dead)"
+      }
+    ],
+    "victor": "Macedon",
+    "summary": "Philip's phalanx pins the Greek line; the eighteen-year-old Alexander leads the Companion cavalry through a gap on the Macedonian left and rolls up the Theban Sacred Band, which fights and dies to a man.",
+    "significance": "Ends the independence of the Greek city-states. Establishes the League of Corinth and clears the way for Alexander's invasion of Persia two years later."
+  },
+  {
+    "id": "issus-333bc",
+    "name": "Battle of Issus",
+    "year": -333,
+    "date": "5 November 333 BC",
+    "lat": 36.847,
+    "lng": 36.182,
+    "era": "ancient",
+    "war": "Wars of Alexander the Great",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Issus",
+    "sides": [
+      {
+        "name": "Macedon",
+        "commander": "Alexander the Great",
+        "strength": "~35,000-40,000",
+        "casualties": "~7,000"
+      },
+      {
+        "name": "Persian Empire",
+        "commander": "Darius III",
+        "strength": "~60,000-100,000 (modern estimate)",
+        "casualties": "tens of thousands killed; Darius's family captured"
+      }
+    ],
+    "victor": "Macedon",
+    "summary": "Darius takes position on a narrow coastal plain that prevents him from bringing his numerical advantage to bear. Alexander charges the Persian center with the Companion cavalry aimed directly at the king, who flees the field.",
+    "significance": "Opens Phoenicia, Syria, and Egypt to Macedonian conquest. Alexander treats Darius's captured family with conspicuous courtesy."
+  },
+  {
+    "id": "trebia-218bc",
+    "name": "Battle of the Trebia",
+    "year": -218,
+    "date": "22 December 218 BC",
+    "lat": 45.0667,
+    "lng": 9.6833,
+    "era": "ancient",
+    "war": "Second Punic War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of the Trebia",
+    "sides": [
+      {
+        "name": "Carthage",
+        "commander": "Hannibal Barca",
+        "strength": "~38,000",
+        "casualties": "~4,000-5,000"
+      },
+      {
+        "name": "Roman Republic",
+        "commander": "Tiberius Sempronius Longus",
+        "strength": "~40,000",
+        "casualties": "~26,000-28,000 killed or captured"
+      }
+    ],
+    "victor": "Carthage",
+    "summary": "Hannibal goads Sempronius into crossing the freezing Trebia at dawn. Numidian cavalry envelops the Roman flanks; Mago's concealed force hits the Roman rear. The Roman center cuts through and escapes; both wings are destroyed.",
+    "significance": "First of three catastrophic Roman defeats by Hannibal in eighteen months — followed by Lake Trasimene and Cannae. Establishes his tactical signature of envelopment."
+  },
+  {
+    "id": "zama-202bc",
+    "name": "Battle of Zama",
+    "year": -202,
+    "date": "19 October 202 BC",
+    "lat": 35.8833,
+    "lng": 9.7833,
+    "era": "ancient",
+    "war": "Second Punic War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Zama",
+    "sides": [
+      {
+        "name": "Roman Republic + Numidian allies",
+        "commander": "Scipio Africanus, Masinissa",
+        "strength": "~35,000",
+        "casualties": "~1,500 killed, 4,000 wounded"
+      },
+      {
+        "name": "Carthage",
+        "commander": "Hannibal Barca",
+        "strength": "~36,000 + 80 war elephants",
+        "casualties": "~20,000 killed, ~20,000 captured"
+      }
+    ],
+    "victor": "Roman Republic",
+    "summary": "Hannibal opens with a charge of eighty war elephants. Scipio has arrayed lanes in his infantry that funnel the panicking animals harmlessly through. Masinissa's Numidian cavalry routs the Carthaginian cavalry, then returns to strike the Carthaginian rear — the same trap Hannibal sprang at Cannae.",
+    "significance": "Ends the Second Punic War. Hannibal's only major battlefield defeat. Carthage is reduced to a Roman client state and finally destroyed in 146 BC."
+  },
+  {
+    "id": "pharsalus-48bc",
+    "name": "Battle of Pharsalus",
+    "year": -48,
+    "date": "9 August 48 BC",
+    "lat": 39.295,
+    "lng": 22.4017,
+    "era": "ancient",
+    "war": "Caesar's Civil War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Pharsalus",
+    "sides": [
+      {
+        "name": "Caesarian forces",
+        "commander": "Julius Caesar",
+        "strength": "~22,000 + 1,000 cavalry",
+        "casualties": "~200-1,200"
+      },
+      {
+        "name": "Pompeian forces",
+        "commander": "Pompey the Great",
+        "strength": "~38,000 + 7,000 cavalry",
+        "casualties": "~6,000-15,000 killed, ~24,000 captured"
+      }
+    ],
+    "victor": "Caesarian forces",
+    "summary": "Pompey's massive cavalry charges Caesar's exposed right. Caesar's concealed fourth line of veterans, told to thrust upward at the riders' faces, turns the charge into a panic. The Pompeian cavalry rout exposes the infantry to envelopment.",
+    "significance": "Decides the Civil War. Pompey flees to Egypt, where he is murdered. Caesar becomes effective master of Rome — until the Ides of March, four years later."
+  },
+  {
+    "id": "bunker-hill-1775",
+    "name": "Battle of Bunker Hill",
+    "year": 1775,
+    "date": "17 June 1775",
+    "lat": 42.3763,
+    "lng": -71.0606,
+    "era": "napoleonic",
+    "war": "American Revolutionary War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Bunker Hill",
+    "sides": [
+      {
+        "name": "American Patriot militia",
+        "commander": "William Prescott, Israel Putnam",
+        "strength": "~1,500",
+        "casualties": "115 killed, 305 wounded, 30 captured"
+      },
+      {
+        "name": "British Army",
+        "commander": "William Howe, Robert Pigot",
+        "strength": "~2,400",
+        "casualties": "226 killed, 828 wounded"
+      }
+    ],
+    "victor": "British Army",
+    "summary": "Colonial militia fortify Breed's Hill (forever mislabeled \"Bunker Hill\") overnight. The British succeed in taking the position only on their third frontal assault, after the defenders run out of powder. \"Don't fire until you see the whites of their eyes.\"",
+    "significance": "Heaviest British losses of any single engagement in the war. Convinces the British command that retaking the colonies will be far costlier than expected."
+  },
+  {
+    "id": "trenton-1776",
+    "name": "Battle of Trenton",
+    "year": 1776,
+    "date": "26 December 1776",
+    "lat": 40.2206,
+    "lng": -74.7563,
+    "era": "napoleonic",
+    "war": "American Revolutionary War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Trenton",
+    "sides": [
+      {
+        "name": "Continental Army",
+        "commander": "George Washington",
+        "strength": "~2,400",
+        "casualties": "2 killed (frozen on march), 5 wounded"
+      },
+      {
+        "name": "Hessian garrison",
+        "commander": "Johann Rall (killed)",
+        "strength": "~1,500",
+        "casualties": "22 killed including Rall, 83 wounded, 896 captured"
+      }
+    ],
+    "victor": "Continental Army",
+    "summary": "Washington crosses the ice-clogged Delaware on Christmas night, marches nine miles in a winter storm, and surprises the Hessian garrison at dawn. The garrison surrenders within ninety minutes.",
+    "significance": "Revives a collapsing American cause. Enlistments due to expire days later are extended. Washington wins again at Princeton a week later."
+  },
+  {
+    "id": "saratoga-1777",
+    "name": "Battles of Saratoga",
+    "year": 1777,
+    "date": "19 September - 17 October 1777",
+    "lat": 42.9805,
+    "lng": -73.6438,
+    "era": "napoleonic",
+    "war": "American Revolutionary War",
+    "battleType": "land",
+    "wikipediaTitle": "Battles of Saratoga",
+    "sides": [
+      {
+        "name": "Continental Army + militia",
+        "commander": "Horatio Gates, Benedict Arnold, Daniel Morgan",
+        "strength": "~15,000",
+        "casualties": "~90 killed, ~240 wounded across both engagements"
+      },
+      {
+        "name": "British Army + German auxiliaries",
+        "commander": "John Burgoyne",
+        "strength": "~7,200",
+        "casualties": "~1,000 killed/wounded, 6,222 surrendered"
+      }
+    ],
+    "victor": "Continental Army + militia",
+    "summary": "British strategy to cut New England off from the other colonies collapses. Two pitched battles at Freeman's Farm (Sept 19) and Bemis Heights (Oct 7) — both decided largely by Arnold's tactical aggression — pin Burgoyne in place. Surrounded and starving, he surrenders his entire army.",
+    "significance": "France enters the war on the American side. Often called the most decisive battle of the last thousand years for its second- and third-order effects."
+  },
+  {
+    "id": "cowpens-1781",
+    "name": "Battle of Cowpens",
+    "year": 1781,
+    "date": "17 January 1781",
+    "lat": 35.1294,
+    "lng": -81.8068,
+    "era": "napoleonic",
+    "war": "American Revolutionary War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Cowpens",
+    "sides": [
+      {
+        "name": "Continental Army + militia",
+        "commander": "Daniel Morgan",
+        "strength": "~1,065",
+        "casualties": "25 killed, 124 wounded"
+      },
+      {
+        "name": "British Army",
+        "commander": "Banastre Tarleton",
+        "strength": "~1,150",
+        "casualties": "110 killed, 200 wounded, 712 captured"
+      }
+    ],
+    "victor": "Continental Army + militia",
+    "summary": "Morgan places his militia in front with orders to fire two volleys and fall back behind his regulars. Tarleton charges into what he thinks is a rout; his line is shattered by disciplined Continental musketry and a cavalry counter-charge on his rear.",
+    "significance": "One of the few outright tactical destructions of a British force in the war. Cripples British strength in the South ahead of Yorktown."
+  },
+  {
+    "id": "yorktown-1781",
+    "name": "Siege of Yorktown",
+    "year": 1781,
+    "date": "28 September - 19 October 1781",
+    "lat": 37.2387,
+    "lng": -76.5103,
+    "era": "napoleonic",
+    "war": "American Revolutionary War",
+    "battleType": "siege",
+    "wikipediaTitle": "Siege of Yorktown",
+    "sides": [
+      {
+        "name": "Franco-American allied force",
+        "commander": "George Washington, Rochambeau, Lafayette",
+        "strength": "~17,600",
+        "casualties": "~75 American killed, 199 wounded; ~220 French killed/wounded"
+      },
+      {
+        "name": "British Army",
+        "commander": "Lord Cornwallis",
+        "strength": "~9,000",
+        "casualties": "156 killed, 326 wounded, 7,087 surrendered"
+      }
+    ],
+    "victor": "Franco-American allied force",
+    "summary": "The French fleet under de Grasse defeats the British relief fleet at the Chesapeake, isolating Cornwallis on the Yorktown peninsula. French and American troops dig parallel siege lines progressively closer. Cornwallis surrenders his army within three weeks.",
+    "significance": "Effective end of the Revolutionary War. The British band reportedly plays \"The World Turned Upside Down\" during the surrender ceremony."
+  },
+  {
+    "id": "lake-erie-1813",
+    "name": "Battle of Lake Erie",
+    "year": 1813,
+    "date": "10 September 1813",
+    "lat": 41.677,
+    "lng": -82.8246,
+    "era": "napoleonic",
+    "war": "War of 1812",
+    "battleType": "naval",
+    "wikipediaTitle": "Battle of Lake Erie",
+    "sides": [
+      {
+        "name": "United States Navy",
+        "commander": "Oliver Hazard Perry",
+        "strength": "9 ships",
+        "casualties": "27 killed, 96 wounded"
+      },
+      {
+        "name": "Royal Navy",
+        "commander": "Robert Heriot Barclay",
+        "strength": "6 ships",
+        "casualties": "41 killed, 94 wounded, 306 captured"
+      }
+    ],
+    "victor": "United States",
+    "summary": "Perry's flagship Lawrence is shot to pieces in the opening hours. He rows under fire to the Niagara, breaks the British line, and forces the surrender of every British ship. \"We have met the enemy and they are ours.\"",
+    "significance": "Gives the US control of Lake Erie for the rest of the war and forces British abandonment of Detroit."
+  },
+  {
+    "id": "new-orleans-1815",
+    "name": "Battle of New Orleans",
+    "year": 1815,
+    "date": "8 January 1815",
+    "lat": 29.9442,
+    "lng": -90.0245,
+    "era": "napoleonic",
+    "war": "War of 1812",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of New Orleans",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "Andrew Jackson",
+        "strength": "~4,700",
+        "casualties": "55 killed, 185 wounded"
+      },
+      {
+        "name": "Great Britain",
+        "commander": "Edward Pakenham (killed)",
+        "strength": "~8,000",
+        "casualties": "386 killed including Pakenham, 1,521 wounded, 552 captured"
+      }
+    ],
+    "victor": "United States",
+    "summary": "Jackson fortifies a narrow front behind a canal with regulars, free Black battalions, Choctaw warriors, Tennessee and Kentucky riflemen, and Jean Lafitte's Baratarian pirates. Pakenham's frontal assault is annihilated in twenty-five minutes.",
+    "significance": "Fought two weeks after the Treaty of Ghent ended the war — the news had not crossed the Atlantic. Makes Jackson a national hero."
+  },
+  {
+    "id": "buena-vista-1847",
+    "name": "Battle of Buena Vista",
+    "year": 1847,
+    "date": "22-23 February 1847",
+    "lat": 25.4583,
+    "lng": -100.975,
+    "era": "industrial",
+    "war": "Mexican–American War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Buena Vista",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "Zachary Taylor",
+        "strength": "~4,700",
+        "casualties": "267 killed, 387 wounded"
+      },
+      {
+        "name": "Mexico",
+        "commander": "Antonio López de Santa Anna",
+        "strength": "~15,000",
+        "casualties": "591 killed, 1,037 wounded, ~1,900 missing"
+      }
+    ],
+    "victor": "United States",
+    "summary": "Outnumbered three to one, Taylor holds a narrow valley with regulars and Indiana, Illinois, and Kentucky volunteers. Jefferson Davis's Mississippi Rifles distinguish themselves; Santa Anna withdraws after two days of failed assaults.",
+    "significance": "Makes Taylor a national figure and elects him president the next year. Allows Winfield Scott's expedition to advance from Veracruz to Mexico City unmolested in the north."
+  },
+  {
+    "id": "first-bull-run-1861",
+    "name": "First Battle of Bull Run",
+    "year": 1861,
+    "date": "21 July 1861",
+    "lat": 38.8141,
+    "lng": -77.5219,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "land",
+    "wikipediaTitle": "First Battle of Bull Run",
+    "sides": [
+      {
+        "name": "Union",
+        "commander": "Irvin McDowell",
+        "strength": "~28,500",
+        "casualties": "460 killed, 1,124 wounded, 1,312 missing"
+      },
+      {
+        "name": "Confederacy",
+        "commander": "P.G.T. Beauregard, Joseph E. Johnston",
+        "strength": "~32,200",
+        "casualties": "387 killed, 1,582 wounded"
+      }
+    ],
+    "victor": "Confederacy",
+    "summary": "First major battle of the Civil War. Johnston's reinforcements arrive from the Shenandoah Valley by rail just in time. Thomas Jackson's brigade holds \"like a stone wall\" — earning him his nickname. The Union retreat becomes a rout pursued by panicked civilian spectators.",
+    "significance": "Shatters the North's expectation of a short war. Lincoln replaces McDowell with McClellan, who begins to build the Army of the Potomac."
+  },
+  {
+    "id": "shiloh-1862",
+    "name": "Battle of Shiloh",
+    "year": 1862,
+    "date": "6-7 April 1862",
+    "lat": 35.1376,
+    "lng": -88.3403,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Shiloh",
+    "sides": [
+      {
+        "name": "Union",
+        "commander": "Ulysses S. Grant, Don Carlos Buell",
+        "strength": "~65,000",
+        "casualties": "1,754 killed, 8,408 wounded, 2,885 missing"
+      },
+      {
+        "name": "Confederacy",
+        "commander": "Albert Sidney Johnston (killed), P.G.T. Beauregard",
+        "strength": "~44,000",
+        "casualties": "1,728 killed including Johnston, 8,012 wounded, 959 missing"
+      }
+    ],
+    "victor": "Union",
+    "summary": "A.S. Johnston launches a surprise dawn attack and nearly drives Grant into the Tennessee River. Prentiss's division holds the \"Hornet's Nest\" for seven hours. Johnston bleeds to death from a wound he ignored. Buell's reinforcements arrive overnight; Grant counterattacks at dawn on Day 2 and recovers the field.",
+    "significance": "More American casualties than in all previous American wars combined. Public outcry over the carnage nearly costs Grant his command."
+  },
+  {
+    "id": "fredericksburg-1862",
+    "name": "Battle of Fredericksburg",
+    "year": 1862,
+    "date": "11-15 December 1862",
+    "lat": 38.3016,
+    "lng": -77.4711,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Fredericksburg",
+    "sides": [
+      {
+        "name": "Union",
+        "commander": "Ambrose Burnside",
+        "strength": "~114,000",
+        "casualties": "1,284 killed, 9,600 wounded"
+      },
+      {
+        "name": "Confederacy",
+        "commander": "Robert E. Lee",
+        "strength": "~72,500",
+        "casualties": "608 killed, 4,116 wounded"
+      }
+    ],
+    "victor": "Confederacy",
+    "summary": "Burnside crosses the Rappahannock and launches fourteen separate frontal assaults against entrenched Confederate positions on Marye's Heights. Not a single Union soldier reaches the stone wall. Lee: \"It is well that war is so terrible, lest we grow too fond of it.\"",
+    "significance": "Catastrophic Union defeat that demoralizes the North. Burnside is replaced by Hooker."
+  },
+  {
+    "id": "chancellorsville-1863",
+    "name": "Battle of Chancellorsville",
+    "year": 1863,
+    "date": "30 April - 6 May 1863",
+    "lat": 38.3088,
+    "lng": -77.6342,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Chancellorsville",
+    "sides": [
+      {
+        "name": "Union",
+        "commander": "Joseph Hooker",
+        "strength": "~133,800",
+        "casualties": "1,606 killed, 9,762 wounded, 5,919 missing"
+      },
+      {
+        "name": "Confederacy",
+        "commander": "Robert E. Lee, Stonewall Jackson",
+        "strength": "~60,300",
+        "casualties": "1,665 killed including Jackson, 9,081 wounded, 2,018 missing"
+      }
+    ],
+    "victor": "Confederacy",
+    "summary": "Outnumbered better than two to one, Lee splits his army — twice — and sends Stonewall Jackson on a twelve-mile flank march. Jackson falls on Hooker's exposed XI Corps at dusk. That night his own pickets, mistaking his returning party for Union cavalry, mortally wound him.",
+    "significance": "Lee's tactical masterpiece — and the campaign that costs him his most able lieutenant. Six weeks later Lee invades Pennsylvania."
+  },
+  {
+    "id": "vicksburg-1863",
+    "name": "Siege of Vicksburg",
+    "year": 1863,
+    "date": "18 May - 4 July 1863",
+    "lat": 32.3526,
+    "lng": -90.8779,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "siege",
+    "wikipediaTitle": "Siege of Vicksburg",
+    "sides": [
+      {
+        "name": "Union",
+        "commander": "Ulysses S. Grant, William T. Sherman",
+        "strength": "~77,000",
+        "casualties": "806 killed, 3,940 wounded"
+      },
+      {
+        "name": "Confederacy",
+        "commander": "John C. Pemberton",
+        "strength": "~33,000",
+        "casualties": "~3,000 killed/wounded, 29,495 surrendered"
+      }
+    ],
+    "victor": "Union",
+    "summary": "Grant ferries his army across the Mississippi south of Vicksburg, defeats Confederate forces in five battles in three weeks, and bottles Pemberton up in the city. The defenders, reduced to eating mule meat, surrender on July 4 after a 47-day siege.",
+    "significance": "Splits the Confederacy. Combined with Gettysburg, ends Confederate offensive capacity. Vicksburg refuses to celebrate Independence Day for 81 years."
+  },
+  {
+    "id": "alma-1854",
+    "name": "Battle of the Alma",
+    "year": 1854,
+    "date": "20 September 1854",
+    "lat": 44.8333,
+    "lng": 33.65,
+    "era": "industrial",
+    "war": "Crimean War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of the Alma",
+    "sides": [
+      {
+        "name": "Anglo-French-Ottoman",
+        "commander": "Lord Raglan, Jacques Leroy de Saint Arnaud",
+        "strength": "~60,000",
+        "casualties": "362 British killed, 1,640 wounded; ~1,340 French killed/wounded"
+      },
+      {
+        "name": "Russian Empire",
+        "commander": "Aleksandr Menshikov",
+        "strength": "~36,000",
+        "casualties": "~5,709 killed/wounded"
+      }
+    ],
+    "victor": "Anglo-French-Ottoman",
+    "summary": "First major battle of the Crimean War. The Allies land on the Russian-held coast and march south. They cross the Alma under fire, climb steep slopes, and dislodge the Russians from prepared positions. Lord Raglan, who served under Wellington at Waterloo, occasionally calls the French \"the enemy.\"",
+    "significance": "Opens the road toward Sevastopol. Allied exhaustion prevents pursuit and misses the chance to take the city quickly."
+  },
+  {
+    "id": "balaclava-1854",
+    "name": "Battle of Balaclava",
+    "year": 1854,
+    "date": "25 October 1854",
+    "lat": 44.505,
+    "lng": 33.595,
+    "era": "industrial",
+    "war": "Crimean War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Balaclava",
+    "sides": [
+      {
+        "name": "British Empire + Ottoman + French",
+        "commander": "Lord Raglan, James Brudenell (Cardigan), George Bingham (Lucan)",
+        "strength": "~20,000",
+        "casualties": "~615 killed/wounded (Light Brigade lost 278 of 670)"
+      },
+      {
+        "name": "Russian Empire",
+        "commander": "Pavel Liprandi",
+        "strength": "~25,000",
+        "casualties": "~627 killed/wounded"
+      }
+    ],
+    "victor": "Indecisive",
+    "summary": "A Russian attack overruns Turkish redoubts and threatens the Allied supply port. The 93rd Highlanders — \"the thin red line tipped with steel\" — repel cavalry without forming square. A confused order then sends the Light Brigade — 670 men under Cardigan — charging directly into the muzzles of Russian guns.",
+    "significance": "Tennyson's poem fixes the Light Brigade's charge in popular memory. The medical scandal exposed by reporting on the war brings Florence Nightingale to the Crimea."
+  },
+  {
+    "id": "sevastopol-siege-1854",
+    "name": "Siege of Sevastopol",
+    "year": 1854,
+    "date": "17 October 1854 - 11 September 1855",
+    "lat": 44.6166,
+    "lng": 33.5254,
+    "era": "industrial",
+    "war": "Crimean War",
+    "battleType": "siege",
+    "wikipediaTitle": "Siege of Sevastopol (1854–1855)",
+    "sides": [
+      {
+        "name": "Anglo-French-Ottoman-Sardinian",
+        "commander": "Aimable Pélissier, James Simpson, Omar Pasha",
+        "strength": "~175,000 rotated",
+        "casualties": "~128,000 killed/wounded/sick"
+      },
+      {
+        "name": "Russian Empire",
+        "commander": "Aleksandr Menshikov, Mikhail Gorchakov",
+        "strength": "~235,000 rotated",
+        "casualties": "~102,000 killed/wounded"
+      }
+    ],
+    "victor": "Anglo-French-Ottoman",
+    "summary": "Eleven-month siege of Russia's main Black Sea port. The Malakoff bastion, key to the defenses, falls to a French assault on 8 September 1855. Russians evacuate the city overnight; the Allies enter a ruin.",
+    "significance": "Ends Russian naval power in the Black Sea region. The Treaty of Paris demilitarizes the sea for fifteen years. A young Tolstoy, present as an artillery officer, writes the Sevastopol Sketches."
+  },
+  {
+    "id": "manila-bay-1898",
+    "name": "Battle of Manila Bay",
+    "year": 1898,
+    "date": "1 May 1898",
+    "lat": 14.5547,
+    "lng": 120.7689,
+    "era": "industrial",
+    "war": "Spanish-American War",
+    "battleType": "naval",
+    "wikipediaTitle": "Battle of Manila Bay",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "George Dewey",
+        "strength": "4 cruisers + 2 gunboats",
+        "casualties": "1 killed (heat stroke), 9 wounded"
+      },
+      {
+        "name": "Spain",
+        "commander": "Patricio Montojo",
+        "strength": "7 cruisers + 3 gunboats",
+        "casualties": "161 killed, 210 wounded; entire fleet lost"
+      }
+    ],
+    "victor": "United States",
+    "summary": "Dewey's Asiatic Squadron enters Manila Bay before dawn and engages the anchored Spanish fleet at close range. \"You may fire when ready, Gridley.\" After an unhurried breakfast pause, his ships return and destroy every Spanish vessel without losing a ship.",
+    "significance": "Ends Spanish rule in the Philippines. Dewey becomes the only man ever to hold the rank of Admiral of the Navy. Marks the US arrival as a Pacific power."
+  },
+  {
+    "id": "san-juan-hill-1898",
+    "name": "Battle of San Juan Hill",
+    "year": 1898,
+    "date": "1 July 1898",
+    "lat": 19.9806,
+    "lng": -75.7472,
+    "era": "industrial",
+    "war": "Spanish-American War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of San Juan Hill",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "William Shafter, Theodore Roosevelt (Rough Riders), Joseph Wheeler",
+        "strength": "~8,400 engaged",
+        "casualties": "124 killed, 818 wounded"
+      },
+      {
+        "name": "Spain",
+        "commander": "Arsenio Linares y Pombo",
+        "strength": "~760 defenders",
+        "casualties": "58 killed, 170 wounded"
+      }
+    ],
+    "victor": "United States",
+    "summary": "The 1st Volunteer Cavalry (\"Rough Riders\") under Theodore Roosevelt and the African American 9th and 10th Cavalry charge Kettle Hill and San Juan Hill in support of the main American assault. Spanish defenders hold for hours before being driven off.",
+    "significance": "Makes Roosevelt a national figure — leading to the governorship of New York, vice-presidency, and presidency within three years. The Buffalo Soldiers' decisive role is historically underplayed."
+  },
+  {
+    "id": "spion-kop-1900",
+    "name": "Battle of Spion Kop",
+    "year": 1900,
+    "date": "23-24 January 1900",
+    "lat": -28.65,
+    "lng": 29.5,
+    "era": "industrial",
+    "war": "Second Boer War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Spion Kop",
+    "sides": [
+      {
+        "name": "British Empire",
+        "commander": "Charles Warren, Redvers Buller",
+        "strength": "~20,000 in the broader Ladysmith relief",
+        "casualties": "243 killed, 1,250 wounded, 311 captured"
+      },
+      {
+        "name": "South African Republic",
+        "commander": "Louis Botha",
+        "strength": "~8,000",
+        "casualties": "68 killed, 267 wounded"
+      }
+    ],
+    "victor": "South African Republic",
+    "summary": "British troops climb Spion Kop overnight and dig in at dawn — only to find the entrenchments are on the wrong, exposed slope, and the actual summit is held by Boers. Rifle fire from three sides makes the position untenable; the British abandon the hill they hold by nightfall.",
+    "significance": "Iconic British disaster. Mahatma Gandhi served as a stretcher-bearer; Winston Churchill was present as a war correspondent; Louis Botha later became the first Prime Minister of South Africa."
+  },
+  {
+    "id": "mafeking-siege-1899",
+    "name": "Siege of Mafeking",
+    "year": 1899,
+    "date": "13 October 1899 - 17 May 1900",
+    "lat": -25.865,
+    "lng": 25.6404,
+    "era": "industrial",
+    "war": "Second Boer War",
+    "battleType": "siege",
+    "wikipediaTitle": "Siege of Mafeking",
+    "sides": [
+      {
+        "name": "British Empire",
+        "commander": "Robert Baden-Powell",
+        "strength": "~1,500 + 300 town volunteers",
+        "casualties": "212 killed, 600 wounded"
+      },
+      {
+        "name": "South African Republic",
+        "commander": "Piet Cronjé, J.P. Snyman",
+        "strength": "up to ~8,000",
+        "casualties": "~1,000"
+      }
+    ],
+    "victor": "British Empire",
+    "summary": "Two hundred seventeen-day siege of a small frontier town. Baden-Powell uses ruses, fake minefields, and morale-boosting Sunday cricket matches. The relief column arrives 17 May 1900 — the announcement triggers wild celebrations in London (\"Mafficking\" enters the English language).",
+    "significance": "One of the few unambiguous British successes of the war. Baden-Powell becomes a national hero and founds the Boy Scouts in 1907."
+  },
+  {
+    "id": "first-marne-1914",
+    "name": "First Battle of the Marne",
+    "year": 1914,
+    "date": "6-12 September 1914",
+    "lat": 48.9472,
+    "lng": 3.4192,
+    "era": "world-war-1",
+    "war": "World War I",
+    "battleType": "land",
+    "wikipediaTitle": "First Battle of the Marne",
+    "sides": [
+      {
+        "name": "France + Britain",
+        "commander": "Joseph Joffre, Michel-Joseph Maunoury, Joseph Gallieni, Sir John French",
+        "strength": "~1,071,000",
+        "casualties": "~263,000 killed/wounded/missing"
+      },
+      {
+        "name": "German Empire",
+        "commander": "Helmuth von Moltke the Younger, Alexander von Kluck, Karl von Bülow",
+        "strength": "~1,485,000",
+        "casualties": "~250,000 killed/wounded/missing"
+      }
+    ],
+    "victor": "France + Britain",
+    "summary": "As the Schlieffen Plan drives toward Paris, French taxicabs rush 6,000 reinforcements to Maunoury's army northeast of the city. Joffre orders a counterattack into the gap that has opened between Kluck's First Army and Bülow's Second Army. The German advance halts; Moltke orders a withdrawal to the Aisne.",
+    "significance": "Schlieffen Plan fails. Germany cannot win the war quickly. Both sides dig in; the Western Front's trench warfare begins."
+  },
+  {
+    "id": "tannenberg-1914",
+    "name": "Battle of Tannenberg",
+    "year": 1914,
+    "date": "26-30 August 1914",
+    "lat": 53.5,
+    "lng": 20.1167,
+    "era": "world-war-1",
+    "war": "World War I",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Tannenberg",
+    "sides": [
+      {
+        "name": "German Empire",
+        "commander": "Paul von Hindenburg, Erich Ludendorff, Max Hoffmann",
+        "strength": "~150,000",
+        "casualties": "~13,000"
+      },
+      {
+        "name": "Russian Empire",
+        "commander": "Alexander Samsonov (suicide)",
+        "strength": "~230,000",
+        "casualties": "~30,000 killed/wounded, ~92,000 captured"
+      }
+    ],
+    "victor": "German Empire",
+    "summary": "Unencrypted Russian wireless messages give the Germans full knowledge of Russian movements. Hindenburg redeploys against Samsonov's Second Army using interior lines. The Russians are enveloped in four days; Samsonov shoots himself in a forest rather than report to the Tsar.",
+    "significance": "Destroys an entire Russian field army in five days. Establishes the Hindenburg-Ludendorff partnership that runs Germany by 1916."
+  },
+  {
+    "id": "jutland-1916",
+    "name": "Battle of Jutland",
+    "year": 1916,
+    "date": "31 May - 1 June 1916",
+    "lat": 56.6667,
+    "lng": 6.0,
+    "era": "world-war-1",
+    "war": "World War I",
+    "battleType": "naval",
+    "wikipediaTitle": "Battle of Jutland",
+    "sides": [
+      {
+        "name": "Royal Navy",
+        "commander": "John Jellicoe, David Beatty",
+        "strength": "151 ships",
+        "casualties": "6,094 killed, 14 ships lost (113,300 tons)"
+      },
+      {
+        "name": "German High Seas Fleet",
+        "commander": "Reinhard Scheer, Franz Hipper",
+        "strength": "99 ships",
+        "casualties": "2,551 killed, 11 ships lost (62,300 tons)"
+      }
+    ],
+    "victor": "Indecisive (strategic British victory)",
+    "summary": "The only major fleet engagement of the war. The British Grand Fleet \"crosses the T\" of the High Seas Fleet twice; Scheer escapes in the dusk and fog. Three British battlecruisers blow up from magazine penetrations.",
+    "significance": "Tactical German victory by casualties — but strategically the High Seas Fleet never sortied again. Britain keeps command of the North Sea for the rest of the war."
+  },
+  {
+    "id": "cambrai-1917",
+    "name": "Battle of Cambrai (1917)",
+    "year": 1917,
+    "date": "20 November - 7 December 1917",
+    "lat": 50.1764,
+    "lng": 3.2356,
+    "era": "world-war-1",
+    "war": "World War I",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Cambrai (1917)",
+    "sides": [
+      {
+        "name": "British Empire",
+        "commander": "Julian Byng",
+        "strength": "~324 tanks + infantry",
+        "casualties": "~44,000"
+      },
+      {
+        "name": "German Empire",
+        "commander": "Georg von der Marwitz",
+        "strength": "Defending Hindenburg Line",
+        "casualties": "~45,000"
+      }
+    ],
+    "victor": "Indecisive",
+    "summary": "First mass use of tanks in concentrated combined-arms attack. 324 Mark IV tanks lead infantry through the Hindenburg Line without preliminary artillery bombardment. The initial advance is the war's largest — but the German counter-attack recovers most of the ground within ten days.",
+    "significance": "Demonstrates the operational potential of armor in mass. Shapes inter-war thinking from Liddell Hart and Fuller to Guderian and Patton."
+  },
+  {
+    "id": "pearl-harbor-1941",
+    "name": "Attack on Pearl Harbor",
+    "year": 1941,
+    "date": "7 December 1941",
+    "lat": 21.365,
+    "lng": -157.945,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "naval",
+    "wikipediaTitle": "Attack on Pearl Harbor",
+    "sides": [
+      {
+        "name": "Imperial Japan",
+        "commander": "Isoroku Yamamoto, Chuichi Nagumo",
+        "strength": "6 fleet carriers, 353 aircraft",
+        "casualties": "64 killed, 29 aircraft + 5 midget submarines lost"
+      },
+      {
+        "name": "United States",
+        "commander": "Husband E. Kimmel, Walter Short",
+        "strength": "Pacific Fleet at anchor",
+        "casualties": "2,403 killed, 1,178 wounded; 4 battleships sunk, 4 damaged, 188 aircraft destroyed"
+      }
+    ],
+    "victor": "Imperial Japan",
+    "summary": "Two waves of Japanese aircraft launched from carriers 230 miles north of Oahu strike the US Pacific Fleet at anchor. USS Arizona and USS Oklahoma are lost with most of their crews. The American carriers, at sea on exercise, are not in port.",
+    "significance": "Brings the United States into World War II. Roosevelt: \"a date which will live in infamy.\" The Japanese fail to destroy fuel storage or repair docks — both critical to the Pacific Fleet's 1942 recovery."
+  },
+  {
+    "id": "coral-sea-1942",
+    "name": "Battle of the Coral Sea",
+    "year": 1942,
+    "date": "4-8 May 1942",
+    "lat": -13.0,
+    "lng": 154.5,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "naval",
+    "wikipediaTitle": "Battle of the Coral Sea",
+    "sides": [
+      {
+        "name": "United States + Australia",
+        "commander": "Frank Jack Fletcher",
+        "strength": "2 carriers + escorts",
+        "casualties": "656 killed, USS Lexington sunk, Yorktown damaged, 69 aircraft lost"
+      },
+      {
+        "name": "Imperial Japan",
+        "commander": "Shigeyoshi Inoue, Takeo Takagi",
+        "strength": "3 carriers + escorts",
+        "casualties": "966 killed, 1 light carrier sunk, Shōkaku heavily damaged, 92 aircraft lost"
+      }
+    ],
+    "victor": "Strategic Allied victory",
+    "summary": "First naval battle in history in which the opposing fleets never sight each other — all combat is conducted by aircraft. American carriers turn back the Japanese invasion of Port Moresby. The Shōkaku is crippled and the Zuikaku's air group decimated; both are unavailable for Midway a month later.",
+    "significance": "First time Japan's expansion is halted. The reduced Japanese carrier force at Midway, combined with the damaged-but-repaired USS Yorktown, helps tip the most consequential battle of the Pacific."
+  },
+  {
+    "id": "iwo-jima-1945",
+    "name": "Battle of Iwo Jima",
+    "year": 1945,
+    "date": "19 February - 26 March 1945",
+    "lat": 24.7833,
+    "lng": 141.3167,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Iwo Jima",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "Holland Smith",
+        "strength": "~70,000 Marines",
+        "casualties": "6,821 killed, 19,217 wounded"
+      },
+      {
+        "name": "Imperial Japan",
+        "commander": "Tadamichi Kuribayashi",
+        "strength": "~22,000",
+        "casualties": "~18,375 killed, 216 captured"
+      }
+    ],
+    "victor": "United States",
+    "summary": "Kuribayashi designs interlocking underground bunker systems; Japanese defenders do not contest the beaches but inflict casualties from concealed positions for five weeks. Joe Rosenthal photographs the flag raising on Mt. Suribachi on Day 5. Fighting continues for another five weeks.",
+    "significance": "First Japanese home soil attacked. The captured airfields save many B-29s on missions over Japan. Used by the Truman administration as evidence of the cost of invading Japan's home islands."
+  },
+  {
+    "id": "okinawa-1945",
+    "name": "Battle of Okinawa",
+    "year": 1945,
+    "date": "1 April - 22 June 1945",
+    "lat": 26.3344,
+    "lng": 127.8056,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Okinawa",
+    "sides": [
+      {
+        "name": "United States + Allies",
+        "commander": "Simon Bolivar Buckner Jr. (killed)",
+        "strength": "~183,000",
+        "casualties": "12,520 killed, 37,222 wounded; 31 ships lost to kamikazes"
+      },
+      {
+        "name": "Imperial Japan",
+        "commander": "Mitsuru Ushijima (suicide)",
+        "strength": "~110,000",
+        "casualties": "~110,000 killed; 100,000-150,000 civilian dead"
+      }
+    ],
+    "victor": "United States",
+    "summary": "Eighty-two-day battle for the southernmost Japanese home island. Kamikaze attacks sink or damage 368 Allied ships. Civilian casualties are catastrophic — many forced by Japanese military to suicide. Both opposing commanders die: Buckner by artillery, Ushijima by ritual suicide.",
+    "significance": "Bloodiest battle of the Pacific War. Convinces Truman that an invasion of Japan would cost a million Allied casualties — supporting his decision to use the atomic bombs."
+  },
+  {
+    "id": "chosin-reservoir-1950",
+    "name": "Battle of Chosin Reservoir",
+    "year": 1950,
+    "date": "27 November - 13 December 1950",
+    "lat": 40.4781,
+    "lng": 127.3169,
+    "era": "modern",
+    "war": "Korean War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Chosin Reservoir",
+    "sides": [
+      {
+        "name": "United Nations Command",
+        "commander": "Edward Almond, Oliver P. Smith",
+        "strength": "~30,000 (1st Marine Division core)",
+        "casualties": "17,843 casualties — including 7,338 frostbite"
+      },
+      {
+        "name": "People's Republic of China",
+        "commander": "Song Shilun",
+        "strength": "~120,000 (9th Army)",
+        "casualties": "~19,200-29,000 killed plus tens of thousands of cold-weather casualties"
+      }
+    ],
+    "victor": "Strategic indecisive; UN withdrawal accomplished",
+    "summary": "After MacArthur dismisses warnings of Chinese intervention, X Corps is surrounded by nine Chinese divisions at -30°F. The 1st Marine Division fights its way 78 miles to the port of Hungnam. O.P. Smith: \"Retreat, hell — we're attacking in a different direction.\"",
+    "significance": "Largest American military evacuation since Dunkirk. Halts the UN advance to the Yalu and locks the Korean War into a stalemate around the 38th parallel."
+  },
+  {
+    "id": "pork-chop-hill-1953",
+    "name": "Battle of Pork Chop Hill",
+    "year": 1953,
+    "date": "16-18 April and 6-11 July 1953",
+    "lat": 38.2333,
+    "lng": 126.9167,
+    "era": "modern",
+    "war": "Korean War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Pork Chop Hill",
+    "sides": [
+      {
+        "name": "United States + UN",
+        "commander": "7th Infantry Division",
+        "strength": "~3,500",
+        "casualties": "243 killed, 916 wounded"
+      },
+      {
+        "name": "People's Republic of China + DPRK",
+        "commander": "CPV 67th Army",
+        "strength": "Several thousand",
+        "casualties": "~1,500+ killed"
+      }
+    ],
+    "victor": "Indecisive (US held in April; abandoned the hill in July)",
+    "summary": "Two engagements for a small outpost hill during the final months of armistice negotiations. American forces hold in April after savage close-quarters combat; voluntarily withdraw three months later as the hill is judged not worth further casualties with peace imminent.",
+    "significance": "Symbolic of the war's late stalemate phase — battles over ground with no strategic value while diplomats argued at Panmunjom."
+  },
+  {
+    "id": "ia-drang-1965",
+    "name": "Battle of Ia Drang",
+    "year": 1965,
+    "date": "14-18 November 1965",
+    "lat": 13.6,
+    "lng": 107.7167,
+    "era": "modern",
+    "war": "Vietnam War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Ia Drang",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "Hal Moore, Robert McDade (1st Cavalry Division)",
+        "strength": "~450 at LZ X-Ray + ~400 at LZ Albany",
+        "casualties": "234 killed, 245 wounded (combined)"
+      },
+      {
+        "name": "People's Army of Vietnam",
+        "commander": "Nguyễn Hữu An",
+        "strength": "~2,500 (33rd and 66th Regiments)",
+        "casualties": "~1,200 killed (US claim)"
+      }
+    ],
+    "victor": "Both sides claim victory",
+    "summary": "First major engagement between US Army troops and regular PAVN. Hal Moore's 1st Battalion, 7th Cavalry is helicoptered into a clearing surrounded by PAVN and holds for three days under repeated assault. Two days later 2nd Battalion is ambushed at LZ Albany and nearly destroyed.",
+    "significance": "Validates US helicopter air mobility doctrine. Foreshadows the war's nature — North Vietnam absorbs heavy losses and keeps coming. Joe Galloway's reporting and \"We Were Soldiers\" make it iconic."
+  },
+  {
+    "id": "tet-offensive-1968",
+    "name": "Tet Offensive",
+    "year": 1968,
+    "date": "30 January - 23 September 1968",
+    "lat": 16.4637,
+    "lng": 107.5909,
+    "era": "modern",
+    "war": "Vietnam War",
+    "battleType": "land",
+    "wikipediaTitle": "Tet Offensive",
+    "sides": [
+      {
+        "name": "North Vietnam + Viet Cong",
+        "commander": "Võ Nguyên Giáp, Văn Tiến Dũng",
+        "strength": "~84,000 attackers",
+        "casualties": "~45,000 killed (US estimate; contested)"
+      },
+      {
+        "name": "United States + South Vietnam",
+        "commander": "William Westmoreland, Cao Văn Viên",
+        "strength": "~1,000,000 total in country",
+        "casualties": "~9,000+ killed, 30,000+ wounded"
+      }
+    ],
+    "victor": "Tactical US/ARVN victory; strategic North Vietnamese victory",
+    "summary": "Coordinated surprise attacks on more than 100 South Vietnamese cities and towns during the Tet ceasefire. The US embassy in Saigon is briefly penetrated. The imperial city of Hue is held for 25 days. Tactically the offensive is crushed; the Viet Cong is gutted as a fighting force.",
+    "significance": "Walter Cronkite reports the war is unwinnable. Johnson declines to seek re-election. American public support for the war collapses despite the tactical result."
+  },
+  {
+    "id": "khe-sanh-1968",
+    "name": "Battle of Khe Sanh",
+    "year": 1968,
+    "date": "21 January - 9 July 1968",
+    "lat": 16.652,
+    "lng": 106.7286,
+    "era": "modern",
+    "war": "Vietnam War",
+    "battleType": "siege",
+    "wikipediaTitle": "Battle of Khe Sanh",
+    "sides": [
+      {
+        "name": "United States + South Vietnam",
+        "commander": "David Lownds (Marine 26th Regiment)",
+        "strength": "~6,000",
+        "casualties": "730 killed, 2,642 wounded"
+      },
+      {
+        "name": "People's Army of Vietnam",
+        "commander": "Trần Quý Hai",
+        "strength": "20,000-40,000",
+        "casualties": "5,500-15,000 estimated (mostly from air strikes)"
+      }
+    ],
+    "victor": "Indecisive",
+    "summary": "Seventy-seven-day siege of a Marine combat base near the Laotian border. Operation Niagara drops 99,000 tons of bombs on PAVN positions surrounding the base. The siege is lifted by Operation Pegasus in April; the base is abandoned that summer.",
+    "significance": "Westmoreland calls it a major attritional victory; critics — and the eventual abandonment of the base — disagree. Often viewed as a PAVN attempt at a second Dien Bien Phu that did not materialize."
+  },
+  {
+    "id": "hill-3234",
+    "name": "Battle for Hill 3234",
+    "year": 1988,
+    "date": "7-8 January 1988",
+    "lat": 33.0833,
+    "lng": 70.1167,
+    "era": "modern",
+    "war": "Soviet-Afghan War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle for Hill 3234",
+    "sides": [
+      {
+        "name": "Soviet Union",
+        "commander": "9th Company, 345th Guards Airborne Regiment",
+        "strength": "39 paratroopers on the peak",
+        "casualties": "6 killed, 28 wounded"
+      },
+      {
+        "name": "Afghan Mujahideen + Pakistani volunteers",
+        "commander": "Unknown",
+        "strength": "~200-400",
+        "casualties": "~200+"
+      }
+    ],
+    "victor": "Soviet Union",
+    "summary": "Thirty-nine Soviet airborne troops hold a peak overlooking the road to Khost against repeated Mujahideen night assaults during Operation Magistral. Twelve hours of close combat; ammunition runs out near the end. Two paratroopers receive Hero of the Soviet Union; the rest receive the Order of the Red Banner.",
+    "significance": "Iconic last-stand engagement of the Soviet-Afghan war and basis of the 2005 Russian film \"9 Rota.\""
+  },
+  {
+    "id": "grozny-first-1994",
+    "name": "First Battle of Grozny",
+    "year": 1994,
+    "date": "31 December 1994 - 8 March 1995",
+    "lat": 43.3168,
+    "lng": 45.6979,
+    "era": "modern",
+    "war": "First Chechen War",
+    "battleType": "siege",
+    "wikipediaTitle": "Battle of Grozny (1994–1995)",
+    "sides": [
+      {
+        "name": "Russian Federation",
+        "commander": "Pavel Grachev, Anatoly Kvashnin",
+        "strength": "~38,000 + armor",
+        "casualties": "~1,376-2,000 killed, 4,500+ wounded"
+      },
+      {
+        "name": "Chechen Republic of Ichkeria",
+        "commander": "Aslan Maskhadov, Shamil Basayev",
+        "strength": "~12,000",
+        "casualties": "~3,000 fighters killed; 25,000+ civilian dead"
+      }
+    ],
+    "victor": "Russian Federation (after enormous cost)",
+    "summary": "Russian armored columns enter Grozny on New Year's Eve and are destroyed in the city by Chechen anti-tank teams using cellars and rooftops. After catastrophic losses, Russia switches to massive artillery and air bombardment that levels much of the city. Chechen forces withdraw to the mountains.",
+    "significance": "Worst tank disaster in Russian history. Triggers the Khasavyurt Accord and Chechen de facto independence — a settlement that lasts until the Second Chechen War in 1999."
+  },
+  {
+    "id": "mogadishu-1993",
+    "name": "Battle of Mogadishu",
+    "year": 1993,
+    "date": "3-4 October 1993",
+    "lat": 2.0469,
+    "lng": 45.3182,
+    "era": "modern",
+    "war": "Somali Civil War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Mogadishu (1993)",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "William Garrison (Task Force Ranger + Delta Force)",
+        "strength": "~160",
+        "casualties": "19 killed, 73 wounded"
+      },
+      {
+        "name": "Somali National Alliance",
+        "commander": "Mohamed Farrah Aidid",
+        "strength": "Thousands of militia",
+        "casualties": "Estimated 500-1,500 killed"
+      }
+    ],
+    "victor": "Tactical US success; strategic Somali victory",
+    "summary": "A daylight raid to capture top lieutenants of warlord Mohamed Farrah Aidid spirals into fifteen hours of urban combat after two MH-60 Black Hawks are shot down. Pinned-down Rangers and Delta operators hold positions overnight before being relieved by a Pakistani-Malaysian-American armored column.",
+    "significance": "Mark Bowden's book and Ridley Scott's film burn the engagement into popular memory. Within months, President Clinton orders the withdrawal of US forces from Somalia."
+  },
+  {
+    "id": "tora-bora-2001",
+    "name": "Battle of Tora Bora",
+    "year": 2001,
+    "date": "6-17 December 2001",
+    "lat": 34.1167,
+    "lng": 70.2167,
+    "era": "modern",
+    "war": "War in Afghanistan (2001–2021)",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Tora Bora",
+    "sides": [
+      {
+        "name": "United States + Northern Alliance",
+        "commander": "Hazret Ali, Haji Zaman; US SOF and CIA SAD",
+        "strength": "~70 US operators + ~2,500 Afghan",
+        "casualties": "0 US killed; Northern Alliance casualties unknown"
+      },
+      {
+        "name": "Al-Qaeda + Taliban",
+        "commander": "Osama bin Laden",
+        "strength": "~1,500-2,000",
+        "casualties": "~200 killed, ~52 captured"
+      }
+    ],
+    "victor": "United States and allies (mixed; bin Laden escaped)",
+    "summary": "US air strikes pound suspected cave complexes in the White Mountains while Afghan Northern Alliance allies advance on the ground. Bin Laden is believed to have been present but escapes — almost certainly into Pakistan — through gaps in the Afghan cordon.",
+    "significance": "Lost opportunity to capture bin Laden in the immediate aftermath of 9/11. Cited as the seminal case study of why local proxy forces alone are insufficient for high-value-target operations. Bin Laden lives for another ten years."
+  },
+  {
+    "id": "fall-of-baghdad-2003",
+    "name": "Fall of Baghdad (2003)",
+    "year": 2003,
+    "date": "3-9 April 2003",
+    "lat": 33.3152,
+    "lng": 44.3661,
+    "era": "modern",
+    "war": "Iraq War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Baghdad (2003)",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "David Petraeus, David Perkins, James Mattis",
+        "strength": "3rd Infantry Division + 1st Marine Division (~25,000)",
+        "casualties": "34 killed, 248 wounded"
+      },
+      {
+        "name": "Iraq",
+        "commander": "Saddam Hussein, Qusay Hussein",
+        "strength": "~36,000 Republican Guard + Special Republican Guard",
+        "casualties": "~2,300+ killed (estimate)"
+      }
+    ],
+    "victor": "United States",
+    "summary": "The \"Thunder Run\" — two armored thrusts into Baghdad on 5 and 7 April — finds Iraqi defenses brittle. By 9 April US troops are in Firdos Square and the statue of Saddam Hussein is pulled down.",
+    "significance": "Effective end of the Saddam Hussein regime. Beginning, not end, of US involvement in Iraq — the insurgency lasts another decade."
+  },
+  {
+    "id": "second-fallujah-2004",
+    "name": "Second Battle of Fallujah",
+    "year": 2004,
+    "date": "7 November - 23 December 2004",
+    "lat": 33.3556,
+    "lng": 43.7833,
+    "era": "modern",
+    "war": "Iraq War",
+    "battleType": "land",
+    "wikipediaTitle": "Second Battle of Fallujah",
+    "sides": [
+      {
+        "name": "United States + UK + Iraqi government",
+        "commander": "James Mattis, Richard Natonski",
+        "strength": "~13,500",
+        "casualties": "95 American killed, 560 wounded; 4 British, 6 Iraqi government killed"
+      },
+      {
+        "name": "Iraqi insurgents",
+        "commander": "Abdullah al-Janabi, Omar Hadid",
+        "strength": "~3,500-4,000",
+        "casualties": "~1,200-2,000 killed, ~1,500 captured"
+      }
+    ],
+    "victor": "United States and allies",
+    "summary": "Largest urban battle the US Marines have fought since Hue in 1968. American and Iraqi forces clear the city block by block over six weeks against entrenched insurgents using IEDs, snipers, and prepared fighting positions.",
+    "significance": "Establishes that insurgents cannot hold ground against US conventional forces — but they rebuild elsewhere. Models for urban combat doctrine in Mosul, Marawi, and Mariupol."
+  },
+  {
+    "id": "lexington-concord-1775",
+    "name": "Battles of Lexington and Concord",
+    "year": 1775,
+    "date": "19 April 1775",
+    "lat": 42.4584,
+    "lng": -71.4534,
+    "era": "napoleonic",
+    "war": "American Revolutionary War",
+    "battleType": "land",
+    "wikipediaTitle": "Battles of Lexington and Concord",
+    "sides": [
+      {
+        "name": "Province of Massachusetts Bay militia",
+        "commander": "John Parker, James Barrett, William Heath",
+        "strength": "~3,800 over the day",
+        "casualties": "49 killed, 39 wounded, 5 missing"
+      },
+      {
+        "name": "Great Britain",
+        "commander": "Francis Smith, John Pitcairn, Hugh Percy",
+        "strength": "~1,500 regulars (700 initial column, relief column followed)",
+        "casualties": "73 killed, 174 wounded, 26 missing"
+      }
+    ],
+    "victor": "Province of Massachusetts Bay militia",
+    "summary": "British regulars marching from Boston to seize colonial military stores at Concord clash with militia on Lexington Green at dawn. The advance reaches Concord but is harried by swelling militia ranks all the way back to Boston, suffering nearly 300 casualties on the retreat along the Battle Road.",
+    "significance": "The \"shot heard round the world.\" Opens the American Revolutionary War and demonstrates that colonial militia can inflict serious losses on British regulars in irregular fighting."
+  },
+  {
+    "id": "long-island-1776",
+    "name": "Battle of Long Island",
+    "year": 1776,
+    "date": "27 August 1776",
+    "lat": 40.6782,
+    "lng": -73.9442,
+    "era": "napoleonic",
+    "war": "American Revolutionary War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Long Island",
+    "sides": [
+      {
+        "name": "Continental Army",
+        "commander": "George Washington, Israel Putnam, William Alexander (Lord Stirling)",
+        "strength": "~10,000 engaged",
+        "casualties": "~300 killed, ~650 wounded, ~1,000 captured"
+      },
+      {
+        "name": "Great Britain + Hessians",
+        "commander": "William Howe, Henry Clinton, Charles Cornwallis, Leopold Philip de Heister",
+        "strength": "~20,000 engaged",
+        "casualties": "63 killed, 314 wounded, 31 missing"
+      }
+    ],
+    "victor": "Great Britain",
+    "summary": "Howe lands at Gravesend Bay and outflanks Washington's positions on the Heights of Guan via the lightly guarded Jamaica Pass. The American line collapses. Washington's army escapes annihilation by a nighttime evacuation across the East River to Manhattan under cover of fog.",
+    "significance": "Largest battle of the Revolution by manpower engaged. Demonstrated that the Continental Army could not face the British in open European-style battle, pushing Washington toward Fabian strategy."
+  },
+  {
+    "id": "princeton-1777",
+    "name": "Battle of Princeton",
+    "year": 1777,
+    "date": "3 January 1777",
+    "lat": 40.3573,
+    "lng": -74.6672,
+    "era": "napoleonic",
+    "war": "American Revolutionary War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Princeton",
+    "sides": [
+      {
+        "name": "Continental Army",
+        "commander": "George Washington, Hugh Mercer, John Cadwalader",
+        "strength": "~4,500",
+        "casualties": "~25 killed, ~40 wounded"
+      },
+      {
+        "name": "Great Britain",
+        "commander": "Charles Mawhood",
+        "strength": "~1,200 (three regiments)",
+        "casualties": "~100 killed, ~70 wounded, ~280 captured"
+      }
+    ],
+    "victor": "Continental Army",
+    "summary": "Days after the surprise at Trenton, Washington slips around Cornwallis's army at night and falls on a British brigade marching from Princeton toward Trenton. After Hugh Mercer's vanguard is overrun, Washington personally leads a counterattack that routs the British regulars.",
+    "significance": "Combined with Trenton, restores faith in the cause after a dismal 1776, secures the Continental Army's winter quarters at Morristown, and is taught as a model of operational surprise."
+  },
+  {
+    "id": "palo-alto-1846",
+    "name": "Battle of Palo Alto",
+    "year": 1846,
+    "date": "8 May 1846",
+    "lat": 26.0103,
+    "lng": -97.4628,
+    "era": "industrial",
+    "war": "Mexican–American War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Palo Alto",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "Zachary Taylor",
+        "strength": "~2,300",
+        "casualties": "5 killed, 48 wounded"
+      },
+      {
+        "name": "Mexico",
+        "commander": "Mariano Arista",
+        "strength": "~3,400",
+        "casualties": "~102 killed, ~129 wounded"
+      }
+    ],
+    "victor": "United States",
+    "summary": "First major battle of the Mexican–American War. Taylor's relief column for Fort Texas meets Arista's army on the prairie north of Matamoros. American \"flying artillery\" — light, horse-drawn batteries that displace rapidly — dominates the engagement, breaking Mexican infantry attacks at range.",
+    "significance": "Established the dominance of mobile US artillery doctrine and opened Taylor's path into northern Mexico. The next day's Battle of Resaca de la Palma completed the rout."
+  },
+  {
+    "id": "chapultepec-1847",
+    "name": "Battle of Chapultepec",
+    "year": 1847,
+    "date": "12–13 September 1847",
+    "lat": 19.4225,
+    "lng": -99.1817,
+    "era": "industrial",
+    "war": "Mexican–American War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Chapultepec",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "Winfield Scott, John Quitman, Gideon Pillow",
+        "strength": "~7,200",
+        "casualties": "138 killed, 673 wounded"
+      },
+      {
+        "name": "Mexico",
+        "commander": "Antonio López de Santa Anna, Nicolás Bravo",
+        "strength": "~1,000 garrison defending; ~5,000+ in surrounding works",
+        "casualties": "~1,800 killed, wounded, or captured (estimate)"
+      }
+    ],
+    "victor": "United States",
+    "summary": "After a 14-hour bombardment, Scott's columns storm the fortified hilltop guarding the western approach to Mexico City. The young cadets of the Mexican Military Academy defend the castle to the end — the Niños Héroes of national memory. By nightfall on the 13th the gates of Mexico City lie open.",
+    "significance": "Decisive engagement of the campaign for Mexico City. Mexico City falls the next day, leading to the Treaty of Guadalupe Hidalgo and the cession of roughly half of Mexico's territory to the United States."
+  },
+  {
+    "id": "fort-sumter-1861",
+    "name": "Battle of Fort Sumter",
+    "year": 1861,
+    "date": "12–13 April 1861",
+    "lat": 32.7522,
+    "lng": -79.8744,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Fort Sumter",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "Robert Anderson",
+        "strength": "85 (garrison)",
+        "casualties": "0 killed in action (1 killed in accidental explosion during surrender salute)"
+      },
+      {
+        "name": "Confederate States",
+        "commander": "P. G. T. Beauregard",
+        "strength": "~500 (shore batteries)",
+        "casualties": "0 killed"
+      }
+    ],
+    "victor": "Confederate States",
+    "summary": "Confederate batteries ringing Charleston Harbor open fire on the Federal garrison of Fort Sumter at 4:30 a.m. on 12 April 1861. After 34 hours of bombardment, Major Anderson surrenders the fort, evacuating the garrison by ship.",
+    "significance": "Opening engagement of the American Civil War. Lincoln's call for 75,000 volunteers in response leads four more states to secede; the war that follows kills over 600,000."
+  },
+  {
+    "id": "wilderness-1864",
+    "name": "Battle of the Wilderness",
+    "year": 1864,
+    "date": "5–7 May 1864",
+    "lat": 38.3193,
+    "lng": -77.7647,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of the Wilderness",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "Ulysses S. Grant, George Meade, Winfield Scott Hancock",
+        "strength": "~102,000",
+        "casualties": "~17,600 (2,246 killed)"
+      },
+      {
+        "name": "Confederate States",
+        "commander": "Robert E. Lee, James Longstreet, Richard Ewell, A. P. Hill",
+        "strength": "~61,000",
+        "casualties": "~11,000"
+      }
+    ],
+    "victor": "Tactically inconclusive; strategic Union victory",
+    "summary": "Grant's first battle as general-in-chief, fought in the dense second-growth scrub of central Virginia where artillery and cavalry were useless and fires consumed the wounded between the lines. Lee inflicts heavier losses but cannot stop the Federal advance.",
+    "significance": "Opens the Overland Campaign. Unlike his predecessors, Grant does not retreat after taking heavy casualties — he sidesteps south, beginning the relentless pressure that ends at Appomattox."
+  },
+  {
+    "id": "atlanta-1864",
+    "name": "Battle of Atlanta",
+    "year": 1864,
+    "date": "22 July 1864",
+    "lat": 33.749,
+    "lng": -84.388,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Atlanta",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "William Tecumseh Sherman, James B. McPherson, John A. Logan",
+        "strength": "~34,800 engaged",
+        "casualties": "~3,641 (including McPherson killed)"
+      },
+      {
+        "name": "Confederate States",
+        "commander": "John Bell Hood, William J. Hardee",
+        "strength": "~40,000 engaged",
+        "casualties": "~5,500"
+      }
+    ],
+    "victor": "United States",
+    "summary": "Hood, newly appointed to replace the cautious Johnston, sends Hardee's corps on a long night march to strike the Federal left flank east of Atlanta. The attack catches McPherson's Army of the Tennessee partially in motion. McPherson is killed; the Union line holds and counterattacks.",
+    "significance": "Combined with the larger Atlanta Campaign, the fall of the city on 2 September 1864 transforms northern morale, secures Lincoln's reelection in November, and seals Confederate defeat in the West."
+  },
+  {
+    "id": "petersburg-1864",
+    "name": "Siege of Petersburg",
+    "year": 1864,
+    "date": "15 June 1864 – 25 March 1865",
+    "lat": 37.2279,
+    "lng": -77.4019,
+    "era": "industrial",
+    "war": "American Civil War",
+    "battleType": "land",
+    "wikipediaTitle": "Siege of Petersburg",
+    "sides": [
+      {
+        "name": "United States",
+        "commander": "Ulysses S. Grant, George Meade, Benjamin Butler, Philip Sheridan",
+        "strength": "~67,000 – 125,000 (varied)",
+        "casualties": "~42,000"
+      },
+      {
+        "name": "Confederate States",
+        "commander": "Robert E. Lee, P. G. T. Beauregard",
+        "strength": "~52,000 – 64,000 (varied)",
+        "casualties": "~28,000"
+      }
+    ],
+    "victor": "United States",
+    "summary": "After failing to take Petersburg by direct assault in mid-June 1864, Grant settles into a nine-month siege of the rail hub south of Richmond. Trench warfare prefigures the Western Front: continuous earthworks, mining (the Crater), and attritional raids on supply lines.",
+    "significance": "Effectively decides the war in the East. When Lee's lines finally break in late March 1865 he abandons both Petersburg and Richmond, fleeing west to Appomattox Court House and surrender."
+  },
+  {
+    "id": "battle-of-france-1940",
+    "name": "Battle of France",
+    "year": 1940,
+    "date": "10 May – 25 June 1940",
+    "lat": 49.7,
+    "lng": 4.9444,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of France",
+    "sides": [
+      {
+        "name": "France + United Kingdom + Belgium + Netherlands",
+        "commander": "Maurice Gamelin, Maxime Weygand, Lord Gort, John Vereker",
+        "strength": "~3,300,000 (combined Allied)",
+        "casualties": "~360,000 killed or wounded; ~1,900,000 captured or missing"
+      },
+      {
+        "name": "Nazi Germany + Italy",
+        "commander": "Gerd von Rundstedt, Fedor von Bock, Wilhelm Ritter von Leeb, Heinz Guderian, Erwin Rommel",
+        "strength": "~3,350,000",
+        "casualties": "~27,000 killed, ~111,000 wounded, ~18,000 missing"
+      }
+    ],
+    "victor": "Nazi Germany + Italy",
+    "summary": "Erich von Manstein's Sichelschnitt plan sends seven panzer divisions through the supposedly impassable Ardennes Forest. After breaking the French line at Sedan, the armor races to the English Channel, encircling the cream of the Allied armies in Belgium. Within six weeks France signs an armistice at Compègne.",
+    "significance": "Among the most consequential campaigns of the twentieth century. Wehrmacht doctrine of combined-arms armor and tactical air power overturns expectations from World War I. France's fall isolates Britain and reshapes the European balance for the next five years."
+  },
+  {
+    "id": "dunkirk-1940",
+    "name": "Dunkirk Evacuation",
+    "year": 1940,
+    "date": "26 May – 4 June 1940",
+    "lat": 51.0344,
+    "lng": 2.3768,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "wikipediaTitle": "Dunkirk evacuation",
+    "sides": [
+      {
+        "name": "United Kingdom + France + Belgium",
+        "commander": "Bertram Ramsay, Lord Gort, William Tennant",
+        "strength": "~400,000 troops; ~800 \"Little Ships\" plus Royal Navy",
+        "casualties": "~68,000 (combined with surrounding operations); 6 destroyers and ~200 small craft lost"
+      },
+      {
+        "name": "Nazi Germany",
+        "commander": "Gerd von Rundstedt, Ewald von Kleist, Hermann Goering",
+        "strength": "~800,000 in army group; full Luftwaffe support",
+        "casualties": "~20,000 (combined with surrounding operations); ~240 aircraft lost"
+      }
+    ],
+    "victor": "Operational German victory; strategic British escape",
+    "summary": "Trapped against the Channel after the German breakthrough at Sedan, the British Expeditionary Force and elements of the French First Army are evacuated from the beaches of Dunkirk under near-constant Luftwaffe attack. Operation Dynamo lifts 338,226 troops to England between 26 May and 4 June, aided by a famous flotilla of civilian \"Little Ships.\"",
+    "significance": "Preserves the trained core of the British army for the rest of the war. Hitler's controversial halt order before Dunkirk — letting the Luftwaffe rather than the panzers finish the pocket — is debated as one of the war's pivotal mistakes."
+  },
+  {
+    "id": "el-alamein-1942",
+    "name": "Second Battle of El Alamein",
+    "year": 1942,
+    "date": "23 October – 11 November 1942",
+    "lat": 30.8333,
+    "lng": 28.95,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "wikipediaTitle": "Second Battle of El Alamein",
+    "sides": [
+      {
+        "name": "United Kingdom + Commonwealth",
+        "commander": "Bernard Montgomery, Harold Alexander",
+        "strength": "~195,000",
+        "casualties": "~13,500 (including 2,350 killed); ~500 tanks lost"
+      },
+      {
+        "name": "Nazi Germany + Italy",
+        "commander": "Erwin Rommel, Georg Stumme",
+        "strength": "~116,000",
+        "casualties": "~30,000+ casualties; ~30,000 captured; ~500 tanks lost"
+      }
+    ],
+    "victor": "United Kingdom + Commonwealth",
+    "summary": "After holding Rommel at the First Battle of El Alamein in July, Montgomery's Eighth Army opens a meticulously prepared offensive with Operation Lightfoot. A massive artillery barrage punches lanes through Axis minefields; armor exploits over twelve days of attritional fighting until Rommel orders a retreat against Hitler's stand-fast order.",
+    "significance": "Decisive end of Axis offensive operations in North Africa. Churchill: \"Before Alamein we never had a victory. After Alamein we never had a defeat.\" Combined with Operation Torch a week later, it pinches the Axis between two Allied forces in Tunisia."
+  },
+  {
+    "id": "guadalcanal-1942",
+    "name": "Guadalcanal Campaign",
+    "year": 1942,
+    "date": "7 August 1942 – 9 February 1943",
+    "lat": -9.428,
+    "lng": 160.0492,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "wikipediaTitle": "Guadalcanal campaign",
+    "sides": [
+      {
+        "name": "United States + Australia + New Zealand",
+        "commander": "Alexander Vandegrift, William Halsey, Robert Ghormley, Richmond K. Turner",
+        "strength": "~60,000 ground forces engaged",
+        "casualties": "~7,100 killed, 7,800 wounded; 29 ships lost"
+      },
+      {
+        "name": "Empire of Japan",
+        "commander": "Harukichi Hyakutake, Isoroku Yamamoto, Mikawa Gunichi",
+        "strength": "~36,200 ground forces engaged",
+        "casualties": "~31,000 killed (mostly disease and starvation); 38 ships lost"
+      }
+    ],
+    "victor": "United States and allies",
+    "summary": "The first major US offensive of the Pacific War turns on a single airstrip — Henderson Field. Six months of jungle warfare, seven major naval battles, and constant air combat exhaust Japanese ability to contest the South Pacific. The Tokyo Express runs reinforcements in at night; \"Cactus Air Force\" hammers them by day.",
+    "significance": "Halts Japanese expansion in the Pacific and shifts strategic initiative to the Allies for the rest of the war. The campaign's attritional naval battles around Savo Sound (\"Iron Bottom Sound\") cripple Japan's pre-war elite cruiser and destroyer force."
+  },
+  {
+    "id": "leyte-gulf-1944",
+    "name": "Battle of Leyte Gulf",
+    "year": 1944,
+    "date": "23–26 October 1944",
+    "lat": 11.0,
+    "lng": 125.0,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "naval",
+    "wikipediaTitle": "Battle of Leyte Gulf",
+    "sides": [
+      {
+        "name": "United States + Australia",
+        "commander": "William Halsey, Thomas Kinkaid, Jesse Oldendorf, Clifton Sprague",
+        "strength": "8 fleet carriers, 8 light carriers, 18 escort carriers, 12 battleships, plus cruisers and destroyers",
+        "casualties": "~3,000 killed; 1 light carrier, 2 escort carriers, 3 destroyers/destroyer escorts sunk"
+      },
+      {
+        "name": "Empire of Japan",
+        "commander": "Takeo Kurita, Jisaburo Ozawa, Shoji Nishimura, Kiyohide Shima",
+        "strength": "1 fleet carrier, 3 light carriers, 9 battleships, plus cruisers and destroyers",
+        "casualties": "~12,500 killed; 4 carriers (including Zuikaku, last Pearl Harbor carrier), 3 battleships (Musashi, Fuso, Yamashiro), 6 heavy cruisers, 4 light cruisers, 11 destroyers sunk"
+      },
+      {
+        "name": "Empire of Japan kamikaze",
+        "commander": "Takijiro Onishi",
+        "strength": "Special Attack Unit (debut)",
+        "casualties": "Pilots killed (no quarter sought)"
+      }
+    ],
+    "victor": "United States and allies",
+    "summary": "The largest naval battle in history by tonnage engaged. Japan commits virtually its remaining surface fleet to oppose the Leyte landings via the Sho-Go plan. Four engagements — Sibuyan Sea, Surigao Strait (the last battleship-vs-battleship action in history), Cape Engaño, and Samar (\"Taffy 3\" stops Kurita's battleship force with destroyers and escort carriers) — destroy the Imperial Japanese Navy as a strategic force.",
+    "significance": "Effective end of the Imperial Japanese Navy. First use of organized kamikaze attacks. Secures the liberation of the Philippines and cuts Japan off from its southern resource zone."
+  },
+  {
+    "id": "berlin-1945",
+    "name": "Battle of Berlin",
+    "year": 1945,
+    "date": "16 April – 2 May 1945",
+    "lat": 52.52,
+    "lng": 13.405,
+    "era": "world-war-2",
+    "war": "World War II",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Berlin",
+    "sides": [
+      {
+        "name": "Soviet Union + Poland",
+        "commander": "Georgy Zhukov, Ivan Konev, Konstantin Rokossovsky",
+        "strength": "~2,300,000; ~6,250 tanks; ~7,500 aircraft",
+        "casualties": "~81,000 killed, ~280,000 wounded (full Berlin Strategic Offensive)"
+      },
+      {
+        "name": "Nazi Germany",
+        "commander": "Adolf Hitler, Helmuth Weidling, Gotthard Heinrici, Wilhelm Mohnke",
+        "strength": "~1,000,000 (including Volkssturm and Hitler Youth)",
+        "casualties": "~92,000 – 100,000 killed; ~480,000 captured"
+      }
+    ],
+    "victor": "Soviet Union and allies",
+    "summary": "Three Soviet fronts converge on the Reich capital. The breakthrough at the Seelow Heights opens the way; by 25 April the city is encircled. Street fighting through the inner districts — the Reichstag, the Tiergarten, the Chancellery — lasts a week. Hitler commits suicide in the Führerbunker on 30 April; the garrison surrenders 2 May.",
+    "significance": "Final major battle of the European theater. The German unconditional surrender follows on 8 May. The street-fighting devastation and Soviet conduct after the fall shape memory of the war in both Germanies for decades."
+  },
+  {
+    "id": "tet-saigon-1968",
+    "name": "Tet Offensive: Saigon (US Embassy attack)",
+    "year": 1968,
+    "date": "30 January – 7 March 1968",
+    "lat": 10.7831,
+    "lng": 106.7004,
+    "era": "modern",
+    "war": "Vietnam War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Saigon (1968)",
+    "sides": [
+      {
+        "name": "United States + ARVN",
+        "commander": "Frederick C. Weyand, Cao Văn Viên",
+        "strength": "~12,000 (II Field Force + ARVN III Corps)",
+        "casualties": "~1,000 US/ARVN killed"
+      },
+      {
+        "name": "Viet Cong + PAVN",
+        "commander": "Trần Văn Trà",
+        "strength": "~35 sapper teams + Local Force battalions",
+        "casualties": "~6,000 killed"
+      }
+    ],
+    "victor": "United States and ARVN (tactical); North Vietnamese (strategic and propaganda)",
+    "summary": "On the night of the Tet lunar new year, simultaneous attacks erupt across South Vietnam. In Saigon, a Viet Cong sapper team blows a hole in the wall of the US Embassy and fights for six hours inside the compound. Other teams hit the Presidential Palace, the radio station, and the airbase at Tân Sơn Nhứt. All are eventually repulsed.",
+    "significance": "Although a tactical defeat for the communists, the spectacle of fighting in the streets of the South Vietnamese capital — and on the embassy lawn — collapses American public support for the war. Walter Cronkite editorializes against further escalation; LBJ withdraws from the presidential race weeks later."
+  },
+  {
+    "id": "hue-1968",
+    "name": "Battle of Hue",
+    "year": 1968,
+    "date": "31 January – 2 March 1968",
+    "lat": 16.4637,
+    "lng": 107.5909,
+    "era": "modern",
+    "war": "Vietnam War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Huế",
+    "sides": [
+      {
+        "name": "United States + ARVN",
+        "commander": "Foster LaHue, Ngô Quang Trưởng",
+        "strength": "~11,000 (US Marines, 1st Cavalry, ARVN Marines + airborne)",
+        "casualties": "~668 US/ARVN killed, ~3,700 wounded"
+      },
+      {
+        "name": "PAVN + Viet Cong",
+        "commander": "Trần Văn Quang",
+        "strength": "~10,000",
+        "casualties": "~5,000+ killed (estimate)"
+      }
+    ],
+    "victor": "United States + ARVN",
+    "summary": "PAVN and Viet Cong units seize Hue, the old imperial capital, in the opening hours of Tet and hold most of the city — including the Citadel and Imperial Palace — for 26 days. US Marines clear the southern (modern) bank block by block; ARVN Marines and paratroopers clear the Citadel. The fight is the largest urban combat the US has seen since Manila 1945.",
+    "significance": "Establishes the brutal cost of urban warfare in a divided modern city. Discovery of mass graves of executed civilians (the Hue Massacre) becomes one of the war's defining atrocities. The battle's intensity and duration reinforce the disconnect between Westmoreland's confidence and the situation on the ground."
+  },
+  {
+    "id": "santiago-de-cuba-1898",
+    "name": "Battle of Santiago de Cuba",
+    "year": 1898,
+    "date": "3 July 1898",
+    "lat": 19.965,
+    "lng": -75.91,
+    "era": "industrial",
+    "war": "Spanish-American War",
+    "battleType": "naval",
+    "wikipediaTitle": "Battle of Santiago de Cuba",
+    "sides": [
+      {
+        "name": "United States Navy",
+        "commander": "William T. Sampson, Winfield Scott Schley",
+        "strength": "5 battleships, 2 armored cruisers, 1 protected cruiser, 1 yacht",
+        "casualties": "1 killed, 1 wounded; no ships lost"
+      },
+      {
+        "name": "Spanish Navy",
+        "commander": "Pascual Cervera y Topete",
+        "strength": "4 armored cruisers, 2 destroyers",
+        "casualties": "~370 killed, ~1,800 captured; all 6 ships sunk or beached"
+      }
+    ],
+    "victor": "United States",
+    "summary": "With US ground forces holding the heights above Santiago and the city about to fall, Admiral Cervera receives orders to sortie. His outdated cruisers leave the harbor in column and are chased down one by one along the Cuban coast by the blockading US squadron. Within four hours the Spanish Caribbean fleet is destroyed.",
+    "significance": "Effective end of Spanish naval power in the New World. Santiago capitulates two weeks later, ending the Cuban campaign. The Treaty of Paris (December 1898) cedes Cuba, Puerto Rico, Guam, and the Philippines to American influence."
+  },
+  {
+    "id": "magersfontein-1899",
+    "name": "Battle of Magersfontein",
+    "year": 1899,
+    "date": "11 December 1899",
+    "lat": -28.9794,
+    "lng": 24.7611,
+    "era": "industrial",
+    "war": "Second Boer War",
+    "battleType": "land",
+    "wikipediaTitle": "Battle of Magersfontein",
+    "sides": [
+      {
+        "name": "United Kingdom (Highland Brigade + Methuen's Division)",
+        "commander": "Paul Sanford Methuen, Andrew Gilbert Wauchope",
+        "strength": "~15,000",
+        "casualties": "210 killed, 675 wounded, 96 missing"
+      },
+      {
+        "name": "South African Republic + Orange Free State",
+        "commander": "Piet Cronjé, Koos de la Rey",
+        "strength": "~8,500",
+        "casualties": "87 killed, 213 wounded"
+      }
+    ],
+    "victor": "South African Republic + Orange Free State",
+    "summary": "Lord Methuen's relief column for the besieged Kimberley garrison is halted by Boer commandos dug into rifle trenches at the base of Magersfontein Hill — a novel deployment that breaks the textbook British plan of shelling the crest and storming. A pre-dawn assault by the Highland Brigade is caught in the open by close-range mauser fire. General Wauchope and over a third of his officers fall.",
+    "significance": "Second engagement of the British \"Black Week.\" Combined with defeats at Stormberg (10 December) and Colenso (15 December), it forces a wholesale rethinking of British colonial warfare and the recall of Buller. Marks the early high point of Boer mobile defense."
   }
 ]

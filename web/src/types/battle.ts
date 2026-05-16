@@ -29,7 +29,25 @@ export interface Battle {
   summary: string;
   significance: string;
   references?: Reference[];
+  verified?: boolean;
+  source?: string;
+  hasReplay?: boolean;
+  hasSchematic?: boolean;
+  wikipediaTitle?: string;
+  tier?: 'reconstructed' | 'documented' | 'indexed';
 }
+
+export const TIER_LABELS: Record<string, string> = {
+  reconstructed: 'Reconstructed',
+  documented: 'Documented',
+  indexed: 'Indexed',
+};
+
+export const TIER_DESCRIPTIONS: Record<string, string> = {
+  reconstructed: 'Hand-built phase-by-phase replay; commanders, sides, and dates have been hand-checked.',
+  documented: 'Curated entry or imported with a full set of sides, dates, and a clean war attribution.',
+  indexed: 'Wikidata-harvested pointer. Coordinates and name only; treat as a deep link to Wikipedia.',
+};
 
 export const ERA_COLORS: Record<string, string> = {
   'ancient': '#f59e0b',

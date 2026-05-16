@@ -18,6 +18,9 @@ type Replay struct {
 	FactionB string `json:"factionB"`
 	// FactionC is an optional label for a third faction (color c).
 	FactionC string `json:"factionC,omitempty"`
+	// Schematic is true when the replay was generated automatically from
+	// the battle's metadata rather than hand-curated.
+	Schematic bool `json:"schematic,omitempty"`
 	// Phases is the ordered sequence of phases.
 	Phases []Phase `json:"phases"`
 }

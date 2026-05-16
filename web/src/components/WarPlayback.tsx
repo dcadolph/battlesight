@@ -48,7 +48,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose }:
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(4000);
   const [detail, setDetail] = useState<Battle | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     fetch('/api/battles/stats')

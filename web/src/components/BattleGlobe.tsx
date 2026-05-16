@@ -6,6 +6,7 @@ import { ERA_COLORS } from '../types/battle';
 import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import type { FeatureCollection, Feature, Geometry, Position } from 'geojson';
+import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../data/cities';
 
 interface BattleGlobeProps {
   battles: Battle[];
@@ -319,9 +320,10 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       ref={globeRef as React.MutableRefObject<GlobeMethods | undefined>}
       width={dimensions.width}
       height={dimensions.height}
-      globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-      backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
-      atmosphereColor="#4a9eff"
+      globeImageUrl={HI_RES_EARTH}
+      bumpImageUrl={TOPOLOGY_BUMP}
+      backgroundImageUrl={NIGHT_SKY}
+      atmosphereColor="#7ab9ff"
       atmosphereAltitude={0.15}
       pointsData={visibleBattles}
       pointLat="lat"

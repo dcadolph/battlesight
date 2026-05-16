@@ -15,7 +15,9 @@ interface BattleReplayProps {
 export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange }: BattleReplayProps) {
   const [replay, setReplay] = useState<Replay | null>(null);
   const [phaseIdx, setPhaseIdx] = useState(initialPhase);
-  const [playing, setPlaying] = useState(false);
+  // Auto-play on open. Opening "Watch the battle" implies "play it" — making
+  // the user hunt for a play button to see anything happen is a poor default.
+  const [playing, setPlaying] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<'globe' | 'tactical'>('globe');
@@ -105,6 +107,29 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         @keyframes arrow-fade-in {
           to { opacity: 1; }
         }
+        /* Marching-dash animation for the globe replay's SVG arrows. The
+           --march custom property carries each arrow's dash+gap period so the
+           pattern shifts by exactly one period per cycle and loops seamlessly.
+           Without var(...), every arrow would have to share one fixed period. */
+        @keyframes march {
+          to { stroke-dashoffset: var(--march, -24px); }
+        }
+        /* Impact-flash animations for the moment an arrow arrives at its
+           destination. impact-core is the bright center dot that pops and
+           fades; impact-ring is the outward shockwave. transform-box: fill-box
+           on the rendered element ensures scale operates from the circle's
+           own center, not the SVG origin. */
+        @keyframes impact-core {
+          0% { opacity: 0; transform: scale(0.2); }
+          20% { opacity: 1; transform: scale(1.0); }
+          60% { opacity: 0.6; transform: scale(0.7); }
+          100% { opacity: 0; transform: scale(0.5); }
+        }
+        @keyframes impact-ring {
+          0% { opacity: 0; transform: scale(0.4); }
+          12% { opacity: 0.95; }
+          100% { opacity: 0; transform: scale(4.5); }
+        }
         .replay-fade-in {
           animation: fade-in 0.6s ease-out;
         }
@@ -149,12 +174,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           {replay.factionC && <FactionLegend color={FACTION_COLOR.c} label={replay.factionC} />}
           <button
             onClick={onClose}
-            className="ml-3 inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500 transition-colors"
-            aria-label="Close replay (Esc)"
-            title="Close (Esc)"
+            className="ml-3 inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-blue-500/50 bg-blue-500/15 text-blue-100 hover:bg-blue-500/30 hover:text-white hover:border-blue-400 transition-colors"
+            aria-label="Back to battle story (Esc)"
+            title="Back to battle story (Esc)"
           >
-            <span className="text-xs font-medium tracking-wide">Back to globe</span>
-            <span className="text-base leading-none">✕</span>
+            <span className="text-base leading-none">←</span>
+            <span className="text-xs font-semibold tracking-wide">Back to story</span>
           </button>
         </div>
       </header>
@@ -281,14 +306,14 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             </div>
             <button
               onClick={onClose}
-              className={`w-full h-9 rounded-md border text-[12px] font-medium tracking-wide transition-colors ${
+              className={`w-full h-9 rounded-md border text-[12px] font-semibold tracking-wide transition-colors ${
                 phaseIdx === replay.phases.length - 1
-                  ? 'border-blue-500/50 bg-blue-500/20 text-blue-200 hover:bg-blue-500/30'
-                  : 'border-slate-700 bg-slate-800/60 text-slate-300 hover:bg-slate-700 hover:text-white'
+                  ? 'border-blue-500/60 bg-blue-500/25 text-blue-100 hover:bg-blue-500/40'
+                  : 'border-blue-500/40 bg-blue-500/10 text-blue-200 hover:bg-blue-500/25 hover:text-white'
               }`}
-              title="Esc"
+              title="Back to battle story (Esc)"
             >
-              {phaseIdx === replay.phases.length - 1 ? 'Done — back to globe' : 'Exit replay'}
+              {phaseIdx === replay.phases.length - 1 ? 'Done — back to story' : '← Back to story'}
             </button>
           </div>
         </aside>

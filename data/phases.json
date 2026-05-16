@@ -15380,379 +15380,1417 @@
   },
   "berlin-1945": {
     "title": "Berlin: The Reich Capital Falls",
-    "intro": "16 April 1945. Three Soviet fronts — Zhukov in the center, Konev in the south, Rokossovsky on the right — open the final offensive of the European war. 2.3 million Red Army soldiers, 6,250 tanks, and 7,500 aircraft converge on a city whose defenders include Hitler Youth and Volkssturm pensioners. In sixteen days the Reich Chancellery flies the red flag.",
-    "battlefieldDesc": "Eastern Germany. The Oder–Neisse line runs north–south on the right; Berlin sits 60 km behind it. Zhukov's 1st Belorussian Front attacks straight from the Seelow Heights; Konev's 1st Ukrainian wheels north from the south.",
+    "intro": "16 April 1945. Three Soviet fronts — Zhukov in the center, Konev in the south, Rokossovsky on the right — open the final offensive of the European war. 2.3 million Red Army soldiers, 6,250 tanks, and 7,500 aircraft converge on a city whose defenders include Hitler Youth, Volkssturm pensioners, and the wreckage of formations that have been retreating for two years. In sixteen days the Reich Chancellery flies the red flag.",
+    "battlefieldDesc": "Eastern Germany. The Oder–Neisse line runs north–south, with Berlin 60 km behind it; Zhukov's 1st Belorussian attacks from the Seelow Heights, Konev's 1st Ukrainian wheels north from the Neisse, and the encirclement closes at Ketzin west of the city on 25 April.",
     "aspectRatio": 1.4,
+    "extentLngDeg": 4.0,
+    "extentLatDeg": 4.0,
     "factionA": "Soviet Union + Polish 1st Army",
     "factionB": "Nazi Germany",
+    "factionC": "United States",
     "phases": [
       {
-        "title": "Seelow Heights",
-        "timeMarker": "16–19 April 1945",
-        "narration": "Zhukov opens with 9,000 guns and 143 searchlights aimed at the German line to blind defenders. The plan is to overwhelm the Seelow Heights at first light. It does not work: German defenders have withdrawn from the front trench overnight; the barrage falls on empty ground; the searchlights silhouette Soviet infantry rather than blinding Germans. Three days and 30,000 Soviet casualties are needed to break through.",
-        "durationMs": 7000,
-        "terrain": [
-          {
-            "kind": "river",
-            "label": "Oder River",
-            "points": [
-              48,
-              4,
-              52,
-              96
-            ]
-          },
-          {
-            "kind": "ridge",
-            "label": "Seelow Heights",
-            "points": [
-              54,
-              30,
-              64,
-              38
-            ]
-          },
-          {
-            "kind": "town",
-            "label": "Berlin",
-            "points": [
-              22,
-              48,
-              32,
-              58
-            ]
-          }
-        ],
+        "title": "Dawn at the Seelow Heights",
+        "timeMarker": "16 April 1945, 03:00",
+        "narration": "Zhukov opens with 9,000 guns and 143 anti-aircraft searchlights aimed at the German line — meant to blind the defenders. It backfires: Heinrici had pulled his frontline troops back overnight, so the barrage falls on empty trenches; the searchlights silhouette the advancing Soviet infantry against the dust. The 8th Guards Army wades into the Oderbruch lowlands and stalls under fire from the Heights above.",
+        "durationMs": 9000,
+        "cameraLat": 52.55,
+        "cameraLng": 14.45,
+        "cameraAltitude": 0.25,
+        "cameraTweenMs": 1400,
         "units": [
-          {
-            "label": "1st Belorussian (Zhukov)",
-            "faction": "a",
-            "unitType": "armor",
-            "x": 64,
-            "y": 30,
-            "w": 14,
-            "h": 14,
-            "strength": 4
-          },
-          {
-            "label": "1st Ukrainian (Konev)",
-            "faction": "a",
-            "unitType": "armor",
-            "x": 72,
-            "y": 70,
-            "w": 14,
-            "h": 10,
-            "strength": 4
-          },
           {
             "label": "9th Army (Busse)",
             "faction": "b",
             "unitType": "infantry",
-            "x": 50,
-            "y": 32,
-            "w": 12,
-            "h": 14,
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5365,
+            "lng": 14.3835,
+            "strength": 4
+          },
+          {
+            "label": "CI Corps",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5,
+            "lng": 14.32,
+            "strength": 3
+          },
+          {
+            "label": "8th Guards (Chuikov)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5872,
+            "lng": 14.6446,
+            "strength": 5
+          }
+        ],
+        "movements": [
+          {
+            "label": "8th Guards assault",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.5872,
+            "fromLng": 14.6446,
+            "toLat": 52.55,
+            "toLng": 14.42,
+            "kind": "charge"
+          },
+          {
+            "label": "5th Shock Army",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.65,
+            "fromLng": 14.6,
+            "toLat": 52.62,
+            "toLng": 14.42,
+            "kind": "advance"
+          },
+          {
+            "label": "Artillery barrage",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.6,
+            "fromLng": 14.55,
+            "toLat": 52.5365,
+            "toLng": 14.3835,
+            "kind": "charge"
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "reich-east",
+            "controller": "b",
+            "ring": [
+              [
+                14.2,
+                52.95
+              ],
+              [
+                14.65,
+                52.3
+              ],
+              [
+                14.64,
+                51.74
+              ],
+              [
+                14.3,
+                51.55
+              ],
+              [
+                13.6,
+                51.5
+              ],
+              [
+                13.1,
+                51.8
+              ],
+              [
+                12.95,
+                52.2
+              ],
+              [
+                13.05,
+                52.55
+              ],
+              [
+                13.2,
+                52.95
+              ]
+            ],
+            "label": "Wehrmacht East"
+          }
+        ],
+        "index": 0,
+        "annotations": [],
+        "terrain": []
+      },
+      {
+        "title": "The Heights Crack",
+        "timeMarker": "17–19 April 1945",
+        "narration": "Three days of grinding assault. Soviet armor is committed early — against doctrine — to force the breakthrough. 1st Guards Tank Army and 2nd Guards Tank Army push up the slopes under direct anti-tank fire. By the morning of the 19th the Seelow position is gone and the road to Berlin is open. The cost: 30,000 Soviet casualties and 743 tanks for a piece of ground 80 km from the capital.",
+        "durationMs": 8000,
+        "cameraLat": 52.54,
+        "cameraLng": 14.3,
+        "cameraAltitude": 0.16,
+        "cameraTweenMs": 1500,
+        "units": [
+          {
+            "label": "9th Army (collapsing)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.53,
+            "lng": 14.3,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "1st Guards Tank",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.6,
+            "lng": 14.55,
+            "strength": 5
+          },
+          {
+            "label": "2nd Guards Tank",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.66,
+            "lng": 14.5,
+            "strength": 5
+          }
+        ],
+        "movements": [
+          {
+            "label": "1st Guards Tank breakthrough",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.6,
+            "fromLng": 14.55,
+            "toLat": 52.53,
+            "toLng": 14.2,
+            "kind": "charge"
+          },
+          {
+            "label": "2nd Guards Tank",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.66,
+            "fromLng": 14.5,
+            "toLat": 52.58,
+            "toLng": 14.2,
+            "kind": "charge"
+          },
+          {
+            "label": "8th Guards exploits",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.55,
+            "fromLng": 14.42,
+            "toLat": 52.52,
+            "toLng": 14.1,
+            "kind": "advance"
+          },
+          {
+            "label": "Wehrmacht withdrawal",
+            "faction": "b",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.5365,
+            "fromLng": 14.3835,
+            "toLat": 52.5,
+            "toLng": 14.0,
+            "kind": "retreat"
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "reich-east",
+            "controller": "b",
+            "ring": [
+              [
+                14.1,
+                52.95
+              ],
+              [
+                14.4,
+                52.3
+              ],
+              [
+                14.5,
+                51.74
+              ],
+              [
+                14.3,
+                51.55
+              ],
+              [
+                13.6,
+                51.5
+              ],
+              [
+                13.1,
+                51.8
+              ],
+              [
+                12.95,
+                52.2
+              ],
+              [
+                13.05,
+                52.55
+              ],
+              [
+                13.2,
+                52.95
+              ]
+            ],
+            "label": "Wehrmacht East"
+          }
+        ],
+        "index": 1,
+        "annotations": [],
+        "terrain": []
+      },
+      {
+        "title": "Konev's Southern Wheel",
+        "timeMarker": "18–22 April 1945",
+        "narration": "While Zhukov bleeds at Seelow, Konev's 1st Ukrainian Front breaks across the Neisse at Forst and Triebel. Schörner's 4th Panzer Army scatters. Konev senses opportunity and wheels his tank armies — the 3rd and 4th Guards Tank — northwest, not west, aimed directly at Berlin's southern districts. Stalin lets the race run between his two marshals.",
+        "durationMs": 8500,
+        "cameraLat": 52.1,
+        "cameraLng": 13.8,
+        "cameraAltitude": 0.5,
+        "cameraTweenMs": 1700,
+        "units": [
+          {
+            "label": "4th Panzer (Gräser)",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 51.8,
+            "lng": 14.3,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "3rd Guards Tank (Rybalko)",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 51.74,
+            "lng": 14.6378,
+            "strength": 5
+          },
+          {
+            "label": "4th Guards Tank (Lelyushenko)",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 51.65,
+            "lng": 14.7,
+            "strength": 5
+          }
+        ],
+        "movements": [
+          {
+            "label": "3rd Guards Tank to Berlin",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 51.74,
+            "fromLng": 14.6378,
+            "toLat": 52.3,
+            "toLng": 13.5,
+            "kind": "charge"
+          },
+          {
+            "label": "4th Guards Tank flank",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 51.65,
+            "fromLng": 14.7,
+            "toLat": 52.05,
+            "toLng": 13.2,
+            "kind": "flank"
+          },
+          {
+            "label": "13th Army support",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 51.55,
+            "fromLng": 14.6,
+            "toLat": 51.9,
+            "toLng": 13.6,
+            "kind": "advance"
+          },
+          {
+            "label": "4th Panzer fallback",
+            "faction": "b",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 51.85,
+            "fromLng": 14.2,
+            "toLat": 51.8665,
+            "toLng": 12.6478,
+            "kind": "rout"
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "reich-east",
+            "controller": "b",
+            "ring": [
+              [
+                13.95,
+                52.85
+              ],
+              [
+                13.95,
+                52.1
+              ],
+              [
+                13.4,
+                51.55
+              ],
+              [
+                13.1,
+                51.8
+              ],
+              [
+                12.95,
+                52.2
+              ],
+              [
+                13.05,
+                52.55
+              ],
+              [
+                13.2,
+                52.85
+              ]
+            ],
+            "label": "Wehrmacht (shrinking)"
+          }
+        ],
+        "index": 2,
+        "annotations": [],
+        "terrain": []
+      },
+      {
+        "title": "Encirclement Closes at Ketzin",
+        "timeMarker": "25 April 1945, ~midday",
+        "narration": "Konev's 4th Guards Tank Army and Zhukov's 47th Army meet at Ketzin, west of Berlin. The ring is closed. Inside it: the entire 9th Army trapped in the Halbe pocket south of the city, the LVI Panzer Corps fallen back into the city, and the remnants of every formation Heinrici threw into the path. Outside it: the road to the Elbe is open and the Reich is about to be split.",
+        "durationMs": 8500,
+        "cameraLat": 52.45,
+        "cameraLng": 13.1,
+        "cameraAltitude": 0.3,
+        "cameraTweenMs": 1700,
+        "units": [
+          {
+            "label": "47th Army (Perkhorovich)",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.55,
+            "lng": 13.2,
+            "strength": 4
+          },
+          {
+            "label": "4th Guards Tank",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.42,
+            "lng": 12.9,
+            "strength": 5
+          },
+          {
+            "label": "9th Army (Busse) trapped",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.13,
+            "lng": 13.706,
             "strength": 3,
-            "status": "broken"
+            "status": "encircled"
           },
           {
-            "label": "4th Panzer (south)",
+            "label": "LVI Panzer (Weidling)",
             "faction": "b",
             "unitType": "armor",
-            "x": 58,
-            "y": 72,
-            "w": 10,
-            "h": 6,
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5,
+            "lng": 13.35,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "Zhukov from north",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.58,
+            "fromLng": 13.33,
+            "toLat": 52.4831,
+            "toLng": 12.9333,
+            "kind": "advance"
+          },
+          {
+            "label": "Konev from south",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.2,
+            "fromLng": 13.1,
+            "toLat": 52.4831,
+            "toLng": 12.9333,
+            "kind": "advance"
+          },
+          {
+            "label": "9th Army breakout attempt",
+            "faction": "b",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.13,
+            "fromLng": 13.706,
+            "toLat": 51.8665,
+            "toLng": 12.6478,
+            "kind": "rout"
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "berlin-pocket",
+            "controller": "b",
+            "ring": [
+              [
+                13.2,
+                52.66
+              ],
+              [
+                13.6,
+                52.66
+              ],
+              [
+                13.75,
+                52.55
+              ],
+              [
+                13.75,
+                52.4
+              ],
+              [
+                13.5,
+                52.38
+              ],
+              [
+                13.2,
+                52.38
+              ]
+            ],
+            "label": "Berlin pocket"
+          }
+        ],
+        "index": 3,
+        "annotations": [],
+        "terrain": []
+      },
+      {
+        "title": "Handshake at Torgau",
+        "timeMarker": "25 April 1945, 16:00",
+        "narration": "Sixty kilometers west of Berlin, on the wreckage of the Elbe bridge at Torgau, Lieutenant Kotzebue of the US 69th Infantry Division meets Lieutenant Silvashko of the Soviet 58th Guards Rifle Division. The Reich is cut in half. North and south of Torgau the front goes quiet within hours: the question of who reaches Berlin first has already been decided in Zhukov's favor.",
+        "durationMs": 7500,
+        "cameraLat": 51.85,
+        "cameraLng": 13.2,
+        "cameraAltitude": 0.45,
+        "cameraTweenMs": 1800,
+        "units": [
+          {
+            "label": "US 69th Division",
+            "faction": "c",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 51.55,
+            "lng": 12.7,
+            "strength": 4
+          },
+          {
+            "label": "Soviet 58th Guards",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 51.55,
+            "lng": 13.25,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "US patrol east",
+            "faction": "c",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 51.55,
+            "fromLng": 12.7,
+            "toLat": 51.5557,
+            "toLng": 13.004,
+            "kind": "advance"
+          },
+          {
+            "label": "Soviet patrol west",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 51.55,
+            "fromLng": 13.25,
+            "toLat": 51.5557,
+            "toLng": 13.004,
+            "kind": "advance"
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "berlin-pocket",
+            "controller": "b",
+            "ring": [
+              [
+                13.2,
+                52.66
+              ],
+              [
+                13.6,
+                52.66
+              ],
+              [
+                13.75,
+                52.55
+              ],
+              [
+                13.75,
+                52.4
+              ],
+              [
+                13.5,
+                52.38
+              ],
+              [
+                13.2,
+                52.38
+              ]
+            ],
+            "label": "Berlin pocket"
+          }
+        ],
+        "index": 4,
+        "annotations": [],
+        "terrain": []
+      },
+      {
+        "title": "Eight Armies into the Suburbs",
+        "timeMarker": "22–26 April 1945",
+        "narration": "Eight Soviet armies enter Berlin from every direction at once: 47th and 3rd Shock from the north, 5th Shock and 8th Guards from the east, 1st Guards Tank from the southeast, 3rd Guards Tank and 8th Mechanized from the south, 28th Army from the southwest. Inside the city the defenders are a patchwork: LVI Panzer Corps, Waffen-SS Nordland, Volkssturm pensioners, and 15-year-olds of the Hitler Youth.",
+        "durationMs": 9000,
+        "cameraLat": 52.52,
+        "cameraLng": 13.4,
+        "cameraAltitude": 0.14,
+        "cameraTweenMs": 1800,
+        "units": [
+          {
+            "label": "Waffen-SS Nordland",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5145,
+            "lng": 13.35,
+            "strength": 3
+          },
+          {
+            "label": "Volkssturm / HJ",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5,
+            "lng": 13.45,
             "strength": 2
+          },
+          {
+            "label": "LVI Panzer (Weidling)",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5117,
+            "lng": 13.3814,
+            "strength": 3
           }
         ],
         "movements": [
           {
-            "label": "Seelow assault",
+            "label": "3rd Shock from north",
             "faction": "a",
-            "fromX": 70,
-            "fromY": 36,
-            "toX": 56,
-            "toY": 34,
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.68,
+            "fromLng": 13.4,
+            "toLat": 52.568,
+            "toLng": 13.402,
+            "kind": "advance"
+          },
+          {
+            "label": "47th Army from northwest",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.551,
+            "fromLng": 13.201,
+            "toLat": 52.58,
+            "toLng": 13.33,
+            "kind": "advance"
+          },
+          {
+            "label": "5th Shock from east",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.55,
+            "fromLng": 13.55,
+            "toLat": 52.543,
+            "toLng": 13.428,
+            "kind": "advance"
+          },
+          {
+            "label": "8th Guards from east",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.5,
+            "fromLng": 13.55,
+            "toLat": 52.5,
+            "toLng": 13.45,
+            "kind": "advance"
+          },
+          {
+            "label": "1st Guards Tank southeast",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.482,
+            "fromLng": 13.538,
+            "toLat": 52.49,
+            "toLng": 13.45,
             "kind": "charge"
           },
           {
-            "label": "Konev's southern push",
+            "label": "3rd Guards Tank south",
             "faction": "a",
-            "fromX": 78,
-            "fromY": 76,
-            "toX": 62,
-            "toY": 72,
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.38,
+            "fromLng": 13.523,
+            "toLat": 52.473,
+            "toLng": 13.403,
             "kind": "charge"
+          },
+          {
+            "label": "28th Army southwest",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.42,
+            "fromLng": 13.2,
+            "toLat": 52.48,
+            "toLng": 13.3,
+            "kind": "advance"
           }
         ],
-        "annotations": [
+        "controlRegions": [
           {
-            "text": "Zhukov to Stalin: \"The Seelow Heights are taken.\" Stalin to Zhukov: \"You should have taken them on the first day.\"",
-            "x": 50,
-            "y": 95
+            "id": "berlin-pocket",
+            "controller": "b",
+            "ring": [
+              [
+                13.2,
+                52.66
+              ],
+              [
+                13.6,
+                52.66
+              ],
+              [
+                13.75,
+                52.55
+              ],
+              [
+                13.75,
+                52.4
+              ],
+              [
+                13.5,
+                52.38
+              ],
+              [
+                13.2,
+                52.38
+              ]
+            ],
+            "label": "Berlin pocket"
           }
-        ]
+        ],
+        "index": 5,
+        "annotations": [],
+        "terrain": []
       },
       {
-        "title": "Encirclement",
-        "timeMarker": "20–25 April",
-        "narration": "Konev wheels north toward Berlin; Zhukov drives west; on 25 April the two fronts link up at Ketzin west of the city, completing the encirclement. The same day, Soviet and American patrols meet at Torgau on the Elbe. The Reich is cut in half. Inside the Berlin perimeter, Heinrici's Army Group Vistula has dissolved; what defends the city is a patchwork of Hitler Youth, Waffen-SS, and the LVI Panzer Corps under General Weidling.",
-        "durationMs": 6500,
-        "terrain": [
-          {
-            "kind": "town",
-            "label": "Berlin (encircled)",
-            "points": [
-              22,
-              48,
-              32,
-              58
-            ]
-          },
-          {
-            "kind": "town",
-            "label": "Ketzin (linkup)",
-            "points": [
-              16,
-              52,
-              22,
-              58
-            ]
-          }
-        ],
+        "title": "Tempelhof",
+        "timeMarker": "26 April 1945",
+        "narration": "Chuikov's 8th Guards Army — the men who held Stalingrad — fight block by block up Tempelhofer Damm. The airfield itself, the Luftwaffe's lifeline into the city, falls late on the 26th. With Tempelhof gone the city can no longer be resupplied or evacuated by air; the last flight out carries General Ritter von Greim and Hanna Reitsch.",
+        "durationMs": 7500,
+        "cameraLat": 52.47,
+        "cameraLng": 13.4,
+        "cameraAltitude": 0.08,
+        "cameraTweenMs": 1600,
         "units": [
           {
-            "label": "Zhukov closing west",
-            "faction": "a",
-            "unitType": "armor",
-            "x": 26,
-            "y": 44,
-            "w": 22,
-            "h": 6,
-            "strength": 4
-          },
-          {
-            "label": "Konev closing west",
-            "faction": "a",
-            "unitType": "armor",
-            "x": 26,
-            "y": 60,
-            "w": 22,
-            "h": 6,
-            "strength": 4
-          },
-          {
-            "label": "Berlin defenders (Weidling)",
+            "label": "9th Parachute Division",
             "faction": "b",
             "unitType": "infantry",
-            "x": 24,
-            "y": 52,
-            "w": 8,
-            "h": 4,
-            "strength": 1,
-            "status": "encircled"
-          },
-          {
-            "label": "9th Army pocket (Halbe)",
-            "faction": "b",
-            "unitType": "infantry",
-            "x": 50,
-            "y": 64,
-            "w": 10,
-            "h": 6,
-            "strength": 1,
-            "status": "encircled"
-          }
-        ],
-        "movements": [
-          {
-            "label": "Pincers close at Ketzin",
-            "faction": "a",
-            "fromX": 40,
-            "fromY": 46,
-            "toX": 20,
-            "toY": 54,
-            "kind": "flank"
-          },
-          {
-            "label": "Pincers close at Ketzin",
-            "faction": "a",
-            "fromX": 40,
-            "fromY": 60,
-            "toX": 20,
-            "toY": 54,
-            "kind": "flank"
-          }
-        ]
-      },
-      {
-        "title": "Inside the city",
-        "timeMarker": "26 April – 1 May",
-        "narration": "Eight Soviet armies enter Berlin from all sides. Street fighting moves block by block toward the government district — the Tiergarten, the Reichstag, the Reich Chancellery. Both sides use flamethrowers and direct-fire artillery at point-blank range. The 3rd Shock Army takes the Reichstag on 30 April after a night of fighting inside the building. Yegorov and Kantaria raise the flag at dawn on 1 May.",
-        "durationMs": 7000,
-        "terrain": [
-          {
-            "kind": "town",
-            "label": "Government quarter",
-            "points": [
-              42,
-              46,
-              56,
-              56
-            ]
-          },
-          {
-            "kind": "fort",
-            "label": "Reichstag",
-            "points": [
-              46,
-              46,
-              50,
-              50
-            ]
-          },
-          {
-            "kind": "fort",
-            "label": "Reich Chancellery",
-            "points": [
-              48,
-              52,
-              52,
-              56
-            ]
-          },
-          {
-            "kind": "fort",
-            "label": "Tiergarten flak tower",
-            "points": [
-              38,
-              50,
-              42,
-              54
-            ]
-          }
-        ],
-        "units": [
-          {
-            "label": "3rd Shock Army (Reichstag)",
-            "faction": "a",
-            "unitType": "infantry",
-            "x": 38,
-            "y": 38,
-            "w": 14,
-            "h": 8,
-            "strength": 3
-          },
-          {
-            "label": "8th Guards Army (Chuikov)",
-            "faction": "a",
-            "unitType": "infantry",
-            "x": 38,
-            "y": 60,
-            "w": 14,
-            "h": 8,
-            "strength": 3
-          },
-          {
-            "label": "Soviet armor in the streets",
-            "faction": "a",
-            "unitType": "armor",
-            "x": 30,
-            "y": 50,
-            "w": 12,
-            "h": 6,
-            "strength": 3
-          },
-          {
-            "label": "Defenders in the Chancellery",
-            "faction": "b",
-            "unitType": "infantry",
-            "x": 48,
-            "y": 52,
-            "w": 6,
-            "h": 4,
-            "strength": 1,
-            "status": "encircled"
-          },
-          {
-            "label": "Hitler Youth + Volkssturm",
-            "faction": "b",
-            "unitType": "infantry",
-            "x": 40,
-            "y": 48,
-            "w": 18,
-            "h": 8,
-            "strength": 1,
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.473,
+            "lng": 13.403,
+            "strength": 2,
             "status": "broken"
+          },
+          {
+            "label": "Hitler Youth",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.46,
+            "lng": 13.41,
+            "strength": 1,
+            "status": "exposed"
+          },
+          {
+            "label": "8th Guards Army",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.43,
+            "lng": 13.4,
+            "strength": 5
           }
         ],
         "movements": [
           {
-            "label": "Push to the Reichstag",
+            "label": "8th Guards on Tempelhof",
             "faction": "a",
-            "fromX": 38,
-            "fromY": 38,
-            "toX": 48,
-            "toY": 48,
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.43,
+            "fromLng": 13.4,
+            "toLat": 52.473,
+            "toLng": 13.403,
+            "kind": "charge"
+          },
+          {
+            "label": "Flanking move east",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.44,
+            "fromLng": 13.45,
+            "toLat": 52.46,
+            "toLng": 13.42,
+            "kind": "flank"
+          },
+          {
+            "label": "Defenders fall back",
+            "faction": "b",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.473,
+            "fromLng": 13.403,
+            "toLat": 52.49,
+            "toLng": 13.38,
+            "kind": "retreat"
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "berlin-pocket",
+            "controller": "b",
+            "ring": [
+              [
+                13.28,
+                52.58
+              ],
+              [
+                13.48,
+                52.58
+              ],
+              [
+                13.5,
+                52.51
+              ],
+              [
+                13.45,
+                52.48
+              ],
+              [
+                13.28,
+                52.48
+              ]
+            ],
+            "label": "Inner pocket"
+          }
+        ],
+        "index": 6,
+        "annotations": [],
+        "terrain": []
+      },
+      {
+        "title": "Spree Crossings",
+        "timeMarker": "28–29 April 1945",
+        "narration": "The Spree cuts the city diagonally and the bridges are the last natural defense. Soviet engineers force the river under direct fire at the Moltke Bridge and the Hohenzollern Bridge, taking appalling casualties to win a meter of concrete at a time. By nightfall on the 29th, the Reichstag is one assault away — and all the politburo wants to know is whose flag will fly first.",
+        "durationMs": 8000,
+        "cameraLat": 52.518,
+        "cameraLng": 13.378,
+        "cameraAltitude": 0.05,
+        "cameraTweenMs": 1500,
+        "units": [
+          {
+            "label": "SS-Nordland",
+            "faction": "b",
+            "unitType": "armor",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5145,
+            "lng": 13.35,
+            "strength": 2,
+            "status": "pressed"
+          },
+          {
+            "label": "3rd Shock spearhead",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.52,
+            "lng": 13.37,
+            "strength": 4,
+            "status": "pressing"
+          },
+          {
+            "label": "150th Rifle Division",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.525,
+            "lng": 13.37,
+            "strength": 5
+          }
+        ],
+        "movements": [
+          {
+            "label": "3rd Shock — Moltke Bridge",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.525,
+            "fromLng": 13.365,
+            "toLat": 52.52,
+            "toLng": 13.37,
+            "kind": "charge"
+          },
+          {
+            "label": "Spearhead toward Reichstag",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.52,
+            "fromLng": 13.37,
+            "toLat": 52.5186,
+            "toLng": 13.3762,
+            "kind": "charge"
+          },
+          {
+            "label": "Flanking — Hohenzollern Bridge",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.52,
+            "fromLng": 13.36,
+            "toLat": 52.518,
+            "toLng": 13.369,
+            "kind": "flank"
+          },
+          {
+            "label": "SS counterattack",
+            "faction": "b",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.5145,
+            "fromLng": 13.35,
+            "toLat": 52.52,
+            "toLng": 13.37,
             "kind": "charge"
           }
         ],
-        "annotations": [
+        "controlRegions": [
           {
-            "text": "Hitler commits suicide on 30 April. Goebbels follows on 1 May.",
-            "x": 50,
-            "y": 96
-          }
-        ]
-      },
-      {
-        "title": "Surrender",
-        "timeMarker": "2 May 1945",
-        "narration": "Weidling, Berlin's last commandant, surrenders the garrison at 06:00 on 2 May. ~92,000 German soldiers are dead in the battle for the city, 480,000 captured; ~81,000 Soviet soldiers killed. Six days later, on 8 May, the unconditional surrender of all German forces is signed at Karlshorst — in Zhukov's headquarters in the suburbs of the city he has just taken.",
-        "durationMs": 6500,
-        "terrain": [
-          {
-            "kind": "town",
-            "label": "Berlin (surrendered)",
-            "points": [
-              22,
-              48,
-              32,
-              58
-            ]
+            "id": "inner-berlin",
+            "controller": "b",
+            "ring": [
+              [
+                13.345,
+                52.535
+              ],
+              [
+                13.42,
+                52.535
+              ],
+              [
+                13.43,
+                52.51
+              ],
+              [
+                13.42,
+                52.495
+              ],
+              [
+                13.345,
+                52.495
+              ]
+            ],
+            "label": "Government district"
           }
         ],
+        "index": 7,
+        "annotations": [],
+        "terrain": []
+      },
+      {
+        "title": "The Reichstag",
+        "timeMarker": "30 April 1945, afternoon",
+        "narration": "Three battalions of the 150th Rifle Division — Neustroyev, Davydov, Samsonov — assault the Reichstag across 200 meters of open ground swept by machine-gun fire. Inside, ~1,000 SS and Volkssturm fight floor by floor with grenades and bayonets. By evening the Soviets are in the second story. Fighting continues through the night.",
+        "durationMs": 8500,
+        "cameraLat": 52.5186,
+        "cameraLng": 13.3762,
+        "cameraAltitude": 0.035,
+        "cameraTweenMs": 1400,
         "units": [
           {
-            "label": "Soviet occupiers",
-            "faction": "a",
-            "unitType": "infantry",
-            "x": 24,
-            "y": 52,
-            "w": 10,
-            "h": 6,
-            "strength": 4
-          },
-          {
-            "label": "Captured garrison",
+            "label": "SS garrison (Reichstag)",
             "faction": "b",
             "unitType": "infantry",
-            "x": 26,
-            "y": 54,
-            "w": 8,
-            "h": 4,
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5186,
+            "lng": 13.3762,
+            "strength": 2,
+            "status": "encircled"
+          },
+          {
+            "label": "150th Rifle Division",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.521,
+            "lng": 13.3735,
+            "strength": 5
+          },
+          {
+            "label": "171st Rifle Division",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5195,
+            "lng": 13.3805,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "Neustroyev battalion",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.521,
+            "fromLng": 13.3735,
+            "toLat": 52.5186,
+            "toLng": 13.3762,
+            "kind": "charge"
+          },
+          {
+            "label": "Davydov battalion",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.5215,
+            "fromLng": 13.376,
+            "toLat": 52.5186,
+            "toLng": 13.3762,
+            "kind": "charge"
+          },
+          {
+            "label": "Samsonov flanking",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.52,
+            "fromLng": 13.3795,
+            "toLat": 52.5186,
+            "toLng": 13.3762,
+            "kind": "flank"
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "gov-quarter",
+            "controller": "b",
+            "ring": [
+              [
+                13.37,
+                52.52
+              ],
+              [
+                13.39,
+                52.522
+              ],
+              [
+                13.395,
+                52.512
+              ],
+              [
+                13.38,
+                52.508
+              ],
+              [
+                13.368,
+                52.512
+              ]
+            ],
+            "label": "Government quarter"
+          }
+        ],
+        "index": 8,
+        "annotations": [],
+        "terrain": []
+      },
+      {
+        "title": "Banner on the Dome",
+        "timeMarker": "30 April – 1 May 1945, dawn",
+        "narration": "At 22:50 on 30 April, Sergeants Yegorov and Kantaria of the 756th Rifle Regiment force their way to the roof and tie the Banner of Victory — Soviet Military Council Banner No. 5 — to a bronze equestrian statue on the western pediment. The photograph staged two days later is the one the world remembers. The actual flag raising happens in darkness, under fire.",
+        "durationMs": 6500,
+        "cameraLat": 52.5186,
+        "cameraLng": 13.3762,
+        "cameraAltitude": 0.025,
+        "cameraTweenMs": 1300,
+        "units": [
+          {
+            "label": "3rd Shock Army",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5186,
+            "lng": 13.3762,
+            "strength": 5
+          },
+          {
+            "label": "SS holdouts (basement)",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5184,
+            "lng": 13.376,
+            "strength": 1,
+            "status": "destroyed"
+          }
+        ],
+        "movements": [
+          {
+            "label": "Banner of Victory",
+            "faction": "a",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.5187,
+            "fromLng": 13.376,
+            "toLat": 52.5186,
+            "toLng": 13.3762,
+            "kind": "advance"
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "gov-quarter",
+            "controller": "a",
+            "ring": [
+              [
+                13.37,
+                52.52
+              ],
+              [
+                13.39,
+                52.522
+              ],
+              [
+                13.395,
+                52.512
+              ],
+              [
+                13.38,
+                52.508
+              ],
+              [
+                13.368,
+                52.512
+              ]
+            ],
+            "label": "Reichstag — taken"
+          }
+        ],
+        "index": 9,
+        "annotations": [],
+        "terrain": []
+      },
+      {
+        "title": "Inside the Bunker",
+        "timeMarker": "30 April 1945, 15:30",
+        "narration": "Eight meters beneath the Reich Chancellery garden, Hitler shoots himself in the Führerbunker. Goebbels poisons his six children and follows on the 1st. The succession passes by codicil to Grand Admiral Karl Dönitz in Flensburg. The bunker's last radio message goes out to Dönitz at 15:18 on 1 May. The thousand-year Reich has 47 hours left.",
+        "durationMs": 7000,
+        "cameraLat": 52.5117,
+        "cameraLng": 13.3814,
+        "cameraAltitude": 0.02,
+        "cameraTweenMs": 1300,
+        "units": [
+          {
+            "label": "Führerbunker",
+            "faction": "b",
+            "unitType": "command",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5117,
+            "lng": 13.3814,
+            "strength": 1,
+            "status": "destroyed"
+          },
+          {
+            "label": "SS Chancellery guard",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.5125,
+            "lng": 13.3805,
             "strength": 1,
             "status": "encircled"
           }
         ],
-        "annotations": [
+        "movements": [],
+        "controlRegions": [
           {
-            "text": "Konev's troops link with Patton's 3rd Army outside Prague three days later. The European war is over.",
-            "x": 50,
-            "y": 96
+            "id": "gov-quarter",
+            "controller": "a",
+            "ring": [
+              [
+                13.37,
+                52.52
+              ],
+              [
+                13.39,
+                52.522
+              ],
+              [
+                13.395,
+                52.512
+              ],
+              [
+                13.38,
+                52.508
+              ],
+              [
+                13.368,
+                52.512
+              ]
+            ],
+            "label": "Government quarter (taken)"
           }
-        ]
+        ],
+        "index": 10,
+        "annotations": [],
+        "terrain": []
+      },
+      {
+        "title": "Karlshorst",
+        "timeMarker": "2 May 1945, 06:00 — 8 May, 23:01",
+        "narration": "General Weidling, the Berlin commandant, surrenders the garrison at six in the morning of 2 May. ~92,000 German soldiers are dead in the battle for the city; ~480,000 captured. ~81,000 Soviet soldiers killed, ~280,000 wounded across the full Strategic Offensive. Six days later, in Zhukov's headquarters in Karlshorst in the eastern suburbs, Field Marshal Keitel signs the unconditional surrender of all German armed forces. The European war is over.",
+        "durationMs": 9000,
+        "cameraLat": 52.5,
+        "cameraLng": 13.4,
+        "cameraAltitude": 0.18,
+        "cameraTweenMs": 1800,
+        "units": [
+          {
+            "label": "Soviet garrison",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.52,
+            "lng": 13.405,
+            "strength": 6
+          },
+          {
+            "label": "Karlshorst (Zhukov HQ)",
+            "faction": "a",
+            "unitType": "command",
+            "x": 50.0,
+            "y": 50.0,
+            "lat": 52.482,
+            "lng": 13.538,
+            "strength": 5
+          }
+        ],
+        "movements": [
+          {
+            "label": "Surrender to Karlshorst",
+            "faction": "b",
+            "fromX": 50.0,
+            "fromY": 50.0,
+            "toX": 50.0,
+            "toY": 50.0,
+            "fromLat": 52.52,
+            "fromLng": 13.405,
+            "toLat": 52.482,
+            "toLng": 13.538,
+            "kind": "withdrawal"
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "berlin-taken",
+            "controller": "a",
+            "ring": [
+              [
+                13.2,
+                52.66
+              ],
+              [
+                13.6,
+                52.66
+              ],
+              [
+                13.75,
+                52.55
+              ],
+              [
+                13.75,
+                52.4
+              ],
+              [
+                13.5,
+                52.38
+              ],
+              [
+                13.2,
+                52.38
+              ]
+            ],
+            "label": "Berlin — Soviet"
+          }
+        ],
+        "index": 11,
+        "annotations": [],
+        "terrain": []
       }
     ]
   },

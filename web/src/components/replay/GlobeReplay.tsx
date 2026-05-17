@@ -496,10 +496,17 @@ interface ArrowVectorProps {
   arrow: ProjectedArrow;
 }
 
-// ArrowVector renders one phase movement as a curved SVG path: a soft glow
-// behind, a flowing-dash stroke on top, and a filled arrowhead at the
-// destination. The dashes themselves animate continuously via the `march`
-// keyframe so the arrow always reads as "force moving toward the target."
+// ArrowVector renders one phase movement as a curved SVG path. Three stacked
+// layers, all on the same geometry:
+//   1. Soft blurred glow under the line.
+//   2. Trace-in stroke: a solid line that "draws" from start to destination
+//      over ~1.1s using pathLength=1 with stroke-dashoffset interpolation.
+//      This reads as the force actively moving toward the objective. Replaces
+//      the old simple fade-in.
+//   3. Marching dashes that fade in after the trace lands and loop forever
+//      so the arrow keeps reading as a live movement.
+// Charges and flanks trace faster, retreats slower. Curve amount and stroke
+// width are kind-dependent so the type of movement is legible at a glance.
 function ArrowVector({ phaseIdx, arrow }: ArrowVectorProps) {
   const { x1, y1, x2, y2, faction, kind, index } = arrow;
   const dx = x2 - x1;
@@ -516,7 +523,7 @@ function ArrowVector({ phaseIdx, arrow }: ArrowVectorProps) {
   const cpY = midY + perpY;
 
   let stroke = 2.8;
-  if (kind === 'charge') stroke = 4.2;
+  if (kind === 'charge') stroke = 4.4;
   else if (kind === 'flank') stroke = 3.4;
   else if (kind === 'rout' || kind === 'retreat' || kind === 'withdrawal') stroke = 2.0;
 
@@ -527,23 +534,51 @@ function ArrowVector({ phaseIdx, arrow }: ArrowVectorProps) {
   const dashLen = Math.max(10, stroke * 5);
   const gapLen = Math.max(6, stroke * 3);
   const period = dashLen + gapLen;
-  const speedMs = kind === 'charge' ? 700 : kind === 'flank' ? 850 : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal' ? 1500 : 1100;
-  const appearDelay = index * 280;
+  const marchSpeed = kind === 'charge' ? 700 : kind === 'flank' ? 850 : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal' ? 1500 : 1100;
+  // Trace duration scales with movement type: charges snap in fast, retreats
+  // are slower so the eye reads them as withdrawal.
+  const traceMs = kind === 'charge' ? 700 : kind === 'flank' ? 950 : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal' ? 1500 : 1100;
+  const appearDelay = index * 240;
+  // Marching dashes appear right as the trace completes (10% overlap for a
+  // seamless handoff). The arrowhead lives on the marching layer so it shows
+  // up at the same time the dashes do, which is right when the trace lands.
+  const marchDelay = appearDelay + traceMs - 100;
 
   return (
-    <g style={{
-      opacity: 0,
-      animation: `arrow-fade-in 500ms ${appearDelay}ms ease-out forwards`,
-    }}>
+    <g>
+      {/* Glow underlay. Fades in alongside the trace so the destination
+          doesn't suddenly brighten when the marching dashes appear. */}
       <path
         d={path}
         stroke={color}
-        strokeOpacity={0.35}
+        strokeOpacity={0}
         strokeWidth={stroke + 5}
         fill="none"
         strokeLinecap="round"
-        style={{ filter: 'blur(4px)' }}
+        style={{
+          filter: 'blur(4px)',
+          animation: `arrow-glow-in 700ms ${appearDelay}ms ease-out forwards`,
+        }}
       />
+      {/* Trace-in line. pathLength=1 lets stroke-dashoffset move from 1 to 0
+          regardless of the actual path length. Fades out as the marching
+          layer takes over to avoid double-bright stroke during the handoff. */}
+      <path
+        d={path}
+        stroke={color}
+        strokeWidth={stroke}
+        fill="none"
+        strokeLinecap="round"
+        pathLength={1}
+        style={{
+          strokeDasharray: '1 1',
+          strokeDashoffset: 1,
+          animation: `arrow-trace ${traceMs}ms ${appearDelay}ms cubic-bezier(.25,.65,.25,1) forwards, arrow-trace-fade 240ms ${marchDelay + 100}ms ease-out forwards`,
+        }}
+      />
+      {/* Marching layer. Hidden until the trace finishes, then loops forever.
+          The arrowhead is attached here so it appears only after the line
+          has actually arrived. */}
       <path
         d={path}
         stroke={color}
@@ -552,9 +587,10 @@ function ArrowVector({ phaseIdx, arrow }: ArrowVectorProps) {
         strokeLinecap="round"
         markerEnd={`url(#${markerId})`}
         style={{
+          opacity: 0,
           strokeDasharray: `${dashLen} ${gapLen}`,
           ['--march' as string]: `${-period}px`,
-          animation: `march ${speedMs}ms linear infinite`,
+          animation: `arrow-march-in 220ms ${marchDelay}ms ease-out forwards, march ${marchSpeed}ms ${marchDelay}ms linear infinite`,
         }}
       />
     </g>
@@ -568,8 +604,8 @@ interface UnitMarkerProps {
 
 // UnitMarker renders a static defender / position marker at a unit's
 // projected screen position. The marker is a faction-colored disk with a
-// pale rim and a unit-type glyph in the center (X for infantry, slash for
-// cavalry, oval for armor, etc.). Sized by relative strength.
+// pale rim and a unit-type glyph in the center. Pop-in uses a slight
+// overshoot bezier so each unit lands with weight, not a flat fade.
 function UnitMarker({ unit }: UnitMarkerProps) {
   const { x, y, faction, radius, unitType, status, index, label } = unit;
   const color = FACTION_COLOR[faction];
@@ -584,14 +620,27 @@ function UnitMarker({ unit }: UnitMarkerProps) {
       transform={`translate(${x} ${y})`}
       style={{
         opacity: 0,
-        animation: `arrow-fade-in 600ms ${appearDelay}ms ease-out forwards`,
+        transformBox: 'fill-box',
+        transformOrigin: 'center',
+        // unit-pop-in: scale from 0.4 with an overshoot, then settle. The
+        // cubic-bezier overshoots ~1.15 around 65% then eases back to 1.0.
+        animation: `unit-pop-in 520ms ${appearDelay}ms cubic-bezier(.34,1.56,.4,1) forwards`,
         pointerEvents: 'auto',
       }}
     >
-      {/* Native SVG tooltip for hover. Keeps labels off the map so they
-          don't clutter, but available on demand. */}
       <title>{titleText}</title>
-      <circle r={radius + 3} fill={hexWithAlpha(color, 0.18)} style={{ filter: 'blur(2.5px)' }} />
+      {/* Soft halo, scaled separately so it breathes slightly larger than
+          the disk for that "this is a live force" feel. */}
+      <circle
+        r={radius + 3}
+        fill={hexWithAlpha(color, 0.22)}
+        style={{
+          filter: 'blur(3px)',
+          transformBox: 'fill-box',
+          transformOrigin: 'center',
+          animation: `unit-halo-breath 3200ms ${appearDelay + 600}ms ease-in-out infinite`,
+        }}
+      />
       <circle r={radius} fill={fill} stroke={stroke} strokeWidth={1.4} />
       <UnitGlyph radius={radius} unitType={unitType} />
       {isBroken && (

@@ -13,6 +13,7 @@ import { HISTORY_BEATS, type HistoryBeat } from './data/history-beats';
 import type { Battle } from './types/battle';
 import { themeForEra, themeForYear } from './theme/era';
 import { enableSound, disableSound, soundEnabled, setSoundEra, playSelect } from './audio/sound';
+import { usePauseOnHidden } from './hooks/usePauseOnHidden';
 
 const MIN_YEAR = -500;
 const MAX_YEAR = 2025;
@@ -178,13 +179,26 @@ export default function App() {
           setHistoryYear(MIN_YEAR);
           return;
         }
+        // War mode: collapse all war state back to the bare landing globe.
+        // Inlined (not the useCallback) so this effect doesn't need a
+        // forward reference to handlePlaybackClose.
+        if (showPlayback) {
+          setShowPlayback(false);
+          setPlaybackBattles(null);
+          setSelectedBattle(null);
+          setIsolatedBattle(null);
+          setReplayBattle(null);
+          setReplayPhase(0);
+          setYearRange([MIN_YEAR, MAX_YEAR]);
+          return;
+        }
         setSelectedBattle(null);
         setIsolatedBattle(null);
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [replayBattle, introVisible, historyMode]);
+  }, [replayBattle, introVisible, historyMode, showPlayback]);
 
   const handleBattleClick = useCallback((battle: Battle) => {
     setSelectedBattle(battle);
@@ -199,9 +213,18 @@ export default function App() {
     if (!battle) setSelectedBattle(null);
   }, []);
 
+  // Closing the war panel returns the user to the bare landing globe: no
+  // selected battle, no isolated battle, no playback markers, no replay
+  // overlay, no year filter. Anything else and the user is left with stray
+  // state from a war they thought they exited.
   const handlePlaybackClose = useCallback(() => {
     setShowPlayback(false);
     setPlaybackBattles(null);
+    setSelectedBattle(null);
+    setIsolatedBattle(null);
+    setReplayBattle(null);
+    setReplayPhase(0);
+    setYearRange([MIN_YEAR, MAX_YEAR]);
   }, []);
 
   const handleWatchReplay = useCallback(() => {
@@ -334,6 +357,18 @@ export default function App() {
   const handleHistoryToggle = useCallback(() => {
     setHistoryPaused((p) => !p);
   }, []);
+
+  // Stop the history sweep AND any running war/replay when the tab is
+  // hidden or the window blurs. Audio is muted at the same time so a hidden
+  // tab is fully silent. Resuming is an explicit user action when they come
+  // back.
+  usePauseOnHidden(useCallback(() => {
+    setHistoryPaused(true);
+    if (soundEnabled()) {
+      disableSound();
+      setSoundOn(false);
+    }
+  }, []));
 
   const handleHistoryClose = useCallback(() => {
     setHistoryMode(false);

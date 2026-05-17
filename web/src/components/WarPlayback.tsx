@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS } from '../types/battle';
 import WarSummaryCard from './WarSummaryCard';
+import { usePauseOnHidden } from '../hooks/usePauseOnHidden';
 
 interface WarPlaybackProps {
   onBattleFocus: (battle: Battle) => void;
@@ -107,6 +108,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       .catch(() => {});
   }, [selectedWar, onBattlesLoaded, onWarSelected]);
 
+  // Stop the war auto-step when the tab is hidden or the window blurs. Same
+  // motivation as the replay version: nobody wants to come back and find
+  // their war scrubbed silently to the last battle.
+  usePauseOnHidden(useCallback(() => setPlaying(false), []));
+
   const focusBattle = useCallback((battle: Battle) => {
     onBattleFocus(battle);
     fetch(`/api/battles/${battle.id}`).then((r) => r.json()).then(setDetail).catch(() => setDetail(battle));
@@ -143,10 +149,12 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     // first battle immediately and the panel opens.
     focusBattle(battle);
 
-    // Cinematic mode: when the current battle has a hand-crafted replay,
-    // open it and dwell long enough for the phases to play before advancing.
-    // Battles without a replay dwell at the normal speed.
-    const isCinematic = cinematic && !!onPlayReplay && battle?.hasReplay;
+    // Cinematic mode: open the replay (hand-crafted OR auto-generated
+    // schematic) for the current battle and dwell long enough for the phases
+    // to play. Without hasSchematic in the check, cinematic only fired for
+    // the ~46 hand-crafted replays out of 12k battles — so every war except
+    // a handful made cinematic look broken.
+    const isCinematic = cinematic && !!onPlayReplay && (battle?.hasReplay || battle?.hasSchematic);
     if (isCinematic && onPlayReplay) {
       onPlayReplay(battle);
     }
@@ -229,11 +237,21 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // pane carries the controls and metadata out of the way).
   if (!selectedWar) {
     return (
-      <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/45 backdrop-blur-sm p-6">
+      <div
+        className="fixed inset-0 z-30 flex items-center justify-center bg-black/45 backdrop-blur-sm p-6"
+        onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      >
         <div className="w-[480px] max-w-[92vw] bg-[#0f1019]/95 border border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[78vh]">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/60 flex-shrink-0">
             <h3 className="text-xs font-semibold text-white tracking-wide uppercase">Choose a war</h3>
-            <button onClick={onClose} className="w-6 h-6 flex items-center justify-center rounded-full text-slate-500 hover:text-white hover:bg-slate-700 transition-all text-xs">&times;</button>
+            <button
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[11px] font-semibold tracking-wide text-slate-200 bg-slate-700/70 hover:bg-slate-600 transition-colors"
+              title="Back to the globe (Esc)"
+            >
+              <span className="text-base leading-none">×</span>
+              Back to globe
+            </button>
           </div>
           <div className="p-4 overflow-y-auto flex-1">
             <input
@@ -302,13 +320,20 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
 
   return (
     <div className="fixed top-0 right-0 h-full w-[420px] max-w-[92vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/60 flex-shrink-0">
-        <h3 className="text-xs font-semibold text-white tracking-wide uppercase truncate pr-2">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/60 flex-shrink-0 gap-2">
+        <h3 className="text-xs font-semibold text-white tracking-wide uppercase truncate pr-2 flex-1 min-w-0">
           {selectedWar}
         </h3>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-[10px] text-slate-500">{battles.length} battles</span>
-          <button onClick={onClose} className="w-6 h-6 flex items-center justify-center rounded-full text-slate-500 hover:text-white hover:bg-slate-700 transition-all text-xs">&times;</button>
+          <span className="text-[10px] text-slate-500">{battles.length}</span>
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[11px] font-semibold tracking-wide text-slate-200 bg-slate-700/70 hover:bg-slate-600 transition-colors"
+            title="Back to the globe (Esc)"
+          >
+            <span className="text-base leading-none">×</span>
+            Back to globe
+          </button>
         </div>
       </div>
 
@@ -359,8 +384,24 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           </div>
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setCinematic((c) => !c)}
-              title="Cinematic mode: when the next battle has a phase replay, open it and play through before advancing."
+              onClick={() => {
+                const next = !cinematic;
+                setCinematic(next);
+                // Toggling cinematic ON should do something visible right now,
+                // not on the next dwell. Fire the replay for the currently
+                // focused battle immediately when it has one. Also enables
+                // auto-play so the rest of the war keeps going.
+                if (next && currentBattle && onPlayReplay &&
+                    (currentBattle.hasReplay || currentBattle.hasSchematic)) {
+                  onPlayReplay(currentBattle);
+                  setPlaying(true);
+                }
+                // Toggling OFF: close any open replay so the panel state matches.
+                if (!next && onCloseReplay) {
+                  onCloseReplay();
+                }
+              }}
+              title="Cinematic mode: opens the replay for each battle and plays through before advancing."
               className={`h-7 px-2.5 rounded text-[10px] font-medium tracking-wide transition-colors ${
                 cinematic
                   ? 'bg-blue-500/25 text-blue-200 border border-blue-500/40'

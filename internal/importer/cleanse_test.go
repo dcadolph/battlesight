@@ -34,6 +34,9 @@ func TestNormaliseText(t *testing.T) {
 		{Name: "multiple spaces", In: "Battle   of    France", Want: "Battle of France"},
 		{Name: "trailing comma colon", In: "British forces,", Want: "British forces"},
 		{Name: "replacement char strip", In: "Wang Xiaochi� commander", Want: "Wang Xiaochi commander"},
+		{Name: "infobox combatant leak", In: "Kingdom of Italy|combatant2=Austria-Hungary", Want: "Kingdom of Italy"},
+		{Name: "infobox commander leak", In: "Napoleon|commander2=Wellington", Want: "Napoleon"},
+		{Name: "truncated ref tag", In: "Nikolai Yudenich, Andranik Ozanian<ref name=\"foo, 1917\"", Want: "Nikolai Yudenich, Andranik Ozanian"},
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", i, test.Name), func(t *testing.T) {
@@ -92,6 +95,39 @@ func TestCanonWarKey(t *testing.T) {
 	// Sanity: the canonical form for one input matches the expected key.
 	if got := canonWarKey("The World War II"); got != "world war ii" {
 		t.Errorf("canonWarKey want %q got %q", "world war ii", got)
+	}
+}
+
+// TestRepairCommaWar pins every real-world comma-joined war name we have to
+// the canonical form the user should see in the wars list.
+func TestRepairCommaWar(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		In   string
+		Want string
+	}{
+		// Comma after a preposition: drop the comma, keep both halves.
+		{In: "Trans-Mississippi Theater of the, American Civil War", Want: "Trans-Mississippi Theater of the American Civil War"},
+		{In: "Muslim conquest of Syria, (Arab–Byzantine wars)", Want: "Muslim conquest of Syria"},
+		// Comma after a conjunction: keep only the head war.
+		{In: "Haitian Revolution and the, War of the First Coalition", Want: "Haitian Revolution"},
+		{In: "Thirty Years' War and the , Franco-Spanish War (1635–59)", Want: "Thirty Years' War"},
+		// Two distinct wars joined by a comma: keep the first segment.
+		{In: "Dakota War of 1862, American Civil War", Want: "Dakota War of 1862"},
+		{In: "American Civil War, Apache Wars", Want: "American Civil War"},
+		{In: "Italian Front, (World War I)", Want: "Italian Front"},
+		{In: "World War II, Pacific War", Want: "World War II"},
+		{In: "Pacific War, World War II", Want: "Pacific War"},
+		// Empty first segment (double comma).
+		{In: "Sri Lankan Civil War,, 2008–2009 SLA Northern offensive", Want: "Sri Lankan Civil War"},
+		// No comma is a no-op.
+		{In: "American Civil War", Want: "American Civil War"},
+	}
+	for _, test := range tests {
+		got := repairCommaWar(test.In)
+		if got != test.Want {
+			t.Errorf("repairCommaWar(%q): want %q got %q", test.In, test.Want, got)
+		}
 	}
 }
 

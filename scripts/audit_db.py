@@ -90,6 +90,27 @@ def year_from_date(date: str) -> int:
     return 0
 
 
+def year_candidates(date: str) -> list:
+    """Return every plausible year mentioned in a prose date string.
+
+    Ranges like "1213-31 May 1215" yield [1213, 1215]; dual notation like
+    "1184 AH (1770 CE)" yields [1184, 1770]. A row's `year` column is
+    considered consistent with the prose whenever it appears in this list,
+    OR when it falls inside the [min, max] envelope (covers "686-690" with
+    year=688).
+    """
+    if not date:
+        return []
+    years = []
+    for m in BC_RE.finditer(date):
+        years.append(-int(m.group(1)))
+    # Strip BC tokens before scanning for AD years to avoid double-counting.
+    cleaned = BC_RE.sub('', date)
+    for m in YEAR_RE.finditer(cleaned):
+        years.append(int(m.group(1)))
+    return years
+
+
 def parse_iso(d: str):
     """Return (year, month, day) tuple for an ISO date, or None if malformed."""
     if not d:
@@ -152,16 +173,23 @@ def main() -> int:
             if not b[field] and b[field] != 0:
                 add('error', 'missing-field', f'{bid}: {field} empty')
 
-        # Year/date agreement
-        date_year = year_from_date(b['date'] or '')
+        # Year/date agreement. Ambiguous prose ("574, 580, or 590") is
+        # recognised as such; for those we trust the curated year field.
+        # For unambiguous prose, the year is OK whenever it appears in any of
+        # the candidate years OR sits inside the candidate min-max envelope
+        # (so "686-690" accepts year=688).
         y = b['year']
-        if date_year != 0 and y != 0:
-            if y > 0 and abs(date_year - y) > 1:
+        date_is_ambiguous = bool(b['date'] and AMBIGUOUS_RE.search(b['date']))
+        candidates = year_candidates(b['date'] or '')
+        if candidates and y != 0 and not date_is_ambiguous:
+            ok = y in candidates
+            if not ok and len(candidates) >= 2:
+                lo, hi = min(candidates), max(candidates)
+                if lo <= y <= hi:
+                    ok = True
+            if not ok:
                 add('error', 'year-date-mismatch',
-                    f'{bid}: year={y} date="{b["date"]}" implies {date_year}')
-            elif y < 0 and abs(date_year) != abs(y):
-                add('error', 'year-date-mismatch',
-                    f'{bid}: year={y} date="{b["date"]}" implies {date_year}')
+                    f'{bid}: year={y} date="{b["date"]}" candidates={candidates}')
 
         # Era taxonomy
         era = b['era'] or ''
@@ -210,11 +238,16 @@ def main() -> int:
                 add('error', 'date-inversion',
                     f'{bid}: date_end {de} before date_start {ds}')
 
-        # date_start year must match `year` column (within sign for BC).
+        # date_start year must agree with `year` column. Same envelope rule
+        # as year/date: candidates from prose define an acceptable range.
         sp = parse_iso(ds) if ds else None
-        if sp and y != 0:
+        if sp and y != 0 and not date_is_ambiguous:
             sy = sp[0]
-            if (y > 0 and sy != y) or (y < 0 and -sy != -y):
+            in_range = False
+            if candidates:
+                lo, hi = min(candidates), max(candidates)
+                in_range = lo <= y <= hi
+            if sy != y and y not in candidates and not in_range:
                 add('error', 'year-date_start-mismatch',
                     f'{bid}: year={y} but date_start year={sy}')
 

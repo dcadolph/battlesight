@@ -23,10 +23,10 @@ func TestParseDateRange(t *testing.T) {
 		{Name: "day range mdy", In: "July 14-15, 1864", Want: DateRange{Start: "1864-07-14", End: "1864-07-15"}},
 		{Name: "full range with en-dash", In: "10 July 1940 – 31 October 1940", Want: DateRange{Start: "1940-07-10", End: "1940-10-31"}},
 		{Name: "month-year only", In: "September 1939", Want: DateRange{Start: "1939-09-01", End: "1939-09-28"}},
-		{Name: "year only", In: "1939", Want: DateRange{Start: "1939-01-01", End: "1939-12-31"}},
-		{Name: "bc year", In: "490 BC", Want: DateRange{Start: "-0490-01-01", End: "-0490-12-31"}},
-		{Name: "empty falls back", In: "", Year: 1815, Want: DateRange{Start: "1815-01-01", End: "1815-12-31"}},
-		{Name: "garbage falls back", In: "{{cite}}", Year: 1066, Want: DateRange{Start: "1066-01-01", End: "1066-12-31"}},
+		{Name: "year only", In: "1939", Want: DateRange{Start: "1939-12-31", End: "1939-12-31"}},
+		{Name: "bc year", In: "490 BC", Want: DateRange{Start: "-0490-12-31", End: "-0490-12-31"}},
+		{Name: "empty falls back", In: "", Year: 1815, Want: DateRange{Start: "1815-12-31", End: "1815-12-31"}},
+		{Name: "garbage falls back", In: "{{cite}}", Year: 1066, Want: DateRange{Start: "1066-12-31", End: "1066-12-31"}},
 		// Formats actually used in the curated set.
 		{Name: "hyphen day range", In: "11-15 December 1862", Want: DateRange{Start: "1862-12-11", End: "1862-12-15"}},
 		{Name: "hyphen day range, single digit", In: "1-3 July 1863", Want: DateRange{Start: "1863-07-01", End: "1863-07-03"}},
@@ -37,7 +37,7 @@ func TestParseDateRange(t *testing.T) {
 		{Name: "mdy with no comma", In: "8 January 1815", Want: DateRange{Start: "1815-01-08", End: "1815-01-08"}},
 		{Name: "ranged across years", In: "27 November - 13 December 1950", Want: DateRange{Start: "1950-11-27", End: "1950-12-13"}},
 		{Name: "long siege", In: "18 May - 4 July 1863", Want: DateRange{Start: "1863-05-18", End: "1863-07-04"}},
-		{Name: "early 5th c bc", In: "August 480 BC", Want: DateRange{Start: "-0480-01-01", End: "-0480-12-31"}},
+		{Name: "early 5th c bc", In: "August 480 BC", Want: DateRange{Start: "-0480-12-31", End: "-0480-12-31"}},
 		{Name: "iso date passthrough", In: "1939-09-01", Want: DateRange{Start: "1939-09-01", End: "1939-09-01"}},
 		// Wikidata cross-month ranges joined with a comma instead of a dash.
 		// Without dedicated handling, the plain DMY pattern picks up the

@@ -6,6 +6,7 @@ import TacticalMap from './TacticalMap';
 import GlobeReplay from './GlobeReplay';
 import { themeForEra } from '../../theme/era';
 import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
+import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
 
 interface BattleReplayProps {
   battle: Battle;
@@ -63,6 +64,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     setSoundEra(battle.era || '');
   }, [battle.era]);
 
+  // Pause the phase advance whenever the tab is hidden or the window blurs.
+  // Without this the timer keeps firing in the background, the user comes
+  // back to find the replay finished, and the audio drone keeps playing
+  // even though nothing is on screen.
+  usePauseOnHidden(useCallback(() => setPlaying(false), []));
+
   const goto = useCallback((i: number) => {
     if (!replay) return;
     const clamped = Math.max(0, Math.min(replay.phases.length - 1, i));
@@ -109,7 +116,27 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   const theme = themeForEra(battle.era);
 
   return (
-    <div className="fixed inset-0 bg-[#070912] z-50 flex flex-col">
+    <div className="fixed inset-0 bg-[#070912] z-50 flex flex-col" style={{ animation: 'replay-fade-in 280ms ease-out forwards' }}>
+      {/* Always-visible exit pill, top-right corner. Sits above the header
+          so it stays reachable regardless of header content. Esc does the
+          same thing, called out in the label so first-time users learn the
+          keyboard shortcut without a tour. */}
+      <button
+        onClick={onClose}
+        className="fixed top-3 right-3 z-[60] inline-flex items-center gap-2 h-9 px-4 rounded-full bg-slate-900/90 border border-slate-600/70 text-slate-100 hover:bg-slate-700 hover:border-slate-400 transition-colors shadow-lg"
+        title="Close replay (Esc)"
+        aria-label="Close replay"
+      >
+        <span className="text-base leading-none">×</span>
+        <span className="text-[12px] font-semibold tracking-wide">Close</span>
+        <span className="text-[10px] text-slate-400 font-medium">Esc</span>
+      </button>
+      <style>{`
+        @keyframes replay-fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
       <style>{`
         @keyframes dash-in {
           to { stroke-dashoffset: 0; }
@@ -117,12 +144,45 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         @keyframes arrow-fade-in {
           to { opacity: 1; }
         }
+        /* Arrow trace-in: the line draws itself from start to destination.
+           pathLength=1 on the path means stroke-dashoffset ranges from 1 to 0
+           regardless of geometric length. */
+        @keyframes arrow-trace {
+          from { stroke-dashoffset: 1; }
+          to   { stroke-dashoffset: 0; }
+        }
+        /* As the marching dashes take over, fade the trace stroke out so we
+           don't double-paint the line briefly. */
+        @keyframes arrow-trace-fade {
+          to { opacity: 0; }
+        }
+        /* The marching layer carries the arrowhead and fades in only after
+           the trace has landed. */
+        @keyframes arrow-march-in {
+          to { opacity: 1; }
+        }
+        /* Glow underlay fades in alongside the trace and stays. */
+        @keyframes arrow-glow-in {
+          to { stroke-opacity: 0.4; }
+        }
         /* Marching-dash animation for the globe replay's SVG arrows. The
            --march custom property carries each arrow's dash+gap period so the
            pattern shifts by exactly one period per cycle and loops seamlessly.
            Without var(...), every arrow would have to share one fixed period. */
         @keyframes march {
           to { stroke-dashoffset: var(--march, -24px); }
+        }
+        /* Unit marker pop-in with overshoot. Pairs with the cubic-bezier on
+           the element so it slightly bounces past 1.0 before settling. */
+        @keyframes unit-pop-in {
+          0%   { opacity: 0; transform: scale(0.4); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        /* Halo "breath" — barely-perceptible scale oscillation so the units
+           feel alive rather than printed. */
+        @keyframes unit-halo-breath {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50%      { transform: scale(1.12); opacity: 0.85; }
         }
         /* Impact-flash animations for the moment an arrow arrives at its
            destination. impact-core is the bright center dot that pops and
@@ -268,6 +328,17 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         {/* Narration sidebar */}
         <aside className="w-[360px] max-w-[40vw] border-l border-slate-800 bg-[#0c101c] flex flex-col">
           <div className="p-6 overflow-y-auto flex-1">
+            {/* Sides legend. Always at the top of the sidebar so the user
+                can map arrow color to faction at a glance while watching
+                the action. The header bar shows the same info but it can
+                get cramped on narrow stages. */}
+            <div className="mb-4 pb-4 border-b border-slate-800/80 space-y-1.5">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-1.5">Sides</div>
+              <SideRow color={FACTION_COLOR.a} label={replay.factionA} />
+              <SideRow color={FACTION_COLOR.b} label={replay.factionB} />
+              {replay.factionC && <SideRow color={FACTION_COLOR.c} label={replay.factionC} />}
+            </div>
+
             <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2">
               Phase {phaseIdx + 1} of {replay.phases.length}
               {phase.timeMarker && <span className="text-slate-400"> · {phase.timeMarker}</span>}
@@ -397,5 +468,25 @@ function FactionLegend({ color, label }: { color: string; label: string }) {
       <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: color }} />
       {label}
     </span>
+  );
+}
+
+// SideRow is the prominent color-coded legend used at the top of the
+// narration sidebar. Bigger swatch + roomy text so the user can keep their
+// eyes on the action and still know which color belongs to whom. The swatch
+// uses the same fill color the arrows and unit markers render with, so the
+// mapping is one-to-one.
+function SideRow({ color, label }: { color: string; label: string }) {
+  return (
+    <div
+      className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md border"
+      style={{ borderColor: `${color}55`, background: `${color}10` }}
+    >
+      <span
+        className="w-3 h-3 rounded-sm flex-shrink-0 shadow-[0_0_6px_currentColor]"
+        style={{ backgroundColor: color, color: color }}
+      />
+      <span className="text-[13px] text-slate-100 font-medium truncate">{label}</span>
+    </div>
   );
 }

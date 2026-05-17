@@ -112,6 +112,10 @@ var (
 	// <ref>...</ref> with optional attributes, plus self-closing <ref />.
 	reRefBlock = regexp.MustCompile(`(?is)<ref\b[^>]*>.*?</ref>`)
 	reRefSelf  = regexp.MustCompile(`(?is)<ref\b[^/]*/>`)
+	// Truncated <ref attr="value" ...  with no matching close tag. Cuts the
+	// rest of the string off, since the data after a mid-attribute truncation
+	// is reliably garbage.
+	reRefUnclosed = regexp.MustCompile(`(?is)<ref\b.*$`)
 	// HTML structural tags we never want to render: <br>, <br/>, <br />.
 	reBR = regexp.MustCompile(`(?i)<br\s*/?>`)
 	// Generic stripper for safe inline tags whose contents we keep.
@@ -120,6 +124,10 @@ var (
 	reMultiSpace = regexp.MustCompile(`\s{2,}`)
 	// Field-leader leakage: "| combatant2 = ..." at the start of a value.
 	reFieldLead = regexp.MustCompile(`^\s*\|\s*[a-zA-Z0-9_]+\s*=\s*`)
+	// Mid-string infobox leak: "Kingdom of Italy|combatant2=Austria-Hungary"
+	// is the parser stuffing two sides into one cell. Cut at the next infobox
+	// field marker so we keep the first side and drop the rest.
+	reInfoboxCombatantLeak = regexp.MustCompile(`(?i)\s*\|\s*(combatant|commander|strength|casualties|result)\d*\s*=.*$`)
 )
 
 // NormaliseText strips Wikipedia / infobox markup that leaked through the
@@ -151,11 +159,16 @@ func NormaliseText(s string) string {
 
 	// Field-leader before tags so "| combatant2 = [[X]]" cleans to "X".
 	s = reFieldLead.ReplaceAllString(s, "")
+	// Mid-string infobox field leak: "Italy|combatant2=Austria-Hungary" -> "Italy".
+	s = reInfoboxCombatantLeak.ReplaceAllString(s, "")
 
 	// Tags first (so brace strippers don't see template fragments embedded
-	// inside ref tags or vice versa).
+	// inside ref tags or vice versa). The unclosed-ref pass runs LAST in
+	// the tag group so paired refs are removed cleanly before we strip the
+	// open-only ones to end of string.
 	s = reRefBlock.ReplaceAllString(s, "")
 	s = reRefSelf.ReplaceAllString(s, "")
+	s = reRefUnclosed.ReplaceAllString(s, "")
 	s = reBR.ReplaceAllString(s, " ")
 	s = reSmallTag.ReplaceAllString(s, "")
 
@@ -386,6 +399,33 @@ func formatYearLabel(y int) string {
 // than rewriting it to whichever number our parser happened to pick first.
 var reAmbiguousDate = regexp.MustCompile(`(?i)\b(or|between|approximately|c\.|circa|disputed|estimated|chronology|/)\b`)
 
+// reYearToken finds every standalone 3-4 digit year token in a date string.
+// Used alongside reBCToken to enumerate every plausible year so we can detect
+// when a stored `year` is inside a multi-year range (1213-1215, 686-690).
+var reYearToken = regexp.MustCompile(`\b(\d{3,4})\b`)
+var reBCToken = regexp.MustCompile(`(\d+)\s*BC`)
+
+// candidateYears returns the list of years a prose date string mentions.
+// Mirrors scripts/audit_db.py's year_candidates so the two stay in lockstep.
+func candidateYears(date string) []int {
+	if date == "" {
+		return nil
+	}
+	var out []int
+	for _, m := range reBCToken.FindAllStringSubmatch(date, -1) {
+		var n int
+		fmt.Sscanf(m[1], "%d", &n)
+		out = append(out, -n)
+	}
+	cleaned := reBCToken.ReplaceAllString(date, "")
+	for _, m := range reYearToken.FindAllStringSubmatch(cleaned, -1) {
+		var n int
+		fmt.Sscanf(m[1], "%d", &n)
+		out = append(out, n)
+	}
+	return out
+}
+
 // alignYearToDate trusts the prose `date` over the `year` column whenever
 // the prose is unambiguous and the two disagree. This catches the common BC
 // off-by-one ("1457 BC" stored as -1456) plus any larger discrepancy where
@@ -431,18 +471,37 @@ func alignYearToDate(ctx context.Context, db *sql.DB) (int, error) {
 
 	var updated int
 	for _, r := range batch {
-		dr := ParseDateRange(r.date, r.year)
-		py := yearFromISO(dr.Start)
-		if py == 0 || py == r.year {
-			continue
-		}
 		// Ambiguous prose: leave year alone. The audit treats this as a
 		// recognised case rather than an error.
 		if reAmbiguousDate.MatchString(r.date) {
 			continue
 		}
-		era := YearToEra(py)
-		if _, err := stmt.ExecContext(ctx, py, era, dr.Start, dr.End, r.id); err != nil {
+		cands := candidateYears(r.date)
+		if len(cands) == 0 {
+			continue
+		}
+		// If `year` already matches a candidate or sits within the candidate
+		// envelope, the row is fine — same rule the audit applies.
+		if yearAcceptable(r.year, cands) {
+			continue
+		}
+		// Pick the smallest candidate as the canonical year (matches the
+		// start-of-engagement convention used by date_start). This makes the
+		// alignment deterministic and easy to predict.
+		target := cands[0]
+		for _, c := range cands {
+			if c < target {
+				target = c
+			}
+		}
+		// Re-derive date_start / date_end from prose when possible, falling
+		// back to "year only" so the dates always agree with year.
+		dr := ParseDateRange(r.date, target)
+		if yearFromISO(dr.Start) != target {
+			dr = yearFallback(target)
+		}
+		era := YearToEra(target)
+		if _, err := stmt.ExecContext(ctx, target, era, dr.Start, dr.End, r.id); err != nil {
 			return updated, fmt.Errorf("align year for %s: %w", r.id, err)
 		}
 		updated++
@@ -451,6 +510,36 @@ func alignYearToDate(ctx context.Context, db *sql.DB) (int, error) {
 		return 0, fmt.Errorf("commit year align: %w", err)
 	}
 	return updated, nil
+}
+
+// yearAcceptable answers "is this stored year consistent with the prose date".
+// Year matches a single explicit candidate, OR sits inside the min-max
+// envelope when prose gives a range. Mirrors the audit's logic so a row that
+// passes cleanse will also pass audit.
+func yearAcceptable(year int, candidates []int) bool {
+	if len(candidates) == 0 {
+		return true
+	}
+	for _, c := range candidates {
+		if c == year {
+			return true
+		}
+	}
+	if len(candidates) >= 2 {
+		lo, hi := candidates[0], candidates[0]
+		for _, c := range candidates {
+			if c < lo {
+				lo = c
+			}
+			if c > hi {
+				hi = c
+			}
+		}
+		if year >= lo && year <= hi {
+			return true
+		}
+	}
+	return false
 }
 
 func yearFromISO(iso string) int {
@@ -638,33 +727,44 @@ func recomputeEra(ctx context.Context, db *sql.DB) (int, error) {
 
 // --- War-name canonicalisation ---------------------------------------------
 
-// canonicaliseWarNames collapses spelling variants of the same war onto a
-// single canonical form (the variant with the most battles). Two wars are
-// considered the same when their canonical key matches: lowercase, all
-// dash variants flattened to "-", leading "the " dropped.
+// warCount is the count-by-name aggregation used by the two canonicalisation
+// passes. Defined at package scope so helpers can take it as a parameter.
+type warCount struct {
+	name  string
+	count int
+}
+
+// canonicaliseWarNames performs two passes:
+//   1. Repair comma-joined war names ("Trans-Mississippi Theater of the,
+//      American Civil War" → "Trans-Mississippi Theater of the American Civil
+//      War") by recognising whether the comma split a single name or joined
+//      two distinct wars, and producing a clean canonical string for either
+//      case. The existing warParent classifier then groups the cleaned name
+//      under its parent (American Civil War, World War I, etc.).
+//   2. Collapse spelling variants of the same war (dash style, leading
+//      "the") onto the variant with the most battles.
 func canonicaliseWarNames(ctx context.Context, db *sql.DB) (int, error) {
-	rows, err := db.QueryContext(ctx,
-		`SELECT war, COUNT(*) FROM battles WHERE war != '' GROUP BY war`)
-	if err != nil {
-		return 0, fmt.Errorf("scan war counts: %w", err)
-	}
-	type warVariant struct {
-		name  string
-		count int
-	}
-	groups := make(map[string][]warVariant)
-	for rows.Next() {
-		var name string
-		var count int
-		if err := rows.Scan(&name, &count); err != nil {
-			rows.Close()
-			return 0, fmt.Errorf("scan war row: %w", err)
+	loadCounts := func() ([]warCount, error) {
+		rows, err := db.QueryContext(ctx,
+			`SELECT war, COUNT(*) FROM battles WHERE war != '' GROUP BY war`)
+		if err != nil {
+			return nil, fmt.Errorf("scan war counts: %w", err)
 		}
-		groups[canonWarKey(name)] = append(groups[canonWarKey(name)], warVariant{name: name, count: count})
+		defer rows.Close()
+		var out []warCount
+		for rows.Next() {
+			var w warCount
+			if err := rows.Scan(&w.name, &w.count); err != nil {
+				return nil, fmt.Errorf("scan war row: %w", err)
+			}
+			out = append(out, w)
+		}
+		return out, rows.Err()
 	}
-	rows.Close()
-	if err := rows.Err(); err != nil {
-		return 0, fmt.Errorf("iterate war rows: %w", err)
+
+	wars, err := loadCounts()
+	if err != nil {
+		return 0, err
 	}
 
 	tx, err := db.BeginTx(ctx, nil)
@@ -678,13 +778,65 @@ func canonicaliseWarNames(ctx context.Context, db *sql.DB) (int, error) {
 	}
 	defer stmt.Close()
 
+	rewrite := func(from, to string) (int, error) {
+		if from == to {
+			return 0, nil
+		}
+		res, err := stmt.ExecContext(ctx, to, from)
+		if err != nil {
+			return 0, fmt.Errorf("rewrite war %q -> %q: %w", from, to, err)
+		}
+		n, _ := res.RowsAffected()
+		return int(n), nil
+	}
+
 	var updated int
+
+	// Pass 1: repair comma-joined war names.
+	for _, w := range wars {
+		if !strings.Contains(w.name, ",") {
+			continue
+		}
+		clean := repairCommaWar(w.name)
+		if clean == "" || clean == w.name {
+			continue
+		}
+		n, err := rewrite(w.name, clean)
+		if err != nil {
+			return updated, err
+		}
+		updated += n
+	}
+	if err := tx.Commit(); err != nil {
+		return updated, fmt.Errorf("commit war repair: %w", err)
+	}
+
+	// Pass 2: collapse spelling variants. Re-read after pass 1 so the variant
+	// grouping sees the cleaned-up names.
+	wars, err = loadCounts()
+	if err != nil {
+		return updated, err
+	}
+
+	tx2, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return updated, fmt.Errorf("begin war variant tx: %w", err)
+	}
+	defer tx2.Rollback()
+	stmt2, err := tx2.PrepareContext(ctx, `UPDATE battles SET war = ? WHERE war = ?`)
+	if err != nil {
+		return updated, fmt.Errorf("prepare war variant update: %w", err)
+	}
+	defer stmt2.Close()
+
+	groups := make(map[string][]warCount)
+	for _, w := range wars {
+		groups[canonWarKey(w.name)] = append(groups[canonWarKey(w.name)], w)
+	}
 	for _, variants := range groups {
 		if len(variants) < 2 {
 			continue
 		}
-		// Canonical name = the one with the most battles. On ties, the
-		// alphabetically first variant wins so the choice is deterministic.
 		sort.Slice(variants, func(i, j int) bool {
 			if variants[i].count != variants[j].count {
 				return variants[i].count > variants[j].count
@@ -693,18 +845,78 @@ func canonicaliseWarNames(ctx context.Context, db *sql.DB) (int, error) {
 		})
 		canon := variants[0].name
 		for _, v := range variants[1:] {
-			res, err := stmt.ExecContext(ctx, canon, v.name)
+			if v.name == canon {
+				continue
+			}
+			res, err := stmt2.ExecContext(ctx, canon, v.name)
 			if err != nil {
-				return updated, fmt.Errorf("canonicalise war %q -> %q: %w", v.name, canon, err)
+				return updated, fmt.Errorf("variant rewrite %q -> %q: %w", v.name, canon, err)
 			}
 			n, _ := res.RowsAffected()
 			updated += int(n)
 		}
 	}
-	if err := tx.Commit(); err != nil {
-		return 0, fmt.Errorf("commit war canonicalise: %w", err)
+	if err := tx2.Commit(); err != nil {
+		return updated, fmt.Errorf("commit war variants: %w", err)
 	}
 	return updated, nil
+}
+
+// joinPreps and splitConjs decide how to treat a comma whose left side ends
+// in one of these words. A join-suffix means the comma is an artifact and
+// the two halves form a single name ("Trans-Mississippi Theater of the,
+// American Civil War"). A split-conj means the comma joined two distinct
+// wars connected by a conjunction, so we keep only the head ("Haitian
+// Revolution and the, War of the First Coalition" → "Haitian Revolution").
+var (
+	joinPreps = []string{" of the", " of"}
+	splitConjs = []string{" and the", " and"}
+)
+
+// repairCommaWar normalises a comma-joined Wikidata war name into a single
+// canonical form, handling the three real-world cases we see:
+//   1. Artifact comma after a preposition → drop the comma, keep both halves
+//      ("Trans-Mississippi Theater of the, American Civil War" →
+//       "Trans-Mississippi Theater of the American Civil War").
+//   2. Artifact conjunction → keep only the head war
+//      ("Haitian Revolution and the, War of the First Coalition" →
+//       "Haitian Revolution").
+//   3. Two distinct wars joined by a comma → keep the first segment
+//      ("Dakota War of 1862, American Civil War" → "Dakota War of 1862").
+// In every case the result is a clean human-readable name. The existing
+// warParent classifier then groups it under its parent war when applicable.
+func repairCommaWar(name string) string {
+	idx := strings.Index(name, ",")
+	if idx < 0 {
+		return name
+	}
+	before := strings.TrimSpace(name[:idx])
+	after := strings.TrimSpace(strings.TrimPrefix(name[idx+1:], ","))
+	// Drop wrapping parens that wiki templates leave around the second half.
+	after = strings.TrimSpace(strings.TrimPrefix(after, "("))
+	after = strings.TrimSpace(strings.TrimSuffix(after, ")"))
+	if before == "" {
+		return after
+	}
+	low := strings.ToLower(before)
+	for _, suf := range splitConjs {
+		if strings.HasSuffix(low, suf) {
+			cleaned := strings.TrimSpace(before[:len(before)-len(suf)])
+			if cleaned != "" {
+				return cleaned
+			}
+			return before
+		}
+	}
+	for _, suf := range joinPreps {
+		if strings.HasSuffix(low, suf) {
+			if after == "" {
+				return before
+			}
+			return strings.TrimSpace(before + " " + after)
+		}
+	}
+	return before
 }
 
 func canonWarKey(w string) string {

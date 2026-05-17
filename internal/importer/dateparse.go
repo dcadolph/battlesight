@@ -72,13 +72,13 @@ func ParseDateRange(s string, fallbackYear int) DateRange {
 		return DateRange{Start: d, End: d}
 	}
 
-	// BC dates.
+	// BC dates: only the year is captured. Use the same end-of-year sentinel
+	// so BC year-only battles sort to the back of their year (matches the
+	// AD year-only behaviour and stops imprecise records from masking better
+	// ones with the same year).
 	if m := bcRe.FindStringSubmatch(s); len(m) > 1 {
 		y, _ := strconv.Atoi(m[1])
-		return DateRange{
-			Start: fmt.Sprintf("-%04d-01-01", y),
-			End:   fmt.Sprintf("-%04d-12-31", y),
-		}
+		return yearFallback(-y)
 	}
 
 	// Full range: "10 July 1940 – 31 October 1940" or "10 July – 31 October 1940"
@@ -213,19 +213,24 @@ func monthNum(s string) int {
 	return months[strings.ToLower(strings.TrimSpace(s))]
 }
 
-// yearFallback creates a date range from just a year.
+// yearFallback creates a date range from just a year. Both start and end
+// land on Dec 31 of the year. This is deliberate: when only the year is
+// known, the battle should sort AFTER any properly-dated battle in the same
+// year. Sewell's Point ("date=1861") used to bubble to the top of 1861 with
+// a Jan 1 start, hiding Fort Sumter (12 April 1861). End-of-year sentinel
+// keeps year-only entries at the back of their year in chronological order.
 func yearFallback(y int) DateRange {
 	if y == 0 {
 		return DateRange{}
 	}
 	if y < 0 {
 		return DateRange{
-			Start: fmt.Sprintf("-%04d-01-01", -y),
+			Start: fmt.Sprintf("-%04d-12-31", -y),
 			End:   fmt.Sprintf("-%04d-12-31", -y),
 		}
 	}
 	return DateRange{
-		Start: fmt.Sprintf("%04d-01-01", y),
+		Start: fmt.Sprintf("%04d-12-31", y),
 		End:   fmt.Sprintf("%04d-12-31", y),
 	}
 }

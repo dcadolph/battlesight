@@ -75,6 +75,12 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
       .then((res) => res.json())
       .then(setDetail)
       .catch(() => {});
+    // Warm the replay cache as soon as the dossier opens. Clicking "Watch
+    // the battle" then hits the browser cache and the overlay opens with no
+    // loading spinner, no perceptible delay.
+    if (battle.hasReplay || battle.hasSchematic) {
+      fetch(`/api/battles/${battle.id}/replay`).catch(() => {});
+    }
   }, [battle]);
 
   const refs = detail.references || [];
@@ -94,10 +100,12 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
       <div className="p-6">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 transition-all"
-          aria-label="Close panel"
+          className="absolute top-3 right-3 inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-slate-800/90 border border-slate-600/70 text-slate-100 hover:bg-slate-700 hover:border-slate-400 transition-all"
+          aria-label="Close panel (Esc)"
+          title="Close (Esc)"
         >
-          &times;
+          <span className="text-base leading-none">×</span>
+          <span className="text-[11px] font-semibold tracking-wide">Close</span>
         </button>
 
         {/* Era stamp: tracked small caps in the era accent. Sits above the

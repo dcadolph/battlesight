@@ -1,12 +1,13 @@
-.PHONY: check test audit run import build-web help
+.PHONY: check test audit audit-db run import build-web help
 
 help:
 	@echo "make targets:"
-	@echo "  test     - run all Go unit tests"
-	@echo "  audit    - run data integrity audit on data/*.json"
-	@echo "  check    - test + audit + Go build + TypeScript check (run before any merge)"
-	@echo "  run      - start the API server on :8080"
-	@echo "  import   - fetch/refresh Wikidata + Wikipedia data into the DB"
+	@echo "  test      - run all Go unit tests"
+	@echo "  audit     - run data integrity audit on data/*.json"
+	@echo "  audit-db  - run wider audit on the live SQLite database"
+	@echo "  check     - test + audit + audit-db + Go build + TypeScript check"
+	@echo "  run       - start the API server on :8080"
+	@echo "  import    - fetch/refresh Wikidata + Wikipedia data into the DB"
 	@echo "  build-web - production frontend build"
 
 test:
@@ -15,7 +16,11 @@ test:
 audit:
 	python3 scripts/audit_data.py
 
-check: test audit
+# audit-db requires data/battletrace.db. The server seeds it on first start.
+audit-db:
+	python3 scripts/audit_db.py
+
+check: test audit audit-db
 	go build ./...
 	cd web && npx tsc -b --noEmit
 

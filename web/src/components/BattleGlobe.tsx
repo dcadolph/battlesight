@@ -399,7 +399,7 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       pointRadius={pointRadius}
       pointLabel={pointLabel}
       onPointClick={handleBattleClick}
-      pointsMerge={true}
+      pointsMerge={false}
       pointsTransitionDuration={0}
       pointResolution={6}
       ringsData={replayRings}

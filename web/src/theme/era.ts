@@ -31,8 +31,10 @@ const DEFAULT_THEME: EraTheme = {
 
 // Year ranges driving year-to-era resolution. Identical to TimelineSlider's
 // ERA_RANGES so the play-history sweep and the slider's bands agree on where
-// each era begins and ends.
-const ERA_RANGES: Array<[string, number, number]> = [
+// each era begins and ends. Exported because the history playhead paints
+// faint era bands behind its scrub bar and needs the same authoritative
+// boundaries the rest of the app uses.
+export const ERA_RANGES: Array<[string, number, number]> = [
   ['ancient', -500, 500],
   ['medieval', 500, 1500],
   ['early-modern', 1500, 1700],

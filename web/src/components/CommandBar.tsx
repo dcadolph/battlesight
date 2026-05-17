@@ -112,31 +112,37 @@ export default function CommandBar({
 
   return (
     <>
-      {/* Title */}
+      {/* Title block with co-located sound toggle. Previously the sound
+          toggle floated at top-right, which collided with the close buttons
+          on BattlePanel and WarPlayback (both occupy the full-height right
+          column). Living next to the title keeps it out of every right-side
+          panel's chrome lane permanently. */}
       <div className="fixed top-4 left-5 z-40 select-none">
-        <div className="flex items-baseline gap-3">
-          <h1 className="text-xl font-bold text-white tracking-tight">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold text-white tracking-tight leading-none">
             Battle<span className="text-blue-400">Trace</span>
           </h1>
-          <span className="text-[11px] text-slate-600 tabular-nums">
+          <span className="text-[11px] text-slate-600 tabular-nums leading-none pt-[2px]">
             {battleCount.toLocaleString()} battles
             {stats && stats.replayCount > 0 && (
               <span className="ml-2 text-blue-400/80">· {stats.replayCount} replays</span>
             )}
           </span>
+          <button
+            onClick={onToggleSound}
+            className="ml-1 inline-flex items-center justify-center h-6 w-6 rounded-full text-slate-400 hover:text-white bg-slate-800/60 border border-slate-700/50 hover:bg-slate-700/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50"
+            title={soundOn ? 'Sound on. Click to mute.' : 'Sound off. Click for ambient audio.'}
+            aria-label={soundOn ? 'Mute ambient audio' : 'Enable ambient audio'}
+            aria-pressed={soundOn}
+          >
+            {soundOn ? (
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M2 5 L4 5 L7 2 L7 10 L4 7 L2 7 Z"/><path d="M8.5 4 Q10 6 8.5 8" stroke="currentColor" strokeWidth="0.9" fill="none" strokeLinecap="round"/></svg>
+            ) : (
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M2 5 L4 5 L7 2 L7 10 L4 7 L2 7 Z"/><path d="M9 4 L11 8 M11 4 L9 8" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/></svg>
+            )}
+          </button>
         </div>
       </div>
-
-      {/* Sound toggle: small, discreet, top-right. Muted by default so the
-          first impression of the page is silent; users opt in. The icon is
-          plain text so we don't pay for an icon font. */}
-      <button
-        onClick={onToggleSound}
-        className="fixed top-4 right-5 z-40 h-8 px-3 rounded-full text-[11px] font-medium tracking-wide bg-slate-800/70 border border-slate-700/50 text-slate-300 hover:text-white hover:bg-slate-700/80 transition-colors"
-        title={soundOn ? 'Sound on. Click to mute.' : 'Sound off. Click for ambient audio.'}
-      >
-        {soundOn ? '♪ Sound' : '♪ Muted'}
-      </button>
 
       {/* Search. The container is z-[100] so the dropdown is unambiguously
           above the mode-tab row below it. Tabs sit at z-30; this gives the

@@ -74,9 +74,10 @@ export default function App() {
   // RAF loop sets it when the playhead crosses a beat year and clears it
   // after BEAT_CARD_MS. The advance is paused while a beat is on screen.
   const [historyBeat, setHistoryBeat] = useState<HistoryBeat | null>(null);
-  // firedBeats tracks beat years already shown in this run so a single sweep
-  // does not flash the same beat twice. Cleared whenever history mode
-  // restarts. Held in a ref so we don't re-fire on each state change.
+  // firedBeats tracks beat array indices already shown in this run so a
+  // single sweep does not flash the same beat twice. Indices, not years,
+  // because multiple beats can share a year (Singapore and Stalingrad both
+  // fire in 1942). Cleared whenever history mode restarts.
   const firedBeatsRef = useRef<Set<number>>(new Set());
   const [soundOn, setSoundOn] = useState(false);
   const rafRef = useRef<number | null>(null);
@@ -289,10 +290,6 @@ export default function App() {
     lastTickRef.current = null;
   }, []);
 
-  // BEAT_CARD_MS is how long a history-beat title card stays on screen while
-  // the sweep pauses. Tuned for "see the headline, read the dossier line".
-  const BEAT_CARD_MS = 3200;
-
   // Year advance loop: roughly 2525 years over 90 seconds, so ~28 years/sec.
   // We pin the cadence to wall-clock dt rather than fixed-per-frame
   // increments so the playback rate stays consistent regardless of frame
@@ -310,13 +307,16 @@ export default function App() {
       lastTickRef.current = ts;
       setHistoryYear((y) => {
         const next = y + (dt / 1000) * YEARS_PER_SECOND;
-        // Check whether the advance just crossed a curated beat. We snap the
-        // playhead to the beat's year and surface the title card so the
-        // sweep feels like a guided tour rather than years flashing past.
-        for (const beat of HISTORY_BEATS) {
-          if (firedBeatsRef.current.has(beat.year)) continue;
-          if (y < beat.year && next >= beat.year) {
-            firedBeatsRef.current.add(beat.year);
+        // Check whether the advance reached a curated beat. We fire the
+        // first un-fired beat whose year is at or before our new position
+        // and snap the playhead to its year so the title card feels
+        // anchored. Index-based firing lets multiple beats share a year
+        // (1942: Singapore then Stalingrad) and still each get their card.
+        for (let i = 0; i < HISTORY_BEATS.length; i++) {
+          if (firedBeatsRef.current.has(i)) continue;
+          const beat = HISTORY_BEATS[i];
+          if (next >= beat.year) {
+            firedBeatsRef.current.add(i);
             setHistoryBeat(beat);
             return beat.year;
           }
@@ -335,13 +335,9 @@ export default function App() {
     return stopHistoryRaf;
   }, [historyMode, historyPaused, historyBeat, stopHistoryRaf]);
 
-  // Beat card auto-dismiss. When a beat fires we sleep for BEAT_CARD_MS,
-  // then clear it so the advance loop resumes.
-  useEffect(() => {
-    if (!historyBeat) return;
-    const t = setTimeout(() => setHistoryBeat(null), BEAT_CARD_MS);
-    return () => clearTimeout(t);
-  }, [historyBeat]);
+  // No auto-dismiss for beat cards. The user clicks Continue (or hits a key)
+  // when they're ready. Persistent display gives them time to read, decide
+  // whether to dive into the named battle, or just take in the chapter.
 
   const handleHistoryStart = useCallback(() => {
     setSelectedBattle(null);
@@ -374,6 +370,42 @@ export default function App() {
     setHistoryMode(false);
     setHistoryPaused(false);
     setHistoryYear(MIN_YEAR);
+    firedBeatsRef.current.clear();
+  }, []);
+
+  // handleHistoryScrub moves the playhead to an explicit year and rewrites
+  // the fired-beats set so a beat is not fired twice (when scrubbing forward
+  // past a beat we already saw) and a beat can fire again if we scrubbed
+  // backwards before it. The sweep is paused for the duration of the drag
+  // so the user is in control while scrubbing; resume is an explicit action.
+  const handleHistoryScrub = useCallback((targetYear: number) => {
+    setHistoryYear(targetYear);
+    setHistoryPaused(true);
+    const next = new Set<number>();
+    HISTORY_BEATS.forEach((beat, i) => {
+      if (beat.year < targetYear) next.add(i);
+    });
+    firedBeatsRef.current = next;
+    setHistoryBeat(null);
+  }, []);
+
+  // handleHistorySeekBeat snaps to a curated beat and surfaces its title
+  // card immediately. The user clicked the marker because they want to read
+  // that chapter, so we honor the intent rather than waiting for the sweep
+  // to crawl back over the year.
+  const handleHistorySeekBeat = useCallback((beatIndex: number) => {
+    const beat = HISTORY_BEATS[beatIndex];
+    if (!beat) return;
+    setHistoryYear(beat.year);
+    setHistoryPaused(true);
+    const next = new Set<number>();
+    HISTORY_BEATS.forEach((b, i) => {
+      if (i < beatIndex) next.add(i);
+      if (b.year < beat.year) next.add(i);
+    });
+    next.add(beatIndex);
+    firedBeatsRef.current = next;
+    setHistoryBeat(beat);
   }, []);
 
   const handleToggleSound = useCallback(() => {
@@ -424,27 +456,109 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-[#0a0a0f]">
-        <div className="text-center">
-          <div className="text-3xl font-bold text-white mb-2 tracking-tight">BattleTrace</div>
-          <div className="text-slate-500 text-sm">Loading battles...</div>
-          <div className="mt-4 w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto" />
+      <div
+        className="w-full h-full flex items-center justify-center bg-[#06070d] relative overflow-hidden"
+        role="status"
+        aria-live="polite"
+      >
+        {/* Backdrop: deep night with a soft radial bloom that reads as
+            "atmosphere coming up." No spinning element; the bloom and the
+            bar carry motion. */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse at 50% 60%, rgba(122,185,255,0.22) 0%, rgba(122,185,255,0.07) 28%, transparent 60%)',
+            animation: 'splash-bloom 4400ms ease-in-out infinite',
+          }}
+        />
+
+        <div className="relative text-center px-8" style={{ animation: 'splash-block-in 800ms cubic-bezier(.2,.65,.25,1) both' }}>
+          <div
+            className="text-[10px] font-semibold uppercase tracking-[0.5em] text-sky-300/85 mb-4"
+            style={{ textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}
+          >
+            Battle&nbsp;Trace
+          </div>
+          <h1
+            className="text-white leading-[1.0] tracking-tight mb-3"
+            style={{
+              fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif",
+              fontWeight: 600,
+              fontSize: 'clamp(48px, 8vw, 96px)',
+              letterSpacing: '-0.015em',
+              textShadow: '0 8px 32px rgba(0,0,0,0.7)',
+            }}
+          >
+            Two thousand five hundred
+            <br />years of war
+          </h1>
+          <p
+            className="text-[14px] md:text-[15px] text-slate-300/80 italic mt-2 max-w-[60ch] mx-auto leading-relaxed"
+            style={{ fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif" }}
+          >
+            Cataloguing every battle worth remembering, from Marathon to Mariupol.
+          </p>
+
+          {/* Indeterminate progress bar. A bright sliver chases across a
+              hairline track. Reads as "machinery turning over" without
+              looking like a corporate page loader. */}
+          <div className="mt-10 mx-auto w-[280px] h-[2px] bg-slate-700/40 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: '34%',
+                background: 'linear-gradient(90deg, transparent 0%, #93c5fd 50%, transparent 100%)',
+                animation: 'splash-progress 2200ms ease-in-out infinite',
+              }}
+            />
+          </div>
         </div>
+
+        <style>{`
+          @keyframes splash-block-in {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes splash-bloom {
+            0%, 100% { opacity: 0.55; transform: scale(1); }
+            50%      { opacity: 0.9;  transform: scale(1.04); }
+          }
+          @keyframes splash-progress {
+            0%   { transform: translateX(-110%); }
+            100% { transform: translateX(310%); }
+          }
+        `}</style>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-[#0a0a0f]">
-        <div className="text-center">
-          <div className="text-3xl font-bold text-white mb-2 tracking-tight">BattleTrace</div>
-          <div className="text-red-400 text-sm mb-4">{error}</div>
+      <div className="w-full h-full flex items-center justify-center bg-[#06070d] relative overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse at 50% 60%, rgba(244,63,94,0.18) 0%, transparent 60%)',
+          }}
+        />
+        <div className="relative text-center px-8 max-w-md">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.5em] text-rose-300/85 mb-4">
+            Battle&nbsp;Trace
+          </div>
+          <h2
+            className="text-white text-2xl mb-3"
+            style={{ fontFamily: "'Iowan Old Style', Georgia, serif", fontWeight: 600 }}
+          >
+            Could not reach the battle archive
+          </h2>
+          <p className="text-slate-400 text-[14px] mb-6 leading-relaxed">{error}</p>
           <button
             onClick={() => { setLoading(true); setError(null); fetchBattles(); }}
-            className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/30 transition-colors"
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-[13px] font-semibold tracking-wide bg-white text-slate-900 hover:bg-slate-100 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
           >
-            Retry
+            Try again
           </button>
         </div>
       </div>
@@ -554,22 +668,43 @@ export default function App() {
       {historyMode && !historyBeat && (
         <HistoryPlayhead
           year={Math.floor(historyYear)}
+          minYear={MIN_YEAR}
+          maxYear={MAX_YEAR}
           theme={activeTheme}
           playing={!historyPaused}
+          beats={HISTORY_BEATS}
+          battleCount={globeBattles.filter((b) => b.year <= Math.floor(historyYear) + 1).length}
           onToggle={handleHistoryToggle}
           onClose={handleHistoryClose}
+          onScrub={handleHistoryScrub}
+          onSeekBeat={handleHistorySeekBeat}
         />
       )}
 
       {/* Beat title card. Mounts whenever the sweep crosses a curated year
-          and pauses the advance loop while it is visible so the user can
-          read the dossier. The optional jump button exits history mode and
-          opens the linked replay. Keyed on year so consecutive beats
-          remount cleanly and re-fire the appear animation. */}
+          and pauses the advance loop while it is visible. The card stays up
+          until the user clicks Continue (or hits Enter/Space/Esc); Read more
+          jumps to the dossier without auto-playing; Watch jumps and plays.
+          Keyed on year so consecutive beats remount cleanly. */}
       {historyBeat && (
         <HistoryBeatCard
           key={`hb-${historyBeat.year}`}
           beat={historyBeat}
+          onContinue={() => setHistoryBeat(null)}
+          onLearnMore={(battleId) => {
+            setHistoryMode(false);
+            setHistoryPaused(false);
+            setHistoryBeat(null);
+            firedBeatsRef.current.clear();
+            fetch(`/api/battles/${battleId}`)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((b: Battle | null) => {
+                if (!b) return;
+                setSelectedBattle(b);
+                setIsolatedBattle(b);
+              })
+              .catch(() => {});
+          }}
           onJump={(battleId) => {
             setHistoryMode(false);
             setHistoryPaused(false);

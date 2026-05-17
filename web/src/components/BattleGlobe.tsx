@@ -87,6 +87,17 @@ function escapeHTML(s: string): string {
     .replace(/'/g, '&#39;');
 }
 
+// hexToRgba converts "#rrggbb" + alpha into an "rgba(r,g,b,a)" string.
+// Used by ring color callbacks where the alpha animates over the ring's
+// propagation, so a solid hex doesn't cut it.
+function hexToRgba(hex: string, alpha: number): string {
+  if (!hex.startsWith('#') || hex.length !== 7) return hex;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 // darkenHex returns a solid darker variant of an #rrggbb color by scaling
 // each channel by factor (0..1). Solid output keeps the merged point buffer
 // fully opaque so depth sorting stays stable.
@@ -119,19 +130,78 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>([]);
 
+  // visibleBattles filters to the active year window and drops anything
+  // without usable geography. (0, 0) is the importer's "no coords" sentinel
+  // and is treated as missing; a real battle would never land on Null Island.
+  // Out-of-range coords (typos, bad imports) are silently excluded so they
+  // do not render off the back of the globe or shove the camera into space.
   const visibleBattles = useMemo(
-    () => battles.filter(
-      (b) => b.year >= yearRange[0] && b.year <= yearRange[1] && !(b.lat === 0 && b.lng === 0),
-    ),
+    () => battles.filter((b) => {
+      if (b.year < yearRange[0] || b.year > yearRange[1]) return false;
+      if (b.lat === 0 && b.lng === 0) return false;
+      if (!Number.isFinite(b.lat) || !Number.isFinite(b.lng)) return false;
+      if (b.lat < -90 || b.lat > 90) return false;
+      if (b.lng < -180 || b.lng > 180) return false;
+      return true;
+    }),
     [battles, yearRange],
   );
 
   const replayRings = useMemo(
     () => visibleBattles
       .filter((b) => b.hasReplay)
-      .map((b) => ({ lat: b.lat, lng: b.lng, id: b.id, era: b.era })),
+      .map((b) => ({ lat: b.lat, lng: b.lng, id: b.id, kind: 'replay' as const, color: '#93c5fd' })),
     [visibleBattles],
   );
+
+  // Battle-ignition pulses: when a battle becomes newly visible (because the
+  // history sweep just crossed its year), emit a one-shot ring in the era
+  // color at its location. Lives for ~2.2s, then drops out so the rings
+  // layer doesn't grow unbounded. Reads as "the battle just lit up" rather
+  // than a static pin appearing.
+  const lastIdsRef = useRef<Set<string>>(new Set());
+  const [ignitionRings, setIgnitionRings] = useState<Array<{ lat: number; lng: number; id: string; kind: 'ignition'; color: string; expires: number }>>([]);
+
+  useEffect(() => {
+    const tNow = performance.now();
+    const current = new Set<string>();
+    const additions: typeof ignitionRings = [];
+    for (const b of visibleBattles) {
+      current.add(b.id);
+      if (!lastIdsRef.current.has(b.id)) {
+        // Skip the very first render (when lastIdsRef is empty); we don't
+        // want every visible battle to pulse on mount.
+        if (lastIdsRef.current.size === 0) continue;
+        additions.push({
+          lat: b.lat,
+          lng: b.lng,
+          id: `ig-${b.id}-${tNow}`,
+          kind: 'ignition',
+          color: ERA_COLORS[b.era] || '#ffffff',
+          expires: tNow + 2200,
+        });
+      }
+    }
+    lastIdsRef.current = current;
+    if (additions.length === 0) return;
+    setIgnitionRings((prev) => {
+      const alive = prev.filter((r) => r.expires > tNow);
+      return [...alive, ...additions];
+    });
+  }, [visibleBattles]);
+
+  // Sweep expired ignition rings every 500ms when any are alive. Cheap
+  // and bounded; stays idle when the history sweep is not active.
+  useEffect(() => {
+    if (ignitionRings.length === 0) return;
+    const id = setInterval(() => {
+      const tNow = performance.now();
+      setIgnitionRings((prev) => prev.filter((r) => r.expires > tNow));
+    }, 500);
+    return () => clearInterval(id);
+  }, [ignitionRings.length]);
+
+  const rings = useMemo(() => [...replayRings, ...ignitionRings], [replayRings, ignitionRings]);
 
   useEffect(() => {
     fetch(COUNTRIES_URL)
@@ -209,25 +279,53 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     };
   }, []);
 
+  // previousBattleRef remembers the prior selection so a successive A → B
+  // transition can fly through the midpoint instead of cutting straight from
+  // one anchor to another. In cinematic war playback the user reads the
+  // chain as "show A, lift back to read the campaign, drop onto B" rather
+  // than yanking between unrelated points.
+  const previousBattleRef = useRef<Battle | null>(null);
   useEffect(() => {
-    if (!selectedBattle || !globeRef.current) return;
+    if (!selectedBattle || !globeRef.current) {
+      // Clear the memory once nothing is selected so the next first-pick
+      // does its cleanest single descent.
+      previousBattleRef.current = selectedBattle;
+      return;
+    }
     const globe = globeRef.current;
     globe.controls().autoRotate = false;
-    // Directed swoop: arc the camera to an off-axis vantage, hold for a
-    // breath, then settle directly over the target at low altitude. The
-    // offset on lng pitches the approach so the move reads as a slow arc
-    // rather than a vertical drop. Holding briefly before the final descent
-    // gives the panel slide-in something to land against.
-    const arcLng = selectedBattle.lng + (selectedBattle.lng < 0 ? 14 : -14);
-    const arcLat = selectedBattle.lat + (selectedBattle.lat < 0 ? -8 : 8);
-    globe.pointOfView({ lat: arcLat, lng: arcLng, altitude: 1.6 }, 900);
+    const prev = previousBattleRef.current;
+    previousBattleRef.current = selectedBattle;
+
+    if (!prev || prev.id === selectedBattle.id) {
+      // First selection (or a re-selection of the same battle). Single
+      // smooth descent to the target. No midpoint, nothing to lift over.
+      globe.pointOfView(
+        { lat: selectedBattle.lat, lng: selectedBattle.lng, altitude: 1.1 },
+        1500,
+      );
+      return;
+    }
+
+    // Two-step cinematic move: rise to the midpoint of prev and next at an
+    // altitude that frames both, then drop into next. The lift altitude
+    // scales with the great-arc distance so a near-neighbor jump barely
+    // pulls back while a hop across continents really shows the journey.
+    const mid = midpoint(prev, selectedBattle);
+    const arcDeg = arcDistance(prev, selectedBattle);
+    const liftAlt = Math.max(1.6, Math.min(2.8, 0.9 + arcDeg / 30));
+
+    globe.pointOfView(
+      { lat: mid.lat, lng: mid.lng, altitude: liftAlt },
+      900,
+    );
     const settle = setTimeout(() => {
       if (!globeRef.current) return;
       globeRef.current.pointOfView(
         { lat: selectedBattle.lat, lng: selectedBattle.lng, altitude: 1.1 },
         1100,
       );
-    }, 1000);
+    }, 950);
     return () => clearTimeout(settle);
   }, [selectedBattle]);
 
@@ -316,6 +414,7 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     const eraColor = ERA_COLORS[b.era] || '#94a3b8';
     const yearStr = b.year === 0 ? '' : b.year < 0 ? `${Math.abs(b.year)} BC` : `${b.year}`;
     const dateLine = b.date && b.date !== '0' ? b.date : yearStr;
+    const displayName = b.name?.trim() || 'Unnamed battle';
     const sub = [dateLine, b.war].filter(Boolean).join(' · ');
     const typeBadge = b.battleType
       ? `<span style="display:inline-block;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;padding:1px 6px;border-radius:6px;background:rgba(148,163,184,0.15);color:#cbd5e1">${escapeHTML(b.battleType)}</span>`
@@ -352,11 +451,12 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       font-family: Inter, system-ui, sans-serif;
       font-size: 13px;
       color: #e2e8f0;
-      max-width: 260px;
+      max-width: min(260px, 84vw);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.55);
       pointer-events: none;
     ">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap">${tierBadge}${typeBadge}</div>
-      <div style="font-weight:600; font-size:14px; color:${eraColor}">${escapeHTML(b.name)}</div>
+      <div style="font-weight:600; font-size:14px; color:${eraColor}">${escapeHTML(displayName)}</div>
       ${sub ? `<div style="opacity:0.65; margin-top:2px; font-size:11px">${escapeHTML(sub)}</div>` : ''}
       ${victorLine}
       ${casLine}
@@ -402,12 +502,21 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       pointsMerge={false}
       pointsTransitionDuration={0}
       pointResolution={6}
-      ringsData={replayRings}
+      ringsData={rings}
       ringLat="lat"
       ringLng="lng"
-      ringColor={() => (t: number) => `rgba(147,197,253,${0.7 * (1 - t)})`}
+      ringColor={(d: object) => {
+        const r = d as { kind: 'replay' | 'ignition'; color: string };
+        const base = r.color;
+        if (r.kind === 'ignition') {
+          // Single bright burst that fades fast: era-colored core dropping
+          // from 95% to 0 alpha along the ring's outward propagation.
+          return (t: number) => hexToRgba(base, 0.95 * (1 - t));
+        }
+        return (t: number) => hexToRgba(base, 0.7 * (1 - t));
+      }}
       ringMaxRadius={2.6}
-      ringPropagationSpeed={1.2}
+      ringPropagationSpeed={1.6}
       ringRepeatPeriod={2200}
       ringAltitude={0.005}
       polygonsData={highlightedCountry}

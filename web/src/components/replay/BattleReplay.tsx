@@ -24,6 +24,10 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   const [speed, setSpeed] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<'globe' | 'tactical'>('globe');
+  // ended is true after the last phase's dwell completes. It triggers the
+  // outro card so the replay lands with intention instead of just freezing
+  // on the final tactical state. Cleared whenever the user scrubs back.
+  const [ended, setEnded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
@@ -45,7 +49,11 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     const dur = (current.durationMs ?? 5500) / speed;
     timerRef.current = setTimeout(() => {
       if (phaseIdx >= replay.phases.length - 1) {
+        // Last phase finished its dwell. Trigger the outro card so the
+        // replay reads as "battle over" instead of freezing on the final
+        // tactical state.
         setPlaying(false);
+        setEnded(true);
         return;
       }
       setPhaseIdx((i) => i + 1);
@@ -74,6 +82,18 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     if (!replay) return;
     const clamped = Math.max(0, Math.min(replay.phases.length - 1, i));
     setPhaseIdx(clamped);
+    // Any manual phase change clears the outro card. The user has chosen
+    // to engage with the replay again; do not occlude it.
+    setEnded(false);
+  }, [replay]);
+
+  // restartReplay rewinds to the first phase and starts playing again. Used
+  // by the outro card so a viewer can re-watch without leaving the overlay.
+  const restartReplay = useCallback(() => {
+    if (!replay) return;
+    setPhaseIdx(0);
+    setEnded(false);
+    setPlaying(true);
   }, [replay]);
 
   useEffect(() => {
@@ -117,20 +137,6 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
 
   return (
     <div className="fixed inset-0 bg-[#070912] z-50 flex flex-col" style={{ animation: 'replay-fade-in 280ms ease-out forwards' }}>
-      {/* Always-visible exit pill, top-right corner. Sits above the header
-          so it stays reachable regardless of header content. Esc does the
-          same thing, called out in the label so first-time users learn the
-          keyboard shortcut without a tour. */}
-      <button
-        onClick={onClose}
-        className="fixed top-3 right-3 z-[60] inline-flex items-center gap-2 h-9 px-4 rounded-full bg-slate-900/90 border border-slate-600/70 text-slate-100 hover:bg-slate-700 hover:border-slate-400 transition-colors shadow-lg"
-        title="Close replay (Esc)"
-        aria-label="Close replay"
-      >
-        <span className="text-base leading-none">×</span>
-        <span className="text-[12px] font-semibold tracking-wide">Close</span>
-        <span className="text-[10px] text-slate-400 font-medium">Esc</span>
-      </button>
       <style>{`
         @keyframes replay-fade-in {
           from { opacity: 0; }
@@ -239,12 +245,22 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           )}
         </div>
         <div className="flex items-center gap-2">
-          <FactionLegend color={FACTION_COLOR.a} label={replay.factionA} />
-          <FactionLegend color={FACTION_COLOR.b} label={replay.factionB} />
-          {replay.factionC && <FactionLegend color={FACTION_COLOR.c} label={replay.factionC} />}
+          {/* One-click jump to the battlefield in Google Earth. Opens in a
+              new tab so the replay session is preserved — the user can come
+              back to BattleTrace from the same tab they left. */}
+          <a
+            href={`https://earth.google.com/web/@${battle.lat},${battle.lng},0a,8000d,35y,0h,55t,0r`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1 inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25 hover:border-emerald-400 transition-colors"
+            title="Open this battlefield in Google Earth (new tab)"
+          >
+            <span className="text-[13px] leading-none">🌍</span>
+            <span className="text-xs font-semibold tracking-wide">Earth</span>
+          </a>
           <button
             onClick={onClose}
-            className="ml-3 inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-blue-500/50 bg-blue-500/15 text-blue-100 hover:bg-blue-500/30 hover:text-white hover:border-blue-400 transition-colors"
+            className="ml-1 inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-blue-500/50 bg-blue-500/15 text-blue-100 hover:bg-blue-500/30 hover:text-white hover:border-blue-400 transition-colors"
             aria-label="Back to battle story (Esc)"
             title="Back to battle story (Esc)"
           >
@@ -281,31 +297,49 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
 
             {/* Chapter card: flashes the phase title centered over the map at
                 the start of each phase, then fades. Keyed on phaseIdx so it
-                replays on every advance. */}
-            <div
-              key={`chapter-${phaseIdx}`}
-              className="chapter-card pointer-events-none absolute inset-0 flex items-center justify-center"
-            >
+                replays on every advance. Suppressed when the outro card is
+                up so the two do not overlap on the final phase. */}
+            {!ended && (
               <div
-                className="px-7 py-4 rounded-xl bg-black/55 backdrop-blur-sm border shadow-2xl text-center"
-                style={{ borderColor: `${theme.accent}40` }}
+                key={`chapter-${phaseIdx}`}
+                className="chapter-card pointer-events-none absolute inset-0 flex items-center justify-center"
               >
-                {phase.timeMarker && (
-                  <div
-                    className="text-[10px] uppercase tracking-[0.32em] mb-1"
-                    style={{ color: theme.accent }}
-                  >
-                    {phase.timeMarker}
-                  </div>
-                )}
                 <div
-                  className="text-3xl text-white tracking-tight"
-                  style={{ fontFamily: theme.titleFont, fontWeight: 600 }}
+                  className="px-7 py-4 rounded-xl bg-black/55 backdrop-blur-sm border shadow-2xl text-center"
+                  style={{ borderColor: `${theme.accent}40` }}
                 >
-                  {phase.title}
+                  {phase.timeMarker && (
+                    <div
+                      className="text-[10px] uppercase tracking-[0.32em] mb-1"
+                      style={{ color: theme.accent }}
+                    >
+                      {phase.timeMarker}
+                    </div>
+                  )}
+                  <div
+                    className="text-3xl text-white tracking-tight"
+                    style={{ fontFamily: theme.titleFont, fontWeight: 600 }}
+                  >
+                    {phase.title}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Outro: the battle is over. A composed end card replaces the
+                last phase's chapter flash so the replay lands with intention.
+                Victor, per-side casualty roll, the battle's significance
+                line, and a small action row. The user is no longer watching
+                arrows — they are reading the verdict. */}
+            {ended && (
+              <BattleOutro
+                battle={battle}
+                replay={replay}
+                theme={theme}
+                onRestart={restartReplay}
+                onBackToStory={onClose}
+              />
+            )}
 
             {/* View toggle (pinned bottom-left over the stage). */}
             <div className="absolute bottom-3 left-3 flex bg-black/60 border border-white/10 rounded-full overflow-hidden text-[10px] uppercase tracking-wider">
@@ -346,9 +380,8 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             <h3 key={`title-${phaseIdx}`} className="replay-fade-in text-xl font-semibold text-white mb-3 tracking-tight">
               {phase.title}
             </h3>
-            <p key={`narr-${phaseIdx}`} className="replay-fade-in text-[14px] leading-relaxed text-slate-300">
-              {phase.narration}
-            </p>
+            <NarrationReveal key={`narr-${phaseIdx}`} text={phase.narration} />
+
 
             {phaseIdx === 0 && (
               <div className="mt-6 pt-5 border-t border-slate-800/80">
@@ -374,33 +407,84 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             </div>
           </div>
 
-          {/* Phase pill nav */}
+          {/* Chapter rail. Replaces the wrap-row of tiny number pills with a
+              horizontally scrolling reel of named chapters. Each chapter
+              shows its index, the phase title (truncated), and the time
+              marker when available. The active chapter has a flag in the
+              era accent so the eye locks onto it without effort. */}
           <div className="border-t border-slate-800 p-4 space-y-3">
-            <div className="flex flex-wrap gap-1.5">
-              {replay.phases.map((p, i) => (
-                <button
-                  key={i}
-                  onClick={() => goto(i)}
-                  className={`h-6 px-2 rounded text-[10px] transition-colors ${
-                    i === phaseIdx
-                      ? 'bg-blue-500/25 text-blue-300 border border-blue-500/40'
-                      : i < phaseIdx
-                      ? 'bg-slate-800 text-slate-400 border border-slate-700/60 hover:text-white'
-                      : 'bg-slate-900 text-slate-600 border border-slate-800 hover:text-slate-300'
-                  }`}
-                  title={p.title}
-                >
-                  {i + 1}
-                </button>
-              ))}
+            <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 flex items-center justify-between">
+              <span>Chapters</span>
+              <span className="tabular-nums text-slate-600">{phaseIdx + 1} / {replay.phases.length}</span>
+            </div>
+            <div
+              className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scroll-smooth"
+              style={{ scrollbarWidth: 'thin' }}
+            >
+              {replay.phases.map((p, i) => {
+                const isActive = i === phaseIdx;
+                const isPast = i < phaseIdx;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => goto(i)}
+                    className="group relative flex-shrink-0 text-left rounded-md transition-all focus:outline-none focus-visible:ring-2"
+                    style={{
+                      width: 132,
+                      padding: '8px 10px',
+                      background: isActive
+                        ? `${theme.accent}1f`
+                        : isPast
+                          ? 'rgba(30,33,46,0.85)'
+                          : 'rgba(15,18,28,0.6)',
+                      border: isActive
+                        ? `1px solid ${theme.accent}66`
+                        : '1px solid rgba(51,55,76,0.5)',
+                    }}
+                    title={p.title}
+                  >
+                    <div
+                      className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.16em] mb-1"
+                      style={{
+                        color: isActive ? theme.accent : isPast ? '#94a3b8' : '#64748b',
+                      }}
+                    >
+                      <span className="tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                      {p.timeMarker && (
+                        <>
+                          <span className="opacity-50">·</span>
+                          <span className="truncate">{p.timeMarker}</span>
+                        </>
+                      )}
+                    </div>
+                    <div
+                      className="text-[11.5px] leading-snug line-clamp-2"
+                      style={{
+                        color: isActive ? '#ffffff' : isPast ? '#cbd5e1' : '#94a3b8',
+                        fontWeight: isActive ? 600 : 500,
+                      }}
+                    >
+                      {p.title}
+                    </div>
+                    {/* Active-chapter flag along the bottom edge. */}
+                    {isActive && (
+                      <span
+                        className="absolute left-2 right-2 bottom-0 h-[2px] rounded-full"
+                        style={{ background: theme.accent, boxShadow: `0 0 8px ${theme.accent}` }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
             <button
               onClick={onClose}
-              className={`w-full h-9 rounded-md border text-[12px] font-semibold tracking-wide transition-colors ${
-                phaseIdx === replay.phases.length - 1
-                  ? 'border-blue-500/60 bg-blue-500/25 text-blue-100 hover:bg-blue-500/40'
-                  : 'border-blue-500/40 bg-blue-500/10 text-blue-200 hover:bg-blue-500/25 hover:text-white'
-              }`}
+              className="w-full h-10 rounded-full text-[13px] font-semibold tracking-wide transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
+              style={{
+                background: phaseIdx === replay.phases.length - 1 ? `${theme.accent}26` : `${theme.accent}14`,
+                color: phaseIdx === replay.phases.length - 1 ? '#fff' : '#e2e8f0',
+                border: `1px solid ${theme.accent}55`,
+              }}
               title="Back to battle story (Esc)"
             >
               {phaseIdx === replay.phases.length - 1 ? 'Done, back to story' : '← Back to story'}
@@ -462,12 +546,241 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   );
 }
 
-function FactionLegend({ color, label }: { color: string; label: string }) {
+// BattleOutro is the composed end card that replaces the chapter flash on
+// the final phase. The replay used to just freeze on the last tactical
+// state; now it lands on a curated summary: victor, casualty roll, what it
+// meant. The card sits inside the stage area so the underlying globe stays
+// visible behind a generous veil; the eye reads "the smoke clears" rather
+// than "modal popped up." Two actions: rewatch from phase one, or return to
+// the dossier.
+interface BattleOutroProps {
+  battle: Battle;
+  replay: Replay;
+  theme: { accent: string; titleFont: string; mood: string };
+  onRestart: () => void;
+  onBackToStory: () => void;
+}
+
+function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: BattleOutroProps) {
+  // Victor wins precedence: explicit field on the battle record. Fall back
+  // to "Decisive" attribution from the replay title if neither side claims
+  // it (most curated replays still name the winner).
+  void replay;
+  const victor = (battle.victor || '').trim();
+  const sides = battle.sides || [];
   return (
-    <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] text-slate-300 bg-slate-800/70 border border-slate-700/40">
-      <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: color }} />
-      {label}
-    </span>
+    <div
+      className="pointer-events-auto absolute inset-0 flex items-center justify-center px-6"
+      style={{ animation: 'outro-veil-in 720ms ease-out both' }}
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse at center, ${theme.accent}10 0%, rgba(7,9,18,0.78) 60%, rgba(7,9,18,0.88) 100%)`,
+          backdropFilter: 'blur(6px)',
+          animation: 'outro-bg-fade 720ms ease-out both',
+        }}
+      />
+      <div
+        className="relative max-w-[640px] w-full text-center"
+        style={{ animation: 'outro-block-in 820ms cubic-bezier(.2,.65,.25,1) both' }}
+      >
+        <div
+          className="text-[11px] font-semibold uppercase tracking-[0.42em] mb-3"
+          style={{ color: theme.accent, textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}
+        >
+          The smoke clears
+        </div>
+
+        {victor ? (
+          <>
+            <div
+              className="text-white leading-[1.04] tracking-tight"
+              style={{
+                fontFamily: theme.titleFont,
+                fontWeight: 600,
+                fontSize: 'clamp(34px, 5.8vw, 64px)',
+                letterSpacing: '-0.01em',
+                textShadow: '0 6px 32px rgba(0,0,0,0.7)',
+              }}
+            >
+              {victor}
+            </div>
+            <div className="mt-1 text-[12px] tracking-[0.32em] uppercase text-slate-300/85">
+              prevails at {battle.name}
+            </div>
+          </>
+        ) : (
+          <div
+            className="text-white leading-[1.04] tracking-tight"
+            style={{
+              fontFamily: theme.titleFont,
+              fontWeight: 600,
+              fontSize: 'clamp(30px, 4.6vw, 52px)',
+              letterSpacing: '-0.01em',
+              textShadow: '0 6px 32px rgba(0,0,0,0.7)',
+            }}
+          >
+            {battle.name} ends
+          </div>
+        )}
+
+        <div
+          className="mx-auto mt-5 mb-4 h-px"
+          style={{
+            width: 140,
+            background: `linear-gradient(90deg, transparent 0%, ${theme.accent} 50%, transparent 100%)`,
+          }}
+        />
+
+        {sides.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-[540px] mx-auto mb-5 text-left">
+            {sides.slice(0, 4).map((s, i) => {
+              const isVictor = victor && s.name === battle.victor;
+              return (
+                <div
+                  key={`${i}-${s.name}`}
+                  className="rounded-lg px-3 py-2.5 border"
+                  style={{
+                    borderColor: isVictor ? `${theme.accent}66` : 'rgba(148,163,184,0.18)',
+                    background: isVictor ? `${theme.accent}10` : 'rgba(15,18,28,0.55)',
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-[13px] font-semibold text-white truncate"
+                      title={s.name}
+                    >
+                      {s.name}
+                    </span>
+                    {isVictor && (
+                      <span
+                        className="text-[9px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded-full"
+                        style={{ color: theme.accent, background: `${theme.accent}26` }}
+                      >
+                        Victor
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1 text-[11px] text-slate-400">
+                    {s.casualties ? (
+                      <>Casualties · <span className="text-slate-200">{s.casualties}</span></>
+                    ) : (
+                      <span className="text-slate-500">Casualties unknown</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {battle.significance && (
+          <p
+            className="text-[14px] leading-[1.6] text-slate-200/90 mx-auto mb-6 max-w-[58ch]"
+            style={{
+              fontFamily: theme.titleFont,
+              fontStyle: 'italic',
+              textShadow: '0 2px 12px rgba(0,0,0,0.5)',
+            }}
+          >
+            {battle.significance}
+          </p>
+        )}
+
+        <div className="flex items-center justify-center gap-2.5">
+          <button
+            type="button"
+            onClick={onRestart}
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-[13px] font-semibold tracking-wide border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
+            style={{
+              color: theme.accent,
+              borderColor: `${theme.accent}66`,
+              background: `${theme.accent}1a`,
+            }}
+          >
+            ⟲ Replay from start
+          </button>
+          <button
+            type="button"
+            onClick={onBackToStory}
+            autoFocus
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-[13px] font-semibold tracking-wide bg-white text-slate-900 hover:bg-slate-100 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
+          >
+            Back to the story
+          </button>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes outro-veil-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes outro-bg-fade {
+          from { opacity: 0; backdrop-filter: blur(0px); }
+          to   { opacity: 1; backdrop-filter: blur(6px); }
+        }
+        @keyframes outro-block-in {
+          from { opacity: 0; transform: translateY(18px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// NarrationReveal renders phase narration word-by-word with a soft fade so
+// each phrase lands rather than the whole paragraph popping in. The reveal
+// budget caps at ~1.3s total regardless of length so a long narration does
+// not stall the cadence. Honors prefers-reduced-motion by skipping the
+// animation entirely.
+function NarrationReveal({ text }: { text: string }) {
+  const words = (text || '').split(/(\s+)/);
+  const reducedMotion = typeof window !== 'undefined'
+    && window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const totalWords = words.filter((w) => w.trim().length > 0).length || 1;
+  const budgetMs = Math.min(1300, Math.max(360, totalWords * 32));
+  const perWordMs = budgetMs / totalWords;
+
+  if (reducedMotion) {
+    return (
+      <p className="replay-fade-in text-[14px] leading-relaxed text-slate-300">
+        {text}
+      </p>
+    );
+  }
+
+  let wordIndex = 0;
+  return (
+    <p className="text-[14px] leading-relaxed text-slate-300">
+      {words.map((tok, i) => {
+        if (tok.trim().length === 0) {
+          return <span key={i}>{tok}</span>;
+        }
+        const delay = wordIndex * perWordMs;
+        wordIndex++;
+        return (
+          <span
+            key={i}
+            style={{
+              display: 'inline-block',
+              opacity: 0,
+              transform: 'translateY(3px)',
+              animation: `narration-word 360ms ${delay}ms cubic-bezier(.2,.7,.25,1) forwards`,
+            }}
+          >
+            {tok}
+          </span>
+        );
+      })}
+      <style>{`
+        @keyframes narration-word {
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </p>
   );
 }
 

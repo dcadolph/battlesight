@@ -199,6 +199,11 @@ func (h *Handler) getReplay(w http.ResponseWriter, r *http.Request) {
 
 	rep, ok := GenerateReplay(battle)
 	if !ok {
+		// GenerateReplay returns false either because the battle has no
+		// sides data to schematize or because schematization itself failed.
+		// Log so silent schematic gaps in the data surface in the operator
+		// log instead of looking like 404s to the client.
+		log.Printf("replay: no schematic for %q (sides=%d)", battle.ID, len(battle.Sides))
 		writeError(w, http.StatusNotFound, "no replay available for this battle")
 		return
 	}
@@ -301,26 +306,39 @@ func dailyIndex(n int) int {
 	return rand.IntN(n)
 }
 
-// writeJSON encodes v as JSON and writes it to the response.
+// writeJSON encodes v as JSON and writes it to the response. Encode errors
+// are logged because the headers have already been written by the time the
+// encoder fails, so there is no clean way to send a 500 to the client.
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(v)
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		log.Printf("json encode failed: %v", err)
+	}
 }
 
 // writeError writes a JSON error response.
 func writeError(w http.ResponseWriter, status int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(map[string]string{"error": msg})
+	if err := json.NewEncoder(w).Encode(map[string]string{"error": msg}); err != nil {
+		log.Printf("json encode failed for error %q: %v", msg, err)
+	}
 }
 
-// queryInt reads an integer query parameter, returning 0 if absent or invalid.
+// queryInt reads an integer query parameter, returning 0 if absent. Parse
+// errors are logged so malformed inputs like ?limit=foo do not silently
+// degrade to the default behavior; the caller still gets 0 to keep the
+// request flowing, but the operator sees the bad input in the log.
 func queryInt(q interface{ Get(string) string }, key string) int {
 	v := q.Get(key)
 	if v == "" {
 		return 0
 	}
-	n, _ := strconv.Atoi(v)
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		log.Printf("queryInt: bad value for %q: %q", key, v)
+		return 0
+	}
 	return n
 }

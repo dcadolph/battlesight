@@ -130,6 +130,42 @@ interface ProjectedArrow {
   label?: string;
 }
 
+// arrowTiming returns the timing budget for a single movement at a given
+// queue position. Centralized so the trace, the marching dashes, and the
+// impact flash all share the same arithmetic. Without this, the flash drifts
+// out of sync with the trace (a long retreat trace lands two seconds after
+// its flash, or a snappy charge flashes before its line arrives).
+function arrowTiming(kind: string | undefined, index: number): {
+  appearDelay: number;
+  traceMs: number;
+  marchSpeed: number;
+  // impactDelay is when the destination ring + thump should fire. Tuned to
+  // hit just as the trace completes so the eye reads "force arrives → land."
+  impactDelay: number;
+} {
+  const appearDelay = index * 240;
+  const traceMs = kind === 'charge'
+    ? 700
+    : kind === 'flank'
+      ? 950
+      : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal'
+        ? 1500
+        : 1100;
+  const marchSpeed = kind === 'charge'
+    ? 700
+    : kind === 'flank'
+      ? 850
+      : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal'
+        ? 1500
+        : 1100;
+  // Impact fires 80ms before the trace formally ends so the ring and the
+  // arrowhead read as a single event. Retreats are deliberately quieter:
+  // the flash is the moment of contact, and a withdrawal does not make
+  // contact, so we delay it to coincide with arrival rather than impact.
+  const impactDelay = appearDelay + traceMs - 80;
+  return { appearDelay, traceMs, marchSpeed, impactDelay };
+}
+
 interface ProjectedUnit {
   index: number;
   faction: Faction;
@@ -148,6 +184,41 @@ interface PolygonDatum {
   strokeColor: string;
   sideColor: string;
   altitude: number;
+}
+
+// relaxUnitCollisions pushes overlapping unit markers apart so a dense
+// battlefield does not stack a dozen disks into one indistinguishable blob.
+// Greedy: process in queue order, for each unit walk every earlier unit and
+// nudge it outward along the line between them if the disks would overlap.
+// One pass is enough at the densities we render and keeps the projection
+// loop cheap.
+function relaxUnitCollisions(units: ProjectedUnit[]): ProjectedUnit[] {
+  const out = units.map((u) => ({ ...u }));
+  const gap = 2;
+  for (let i = 0; i < out.length; i++) {
+    if (!out[i].visible) continue;
+    for (let j = 0; j < i; j++) {
+      if (!out[j].visible) continue;
+      const dx = out[i].x - out[j].x;
+      const dy = out[i].y - out[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const minDist = out[i].radius + out[j].radius + gap;
+      if (dist > 0 && dist < minDist) {
+        const push = (minDist - dist) / 2;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        out[i].x += nx * push;
+        out[i].y += ny * push;
+        out[j].x -= nx * push;
+        out[j].y -= ny * push;
+      } else if (dist === 0) {
+        // Exact overlap, push i by a deterministic offset so collisions are
+        // resolved consistently across frames.
+        out[i].x += minDist;
+      }
+    }
+  }
+  return out;
 }
 
 export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeReplayProps) {
@@ -188,9 +259,12 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
   const extentLatDeg = replay.extentLatDeg ?? DEFAULT_EXTENT_DEG;
 
   // Resolve the effective camera target for this phase. cameraLat/cameraLng
-  // default to the battle location; cameraAltitude defaults to a comfortable
-  // operational view derived from the replay's extent.
-  const defaultAltitude = Math.max(0.18, Math.min(0.7, extentLngDeg / 8));
+  // default to the battle location; cameraAltitude defaults to a tighter
+  // operational view than before. Dropping the divisor from 8 to 12 brings
+  // the camera in roughly 33%, which makes arrows traverse a meaningful
+  // fraction of the viewport instead of looking like short flicks against
+  // a wide-open continent.
+  const defaultAltitude = Math.max(0.12, Math.min(0.55, extentLngDeg / 12));
   const cameraLat = phase.cameraLat ?? battle.lat;
   const cameraLng = phase.cameraLng ?? battle.lng;
   const cameraAlt = phase.cameraAltitude ?? defaultAltitude;
@@ -365,10 +439,15 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
 
   // RAF loop projects all phase geometry onto screen pixels. Updates every
   // frame so the SVG overlay tracks camera fly-ins and any user drag without
-  // visible lag.
+  // visible lag. mountedRef guards against state updates queued in the same
+  // frame as an unmount (closing the replay mid-tween). Without the guard,
+  // React logs "update on unmounted component" and the next phase mount can
+  // briefly inherit the stale projection from the previous phase.
   useEffect(() => {
     let raf = 0;
+    let mounted = true;
     const tick = () => {
+      if (!mounted) return;
       const globe = globeRef.current;
       if (globe && typeof globe.getScreenCoords === 'function') {
         const nextArrows: ProjectedArrow[] = movementGeo.map((m) => {
@@ -388,9 +467,10 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
             label: m.label,
           };
         });
+        if (!mounted) return;
         setArrows(nextArrows);
 
-        const nextUnits: ProjectedUnit[] = defenderGeo.map((u) => {
+        const projected: ProjectedUnit[] = defenderGeo.map((u) => {
           const p = globe.getScreenCoords(u.lat, u.lng, 0) as { x: number; y: number } | null;
           const ok = !!p && Number.isFinite(p.x) && Number.isFinite(p.y);
           return {
@@ -405,12 +485,17 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
             visible: ok,
           };
         });
+        const nextUnits = relaxUnitCollisions(projected);
+        if (!mounted) return;
         setUnits(nextUnits);
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(raf);
+    };
   }, [movementGeo, defenderGeo]);
 
   return (
@@ -425,6 +510,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
         atmosphereColor={themeForEra(battle.era).atmosphere}
         atmosphereAltitude={0.16}
         polygonsData={polygonData}
+        polygonGeoJsonGeometry={(d: object) => (d as PolygonDatum).feature.geometry as unknown as { type: string; coordinates: number[] }}
         polygonCapColor={(d: object) => (d as PolygonDatum).capColor}
         polygonSideColor={(d: object) => (d as PolygonDatum).sideColor}
         polygonStrokeColor={(d: object) => (d as PolygonDatum).strokeColor}
@@ -465,15 +551,17 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
             arrow={a}
           />
         ))}
-        {/* Impact flashes triggered shortly after each arrow appears. A
-            burst of color at the destination signals "force has arrived." */}
+        {/* Impact flashes timed to each arrow's individual trace duration, so
+            a slow retreat does not flash before it has finished moving and a
+            fast charge does not flash long after it has landed. The shared
+            arrowTiming helper keeps the flash and the trace honest. */}
         {arrows.filter((a) => a.visible).map((a) => (
           <ImpactFlash
             key={`flash-${phaseIdx}-${a.index}`}
             x={a.x2}
             y={a.y2}
             color={FACTION_COLOR[a.faction]}
-            delay={a.index * 280 + 500}
+            delay={arrowTiming(a.kind, a.index).impactDelay}
           />
         ))}
       </svg>
@@ -534,11 +622,7 @@ function ArrowVector({ phaseIdx, arrow }: ArrowVectorProps) {
   const dashLen = Math.max(10, stroke * 5);
   const gapLen = Math.max(6, stroke * 3);
   const period = dashLen + gapLen;
-  const marchSpeed = kind === 'charge' ? 700 : kind === 'flank' ? 850 : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal' ? 1500 : 1100;
-  // Trace duration scales with movement type: charges snap in fast, retreats
-  // are slower so the eye reads them as withdrawal.
-  const traceMs = kind === 'charge' ? 700 : kind === 'flank' ? 950 : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal' ? 1500 : 1100;
-  const appearDelay = index * 240;
+  const { appearDelay, traceMs, marchSpeed } = arrowTiming(kind, index);
   // Marching dashes appear right as the trace completes (10% overlap for a
   // seamless handoff). The arrowhead lives on the marching layer so it shows
   // up at the same time the dashes do, which is right when the trace lands.
@@ -658,48 +742,45 @@ function UnitMarker({ unit }: UnitMarkerProps) {
   );
 }
 
-// UnitGlyph draws a tiny NATO-style symbol inside a unit marker. Centered at
-// the parent group's origin and sized relative to the marker radius.
+// UNIT_ICON maps a unit type to a unicode glyph rendered inside the marker.
+// Chess pieces and military symbols are recognisable at small sizes and read
+// far better than the previous thin SVG lines. The chess "knight" stands in
+// for cavalry, the "pawn" for infantry foot soldiers, the "rook" for siege
+// artillery, the "bishop" for archers (their angled silhouette suggests a
+// drawn bow). Aircraft, ships, and tanks get dedicated unicode icons.
+const UNIT_ICON: Record<string, string> = {
+  infantry: '♟',
+  cavalry: '♞',
+  archers: '♝',
+  artillery: '♜',
+  command: '★',
+  armor: '▰',
+  aircraft: '✈',
+  ships: '⚓',
+};
+
+// UnitGlyph renders the unit-type icon inside a marker. Sized to fit, with a
+// subtle dark stroke so the glyph stays legible against the faction-colored
+// disk regardless of theme.
 function UnitGlyph({ radius, unitType }: { radius: number; unitType?: string }) {
-  const r = radius * 0.55;
-  const stroke = '#f8fafc';
-  const sw = 1.4;
-  switch (unitType) {
-    case 'infantry':
-      return (
-        <>
-          <line x1={-r} y1={-r} x2={r} y2={r} stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
-          <line x1={-r} y1={r} x2={r} y2={-r} stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
-        </>
-      );
-    case 'cavalry':
-      return <line x1={-r} y1={r} x2={r} y2={-r} stroke={stroke} strokeWidth={sw} strokeLinecap="round" />;
-    case 'armor':
-      return <ellipse cx={0} cy={0} rx={r} ry={r * 0.55} fill="none" stroke={stroke} strokeWidth={sw} />;
-    case 'artillery':
-      return <circle r={r * 0.35} fill={stroke} />;
-    case 'aircraft':
-      return (
-        <>
-          <line x1={-r} y1={0} x2={r} y2={0} stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
-          <line x1={0} y1={-r * 0.6} x2={0} y2={r * 0.6} stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
-        </>
-      );
-    case 'ships':
-      return <path d={`M ${-r} 0 L ${r} 0 M 0 ${-r * 0.6} L 0 ${r * 0.6}`} stroke={stroke} strokeWidth={sw} strokeLinecap="round" />;
-    case 'command':
-      return (
-        <path
-          d={`M 0 ${-r} L ${r * 0.3} ${-r * 0.3} L ${r} 0 L ${r * 0.3} ${r * 0.3} L 0 ${r} L ${-r * 0.3} ${r * 0.3} L ${-r} 0 L ${-r * 0.3} ${-r * 0.3} Z`}
-          fill={stroke}
-          opacity={0.85}
-        />
-      );
-    case 'archers':
-      return <path d={`M ${-r} ${r * 0.6} Q 0 ${-r} ${r} ${r * 0.6}`} fill="none" stroke={stroke} strokeWidth={sw} />;
-    default:
-      return null;
-  }
+  const icon = unitType ? UNIT_ICON[unitType] : '';
+  if (!icon) return null;
+  const fontSize = radius * 1.6;
+  return (
+    <text
+      textAnchor="middle"
+      dominantBaseline="central"
+      fontSize={fontSize}
+      fontWeight={600}
+      fill="#f8fafc"
+      stroke="rgba(15,18,30,0.85)"
+      strokeWidth={Math.max(0.6, fontSize * 0.06)}
+      paintOrder="stroke fill"
+      style={{ pointerEvents: 'none', userSelect: 'none' }}
+    >
+      {icon}
+    </text>
+  );
 }
 
 interface ImpactFlashProps {

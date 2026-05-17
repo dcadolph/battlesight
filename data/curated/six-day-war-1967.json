@@ -1,0 +1,29 @@
+{
+  "id": "six-day-war-1967",
+  "name": "Six-Day War",
+  "year": 1967,
+  "date": "5 – 10 June 1967",
+  "lat": 31.78,
+  "lng": 35.2,
+  "era": "modern",
+  "war": "Six-Day War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Israel",
+      "commander": "Levi Eshkol (prime minister), Moshe Dayan (defence minister), Yitzhak Rabin (chief of staff), Mordechai Hod (air force)",
+      "strength": "About 264,000 troops (including reserves), 800 tanks, 300 combat aircraft",
+      "casualties": "Around 776 killed, 2,563 wounded, 15 captured"
+    },
+    {
+      "name": "Egypt, Syria, Jordan, Iraq, and allies",
+      "commander": "Gamal Abdel Nasser (Egypt), Hafez al-Assad (Syrian defence), King Hussein (Jordan)",
+      "strength": "About 547,000 troops (240,000 deployed), 2,504 tanks, 957 combat aircraft across the Arab coalition",
+      "casualties": "Around 21,000 killed, 45,000 wounded, 6,000 captured; about 469 aircraft destroyed; loss of Sinai, Golan, West Bank, East Jerusalem, and Gaza Strip"
+    }
+  ],
+  "victor": "Israel",
+  "summary": "At 07:45 on the fifth of June the Israeli Air Force opened Operation Focus and in three hours destroyed almost the entire Egyptian Air Force on the ground. Strikes that afternoon destroyed two-thirds of the Syrian and Jordanian air forces. Without air cover the Arab armies fought ground campaigns Israel had already won. Israeli armour took the Sinai in four days, the West Bank and East Jerusalem in three days against Jordan, and the Golan Heights in two days against Syria. United Nations ceasefires went into effect on the eighth, ninth, and tenth.",
+  "significance": "Six days reshaped the Middle East for the next fifty years. Israel quadrupled the territory under its control, acquired the West Bank, East Jerusalem, Gaza, the Sinai, and the Golan Heights, and the political problems each of those acquisitions created continue to define the region. Nasserism, the Arab world's dominant ideological current since 1952, did not survive the war. The Palestinian national movement, the modern occupation, the road to Camp David, and the long Israeli–Palestinian conflict all trace their immediate antecedents to those six days.",
+  "wikipediaTitle": "Six-Day War"
+}

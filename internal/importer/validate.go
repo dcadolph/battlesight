@@ -80,6 +80,7 @@ var validErasSet = map[string]struct{}{
 	"napoleonic":   {},
 	"industrial":   {},
 	"world-war-1":  {},
+	"interwar":     {},
 	"world-war-2":  {},
 	"modern":       {},
 }
@@ -111,6 +112,7 @@ var eraYearRange = map[string][2]int{
 	"napoleonic":   {1700, 1820},
 	"industrial":   {1820, 1914},
 	"world-war-1":  {1914, 1919},
+	"interwar":     {1919, 1939},
 	"world-war-2":  {1939, 1946},
 	"modern":       {1946, 2100},
 }
@@ -127,6 +129,7 @@ var eraCasualtyCap = map[string]int{
 	"napoleonic":   1_000_000,
 	"industrial":   1_500_000,
 	"world-war-1":  5_000_000,
+	"interwar":     2_000_000,
 	"world-war-2":  10_000_000,
 	"modern":       5_000_000,
 }
@@ -318,7 +321,7 @@ func ValidateBattles(bs []battles.Battle) ValidationReport {
 		} else if _, ok := validErasSet[b.Era]; !ok {
 			rep.Errors = append(rep.Errors, ValidationError{
 				ID: b.ID, Field: "era",
-				Message: fmt.Sprintf("unknown era %q; valid: ancient medieval early-modern napoleonic industrial world-war-1 world-war-2 modern", b.Era),
+				Message: fmt.Sprintf("unknown era %q; valid: ancient medieval early-modern napoleonic industrial world-war-1 interwar world-war-2 modern", b.Era),
 			})
 		} else if b.Year != 0 {
 			// Year/era alignment: a battle dated 1500 tagged as "ancient"

@@ -1,0 +1,29 @@
+{
+  "id": "megiddo-1457bc",
+  "name": "Battle of Megiddo",
+  "year": -1457,
+  "date": "16 April 1457 BC",
+  "lat": 32.585,
+  "lng": 35.183,
+  "era": "ancient",
+  "war": "Egyptian–Canaanite wars",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "New Kingdom Egypt",
+      "commander": "Thutmose III",
+      "strength": "About 10,000 to 20,000 chariotry, infantry, and archers of the Egyptian army of the New Kingdom",
+      "casualties": "Light, by the Egyptian account"
+    },
+    {
+      "name": "Canaanite coalition",
+      "commander": "King of Kadesh (named in the Egyptian account but not preserved)",
+      "strength": "A coalition of city-state armies from Kadesh, Megiddo, Mitanni, and the cities of Syria-Palestine, roughly equal to the Egyptian force",
+      "casualties": "About 83 killed and 340 captured in the field (per the Karnak inscription); the survivors withdrew into Megiddo and surrendered after a seven-month siege"
+    }
+  ],
+  "victor": "New Kingdom Egypt",
+  "summary": "Thutmose III led the Egyptian army through the narrow Aruna Pass against the advice of his commanders and emerged onto the plain of Esdraelon to find the Canaanite coalition arrayed before the walls of Megiddo. His army deployed in a curved line, charged on the southern wing, and broke the coalition before it could re-form. The Canaanites fled into Megiddo. The siege that followed lasted seven months and ended in surrender.",
+  "significance": "Megiddo is the earliest battle in human history for which a contemporaneous detailed account survives. The inscription recorded by Thutmose's scribe Tjaneni on the walls of the Temple of Amun-Ra at Karnak names the commanders, the route, the order of battle, and the casualty figures. The victory restored Egyptian control of the Levant for the duration of the New Kingdom and gave the Hebrew Bible the name Armageddon, from har Megiddon, the hill of Megiddo.",
+  "wikipediaTitle": "Battle of Megiddo (15th century BC)"
+}

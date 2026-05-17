@@ -1,0 +1,29 @@
+{
+  "id": "dien-bien-phu-1954",
+  "name": "Battle of Dien Bien Phu",
+  "year": 1954,
+  "date": "13 March – 7 May 1954",
+  "lat": 21.3833,
+  "lng": 103.0167,
+  "era": "modern",
+  "war": "First Indochina War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Viet Minh",
+      "commander": "Vo Nguyen Giap",
+      "strength": "About 50,000 combat troops, 50,000 logistic porters, four divisions, and the first heavy artillery the Viet Minh had massed in the field",
+      "casualties": "Roughly 8,000 killed and 16,000 wounded"
+    },
+    {
+      "name": "French Union",
+      "commander": "Christian de Castries (garrison), Henri Navarre (overall in Indochina)",
+      "strength": "About 14,000 troops including paratroopers, the French Foreign Legion, Moroccan and Algerian regiments, Thai auxiliaries, and air resupply only",
+      "casualties": "Roughly 2,300 killed, 5,200 wounded, and 11,700 captured (only 3,300 survived captivity to be repatriated)"
+    }
+  ],
+  "victor": "Viet Minh",
+  "summary": "Navarre planted a fortified airhead in a valley near the Laotian border to lure Giap into a set-piece battle the French expected to win on firepower. Giap surprised them by dragging Soviet-supplied 105 mm howitzers and 37 mm anti-aircraft guns onto the surrounding ridges by hand, dug them into reverse slopes, and opened the siege on the thirteenth of March. The French airstrip was rendered unusable within twenty-four hours and air resupply became suicidal under the AA umbrella. The outer strongpoints (Beatrice, Gabrielle, Anne-Marie) fell within a week. The central garrison surrendered on the seventh of May after fifty-six days.",
+  "significance": "Dien Bien Phu ended French rule in Indochina. The Geneva Accords of July 1954 partitioned Vietnam at the seventeenth parallel and set the table for American intervention a decade later. The battle is the canonical case of a peasant insurgency defeating a Western expeditionary force in a stand-up battle, and the strategic lesson resonated through every twentieth-century anticolonial war that followed.",
+  "wikipediaTitle": "Battle of Dien Bien Phu"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "battle-of-britain-1940",
+  "name": "Battle of Britain",
+  "year": 1940,
+  "date": "10 July – 31 October 1940",
+  "lat": 51.0,
+  "lng": 0.5,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "air",
+  "sides": [
+    {
+      "name": "RAF Fighter Command (UK)",
+      "commander": "Hugh Dowding (Fighter Command), Keith Park (11 Group), Trafford Leigh-Mallory (12 Group)",
+      "strength": "About 1,963 serviceable single-seat fighters across Fighter Command; Hurricane and Spitfire production replacing losses faster than aircrew",
+      "casualties": "1,547 RAF aircraft destroyed, 1,542 aircrew killed"
+    },
+    {
+      "name": "Luftwaffe (Germany)",
+      "commander": "Hermann Göring (overall), Hugo Sperrle (Luftflotte 3), Albert Kesselring (Luftflotte 2), Hans-Jürgen Stumpff (Luftflotte 5)",
+      "strength": "About 2,550 aircraft (Bf 109 and Bf 110 fighters, He 111, Do 17, Ju 88 bombers, Ju 87 Stukas)",
+      "casualties": "1,977 Luftwaffe aircraft destroyed, 2,585 aircrew killed"
+    }
+  ],
+  "victor": "RAF Fighter Command (UK)",
+  "summary": "After France fell in June 1940, Hitler needed air superiority over the Channel before any invasion fleet could cross. Göring promised it in four weeks. Through July and August the Luftwaffe attacked Channel convoys, then radar stations, then the sector airfields of 11 Group in the southeast. Fighter Command was bleeding pilots faster than it could train them. On the seventh of September Göring switched the bombing to London, releasing the airfields. Eight days later, on the fifteenth, the largest single day of fighting drove the Luftwaffe back. The invasion was indefinitely postponed.",
+  "significance": "The Battle of Britain was the first major campaign in history fought entirely by air forces, and the first strategic defeat of Nazi Germany. The Royal Air Force kept Britain in the war, ensured the United States and Soviet Union eventually had a European partner to ally with, and proved that air power alone could not force a developed nation to surrender. Churchill's verdict on Fighter Command aircrew (\"Never was so much owed by so many to so few\") fixed the campaign's place in British memory.",
+  "wikipediaTitle": "Battle of Britain"
+}

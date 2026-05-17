@@ -1,0 +1,29 @@
+{
+  "id": "damascus-fall-2024",
+  "name": "Fall of Damascus (2024)",
+  "year": 2024,
+  "date": "7 – 8 December 2024",
+  "lat": 33.5138,
+  "lng": 36.2765,
+  "era": "modern",
+  "war": "Syrian Civil War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Syrian opposition (HTS-led)",
+      "commander": "Abu Mohammad al-Julani, Southern Operations Room (Daraa militias)",
+      "strength": "Northern HTS columns converging on Damascus from Homs, southern coalition rising from Daraa and Suwayda",
+      "casualties": "Minimal"
+    },
+    {
+      "name": "Syrian Arab Army (Assad government)",
+      "commander": "Maher al-Assad (4th Armoured Division), Republican Guard command",
+      "strength": "Republican Guard and 4th Division remnants; most units stood down or defected as the opposition approached",
+      "casualties": "Few in combat; the army dissolved rather than fought"
+    }
+  ],
+  "victor": "Syrian opposition (HTS-led)",
+  "summary": "After Homs fell on the sixth of December, opposition columns from the north and a southern coalition rising from the Hauran converged on Damascus overnight. Bashar al-Assad flew out on a Russian aircraft from Khmeimim airbase before dawn on the eighth. Rebel fighters entered the city without a fight by mid-morning and crowds tore down statues of Hafez al-Assad in Umayyad Square.",
+  "significance": "Fifty-four years of Assad family rule ended in a single weekend. Sednaya prison was opened and thousands of political prisoners released, many of whom had been missing for decades. The collapse handed Russia and Iran their largest strategic loss of the decade and reset the balance of the eastern Mediterranean. A transitional government led by Ahmad al-Sharaa (formerly al-Julani) assumed control under terms that remained contested through 2025.",
+  "wikipediaTitle": "Fall of Damascus (2024)"
+}

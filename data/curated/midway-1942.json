@@ -1,0 +1,29 @@
+{
+  "id": "midway-1942",
+  "name": "Battle of Midway",
+  "year": 1942,
+  "date": "4 – 7 June 1942",
+  "lat": 28.2,
+  "lng": -177.35,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "naval",
+  "sides": [
+    {
+      "name": "United States",
+      "commander": "Chester W. Nimitz (overall), Frank Jack Fletcher (TF 17), Raymond A. Spruance (TF 16)",
+      "strength": "3 fleet carriers (Yorktown, Enterprise, Hornet), 7 heavy cruisers, 1 light cruiser, 15 destroyers, 233 aircraft on the carriers, 127 land-based aircraft on Midway",
+      "casualties": "1 carrier (Yorktown) and 1 destroyer (Hammann) sunk, 144 aircraft lost, 307 killed"
+    },
+    {
+      "name": "Empire of Japan",
+      "commander": "Isoroku Yamamoto (overall), Chuichi Nagumo (1st Air Fleet)",
+      "strength": "4 fleet carriers (Akagi, Kaga, Soryu, Hiryu), 2 battleships, 2 heavy cruisers, 1 light cruiser, 12 destroyers, 248 carrier aircraft",
+      "casualties": "4 fleet carriers and 1 heavy cruiser sunk, 248 aircraft destroyed, 3,057 killed including the irreplaceable core of the carrier pilot corps"
+    }
+  ],
+  "victor": "United States",
+  "summary": "American codebreakers at Station Hypo cracked the Japanese operational cipher and pinpointed Midway as Yamamoto's target. Nimitz positioned three carriers northeast of the atoll in ambush. Nagumo's strike on Midway forced him to begin rearming his reserve aircraft for a second land attack. Just as the changeover was midway through, Wade McClusky's SBD Dauntless dive bombers from Enterprise arrived overhead and, in five minutes between 10:22 and 10:27, set Akagi, Kaga, and Soryu on fire. Hiryu launched two strikes that crippled Yorktown before Enterprise dive bombers caught and sank her in the afternoon. By dusk on the fourth all four Japanese fleet carriers were lost.",
+  "significance": "Midway shifted the Pacific naval balance permanently. Japan never replaced the four carriers or the pilots who went down with them. Six months after Pearl Harbor the strategic initiative passed to the United States and never returned. The battle is the standard case study in operational intelligence, command decision under fragmentary information, and the consequences of doctrinal rigidity.",
+  "wikipediaTitle": "Battle of Midway"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "vienna-1683",
+  "name": "Battle of Vienna",
+  "year": 1683,
+  "date": "11 – 12 September 1683",
+  "lat": 48.2417,
+  "lng": 16.3219,
+  "era": "early-modern",
+  "war": "Great Turkish War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Holy League (Polish–Lithuanian Commonwealth, Holy Roman Empire, Habsburgs)",
+      "commander": "John III Sobieski (king of Poland and overall commander), Charles V of Lorraine",
+      "strength": "About 80,000 troops including 27,000 Polish-Lithuanian cavalry and the famed winged hussars",
+      "casualties": "Around 4,500 killed and wounded"
+    },
+    {
+      "name": "Ottoman Empire",
+      "commander": "Kara Mustafa Pasha (grand vizier)",
+      "strength": "Roughly 130,000 to 170,000 besieging Vienna, with siege batteries dug close to the bastions",
+      "casualties": "Roughly 15,000 killed; the entire siege park lost"
+    }
+  ],
+  "victor": "Holy League",
+  "summary": "Vienna had been under siege since mid-July, its walls progressively mined and the garrison reduced to about a tenth of its starting strength. A relief army under John III Sobieski crossed the Danube north of the city and descended from the Kahlenberg heights on the twelfth of September. After a long day of contested advance through vineyards and villages, the largest cavalry charge in history (around 18,000 horsemen, the Polish winged hussars at the spearhead) broke the Ottoman line in the late afternoon.",
+  "significance": "Vienna 1683 marked the turning of the long Ottoman tide in central Europe. The Holy League went on the offensive for the next sixteen years, driving the Ottomans out of Hungary and the western Balkans by the Treaty of Karlowitz in 1699. The Habsburg position as the leading central European power, and the modern shape of central European borders, both date from this single afternoon under the walls of Vienna.",
+  "wikipediaTitle": "Battle of Vienna"
+}

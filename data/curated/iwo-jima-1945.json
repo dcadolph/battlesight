@@ -1,0 +1,29 @@
+{
+  "id": "iwo-jima-1945",
+  "name": "Battle of Iwo Jima",
+  "year": 1945,
+  "date": "19 February – 26 March 1945",
+  "lat": 24.785,
+  "lng": 141.317,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "amphibious",
+  "sides": [
+    {
+      "name": "United States (V Amphibious Corps)",
+      "commander": "Holland Smith (V Amphibious Corps), Harry Schmidt (Marine ground commander), Raymond Spruance (5th Fleet), Marc Mitscher (TF 58)",
+      "strength": "About 70,000 Marines in 3rd, 4th, and 5th Marine Divisions, supported by 450 ships and overwhelming air and naval gunfire",
+      "casualties": "6,821 killed, 19,217 wounded; the costliest battle in Marine Corps history"
+    },
+    {
+      "name": "Imperial Japanese Army",
+      "commander": "Tadamichi Kuribayashi",
+      "strength": "About 20,933 Imperial Japanese Army and Navy troops dug into a network of 11 miles of tunnels and bunkers across the island's volcanic terrain",
+      "casualties": "About 18,375 killed; only 216 captured during the battle, with isolated survivors holding out for weeks afterward"
+    }
+  ],
+  "victor": "United States",
+  "summary": "Kuribayashi abandoned the doctrine of contesting the beaches and dug his garrison into deep concentric defences across the island's interior, especially around Mount Suribachi and the northern plateau. Marines landed at 09:00 on the nineteenth and within hours were pinned on the black volcanic sand by indirect fire from positions the bombardment had not reached. The flag-raising on Suribachi on the twenty-third of February (photographed by Joe Rosenthal) became one of the most iconic images of the war, but the battle continued for another five weeks against bunker complexes that flame-throwers and demolition teams had to clear one cave at a time.",
+  "significance": "Iwo Jima delivered an airfield 750 miles closer to the Japanese home islands and saved an estimated 24,000 B-29 crewmen who would later make emergency landings on the island. Strategically it confirmed for American planners that the projected invasion of Japan would be catastrophic, a calculus that fed into the decision to use atomic weapons later that year. For the Marine Corps, it became the defining campaign of the institution: \"Uncommon valour was a common virtue.\"",
+  "wikipediaTitle": "Battle of Iwo Jima"
+}

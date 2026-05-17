@@ -1,0 +1,29 @@
+{
+  "id": "falklands-1982",
+  "name": "Falklands War",
+  "year": 1982,
+  "date": "2 April – 14 June 1982",
+  "lat": -51.7,
+  "lng": -57.85,
+  "era": "modern",
+  "war": "Falklands War",
+  "battleType": "amphibious",
+  "sides": [
+    {
+      "name": "United Kingdom",
+      "commander": "John Fieldhouse (overall, from Northwood), Sandy Woodward (carrier battle group), Julian Thompson (3 Commando Brigade), Jeremy Moore (overall land)",
+      "strength": "About 30,000 personnel, two aircraft carriers (Hermes and Invincible), Harrier and Sea Harrier squadrons, the 3 Commando and 5th Infantry Brigades",
+      "casualties": "255 killed, 775 wounded; 2 destroyers, 2 frigates, and several other ships lost"
+    },
+    {
+      "name": "Argentina",
+      "commander": "Leopoldo Galtieri (junta), Mario Menéndez (military governor of Las Malvinas)",
+      "strength": "About 11,400 troops on the islands, the carrier Veinticinco de Mayo (kept in port after the Belgrano sank), Mirage and A-4 Skyhawk squadrons",
+      "casualties": "649 killed (323 on the cruiser General Belgrano alone), 1,657 wounded; 11,313 captured at the surrender"
+    }
+  ],
+  "victor": "United Kingdom",
+  "summary": "Argentina's junta seized the British dependency on the second of April hoping to deflect attention from a domestic political crisis. Margaret Thatcher's government dispatched a task force 13,000 kilometres south within three days. The submarine HMS Conqueror sank the cruiser General Belgrano on the second of May; Argentine Super Étendard fighters retaliated with Exocet strikes that sank HMS Sheffield two days later. British troops landed at San Carlos Water on the twenty-first of May, fought a series of battles eastward across East Falkland (Goose Green, Mount Longdon, Tumbledown), and accepted the Argentine surrender at Port Stanley on the fourteenth of June.",
+  "significance": "The Falklands War saved Thatcher's government, ended Argentina's military junta, and restored British self-image after a decade of imperial retreat. Operationally it was the first sustained test of post-Vietnam Western military technology against a competent regional power and became the canonical case study for naval task-force operations beyond the range of land-based fighter cover.",
+  "wikipediaTitle": "Falklands War"
+}

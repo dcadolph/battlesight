@@ -1,0 +1,29 @@
+{
+  "id": "marathon-490bc",
+  "name": "Battle of Marathon",
+  "year": -490,
+  "date": "September 490 BC",
+  "lat": 38.1133,
+  "lng": 23.9738,
+  "era": "ancient",
+  "war": "Greco-Persian Wars",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Athens and Plataea",
+      "commander": "Miltiades the Younger (de facto), Callimachus (polemarch)",
+      "strength": "About 9,000 Athenian hoplites and 1,000 Plataeans",
+      "casualties": "192 Athenians (per Herodotus); 11 Plataeans"
+    },
+    {
+      "name": "Achaemenid Persia",
+      "commander": "Datis and Artaphernes",
+      "strength": "Roughly 20,000 to 25,000 infantry and cavalry plus a Persian fleet of 600 triremes",
+      "casualties": "Around 6,400 killed (per Herodotus); 7 ships lost"
+    }
+  ],
+  "victor": "Athens and Plataea",
+  "summary": "Persian forces under Datis landed on the plain of Marathon to punish Athens for supporting the Ionian Revolt. The Athenian hoplite phalanx, thinned in the center and weighted on the wings, ran the last stretch into Persian arrow range and crushed the Persian wings before turning inward to envelop the centre. Survivors fled to the ships under harassing pursuit while the Athenian army marched back overnight to defend the city against a possible Persian landing.",
+  "significance": "Marathon was the first time a Greek hoplite army defeated a Persian field force in open battle. It bought Athens a decade to build the navy that would win Salamis, established the political and cultural confidence that produced the classical age, and gave the marathon footrace its name through the story of Pheidippides. Herodotus framed the engagement as the moment Greek freedom proved itself capable of standing against eastern empire.",
+  "wikipediaTitle": "Battle of Marathon"
+}

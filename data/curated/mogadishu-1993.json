@@ -1,0 +1,32 @@
+{
+  "id": "mogadishu-1993",
+  "name": "Battle of Mogadishu",
+  "year": 1993,
+  "date": "3 – 4 October 1993",
+  "lat": 2.0398,
+  "lng": 45.3393,
+  "era": "modern",
+  "war": "Somali Civil War",
+  "battleType": "land",
+  "aliases": [
+    { "name": "Black Hawk Down", "by": "Popular Western shorthand after the 1999 book and 2001 film" }
+  ],
+  "sides": [
+    {
+      "name": "Task Force Ranger (US Army, Delta Force, 160th SOAR) and the UNOSOM relief column",
+      "commander": "William F. Garrison (Task Force Ranger), Thomas Montgomery (UNOSOM II deputy commander, US Forces Somalia)",
+      "strength": "About 160 Rangers, Delta operators, and SEALs in the original snatch operation; the relief column of 100 vehicles assembled from US, Pakistani, and Malaysian units to extract them",
+      "casualties": "19 killed (18 American, 1 Malaysian), 73 wounded; 2 UH-60 Black Hawks shot down by RPGs"
+    },
+    {
+      "name": "Somali National Alliance",
+      "commander": "Mohamed Farrah Aidid (faction leader), Yusuf Dahir Mo'alim (street command)",
+      "strength": "About 2,000 to 4,000 militia and armed civilians, plus an unknown number of unarmed bystanders drawn into the fighting",
+      "casualties": "Estimates range from 315 to 2,000 killed; civilian dead in the high hundreds at least"
+    }
+  ],
+  "victor": "Tactical American success (target snatched), strategic failure",
+  "summary": "Task Force Ranger launched a daylight helicopter raid on the Olympic Hotel to capture two of Aidid's senior lieutenants. The snatch succeeded in twenty minutes; the extraction did not. Two MH-60 Black Hawks were shot down by RPGs over the Bakaara Market. Rangers and Delta operators fought through the night around the crash sites until the rescue column of Pakistani M48 tanks and Malaysian Condor APCs broke through at dawn. The dead American helicopter pilot was dragged through the streets by Aidid's militia for a CNN camera.",
+  "significance": "Mogadishu reshaped American foreign policy. Bill Clinton ordered the withdrawal of US forces from Somalia within days, an event that subsequently constrained intervention in the Rwandan genocide, the Bosnian war, and a generation of humanitarian crises. Osama bin Laden cited it as evidence that the United States would not absorb casualties for limited objectives, a calculation that informed the planning of subsequent al-Qaeda attacks.",
+  "wikipediaTitle": "Battle of Mogadishu (1993)"
+}

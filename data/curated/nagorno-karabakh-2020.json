@@ -1,0 +1,29 @@
+{
+  "id": "nagorno-karabakh-2020",
+  "name": "Second Nagorno-Karabakh War",
+  "year": 2020,
+  "date": "27 September – 10 November 2020",
+  "lat": 39.83,
+  "lng": 46.75,
+  "era": "modern",
+  "war": "Nagorno-Karabakh conflict",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Azerbaijan (with Turkish drone and operational support)",
+      "commander": "Ilham Aliyev (commander-in-chief), Hikmet Hasanov (chief of general staff)",
+      "strength": "About 65,000 active troops, supported by Bayraktar TB2 drones, Israeli loitering munitions, and Turkish-trained Syrian mercenaries",
+      "casualties": "Roughly 2,900 killed, 11,500 wounded"
+    },
+    {
+      "name": "Armenia and the Republic of Artsakh",
+      "commander": "Nikol Pashinyan (Armenian prime minister), Movses Hakobyan (Artsakh defence)",
+      "strength": "Around 60,000 Armenian and Artsakh Defence Army troops dug into old Soviet-era fortifications and the mountain line",
+      "casualties": "About 3,800 killed and several thousand wounded; tens of thousands displaced"
+    }
+  ],
+  "victor": "Azerbaijan",
+  "summary": "Azerbaijan opened with simultaneous strikes along the line of contact at dawn on the twenty-seventh of September 2020. Bayraktar TB2 and Israeli Harop drones systematically destroyed Armenian armour, artillery, and air-defence batteries in the open, allowing Azerbaijani special forces to take ridges that had held for decades. The decisive moment was the fall of Shusha in early November, the strategic hilltop above Stepanakert. Russia brokered a ceasefire on the tenth of November in which Armenia ceded the seven occupied districts around Karabakh and a corridor through Lachin.",
+  "significance": "The forty-four-day war was the first major engagement decided by mass-produced loitering munitions and small armed drones, and the experience reshaped procurement everywhere from Kyiv to Taipei. Azerbaijan recovered most of the territory Armenia had held since the first war in the 1990s and Russia inserted peacekeepers along the corridor. The Armenian government fell into a political crisis from which it never fully recovered, and Karabakh was reset to the boundary of the autonomous region itself, setting up the Azerbaijani offensive of 2023 that ended Armenian presence entirely.",
+  "wikipediaTitle": "2020 Nagorno-Karabakh war"
+}

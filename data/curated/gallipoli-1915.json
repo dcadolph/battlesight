@@ -1,0 +1,29 @@
+{
+  "id": "gallipoli-1915",
+  "name": "Gallipoli Campaign",
+  "year": 1915,
+  "date": "17 February 1915 – 9 January 1916",
+  "lat": 40.2167,
+  "lng": 26.4,
+  "era": "world-war-1",
+  "war": "World War I",
+  "battleType": "amphibious",
+  "sides": [
+    {
+      "name": "Allied (British Empire, France, ANZAC)",
+      "commander": "Ian Hamilton (Mediterranean Expeditionary Force), William Birdwood (ANZAC), Frederick Stopford (IX Corps)",
+      "strength": "About 489,000 troops across the campaign including British, Indian, Australian, New Zealand, Newfoundland, and French divisions; supported by the Mediterranean Fleet",
+      "casualties": "Around 252,000 killed, wounded, or sick (including 56,000 dead)"
+    },
+    {
+      "name": "Ottoman Empire (with German staff support)",
+      "commander": "Otto Liman von Sanders (German military mission), Mustafa Kemal (19th Division, later corps and front)",
+      "strength": "About 315,000 Ottoman troops dug into the cliffs and ridges above the landing beaches",
+      "casualties": "About 251,000 killed, wounded, or sick (around 87,000 dead)"
+    }
+  ],
+  "victor": "Ottoman Empire",
+  "summary": "Winston Churchill, then First Lord of the Admiralty, drove the campaign to force the Dardanelles, knock the Ottoman Empire out of the war, and reopen sea communication with Russia. The naval attack on the eighteenth of March 1915 lost three battleships to mines and was abandoned. The land invasion on the twenty-fifth of April scattered British and Anzac divisions across small beaches under the cliffs at Cape Helles and Anzac Cove, where Mustafa Kemal's counter-attacks held the high ground. Eight months of trench warfare in dry summer heat then winter rain produced nothing the original plan asked of it. The British withdrew without a casualty over the night of the eighth into the ninth of January 1916.",
+  "significance": "Gallipoli ended Churchill's first political career, founded the Australian and New Zealand national days of remembrance (Anzac Day), and launched Mustafa Kemal toward the presidency of the Turkish Republic he would proclaim eight years later. Strategically the Ottomans held the straits and Russia stayed isolated, contributing to the conditions of the 1917 revolutions. Operationally the campaign became the canonical example of an amphibious operation conducted on impossibly optimistic assumptions about terrain, supply, and the enemy.",
+  "wikipediaTitle": "Gallipoli campaign"
+}

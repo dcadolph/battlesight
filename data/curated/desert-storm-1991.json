@@ -1,0 +1,29 @@
+{
+  "id": "desert-storm-1991",
+  "name": "Operation Desert Storm",
+  "year": 1991,
+  "date": "17 January – 28 February 1991",
+  "lat": 29.3759,
+  "lng": 47.9774,
+  "era": "modern",
+  "war": "Gulf War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Coalition Forces (United States, United Kingdom, Saudi Arabia, France, and 35 other nations)",
+      "commander": "Norman Schwarzkopf (CENTCOM), Khalid bin Sultan (Saudi Joint Forces), Frederick Franks (VII Corps), Gary Luck (XVIII Airborne Corps)",
+      "strength": "About 956,600 troops, 3,360 tanks, 2,250 aircraft",
+      "casualties": "Around 292 killed and 776 wounded across the entire coalition"
+    },
+    {
+      "name": "Iraq",
+      "commander": "Saddam Hussein (overall), Sultan Hashim Ahmad (defence)",
+      "strength": "About 650,000 troops, 4,200 tanks, 700 aircraft (most of which fled to Iran during the air campaign)",
+      "casualties": "About 25,000 to 30,000 killed; over 75,000 captured; the army's combat capability destroyed in 100 hours of ground war"
+    }
+  ],
+  "victor": "Coalition Forces",
+  "summary": "After Iraq invaded Kuwait on the second of August 1990, an American-led coalition of 36 nations spent five months building up the largest military force assembled since the Second World War. The air campaign opened on the seventeenth of January 1991 and ground for thirty-eight days against Iraqi command, communications, air defences, and the army in Kuwait. The ground campaign opened on the twenty-fourth of February. Schwarzkopf's \"left hook\" of VII and XVIII Airborne Corps swept around the western flank, while Marines pushed into Kuwait City itself. One hundred hours after the ground war began, with the Iraqi army shattered and fleeing north on the Highway of Death, George H. W. Bush halted the offensive.",
+  "significance": "Desert Storm was the first major war fought after the end of the Cold War and the first sustained demonstration of American precision-strike capabilities, stealth aircraft, GPS-guided manoeuvre, and 24-hour CNN coverage. Saddam Hussein remained in power and the Iraqi opposition Bush had encouraged to rise was crushed. The strategic decision to stop short of Baghdad shaped American foreign policy for the next decade and produced the political conditions for the 2003 invasion that returned to finish the job.",
+  "wikipediaTitle": "Gulf War"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "yorktown-1781",
+  "name": "Siege of Yorktown",
+  "year": 1781,
+  "date": "28 September – 19 October 1781",
+  "lat": 37.2387,
+  "lng": -76.5085,
+  "era": "napoleonic",
+  "war": "American Revolutionary War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Continental Army and French expeditionary force",
+      "commander": "George Washington (overall), Jean-Baptiste de Rochambeau (French ground), François-Joseph Paul de Grasse (French fleet)",
+      "strength": "About 8,800 Continentals, 7,800 French regulars, 3,100 Virginia militia, and de Grasse's 28-ship Caribbean fleet blockading the Chesapeake",
+      "casualties": "Around 88 killed, 301 wounded"
+    },
+    {
+      "name": "British and Hessian forces",
+      "commander": "Charles Cornwallis (Earl Cornwallis)",
+      "strength": "About 9,000 British, Hessian, and Loyalist troops",
+      "casualties": "About 156 killed, 326 wounded; 7,247 surrendered along with the entire fleet at Yorktown"
+    }
+  ],
+  "victor": "Continental Army and French expeditionary force",
+  "summary": "Washington and Rochambeau marched 600 kilometres south from the Hudson highlands in late August, deceiving Henry Clinton in New York into thinking they were preparing to attack the city. De Grasse arrived in the Chesapeake on the thirtieth of August and on the fifth of September defeated the British Atlantic fleet at the Battle of the Capes, sealing Cornwallis off from rescue. Washington opened the formal siege on the twenty-eighth and reduced redoubts 9 and 10 in night assaults on the fourteenth of October (Alexander Hamilton led the American column). Cornwallis surrendered on the seventeenth and his army marched out to lay down arms on the nineteenth.",
+  "significance": "Yorktown effectively ended major combat in the Revolutionary War. The British public's appetite for the war collapsed when news reached London in late November. Lord North's government fell in March 1782 and the new Rockingham ministry opened peace negotiations. The Treaty of Paris (1783) recognised the independence of the United States and ceded territory to the Mississippi River. The combined Franco-American operational planning and the deception that produced the march south remain among the most studied campaigns in American military history.",
+  "wikipediaTitle": "Siege of Yorktown"
+}

@@ -7,16 +7,17 @@ import type {
   Annotation,
   Faction,
 } from '../../types/replay';
-import { FACTION_COLOR, FACTION_GLOW } from '../../types/replay';
+import { factionColorFor, factionGlowFor } from '../../types/replay';
 
 interface TacticalMapProps {
   phase: Phase;
   aspectRatio: number;
+  aggressor?: Faction;
 }
 
 const VIEW_H = 100;
 
-export default function TacticalMap({ phase, aspectRatio }: TacticalMapProps) {
+export default function TacticalMap({ phase, aspectRatio, aggressor }: TacticalMapProps) {
   const viewW = useMemo(() => Math.round(VIEW_H * aspectRatio), [aspectRatio]);
 
   // Camera transform: when the phase declares a focus rect, scale+translate
@@ -72,7 +73,7 @@ export default function TacticalMap({ phase, aspectRatio }: TacticalMapProps) {
               markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path d="M 0 0 L 14 7 L 0 14 L 4 7 z" fill={FACTION_COLOR[f]} />
+              <path d="M 0 0 L 14 7 L 0 14 L 4 7 z" fill={factionColorFor(f, aggressor)} />
             </marker>
           ))}
         </defs>
@@ -90,11 +91,11 @@ export default function TacticalMap({ phase, aspectRatio }: TacticalMapProps) {
           ))}
 
           {(phase.movements ?? []).map((m, i, all) => (
-            <MovementArrow key={`mv-${i}-${phase.index}`} movement={m} viewW={viewW} index={i} total={all.length} />
+            <MovementArrow key={`mv-${i}-${phase.index}`} movement={m} viewW={viewW} index={i} total={all.length} aggressor={aggressor} />
           ))}
 
           {phase.units.map((u) => (
-            <UnitBlock key={`unit-${u.label}`} unit={u} viewW={viewW} />
+            <UnitBlock key={`unit-${u.label}`} unit={u} viewW={viewW} aggressor={aggressor} />
           ))}
 
           {(phase.annotations ?? []).map((a, i) => (
@@ -445,11 +446,12 @@ function TerrainShape({ terrain, viewW }: TerrainProps) {
 interface UnitProps {
   unit: Unit;
   viewW: number;
+  aggressor?: Faction;
 }
 
-function UnitBlock({ unit, viewW }: UnitProps) {
-  const color = FACTION_COLOR[unit.faction];
-  const glow = FACTION_GLOW[unit.faction];
+function UnitBlock({ unit, viewW, aggressor }: UnitProps) {
+  const color = factionColorFor(unit.faction, aggressor);
+  const glow = factionGlowFor(unit.faction, aggressor);
   const x = scaleX(unit.x, viewW);
   const y = unit.y;
   const w = scaleX(unit.w ?? 8, viewW) - scaleX(0, viewW);
@@ -686,10 +688,11 @@ interface MovementProps {
   // total is the number of movements in the phase, used to scale per-arrow
   // delay so the full choreography always finishes before the next phase.
   total: number;
+  aggressor?: Faction;
 }
 
-function MovementArrow({ movement, viewW, index, total }: MovementProps) {
-  const color = FACTION_COLOR[movement.faction];
+function MovementArrow({ movement, viewW, index, total, aggressor }: MovementProps) {
+  const color = factionColorFor(movement.faction, aggressor);
   const x1 = scaleX(movement.fromX, viewW);
   const y1 = movement.fromY;
   const x2 = scaleX(movement.toX, viewW);

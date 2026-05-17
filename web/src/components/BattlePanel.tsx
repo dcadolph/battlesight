@@ -3,6 +3,7 @@ import type { Battle, Reference } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS, TIER_LABELS, TIER_DESCRIPTIONS } from '../types/battle';
 import { themeForEra } from '../theme/era';
 import { formatYear, formatBattleDate } from '../lib/format';
+import CloseButton from './CloseButton';
 
 interface BattlePanelProps {
   battle: Battle;
@@ -118,22 +119,13 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
 
   return (
     <div className="fixed top-0 right-0 h-full w-[420px] max-w-[90vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 overflow-y-auto">
-      {/* Sticky close button. Lives in a fixed-position layer rather than
-          inside the scrolling body so it never disappears under a long
-          dossier. Larger and higher-contrast than the previous version so
-          the eye finds it the first time, every time. */}
-      <button
-        onClick={onClose}
-        className="sticky top-3 ml-auto mr-3 mt-3 z-10 inline-flex items-center gap-1.5 h-9 pl-2.5 pr-3.5 rounded-full bg-white text-slate-900 shadow-[0_8px_18px_-8px_rgba(0,0,0,0.7)] hover:bg-slate-100 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1019]"
-        aria-label="Close panel (Esc)"
-        title="Close (Esc)"
-        style={{ float: 'right' }}
-      >
-        <svg width="11" height="11" viewBox="0 0 11 11" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
-          <path d="M1 1 L10 10 M10 1 L1 10" />
-        </svg>
-        <span className="text-[12px] font-semibold tracking-wide">Close</span>
-      </button>
+      {/* Sticky close mark. The shared CloseButton component anchors the
+          exit affordance in the same place with the same style as every
+          other dismissable surface in the app, so the user always knows
+          how to leave whatever they opened. */}
+      <div className="sticky top-3 z-10 ml-auto mr-3 mt-3" style={{ float: 'right' }}>
+        <CloseButton onClick={onClose} label="Close panel (Esc)" />
+      </div>
       <div className="p-6 pt-2 clear-both">
 
         {/* Era stamp: tracked small caps in the era accent. Sits above the
@@ -215,47 +207,66 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
           </p>
         )}
 
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
-          {battle.era && (
-            <span
-              className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold"
-              style={{ backgroundColor: `${color}20`, color }}
-            >
-              {ERA_LABELS[battle.era] || battle.era}
-            </span>
-          )}
-          {(() => {
-            const tier = detail.tier ?? battle.tier ?? (detail.verified ? 'documented' : 'indexed');
-            const tone =
-              tier === 'reconstructed'
-                ? 'bg-blue-500/15 text-blue-300 border-blue-500/25'
-                : tier === 'documented'
-                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25'
-                : 'bg-amber-500/15 text-amber-300 border-amber-500/25';
-            return (
+        {/* Facts grid. Replaces the previous pill+date+war+link soup with a
+            clean label/value table so every battle renders the same shape
+            regardless of which fields happen to be populated. Empty fields
+            render as the slate "—" placeholder rather than collapsing the
+            row, keeping the dossier rhythm identical across battles. */}
+        {(() => {
+          const tier = detail.tier ?? battle.tier ?? (detail.verified ? 'documented' : 'indexed');
+          const tierColor =
+            tier === 'reconstructed' ? '#60a5fa' : tier === 'documented' ? '#34d399' : '#fbbf24';
+          const rows: Array<[string, React.ReactNode]> = [
+            ['Date', yearKnown ? dateDisplay : '—'],
+            ['Era', (
+              <span style={{ color }}>{ERA_LABELS[battle.era] || battle.era || '—'}</span>
+            )],
+            ['War', battle.war || '—'],
+            ['Type', battle.battleType
+              ? battle.battleType.charAt(0).toUpperCase() + battle.battleType.slice(1)
+              : '—'],
+            ['Tier', (
               <span
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium border ${tone}`}
+                style={{ color: tierColor }}
                 title={TIER_DESCRIPTIONS[tier]}
               >
                 {TIER_LABELS[tier]}
               </span>
-            );
-          })()}
-        </div>
+            )],
+          ];
+          return (
+            <dl
+              className="mb-5 rounded-xl border border-slate-800/70 bg-slate-900/30 divide-y divide-slate-800/50"
+              style={{ overflow: 'hidden' }}
+            >
+              {rows.map(([k, v]) => (
+                <div
+                  key={k}
+                  className="flex items-baseline gap-3 px-4 py-2"
+                >
+                  <dt className="text-[10px] uppercase tracking-[0.22em] text-slate-500 w-14 flex-shrink-0">
+                    {k}
+                  </dt>
+                  <dd className="text-[13px] text-slate-200 leading-snug flex-1 min-w-0">
+                    {v}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          );
+        })()}
 
-        {/* Compact metadata strip: date + war + outbound links. Lives under the
-            hero so the dossier opens cinematically and the chrome stays out
-            of the way until the reader wants it. */}
-        <p className="text-slate-400 text-sm mb-1">
-          {yearKnown ? dateDisplay : 'Date unknown'}
-        </p>
-        <div className="flex items-center gap-3 mb-4 flex-wrap">
-          {battle.war && <span className="text-slate-500 text-sm">{battle.war}</span>}
+        {/* Actions row: one unified strip of outbound links and share. All
+            buttons share the same shape, height, and rest-state styling so
+            the eye reads them as a toolbar rather than three different
+            kinds of object. */}
+        <div className="flex items-center gap-2 mb-5 flex-wrap">
           <a
             href={`https://earth.google.com/web/@${battle.lat},${battle.lng},0a,30000d,35y,0h,0t,0r`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors"
+            className="inline-flex items-center justify-center h-8 px-3 rounded-md text-[11px] font-medium bg-slate-800/60 text-slate-200 border border-slate-700/60 hover:bg-slate-700/70 transition-colors"
+            title="Open the battlefield in Google Earth"
           >
             Google Earth
           </a>
@@ -264,8 +275,8 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
               href={`https://en.wikipedia.org/wiki/${encodeURIComponent((detail.wikipediaTitle || battle.wikipediaTitle || '').replace(/ /g, '_'))}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-sky-500/15 text-sky-300 border border-sky-500/25 hover:bg-sky-500/25 transition-colors"
-              title="Open this battle on Wikipedia to cross-check"
+              className="inline-flex items-center justify-center h-8 px-3 rounded-md text-[11px] font-medium bg-slate-800/60 text-slate-200 border border-slate-700/60 hover:bg-slate-700/70 transition-colors"
+              title="Open this battle on Wikipedia"
             >
               Wikipedia
             </a>
@@ -273,8 +284,8 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
           {onShare && (
             <button
               onClick={onShare}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-700/40 text-slate-300 border border-slate-600/40 hover:bg-slate-700/60 transition-colors"
-              title="Copy share link"
+              className="inline-flex items-center justify-center h-8 px-3 rounded-md text-[11px] font-medium bg-slate-800/60 text-slate-200 border border-slate-700/60 hover:bg-slate-700/70 transition-colors"
+              title="Copy share link to clipboard"
             >
               Share
             </button>

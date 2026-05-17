@@ -1,0 +1,29 @@
+{
+  "id": "spanish-armada-1588",
+  "name": "Defeat of the Spanish Armada",
+  "year": 1588,
+  "date": "31 July – 12 August 1588",
+  "lat": 50.5,
+  "lng": -1.0,
+  "era": "early-modern",
+  "war": "Anglo-Spanish War (1585–1604)",
+  "battleType": "naval",
+  "sides": [
+    {
+      "name": "Kingdom of England (and Dutch privateers)",
+      "commander": "Charles Howard (Lord High Admiral), Francis Drake (vice admiral), John Hawkins, Martin Frobisher",
+      "strength": "About 34 royal warships plus around 130 armed merchantmen, faster and better-gunned than the Spanish",
+      "casualties": "Roughly 50 to 100 killed in action; thousands more killed by typhus and dysentery after the campaign"
+    },
+    {
+      "name": "Spanish Empire",
+      "commander": "Alonso Pérez de Guzmán, Duke of Medina Sidonia",
+      "strength": "About 130 ships including 22 fighting galleons, carrying 19,000 soldiers intended to escort the Duke of Parma's army across from Flanders",
+      "casualties": "Roughly 20,000 killed (mostly to disease and shipwreck on the return voyage); about 60 ships lost"
+    }
+  ],
+  "victor": "Kingdom of England",
+  "summary": "Philip II ordered the Armada to escort Alexander Farnese's army of Flanders across the Channel to invade England. The English fleet shadowed the Spanish crescent formation up the Channel in a series of running gunfights but could not break it. At Calais on the night of the seventh of August, English fireships drove the Spanish to cut their anchor cables and scatter. The Battle of Gravelines the next day broke the Spanish formation properly, and the prevailing wind drove the survivors north into the North Sea. The return route around Scotland and Ireland in autumn gales destroyed the rest.",
+  "significance": "The defeat of the Armada ended any prospect of a Spanish invasion of England, secured the Protestant succession under Elizabeth I, and shifted the European balance away from Habsburg Spain. The English crown emerged with both the strategic confidence and the financial precedent to launch the trans-Atlantic colonial expansion that would define the next two centuries. In English national memory the campaign became the founding myth of British sea power and Drake's deliberate game of bowls at Plymouth Hoe.",
+  "wikipediaTitle": "Spanish Armada"
+}

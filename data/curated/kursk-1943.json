@@ -1,0 +1,29 @@
+{
+  "id": "kursk-1943",
+  "name": "Battle of Kursk",
+  "year": 1943,
+  "date": "5 July – 23 August 1943",
+  "lat": 51.7373,
+  "lng": 36.1873,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Soviet Union",
+      "commander": "Georgy Zhukov and Aleksandr Vasilevsky (Stavka), Konstantin Rokossovsky (Central Front), Nikolai Vatutin (Voronezh Front), Ivan Konev (Steppe Front)",
+      "strength": "About 1.9 million troops, 5,128 tanks and self-propelled guns, 25,013 artillery pieces, 2,792 aircraft in three fronts and a strategic reserve",
+      "casualties": "Roughly 178,000 killed and missing, 685,000 wounded, 6,064 tanks lost"
+    },
+    {
+      "name": "Nazi Germany",
+      "commander": "Erich von Manstein (Army Group South), Walther Model (9th Army), Hermann Hoth (4th Panzer Army)",
+      "strength": "About 780,000 troops, 2,928 tanks and assault guns, 9,966 artillery pieces, 2,110 aircraft in Operation Citadel",
+      "casualties": "Roughly 200,000 killed, wounded, or missing; 760 tanks lost outright with most of the Panzer reserve damaged"
+    }
+  ],
+  "victor": "Soviet Union",
+  "summary": "Hitler delayed Operation Citadel for new Panther and Tiger tanks. Soviet intelligence read the plan in detail and the Red Army spent the spring digging eight defensive belts in depth, laying 503,000 mines, and assembling a strategic reserve. Model's 9th Army from the north stalled in the minefields by the eighth of July. Hoth and SS Panzer Corps from the south reached Prokhorovka on the twelfth and fought the largest tank battle of the war, after which the German attack culminated and could not be renewed. Soviet counter-offensives at Orel (Kutuzov) and Belgorod-Kharkov (Polkovodets Rumyantsev) then drove the front 150 kilometres west by August.",
+  "significance": "Kursk was the last German strategic offensive on the Eastern Front. From this point until Berlin twenty-two months later the Wehrmacht was in continuous retreat. The German panzer reserve that might have stabilised the front in 1944 was burned up in the bocage of Prokhorovka. Soviet armoured doctrine and command had caught up with German practice; the next year would be a Red Army offensive year.",
+  "wikipediaTitle": "Battle of Kursk"
+}

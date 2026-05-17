@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { Battle } from '../../types/battle';
 import type { Replay } from '../../types/replay';
-import { FACTION_COLOR } from '../../types/replay';
+import { factionColorFor } from '../../types/replay';
 import TacticalMap from './TacticalMap';
 import GlobeReplay from './GlobeReplay';
 import { themeForEra } from '../../theme/era';
 import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
 import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
+import CloseButton from '../CloseButton';
 
 interface BattleReplayProps {
   battle: Battle;
@@ -264,15 +265,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             <span className="text-[13px] leading-none">🌍</span>
             <span className="text-xs font-semibold tracking-wide">Earth</span>
           </a>
-          <button
-            onClick={onClose}
-            className="ml-1 inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-blue-500/50 bg-blue-500/15 text-blue-100 hover:bg-blue-500/30 hover:text-white hover:border-blue-400 transition-colors"
-            aria-label="Back to battle story (Esc)"
-            title="Back to battle story (Esc)"
-          >
-            <span className="text-base leading-none">←</span>
-            <span className="text-xs font-semibold tracking-wide">Back to story</span>
-          </button>
+          <div className="ml-1">
+            <CloseButton onClick={onClose} label="Exit replay (Esc)" tone="elevated" />
+          </div>
         </div>
       </header>
 
@@ -295,7 +290,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
               <div className="w-full h-full flex items-center justify-center">
                 <div className="w-full max-w-6xl">
                   <div className="rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
-                    <TacticalMap key={phaseIdx} phase={phase} aspectRatio={aspectRatio} />
+                    <TacticalMap key={phaseIdx} phase={phase} aspectRatio={aspectRatio} aggressor={replay.aggressor} />
                   </div>
                 </div>
               </div>
@@ -374,9 +369,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 get cramped on narrow stages. */}
             <div className="mb-4 pb-4 border-b border-slate-800/80 space-y-1.5">
               <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-1.5">Sides</div>
-              <SideRow color={FACTION_COLOR.a} label={replay.factionA} />
-              <SideRow color={FACTION_COLOR.b} label={replay.factionB} />
-              {replay.factionC && <SideRow color={FACTION_COLOR.c} label={replay.factionC} />}
+              <SideRow color={factionColorFor('a', replay.aggressor)} label={replay.factionA} />
+              <SideRow color={factionColorFor('b', replay.aggressor)} label={replay.factionB} />
+              {replay.factionC && <SideRow color={factionColorFor('c', replay.aggressor)} label={replay.factionC} />}
             </div>
 
             <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2">

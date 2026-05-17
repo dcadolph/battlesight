@@ -1,0 +1,29 @@
+{
+  "id": "hastings-1066",
+  "name": "Battle of Hastings",
+  "year": 1066,
+  "date": "14 October 1066",
+  "lat": 50.9144,
+  "lng": 0.4878,
+  "era": "medieval",
+  "war": "Norman conquest of England",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Normandy and allies",
+      "commander": "William the Conqueror (Duke of Normandy)",
+      "strength": "Roughly 7,000 to 12,000 including Norman knights, Breton and Flemish allies, archers, and crossbowmen",
+      "casualties": "About 2,000 killed"
+    },
+    {
+      "name": "Anglo-Saxon England",
+      "commander": "Harold Godwinson (King of England)",
+      "strength": "Roughly 7,000 to 8,000 housecarls and fyrd, exhausted from the forced march south after Stamford Bridge nineteen days earlier",
+      "casualties": "About 4,000 killed; Harold and both his brothers killed"
+    }
+  ],
+  "victor": "Normandy and allies",
+  "summary": "Harold Godwinson formed the Anglo-Saxon shield-wall on Senlac Hill seven miles inland from Hastings. The Normans attacked uphill all morning and were repulsed each time. Twice the Breton wing broke and ran; twice Saxon pursuers left the shield-wall and were ridden down. By late afternoon Norman archers had thinned the wall enough for a final charge. Harold was killed (by tradition, an arrow in the eye) and his housecarls cut down around his banner.",
+  "significance": "Hastings replaced the Anglo-Saxon ruling class with a Norman one within a generation. English law, language, architecture, and the structure of the kingdom were reset. The Domesday Book recorded the wholesale transfer of landholding in 1086. The political union of England and the French-speaking aristocracy carried England into the Hundred Years' War and shaped English political identity for the next four centuries.",
+  "wikipediaTitle": "Battle of Hastings"
+}

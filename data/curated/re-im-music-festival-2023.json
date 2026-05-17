@@ -1,0 +1,29 @@
+{
+  "id": "re-im-music-festival-2023",
+  "name": "Re'im music festival massacre",
+  "year": 2023,
+  "date": "7 October 2023",
+  "lat": 31.292,
+  "lng": 34.486,
+  "era": "modern",
+  "war": "Israel–Hamas war",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Israel (civilians and police)",
+      "commander": "Local police and reservists, ad hoc",
+      "strength": "About 3,500 unarmed civilians attending the Nova trance festival, a handful of police and arriving reservists",
+      "casualties": "364 civilians killed, at least 40 taken hostage to Gaza"
+    },
+    {
+      "name": "Hamas and allied factions",
+      "commander": "Mohammed Deif (al-Qassam Brigades), Yahya Sinwar (Hamas in Gaza)",
+      "strength": "Several hundred fighters across multiple breach groups, motorbikes, pickup trucks, and paragliders",
+      "casualties": "Tens killed during the day-long attack"
+    }
+  ],
+  "victor": "Hamas and allied factions",
+  "summary": "At dawn on the seventh of October 2023, Hamas and Palestinian Islamic Jihad fighters breached the Gaza border fence and reached the open-air Nova music festival outside the kibbutz of Re'im. Unarmed festival-goers were shot, hunted in fields and bomb shelters, and abducted across the border. The attack was one of more than twenty assaults on Israeli communities and military posts that morning.",
+  "significance": "The festival ground accounted for the single largest concentration of civilian dead on the deadliest day for Jews since the Holocaust. Smartphone footage from the site shaped global opinion of the war that followed and the hostage crisis that anchored every subsequent Israeli operation. The site is now a permanent memorial.",
+  "wikipediaTitle": "Re'im music festival massacre"
+}

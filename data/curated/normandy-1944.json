@@ -1,0 +1,29 @@
+{
+  "id": "normandy-1944",
+  "name": "Battle of Normandy",
+  "year": 1944,
+  "date": "6 June – 30 August 1944",
+  "lat": 49.34,
+  "lng": -0.51,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "amphibious",
+  "sides": [
+    {
+      "name": "Allied (United States, United Kingdom, Canada, Free French, Poland)",
+      "commander": "Dwight D. Eisenhower (Supreme Commander), Bernard Montgomery (21st Army Group), Omar Bradley (1st US Army)",
+      "strength": "About 156,000 troops landed on D-Day; over 1.5 million in theatre by the breakout; 5,000 ships and 11,000 aircraft",
+      "casualties": "Around 226,000 killed, wounded, missing, or captured"
+    },
+    {
+      "name": "Nazi Germany",
+      "commander": "Gerd von Rundstedt (OB West), Erwin Rommel (Army Group B), Friedrich Dollmann (7th Army)",
+      "strength": "About 350,000 troops in the immediate theatre, 1 million across the broader West, including 11 Panzer divisions",
+      "casualties": "Roughly 240,000 killed, wounded, or missing, plus 200,000 captured"
+    }
+  ],
+  "victor": "Allies",
+  "summary": "Operation Overlord opened on the sixth of June with airborne landings inland and amphibious assaults on five beaches code-named Utah, Omaha, Gold, Juno, and Sword. Omaha came closest to failure under enfilade fire from the bluffs. Within a week the Allies had linked the beachheads and built artificial Mulberry harbors to land sustained reinforcements. Six weeks of grinding bocage fighting followed until Operation Cobra punched out of the perimeter on the twenty-fifth of July. The German line collapsed at Falaise on the twentieth of August, Paris fell on the twenty-fifth, and Allied forces stood on the Seine by month-end.",
+  "significance": "Normandy opened the long-promised Second Front and committed the western Allies to the European mainland in numbers Germany could not match. Stalin's diplomatic price for sustaining the Eastern Front offensive was paid. By the end of August Germany faced converging armies from west, east, and south with no operational depth left, and the trajectory toward Berlin was set. The Atlantic Wall, the most heavily fortified coast in history, was reduced to a six-week speed bump.",
+  "wikipediaTitle": "Operation Overlord"
+}

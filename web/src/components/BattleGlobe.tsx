@@ -199,25 +199,37 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
   useEffect(() => {
     const tNow = performance.now();
     const current = new Set<string>();
-    const additions: typeof ignitionRings = [];
+    const fresh: Battle[] = [];
     for (const b of visibleBattles) {
       current.add(b.id);
-      if (!lastIdsRef.current.has(b.id)) {
-        // Skip the very first render (when lastIdsRef is empty); we don't
-        // want every visible battle to pulse on mount.
-        if (lastIdsRef.current.size === 0) continue;
-        additions.push({
-          lat: b.lat,
-          lng: b.lng,
-          id: `ig-${b.id}-${tNow}`,
-          kind: 'ignition',
-          color: ERA_COLORS[b.era] || '#ffffff',
-          expires: tNow + 2200,
-        });
+      if (!lastIdsRef.current.has(b.id) && lastIdsRef.current.size > 0) {
+        fresh.push(b);
       }
     }
     lastIdsRef.current = current;
-    if (additions.length === 0) return;
+    // Two guards against the seizure-flashing the user hit during a fast
+    // history scrub:
+    //   1. If a single frame admits more than 30 new battles, the user is
+    //      scrubbing rather than watching the ticker advance year by year.
+    //      Skip the pulse entirely — the eye reads it as visual noise.
+    //   2. Otherwise cap to a small random sample (max 6 per frame) so the
+    //      pulse remains a cinematic accent, not a wall of strobing rings.
+    if (fresh.length === 0) return;
+    if (fresh.length > 30) return;
+    const SAMPLE_CAP = 6;
+    let chosen = fresh;
+    if (fresh.length > SAMPLE_CAP) {
+      const shuffled = [...fresh].sort(() => Math.random() - 0.5);
+      chosen = shuffled.slice(0, SAMPLE_CAP);
+    }
+    const additions = chosen.map((b) => ({
+      lat: b.lat,
+      lng: b.lng,
+      id: `ig-${b.id}-${tNow}`,
+      kind: 'ignition' as const,
+      color: ERA_COLORS[b.era] || '#ffffff',
+      expires: tNow + 2200,
+    }));
     setIgnitionRings((prev) => {
       const alive = prev.filter((r) => r.expires > tNow);
       return [...alive, ...additions];
@@ -446,10 +458,13 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
   const pointLabel = useCallback((point: object) => {
     const b = point as Battle;
     const eraColor = ERA_COLORS[b.era] || '#94a3b8';
-    const yearStr = b.year === 0 ? '' : b.year < 0 ? `${Math.abs(b.year)} BC` : `${b.year}`;
-    const dateLine = b.date && b.date !== '0' ? b.date : yearStr;
     const displayName = b.name?.trim() || 'Unnamed battle';
-    const sub = [dateLine, b.war].filter(Boolean).join(' · ');
+    // Date logic: prefer the full date string when present (carries the
+    // day-of-month detail the user can't extract from year alone), else
+    // fall back to a year-only line. Both branches feed the dedicated
+    // DATE row so the placement is fixed across every battle.
+    const yearStr = b.year === 0 ? '' : b.year < 0 ? `${Math.abs(b.year)} BC` : `${b.year}`;
+    const dateText = b.date && b.date !== '0' ? b.date : yearStr;
     const typeBadge = b.battleType
       ? `<span style="display:inline-block;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;padding:1px 6px;border-radius:6px;background:rgba(148,163,184,0.15);color:#cbd5e1">${escapeHTML(b.battleType)}</span>`
       : '';
@@ -465,17 +480,26 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       indexed: 'Indexed',
     };
     const tierBadge = `<span style="display:inline-block;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;padding:1px 6px;border-radius:6px;${tierTone[tier]}">${tierLabel[tier]}</span>`;
+
+    // Structured fact rows. Each one is a small-caps label + value pair
+    // anchored to a fixed left column so the eye can scan dates straight
+    // down across multiple tooltips without re-parsing the line every
+    // time. Hidden rather than collapsed when a field is missing.
+    const labelStyle =
+      'display:inline-block;width:48px;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(148,163,184,0.7);font-weight:600';
+    const valueStyle = 'font-size:12px;color:#e2e8f0';
+    const factRow = (label: string, value: string, valColor?: string) =>
+      value
+        ? `<div style="margin-top:3px;display:flex;align-items:baseline;gap:8px"><span style="${labelStyle}">${label}</span><span style="${valueStyle}${valColor ? `;color:${valColor}` : ''}">${escapeHTML(value)}</span></div>`
+        : '';
+
     const totalCas = totalCasualties(b);
-    const casLine = totalCas > 0
-      ? `<div style="margin-top:4px;font-size:11px;color:#fbbf24">~${formatNumber(totalCas)} casualties</div>`
-      : '';
-    const victorLine = b.victor
-      ? `<div style="margin-top:2px;font-size:11px;color:#86efac">Victor: ${escapeHTML(b.victor)}</div>`
-      : '';
+    const casText = totalCas > 0 ? `~${formatNumber(totalCas)}` : '';
+
     const replayLine = b.hasReplay
-      ? '<div style="margin-top:6px;font-size:10px;color:#93c5fd;letter-spacing:0.08em;text-transform:uppercase">▶ Click marker for phase replay</div>'
+      ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(148,163,184,0.18);font-size:10px;color:#93c5fd;letter-spacing:0.08em;text-transform:uppercase">▶ Click marker for phase replay</div>'
       : b.hasSchematic
-      ? '<div style="margin-top:6px;font-size:10px;color:#94a3b8;letter-spacing:0.08em;text-transform:uppercase">▶ Click marker for schematic</div>'
+      ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(148,163,184,0.18);font-size:10px;color:#94a3b8;letter-spacing:0.08em;text-transform:uppercase">▶ Click marker for schematic</div>'
       : '';
     return `<div style="
       background: rgba(10,10,15,0.94);
@@ -485,15 +509,16 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       font-family: Inter, system-ui, sans-serif;
       font-size: 13px;
       color: #e2e8f0;
-      max-width: min(260px, 84vw);
+      max-width: min(280px, 84vw);
       box-shadow: 0 12px 32px rgba(0,0,0,0.55);
       pointer-events: none;
     ">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap">${tierBadge}${typeBadge}</div>
-      <div style="font-weight:600; font-size:14px; color:${eraColor}">${escapeHTML(displayName)}</div>
-      ${sub ? `<div style="opacity:0.65; margin-top:2px; font-size:11px">${escapeHTML(sub)}</div>` : ''}
-      ${victorLine}
-      ${casLine}
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">${tierBadge}${typeBadge}</div>
+      <div style="font-weight:600; font-size:14px; color:${eraColor}; line-height:1.2; margin-bottom:6px">${escapeHTML(displayName)}</div>
+      ${factRow('Date', dateText)}
+      ${factRow('War', b.war || '')}
+      ${factRow('Victor', b.victor || '', '#86efac')}
+      ${factRow('Cas.', casText, '#fbbf24')}
       ${replayLine}
     </div>`;
   }, []);

@@ -200,7 +200,7 @@ export default function CommandBar({
             onKeyDown={handleKeyDown}
             onFocus={() => (results.length > 0 || warResults.length > 0) && setSearchOpen(true)}
             onBlur={() => setTimeout(() => setSearchOpen(false), 150)}
-            placeholder="Search battles or wars..."
+            placeholder="Search battles, wars, places, or paste lat, lng..."
             className="w-full h-10 px-4 bg-[#1e2030] border border-slate-600/50 rounded-xl text-[13px] text-white placeholder-slate-500 focus:outline-none focus:border-blue-400/70 focus:bg-[#232538] shadow-lg transition-all"
           />
           {query && (
@@ -313,7 +313,7 @@ export default function CommandBar({
             label="History"
             active={historyActive}
             onClick={onHistoryPlay}
-            title="Play 2,500 years of history in 90 seconds"
+            title="Play 3,500 years of history in 90 seconds"
             icon={
               <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
                 <path d="M2.5 1.5 L 10.5 6 L 2.5 10.5 Z" />

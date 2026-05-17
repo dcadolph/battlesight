@@ -1,0 +1,33 @@
+{
+  "id": "battle-of-the-bulge-1944",
+  "name": "Battle of the Bulge",
+  "year": 1944,
+  "date": "16 December 1944 – 25 January 1945",
+  "lat": 50.1,
+  "lng": 5.95,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "land",
+  "aliases": [
+    { "name": "Ardennes Counteroffensive", "by": "US Army official designation" },
+    { "name": "Operation Wacht am Rhein", "by": "German codename, \"Watch on the Rhine\"" }
+  ],
+  "sides": [
+    {
+      "name": "Allied (United States, United Kingdom, Belgium)",
+      "commander": "Dwight D. Eisenhower (SHAEF), Omar Bradley (12th Army Group), George S. Patton (3rd Army), Anthony McAuliffe (Bastogne, 101st Airborne)",
+      "strength": "About 610,000 American troops engaged in the broader sector, with British XXX Corps holding the Meuse",
+      "casualties": "About 81,000 American killed, wounded, or missing; 1,400 British"
+    },
+    {
+      "name": "Nazi Germany",
+      "commander": "Gerd von Rundstedt (OB West), Walter Model (Army Group B), Sepp Dietrich (6th Panzer Army), Hasso von Manteuffel (5th Panzer Army)",
+      "strength": "About 410,000 troops, 1,400 tanks, 1,000 aircraft in three armies",
+      "casualties": "About 100,000 killed, wounded, or captured; 700 tanks lost; the strategic reserve held back for the Eastern Front gone"
+    }
+  ],
+  "victor": "Allied",
+  "summary": "Hitler launched his last strategic offensive in the West before dawn on the sixteenth of December, aiming three German armies through the supposedly impassable Ardennes Forest at the port of Antwerp to split the Allied line. American defenders, four thin divisions including Eisenhower's last reserves, were caught by surprise. The 101st Airborne held the road junction at Bastogne under siege through Christmas; Patton wheeled the 3rd Army ninety degrees north and broke through to relieve them on the twenty-sixth. Allied air power resumed when the weather cleared on the twenty-third. The German salient was pinched off by the end of January.",
+  "significance": "The Bulge consumed the last German strategic reserve. The panzer divisions burned in the Ardennes had been intended to stabilise the Eastern Front against the Soviet winter offensive, which by then was already rolling across Poland toward the Oder. The Wehrmacht's tactical handling was excellent and the surprise was real; strategically the gamble produced four weeks of delay at the price of the German army's remaining mobile reserves and the capacity to do anything serious in 1945 beyond surrender.",
+  "wikipediaTitle": "Battle of the Bulge"
+}

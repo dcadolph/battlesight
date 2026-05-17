@@ -1,0 +1,29 @@
+{
+  "id": "plataea-479bc",
+  "name": "Battle of Plataea",
+  "year": -479,
+  "date": "August 479 BC",
+  "lat": 38.22,
+  "lng": 23.27,
+  "era": "ancient",
+  "war": "Greco-Persian Wars",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Greek Allied League",
+      "commander": "Pausanias of Sparta (overall), Aristides of Athens",
+      "strength": "About 38,000 hoplites and 70,000 light infantry from Sparta, Athens, Corinth, and 22 other city-states",
+      "casualties": "About 10,000 killed across the day's fighting"
+    },
+    {
+      "name": "Achaemenid Persia and allies",
+      "commander": "Mardonius (Persian satrap), Artabazos (second in command)",
+      "strength": "Roughly 70,000 to 120,000 Persian, Bactrian, Indian, Saka, and Boeotian Greek troops",
+      "casualties": "Mardonius killed; the Persian army was largely destroyed in the rout"
+    }
+  ],
+  "victor": "Greek Allied League",
+  "summary": "After Salamis, Mardonius and 100,000 Persian troops wintered in Thessaly and marched south in spring 479. The Greek allies massed at the Isthmus and crossed Cithaeron to confront him near Plataea in Boeotia. Twelve days of feint and skirmish followed while the armies maneuvered along the Asopus River. The Greeks tried to redeploy at night. Mardonius mistook the move for retreat and ordered a general attack at dawn. The Spartan and Tegean hoplites in close order ground down the Persian infantry and killed Mardonius. The Persian army broke and was hunted down at the river crossings.",
+  "significance": "Plataea ended the Achaemenid attempt to conquer mainland Greece. On the same day, by tradition, the Greek allied fleet destroyed the Persian land army at Mycale on the Anatolian coast. The Persian Wars closed with the cities of the Aegean liberated and Athens positioned to lead the Delian League. The historian Herodotus, born only five years earlier, would frame these victories as the founding event of Greek (and so European) freedom.",
+  "wikipediaTitle": "Battle of Plataea"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "salamis-480bc",
+  "name": "Battle of Salamis",
+  "year": -480,
+  "date": "September 480 BC",
+  "lat": 37.95,
+  "lng": 23.5667,
+  "era": "ancient",
+  "war": "Greco-Persian Wars",
+  "battleType": "naval",
+  "sides": [
+    {
+      "name": "Greek allied fleet",
+      "commander": "Themistocles (Athens, de facto), Eurybiades (Sparta, nominal)",
+      "strength": "About 370 to 380 triremes drawn from Athens, Corinth, Aegina, and the wider Hellenic alliance",
+      "casualties": "Around 40 triremes lost"
+    },
+    {
+      "name": "Achaemenid Persia",
+      "commander": "Xerxes I (overall), Achaemenes and Ariabignes (squadron commanders)",
+      "strength": "Roughly 600 to 800 triremes drawn from Phoenicia, Egypt, Ionia, and the wider empire",
+      "casualties": "Around 200 to 300 triremes destroyed or captured"
+    }
+  ],
+  "victor": "Greek allied fleet",
+  "summary": "Themistocles lured the Persian fleet into the narrow strait between Salamis and the Athenian mainland with a fake message about Greek treachery. In the confined channel the larger Persian fleet lost its numerical advantage; ships fouled each other while Greek triremes rammed and boarded them in detail. Xerxes watched the destruction from his throne on the slopes of Mount Aigaleo and withdrew the bulk of his army to Asia, leaving his commander Mardonius to winter in Greece.",
+  "significance": "Salamis broke the strategic momentum of the Persian invasion. Without naval superiority Xerxes could no longer keep his enormous army supplied. The following spring Mardonius's army was destroyed at Plataea and the Greek allies took the offensive into the Aegean. Themistocles's victory established Athenian naval power, which underwrote the fifth-century empire and the cultural flowering that produced classical Athens.",
+  "wikipediaTitle": "Battle of Salamis"
+}

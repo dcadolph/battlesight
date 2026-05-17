@@ -1,0 +1,29 @@
+{
+  "id": "gaza-city-2023-2024",
+  "name": "Battle of Gaza City",
+  "year": 2023,
+  "date": "27 October 2023 – April 2024",
+  "lat": 31.5,
+  "lng": 34.467,
+  "era": "modern",
+  "war": "Israel–Hamas war",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Israel",
+      "commander": "Herzi Halevi (Chief of Staff), Yaron Finkelman (Southern Command)",
+      "strength": "Three divisions of the IDF, supported by tanks, combat engineers, and the Israeli Air Force",
+      "casualties": "Hundreds killed and wounded during the urban operation"
+    },
+    {
+      "name": "Hamas and allied factions",
+      "commander": "Yahya Sinwar, Mohammed Deif, Marwan Issa",
+      "strength": "Roughly 15,000 to 25,000 fighters dispersed through the city and the tunnel network beneath",
+      "casualties": "Thousands killed and wounded; full count contested"
+    }
+  ],
+  "victor": "Israel (operational; political settlement unresolved)",
+  "summary": "After three weeks of air and artillery bombardment Israeli ground forces entered the northern Gaza Strip, encircled Gaza City, then drove south through neighborhoods and into the Shifa hospital and Rimal districts. Combat moved underground into the tunnel system as well, with Israeli engineers flooding, demolishing, and clearing shaft by shaft for months. Fighting subsided in April 2024 but Hamas units regenerated in the rubble and the IDF re-entered several neighborhoods later in the year.",
+  "significance": "Gaza City became the test case for twenty-first-century urban siege under continuous social-media observation. Casualty counts in the tens of thousands and the destruction of most public infrastructure produced charges of war crimes at the International Court of Justice and the International Criminal Court. The battle did not destroy Hamas as a movement and the hostage problem remained unresolved through 2024.",
+  "wikipediaTitle": "Battle of Gaza City (2023–present)"
+}

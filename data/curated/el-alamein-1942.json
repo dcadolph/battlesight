@@ -1,0 +1,29 @@
+{
+  "id": "el-alamein-1942",
+  "name": "Second Battle of El Alamein",
+  "year": 1942,
+  "date": "23 October – 11 November 1942",
+  "lat": 30.8313,
+  "lng": 28.9494,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "British 8th Army (Commonwealth)",
+      "commander": "Bernard Montgomery",
+      "strength": "About 195,000 troops, 1,029 tanks (including 252 Shermans), 908 artillery pieces, 750 aircraft",
+      "casualties": "Around 13,560 killed, wounded, or missing; 332 tanks lost"
+    },
+    {
+      "name": "Panzerarmee Afrika (Germany and Italy)",
+      "commander": "Erwin Rommel (returned from sick leave on the twenty-fifth), Georg Stumme (in command until his sudden death the day the battle opened)",
+      "strength": "About 116,000 troops, 547 tanks (only 211 of them German), 552 artillery pieces, 510 aircraft, chronically short of fuel",
+      "casualties": "Roughly 30,500 killed, wounded, or missing; 25,000 captured; nearly all armour lost"
+    }
+  ],
+  "victor": "British 8th Army (Commonwealth)",
+  "summary": "Montgomery opened Operation Lightfoot at 21:40 on the twenty-third of October with the heaviest artillery barrage of the war so far: 900 guns firing on a nine-mile front. Engineers cleared paths through the Axis minefields (the \"Devil's Gardens\") for 13th Corps' tanks. Rommel's fuel-starved Panzers counterattacked at Kidney Ridge and Tel el Aqqaqir but could not break the British line. Operation Supercharge on the second of November tore the centre open. Rommel ordered a retreat that Hitler countermanded; Rommel obeyed his own order anyway. The Panzerarmee began the 1,800-kilometre withdrawal that ended only at Tunisia.",
+  "significance": "El Alamein was the first major British land victory over the Wehrmacht and the strategic turning point in North Africa. Combined with Operation Torch's landings in Morocco and Algeria eight days later, it sealed the eventual destruction of Axis forces in Africa and opened the way to the invasion of Sicily and Italy. Churchill: \"Before Alamein we never had a victory. After Alamein we never had a defeat.\"",
+  "wikipediaTitle": "Second Battle of El Alamein"
+}

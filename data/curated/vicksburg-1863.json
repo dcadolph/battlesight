@@ -1,0 +1,29 @@
+{
+  "id": "vicksburg-1863",
+  "name": "Siege of Vicksburg",
+  "year": 1863,
+  "date": "18 May – 4 July 1863",
+  "lat": 32.3526,
+  "lng": -90.8779,
+  "era": "industrial",
+  "war": "American Civil War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Union (Army of the Tennessee)",
+      "commander": "Ulysses S. Grant, William T. Sherman (XV Corps), James B. McPherson (XVII Corps), John A. McClernand (XIII Corps)",
+      "strength": "About 77,000 troops in three corps, supported by David Porter's Mississippi River squadron",
+      "casualties": "Around 4,910 killed, wounded, or missing in the siege; 10,000 in the broader campaign"
+    },
+    {
+      "name": "Confederate (Army of Mississippi)",
+      "commander": "John C. Pemberton (Vicksburg garrison), Joseph E. Johnston (relief, never arrived in strength)",
+      "strength": "About 33,000 troops behind a nine-mile defensive perimeter on the bluffs above the Mississippi",
+      "casualties": "About 3,200 killed and wounded; 29,495 surrendered on the fourth of July"
+    }
+  ],
+  "victor": "Union",
+  "summary": "After two failed assaults on the eighteenth and twenty-second of May, Grant invested Vicksburg and reduced it by parallel approaches and siege artillery. The garrison and civilian population spent six weeks under bombardment, eventually eating mules and rats. Pemberton requested terms on the third of July, the same day Pickett's Charge failed at Gettysburg, and surrendered on the fourth. Grant paroled the prisoners rather than ship them north.",
+  "significance": "Vicksburg's fall opened the Mississippi River to Union control end to end, severed the Confederacy in two, and gave Abraham Lincoln what he had described as the indispensable strategic objective of the war: \"The Father of Waters again goes unvexed to the sea.\" Combined with Gettysburg the day before, the twin defeats turned the Civil War's trajectory irreversibly toward Union victory and elevated Grant to general-in-chief the following March.",
+  "wikipediaTitle": "Siege of Vicksburg"
+}

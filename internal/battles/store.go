@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -162,9 +164,19 @@ func (s *Store) List(ctx context.Context, f Filter) ([]Battle, int, error) {
 // remove_diacritics=2), so "mohacs" matches "Mohács" and "yi sun sin"
 // matches "Yi Sun-sin". sanitizeFTS adds a prefix wildcard to every term
 // so partial typing finds the full word.
+//
+// Coordinate queries: when the input parses as "lat, lng" or "lat lng"
+// (with optional space separators), the query routes to searchByCoord
+// instead of FTS, returning the geographically nearest battles. Lets a
+// user paste a Google Maps coordinate or click a location they remember
+// and find the closest engagements without knowing the battle's name.
 func (s *Store) Search(ctx context.Context, query string, limit, offset int) ([]Battle, int, error) {
 	if limit <= 0 {
 		limit = 50
+	}
+
+	if lat, lng, ok := parseCoordQuery(query); ok {
+		return s.searchByCoord(ctx, lat, lng, limit, offset)
 	}
 
 	ftsQuery := sanitizeFTS(query)
@@ -204,6 +216,82 @@ func (s *Store) Search(ctx context.Context, query string, limit, offset int) ([]
 		return nil, 0, err
 	}
 
+	return battles, total, nil
+}
+
+// coordQueryRe matches a "lat, lng" or "lat lng" search query. Accepts
+// optional minus signs, integer or decimal forms, a comma or whitespace
+// separator, and surrounding whitespace. The latitude range [-90, 90]
+// and longitude range [-180, 180] are validated after the regex matches,
+// so a string like "12345, 678" parses cleanly but is rejected as
+// out-of-range by parseCoordQuery.
+var coordQueryRe = regexp.MustCompile(`^\s*(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)\s*$`)
+
+// parseCoordQuery returns (lat, lng, ok) if `q` looks like a coordinate
+// pair within the valid geographic ranges. Used by Search to branch into
+// a nearest-neighbor query when the user pastes a Google Maps URL coord
+// or types a latitude/longitude pair.
+func parseCoordQuery(q string) (float64, float64, bool) {
+	m := coordQueryRe.FindStringSubmatch(q)
+	if len(m) != 3 {
+		return 0, 0, false
+	}
+	lat, err1 := strconv.ParseFloat(m[1], 64)
+	lng, err2 := strconv.ParseFloat(m[2], 64)
+	if err1 != nil || err2 != nil {
+		return 0, 0, false
+	}
+	if lat < -90 || lat > 90 || lng < -180 || lng > 180 {
+		return 0, 0, false
+	}
+	return lat, lng, true
+}
+
+// searchByCoord returns the battles geographically nearest to (lat, lng),
+// ordered by ascending squared distance on the lat/lng plane. The squared
+// approximation is fine for sorting; battles spanning two hemispheres
+// rarely tie with battles on the same continent, and Haversine would only
+// matter at antimeridian or pole crossings which our coverage avoids. The
+// trust gate and zero-coord gate from the FTS path are applied so the UI
+// behaves the same shape: same fields, same tier guarantees.
+func (s *Store) searchByCoord(ctx context.Context, lat, lng float64, limit, offset int) ([]Battle, int, error) {
+	bTrusted := trustedWarSQL("b.war")
+	// Total is the count of trusted, coord-bearing battles. Distance
+	// search has no meaningful "match" predicate so the count is the
+	// candidate pool size; the user gets the top `limit` rows of that
+	// pool ordered by proximity.
+	var total int
+	if err := s.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM battles b WHERE (b.lat != 0 OR b.lng != 0) AND `+bTrusted).
+		Scan(&total); err != nil {
+		return nil, 0, fmt.Errorf("count coord candidates: %w", err)
+	}
+
+	// Squared planar distance is used in the ORDER BY only. Adequate for
+	// ranking at the latitudes our catalog covers; an antimeridian crosser
+	// or polar approach would need Haversine, but our coverage avoids
+	// those edges. Not selected as a column so scanBattles still matches
+	// the canonical battleColumns shape.
+	searchSQL := `SELECT ` + prefixCols("b", battleColumns) + `
+		FROM battles b
+		WHERE (b.lat != 0 OR b.lng != 0)
+		  AND ` + bTrusted + `
+		ORDER BY ((b.lat - ?) * (b.lat - ?) + (b.lng - ?) * (b.lng - ?)) ASC
+		LIMIT ? OFFSET ?`
+
+	rows, err := s.db.QueryContext(ctx, searchSQL, lat, lat, lng, lng, limit, offset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("coord search: %w", err)
+	}
+	defer rows.Close()
+
+	battles, err := scanBattles(rows)
+	if err != nil {
+		return nil, 0, err
+	}
+	if err := s.loadSides(ctx, battles); err != nil {
+		return nil, 0, err
+	}
 	return battles, total, nil
 }
 

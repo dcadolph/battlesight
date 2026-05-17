@@ -1,0 +1,29 @@
+{
+  "id": "hattin-1187",
+  "name": "Battle of Hattin",
+  "year": 1187,
+  "date": "4 July 1187",
+  "lat": 32.8003,
+  "lng": 35.4453,
+  "era": "medieval",
+  "war": "Crusades",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Ayyubid Sultanate",
+      "commander": "Salah ad-Din (Saladin)",
+      "strength": "Approximately 30,000 cavalry and infantry, mostly mounted",
+      "casualties": "Light"
+    },
+    {
+      "name": "Kingdom of Jerusalem and Crusader allies",
+      "commander": "Guy of Lusignan, Raymond III of Tripoli, Reynald of Châtillon",
+      "strength": "Around 20,000 including 1,200 mounted knights and the Templar and Hospitaller orders",
+      "casualties": "Most killed, captured, or scattered; the True Cross was lost"
+    }
+  ],
+  "victor": "Ayyubid Sultanate",
+  "summary": "Saladin baited the Crusader army out of its water supply at Sephoris by raiding Tiberias on the Sea of Galilee. The Crusaders marched east into the arid Galilean hills toward the Horns of Hattin in midsummer heat, harassed by Ayyubid skirmishers and brushfires set in the grass. Trapped on the high ground without water, the army broke when Saladin attacked at dawn on the fourth of July. Guy of Lusignan was captured. Reynald of Châtillon was executed personally by Saladin.",
+  "significance": "Hattin destroyed the field army of the Crusader states in a single day. Within three months Saladin had taken Acre, Beirut, Ascalon, and Jerusalem itself. The Latin Kingdom never recovered, the Third Crusade was launched in response, and the legend of Saladin as the chivalrous Muslim ruler entered Western literature.",
+  "wikipediaTitle": "Battle of Hattin"
+}

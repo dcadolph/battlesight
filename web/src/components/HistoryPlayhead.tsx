@@ -3,6 +3,7 @@ import type { EraTheme } from '../theme/era';
 import { ERA_RANGES, themeForEra } from '../theme/era';
 import type { HistoryBeat } from '../data/history-beats';
 import { formatYear } from '../lib/format';
+import CloseButton from './CloseButton';
 
 interface HistoryPlayheadProps {
   // year currently being highlighted on the timeline.
@@ -152,64 +153,70 @@ export default function HistoryPlayhead({
     : null;
 
   return (
-    <div className="fixed top-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
       <div
-        className="px-7 pt-3 pb-3 rounded-2xl bg-black/65 backdrop-blur-xl border shadow-[0_24px_60px_-12px_rgba(0,0,0,0.6)] text-center pointer-events-auto"
+        className="px-9 pt-6 pb-5 rounded-3xl bg-black/70 backdrop-blur-2xl border shadow-[0_36px_80px_-16px_rgba(0,0,0,0.85)] text-center pointer-events-auto"
         style={{
-          width: 'min(680px, 92vw)',
-          borderColor: `${theme.accent}33`,
+          width: 'min(820px, 94vw)',
+          borderColor: `${theme.accent}44`,
+          boxShadow: `0 36px 80px -16px rgba(0,0,0,0.85), inset 0 1px 0 ${theme.accent}22, 0 0 60px ${theme.accent}1a`,
         }}
       >
-        {/* Top row: mood label · year · controls. Year sits in the middle so
-            it reads as the headline; controls hug the right; mood the left. */}
-        <div className="flex items-center justify-between gap-4 mb-2">
-          <div
-            className="text-[10px] uppercase tracking-[0.36em] flex-1 text-left"
-            style={{ color: theme.accent }}
-          >
-            {theme.mood}
+        {/* Hero row: the year is the protagonist, set huge in the era
+            display face. Mood text and controls flank it. The previous
+            layout was a thin pill with a small year that read like a
+            video-player toolbar; this one stages the sweep as a chapter
+            heading the user actually wants to look at. */}
+        <div className="flex items-start justify-between gap-6 mb-5">
+          <div className="flex flex-col items-start text-left flex-1 min-w-0">
+            <span
+              className="text-[10px] uppercase tracking-[0.42em] font-semibold"
+              style={{ color: theme.accent, textShadow: '0 2px 12px rgba(0,0,0,0.7)' }}
+            >
+              {theme.mood}
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-slate-500 mt-1.5 tabular-nums">
+              {battleCount.toLocaleString('en-US')} battles ignited
+            </span>
           </div>
           <div
-            className="tabular-nums text-white leading-none"
+            className="tabular-nums text-white leading-none flex-shrink-0"
             style={{
               fontFamily: theme.titleFont,
               fontWeight: 500,
-              fontSize: 38,
-              textShadow: '0 4px 24px rgba(0,0,0,0.6)',
+              fontSize: 'clamp(48px, 5.4vw, 64px)',
+              letterSpacing: '-0.02em',
+              textShadow: `0 4px 28px rgba(0,0,0,0.7), 0 0 18px ${theme.accent}33`,
             }}
           >
             {formatYear(year)}
           </div>
-          <div className="flex-1 flex justify-end gap-1.5">
+          <div className="flex-1 flex items-center justify-end gap-2">
             <button
               onClick={onToggle}
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full text-white/90 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              className="inline-flex items-center justify-center h-10 w-10 rounded-full text-white transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 hover:scale-105"
               style={{
-                backgroundColor: `${theme.accent}26`,
-                border: `1px solid ${theme.accent}55`,
+                backgroundColor: `${theme.accent}33`,
+                border: `1px solid ${theme.accent}80`,
+                boxShadow: `0 4px 16px ${theme.accent}33`,
               }}
               aria-label={playing ? 'Pause sweep (Space)' : 'Resume sweep (Space)'}
               title={playing ? 'Pause' : 'Resume'}
             >
               {playing ? (
-                <svg width="11" height="12" viewBox="0 0 11 12" fill="currentColor"><rect x="0" y="0" width="3.5" height="12" rx="1"/><rect x="7" y="0" width="3.5" height="12" rx="1"/></svg>
+                <svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor" aria-hidden="true"><rect x="1" y="0" width="3.5" height="14" rx="1"/><rect x="7.5" y="0" width="3.5" height="14" rx="1"/></svg>
               ) : (
-                <svg width="11" height="12" viewBox="0 0 11 12" fill="currentColor"><path d="M1 0.5 L1 11.5 L10.5 6 Z"/></svg>
+                <svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor" aria-hidden="true"><path d="M2 1 L2 13 L12 7 Z"/></svg>
               )}
             </button>
-            <button
-              onClick={onClose}
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full text-rose-200 hover:text-white bg-rose-500/15 border border-rose-400/40 hover:bg-rose-500/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/60"
-              aria-label="Exit history mode (Esc)"
-              title="Exit history mode (Esc)"
-            >
-              <svg width="11" height="11" viewBox="0 0 11 11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M1 1 L10 10 M10 1 L1 10"/></svg>
-            </button>
+            <CloseButton onClick={onClose} label="Exit history mode (Esc)" tone="elevated" />
           </div>
         </div>
 
-        {/* Scrub track. Wraps a generous hit area around a thinner visual
-            bar so dragging is forgiving on touch. */}
+        {/* Scrub track. Thicker bar (12 px) with saturated era bands so
+            the eye reads the shape of recorded history before the user
+            does anything. Generous hit area (38 px) keeps drag forgiving
+            on touch. */}
         <div
           ref={barRef}
           onPointerDown={onPointerDown}
@@ -218,16 +225,16 @@ export default function HistoryPlayhead({
           onPointerCancel={onPointerUp}
           onPointerLeave={onPointerLeave}
           className="relative mt-1 mx-auto cursor-pointer select-none"
-          style={{ height: 28, touchAction: 'none' }}
+          style={{ height: 38, touchAction: 'none' }}
           role="slider"
           aria-label="History playhead. Drag to scrub through the years."
           aria-valuemin={minYear}
           aria-valuemax={maxYear}
           aria-valuenow={year}
         >
-          {/* Era bands. Faint backdrop colors so the user reads "this stretch
-              is medieval, this short slice is WW1" without text labels. */}
-          <div className="absolute inset-x-0 top-[11px] h-[6px] rounded-full overflow-hidden bg-slate-900/80 border border-white/5">
+          {/* Era bands. Slightly heavier alpha so the colored slices read
+              as a chapter map at rest, not a ghost behind the bar. */}
+          <div className="absolute inset-x-0 top-[14px] h-[12px] rounded-full overflow-hidden bg-slate-900/85 border border-white/8" style={{ boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.6)' }}>
             {eraBands.map((b) => (
               <div
                 key={b.key}
@@ -235,7 +242,7 @@ export default function HistoryPlayhead({
                 style={{
                   left: `${b.start * 100}%`,
                   width: `${(b.end - b.start) * 100}%`,
-                  background: `${b.accent}26`,
+                  background: `linear-gradient(180deg, ${b.accent}55 0%, ${b.accent}35 100%)`,
                 }}
                 title={b.mood}
               />
@@ -247,25 +254,29 @@ export default function HistoryPlayhead({
                 className="absolute top-0 bottom-0 w-px"
                 style={{
                   left: `${b.end * 100}%`,
-                  background: 'rgba(255,255,255,0.16)',
+                  background: 'rgba(255,255,255,0.22)',
                 }}
               />
             ))}
-            {/* Filled progress. */}
+            {/* Filled progress overlay on top of era bands so the colored
+                slice through which the user has already swept reads as
+                "lit" while the rest stays muted. */}
             <div
               className="absolute top-0 bottom-0 left-0"
               style={{
                 width: `${progress * 100}%`,
-                background: `linear-gradient(90deg, ${theme.accent}90, ${theme.accent})`,
-                boxShadow: `0 0 14px ${theme.accent}88`,
+                background: `linear-gradient(90deg, ${theme.accent}aa 0%, ${theme.accent} 100%)`,
+                boxShadow: `0 0 18px ${theme.accent}bb, inset 0 1px 0 rgba(255,255,255,0.18)`,
                 transition: isDragging ? 'none' : 'width 200ms ease-out',
               }}
             />
           </div>
 
-          {/* Beat tickmarks above the bar. Each marker is a clickable target
-              with a hover tooltip. Marker height varies by past/future state
-              so the eye reads progress at a glance. */}
+          {/* Beat tickmarks. Vertical pillars rising above the bar in
+              the era's accent. Lit (full opacity, glowing) when the
+              playhead has passed them; dim and short when still upcoming.
+              The headline pops on hover or focus into a small chapter
+              chip above the tick. */}
           {beats.map((beat, i) => {
             const t = (beat.year - minYear) / span;
             if (t < 0 || t > 1) return null;
@@ -284,61 +295,65 @@ export default function HistoryPlayhead({
                   left: `${t * 100}%`,
                   top: 0,
                   transform: 'translateX(-50%)',
-                  height: 14,
-                  width: 14,
+                  height: 26,
+                  width: 18,
                 }}
                 aria-label={`${beat.headline}, ${formatYear(beat.year)}`}
                 title={`${beat.headline} · ${formatYear(beat.year)}`}
               >
                 <span
-                  className="block mx-auto rounded-full transition-all"
+                  className="block mx-auto rounded-full transition-all group-hover:scale-y-110"
                   style={{
-                    width: 6,
-                    height: past ? 10 : 7,
-                    marginTop: past ? 0 : 2,
+                    width: 3,
+                    height: past ? 14 : 10,
+                    marginTop: past ? 0 : 4,
                     background: beatTheme.accent,
-                    boxShadow: past ? `0 0 6px ${beatTheme.accent}` : 'none',
-                    opacity: past ? 1 : 0.6,
+                    boxShadow: past
+                      ? `0 0 10px ${beatTheme.accent}, 0 0 4px ${beatTheme.accent}`
+                      : `0 0 4px ${beatTheme.accent}55`,
+                    opacity: past ? 1 : 0.55,
+                    transformOrigin: 'bottom',
                   }}
                 />
-                {/* Tooltip pinned above the tick. Pops on hover/focus. */}
+                {/* Chapter chip above the tick. Pops on hover and focus. */}
                 <div
                   className="absolute left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity pointer-events-none"
-                  style={{ top: -38, whiteSpace: 'nowrap' }}
+                  style={{ top: -42, whiteSpace: 'nowrap' }}
                 >
                   <div
-                    className="rounded-md px-2 py-1 text-[10px] font-semibold tracking-wide text-white shadow-lg border"
+                    className="rounded-lg px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-white shadow-xl border backdrop-blur"
                     style={{
-                      background: 'rgba(8, 10, 18, 0.94)',
-                      borderColor: `${beatTheme.accent}66`,
+                      background: 'rgba(8, 10, 18, 0.92)',
+                      borderColor: `${beatTheme.accent}88`,
+                      boxShadow: `0 8px 24px rgba(0,0,0,0.6), 0 0 14px ${beatTheme.accent}33`,
                     }}
                   >
                     {beat.headline}
-                    <span className="ml-1.5 opacity-60 tabular-nums">{formatYear(beat.year)}</span>
+                    <span className="ml-2 opacity-60 tabular-nums text-[10px]">{formatYear(beat.year)}</span>
                   </div>
                 </div>
               </button>
             );
           })}
 
-          {/* Hover preview line: vertical hint line showing where a click
-              would land while the cursor is over the bar but no drag is
-              underway. Suppressed during active drag so it does not duplicate
-              the thumb. */}
+          {/* Hover preview: vertical hint line + year chip showing where
+              a click would land while the cursor is over the bar but no
+              drag is underway. Suppressed during active drag to avoid
+              duplicating the thumb. */}
           {hoverPct != null && !isDragging && (
             <>
               <div
-                className="absolute top-[8px] bottom-[6px] w-px pointer-events-none"
+                className="absolute top-[10px] bottom-[6px] w-px pointer-events-none"
                 style={{
                   left: `${hoverPct}%`,
-                  background: 'rgba(255,255,255,0.35)',
+                  background: 'rgba(255,255,255,0.45)',
                 }}
               />
               <div
-                className="absolute pointer-events-none tabular-nums text-[10px] text-white/90 font-semibold px-1.5 py-0.5 rounded bg-black/70 border border-white/15"
+                className="absolute pointer-events-none tabular-nums text-[11px] text-white font-semibold px-2 py-0.5 rounded-md bg-black/85 border border-white/25 shadow-lg"
                 style={{
                   left: `${hoverPct}%`,
-                  top: 22,
+                  top: 30,
                   transform: 'translateX(-50%)',
                 }}
               >
@@ -347,13 +362,15 @@ export default function HistoryPlayhead({
             </>
           )}
 
-          {/* Draggable thumb. Larger hit target than its visual so it stays
-              easy to grab on a touchscreen. */}
+          {/* Draggable thumb. Vertical pill anchored on the bar; the
+              accent-colored core sits inside a white halo so the thumb
+              registers as the protagonist of the bar against any era
+              backdrop. */}
           <div
             className="absolute pointer-events-none"
             style={{
               left: `${progress * 100}%`,
-              top: 7,
+              top: 8,
               transform: 'translateX(-50%)',
               transition: isDragging ? 'none' : 'left 200ms ease-out',
             }}
@@ -361,24 +378,25 @@ export default function HistoryPlayhead({
             <div
               className="rounded-full border-2"
               style={{
-                width: 14,
-                height: 14,
-                background: theme.accent,
+                width: 18,
+                height: 24,
+                background: `linear-gradient(180deg, #fff 0%, ${theme.accent} 100%)`,
                 borderColor: '#fff',
-                boxShadow: `0 0 0 4px ${theme.accent}33, 0 4px 12px rgba(0,0,0,0.5)`,
+                boxShadow: `0 0 0 4px ${theme.accent}44, 0 6px 18px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.6)`,
               }}
             />
           </div>
         </div>
 
-        {/* Foot row: battle count + scrub hint. The hint teaches the
-            interaction the first time the user sees the bar. */}
-        <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400">
-          <span className="tabular-nums">
-            {battleCount.toLocaleString('en-US')} battles ignited
+        {/* Foot row: keyboard hint. Battle count moved up next to the
+            mood label so the foot can carry the interaction teaching
+            without competing for the eye. */}
+        <div className="mt-4 flex items-center justify-center text-[10px] uppercase tracking-[0.24em] text-slate-500">
+          <span className="hidden md:inline">
+            Drag the bar · click a chapter mark · arrow keys step 25 years (shift for 100)
           </span>
-          <span className="text-slate-500 hidden md:inline">
-            Drag the bar or click a chapter mark to jump
+          <span className="md:hidden">
+            Drag to scrub · tap a chapter mark
           </span>
         </div>
       </div>

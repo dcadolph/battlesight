@@ -35,7 +35,11 @@ const DEFAULT_THEME: EraTheme = {
 // faint era bands behind its scrub bar and needs the same authoritative
 // boundaries the rest of the app uses.
 export const ERA_RANGES: Array<[string, number, number]> = [
-  ['ancient', -500, 500],
+  // Ancient era reaches deep antiquity. The Battle of Megiddo (1457 BC)
+  // is the earliest engagement we currently document; the floor at
+  // -3000 leaves headroom for the Mesopotamian and Egyptian dynastic
+  // wars that pre-date Megiddo for future curation.
+  ['ancient', -3000, 500],
   ['medieval', 500, 1500],
   ['early-modern', 1500, 1700],
   ['napoleonic', 1700, 1820],

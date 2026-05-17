@@ -1,0 +1,29 @@
+{
+  "id": "khe-sanh-1968",
+  "name": "Battle of Khe Sanh",
+  "year": 1968,
+  "date": "21 January – 9 July 1968",
+  "lat": 16.6411,
+  "lng": 106.728,
+  "era": "modern",
+  "war": "Vietnam War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "US Marines and ARVN Rangers",
+      "commander": "David Lownds (26th Marines), William Westmoreland (MACV)",
+      "strength": "About 6,000 defenders at the Khe Sanh combat base, supported by Operation Niagara air sorties at 300 per day",
+      "casualties": "About 730 killed, 2,642 wounded"
+    },
+    {
+      "name": "People's Army of Vietnam",
+      "commander": "Võ Nguyên Giáp (overall), Trần Văn Quang (front)",
+      "strength": "About 20,000 to 40,000 PAVN troops in the 304th and 325C Divisions, dug in around the surrounding hills",
+      "casualties": "Estimated 5,500 to 15,000 killed"
+    }
+  ],
+  "victor": "United States",
+  "summary": "The PAVN opened the siege on the twenty-first of January, a week before the Tet Offensive broke. Lyndon Johnson was reportedly haunted by the analogy to Dien Bien Phu fourteen years earlier and kept a sand-table model of the base in the White House Situation Room. Westmoreland answered with Operation Niagara: 100,000 tons of bombs and napalm dropped on PAVN positions over 77 days, the densest concentration of aerial firepower in the history of warfare. The relief operation, Pegasus, opened the road from Camp Carroll in April. The base was abandoned in July under different circumstances.",
+  "significance": "Khe Sanh became the war's most photographed and politically charged engagement. The PAVN's diversionary purpose (drawing American attention away from the cities just before Tet) succeeded even as the siege itself failed. Westmoreland's tactical claim of victory (the Marines held; the PAVN took unsustainable losses) was overshadowed by the political effect of the photographs of bunkered Marines under daily bombardment, which fused with Tet imagery to turn American public opinion against the war.",
+  "wikipediaTitle": "Battle of Khe Sanh"
+}

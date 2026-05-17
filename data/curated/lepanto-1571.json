@@ -1,0 +1,29 @@
+{
+  "id": "lepanto-1571",
+  "name": "Battle of Lepanto",
+  "year": 1571,
+  "date": "7 October 1571",
+  "lat": 38.3,
+  "lng": 21.3,
+  "era": "early-modern",
+  "war": "Ottoman–Habsburg wars",
+  "battleType": "naval",
+  "sides": [
+    {
+      "name": "Holy League (Spain, Venice, Papal States, Savoy, Tuscany, Knights of Malta)",
+      "commander": "Don John of Austria (overall), Sebastiano Venier (Venice), Marcantonio Colonna (Papal)",
+      "strength": "212 galleys including six Venetian galleasses, about 28,000 fighting men plus oarsmen",
+      "casualties": "Roughly 7,500 killed, 12 galleys lost"
+    },
+    {
+      "name": "Ottoman Empire",
+      "commander": "Ali Pasha (kapudan pasha)",
+      "strength": "About 251 galleys and lighter craft, perhaps 31,000 fighting men plus around 50,000 oarsmen and crew",
+      "casualties": "Around 30,000 killed and 3,500 captured; 137 galleys captured, 50 sunk; some 12,000 Christian galley slaves freed"
+    }
+  ],
+  "victor": "Holy League",
+  "summary": "The Christian and Ottoman fleets met in the Gulf of Patras off western Greece on the morning of the seventh of October. Don John deployed the six Venetian galleasses ahead of the main line, where their broadside guns shattered the Ottoman centre and dragged the engagement into a four-hour close-quarters battle of arquebusiers and boarders. Ali Pasha was killed when the Marquesa rammed his flagship Sultana. The Ottoman fleet was effectively destroyed.",
+  "significance": "Lepanto ended the myth of Ottoman naval invincibility and stopped the westward expansion of Ottoman sea power. It also marked the last great battle decided by oared galleys before sail-and-cannon warfare took over the Mediterranean. Miguel de Cervantes, present aboard the Marquesa, lost the use of his left hand at Lepanto, an event he later called the most glorious occasion of his life.",
+  "wikipediaTitle": "Battle of Lepanto"
+}

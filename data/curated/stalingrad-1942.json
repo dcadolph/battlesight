@@ -1,0 +1,29 @@
+{
+  "id": "stalingrad-1942",
+  "name": "Battle of Stalingrad",
+  "year": 1942,
+  "date": "23 August 1942 – 2 February 1943",
+  "lat": 48.708,
+  "lng": 44.5133,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Soviet Union",
+      "commander": "Georgy Zhukov, Aleksandr Vasilevsky, Vasily Chuikov (62nd Army inside the city)",
+      "strength": "Over one million troops by November including Stavka reserves, 13,500 guns, 894 tanks, and 1,100 aircraft",
+      "casualties": "About 478,000 killed and missing; 651,000 wounded"
+    },
+    {
+      "name": "Nazi Germany and Axis allies",
+      "commander": "Friedrich Paulus (6th Army), Hermann Hoth (4th Panzer Army), Erich von Manstein (relief)",
+      "strength": "Roughly 1 million troops at peak including the German 6th Army and 4th Panzer Army, Romanian 3rd and 4th Armies, Italian 8th, and Hungarian 2nd",
+      "casualties": "Around 400,000 German killed, wounded, or captured; over 500,000 Axis allies; the 6th Army was annihilated"
+    }
+  ],
+  "victor": "Soviet Union",
+  "summary": "Paulus's 6th Army drove across the Don steppe to the Volga in August 1942 and reduced Stalingrad to rubble by Luftwaffe bombing on the twenty-third. Soviet 62nd Army defenders fought a yard-by-yard urban defence through factory districts and grain elevators while Stavka secretly assembled three fresh fronts to the north and south. Operation Uranus on the nineteenth of November punched through the Romanian armies on the German flanks and closed a ring around the 6th Army within four days. Hitler ordered Paulus to hold; the relief offensive under Manstein failed; and after nine more weeks of starvation and street fighting the last German soldiers surrendered on the second of February 1943.",
+  "significance": "Stalingrad was the largest battle in the history of warfare and the strategic turning point of the European theatre. The Wehrmacht lost its aura of invincibility, the Eastern Front balance tilted permanently to the Red Army, and the war became a question of when, not whether, the Soviets would reach Berlin. The defence of the city became foundational to Soviet civic identity and the centerpiece of the Great Patriotic War narrative that continues to anchor Russian politics today.",
+  "wikipediaTitle": "Battle of Stalingrad"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "tours-732",
+  "name": "Battle of Tours",
+  "year": 732,
+  "date": "10 October 732",
+  "lat": 47.3941,
+  "lng": 0.6848,
+  "era": "medieval",
+  "war": "Umayyad invasion of Gaul",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Frankish Kingdom and Aquitaine",
+      "commander": "Charles Martel (mayor of the palace), Eudo of Aquitaine",
+      "strength": "About 15,000 to 20,000 infantry in a tight phalanx of heavy foot",
+      "casualties": "About 1,000 killed"
+    },
+    {
+      "name": "Umayyad Caliphate",
+      "commander": "Abd al-Rahman al-Ghafiqi (governor of al-Andalus)",
+      "strength": "Roughly 20,000 to 25,000 cavalry-heavy raiding force out of al-Andalus",
+      "casualties": "Around 10,000 killed; al-Ghafiqi killed in the rout"
+    }
+  ],
+  "victor": "Frankish Kingdom and Aquitaine",
+  "summary": "Charles Martel positioned his shield-wall of heavy infantry on wooded high ground between Tours and Poitiers, denying the Umayyad cavalry the open terrain on which it preferred to fight. For six days the Umayyad horse charged the Frankish square and was repulsed each time. On the seventh day a Frankish raid on the Umayyad camp pulled the cavalry out of the line. Al-Ghafiqi was killed trying to restore order. The Umayyad army withdrew that night.",
+  "significance": "Tours halted the northward expansion of the Umayyad Caliphate beyond the Pyrenees and consolidated Charles Martel's authority over the Frankish realm. The dynasty he founded, the Carolingians, would produce his grandson Charlemagne and the empire that defined medieval western Christendom. Edward Gibbon famously claimed the battle saved Europe for Christianity; modern historians are more cautious, but the strategic limit it set on Umayyad expansion is undisputed.",
+  "wikipediaTitle": "Battle of Tours"
+}

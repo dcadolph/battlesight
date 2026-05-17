@@ -3,6 +3,7 @@ import type { Battle } from '../types/battle';
 import { ERA_COLORS } from '../types/battle';
 import WarSummaryCard from './WarSummaryCard';
 import WarCinematicOverlay from './WarCinematicOverlay';
+import CloseButton from './CloseButton';
 import { usePauseOnHidden } from '../hooks/usePauseOnHidden';
 import { formatYear } from '../lib/format';
 
@@ -308,14 +309,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         <div className="w-[480px] max-w-[92vw] bg-[#0f1019]/95 border border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[78vh]">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/60 flex-shrink-0">
             <h3 className="text-xs font-semibold text-white tracking-wide uppercase">Choose a war</h3>
-            <button
-              onClick={onClose}
-              className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[11px] font-semibold tracking-wide text-slate-200 bg-slate-700/70 hover:bg-slate-600 transition-colors"
-              title="Back to the globe (Esc)"
-            >
-              <span className="text-base leading-none">×</span>
-              Back to globe
-            </button>
+            <CloseButton onClick={onClose} label="Back to the globe (Esc)" />
           </div>
           <div className="p-4 overflow-y-auto flex-1">
             <input
@@ -384,29 +378,33 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
 
   return (
     <div className="fixed top-0 right-0 h-full w-[420px] max-w-[92vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/60 flex-shrink-0 gap-2">
-        <h3 className="text-xs font-semibold text-white tracking-wide uppercase truncate pr-2 flex-1 min-w-0">
+      {/* Header gives the user two unambiguous exits in fixed positions:
+          a back arrow on the left that returns to the war picker (one
+          level up), and the standard X close on the right that exits the
+          mode entirely back to the globe. Previously the back affordance
+          was a near-invisible slate-500 text link buried inside the
+          scroll area, which made the level-up gesture undiscoverable. */}
+      <div className="flex items-center justify-between px-3 py-3 border-b border-slate-800/60 flex-shrink-0 gap-2">
+        <button
+          onClick={() => { setSelectedWar(''); setPlaying(false); setDetail(null); }}
+          className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-slate-900/55 backdrop-blur border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-800/80 hover:border-slate-500/80 transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-300/70"
+          aria-label="Back to wars list"
+          title="Back to wars list"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none" aria-hidden="true">
+            <path d="M9 2 L4 7 L9 12" />
+          </svg>
+        </button>
+        <h3 className="text-xs font-semibold text-white tracking-wide uppercase truncate flex-1 min-w-0 text-center">
           {selectedWar}
         </h3>
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="text-[10px] text-slate-500">{battles.length}</span>
-          <button
-            onClick={onClose}
-            className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[11px] font-semibold tracking-wide text-slate-200 bg-slate-700/70 hover:bg-slate-600 transition-colors"
-            title="Back to the globe (Esc)"
-          >
-            <span className="text-base leading-none">×</span>
-            Back to globe
-          </button>
+          <CloseButton onClick={onClose} label="Back to the globe (Esc)" />
         </div>
       </div>
 
       <div className="p-4 overflow-y-auto flex-1">
-        <button
-          onClick={() => { setSelectedWar(''); setPlaying(false); setDetail(null); }}
-          className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors mb-3 block"
-        >&larr; Pick a different war</button>
-
         {currentBattle && (
           <div className="mb-3">
             <div className="flex items-center gap-2 mb-1">

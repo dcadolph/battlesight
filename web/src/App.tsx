@@ -16,7 +16,12 @@ import { themeForEra, themeForYear } from './theme/era';
 import { enableSound, disableSound, soundEnabled, setSoundEra, playSelect } from './audio/sound';
 import { usePauseOnHidden } from './hooks/usePauseOnHidden';
 
-const MIN_YEAR = -500;
+// MIN_YEAR floors the timeline at -3000 so deep-antiquity engagements
+// (Megiddo 1457 BC, Kadesh 1274 BC, future Mesopotamian and Egyptian
+// dynastic-era battles) render on the slider and the history sweep. The
+// app previously stopped at -500 which dropped every Bronze Age battle
+// off the front of the bar.
+const MIN_YEAR = -3000;
 const MAX_YEAR = 2025;
 
 interface Filters {
@@ -570,7 +575,7 @@ export default function App() {
               textShadow: '0 10px 40px rgba(0,0,0,0.85), 0 0 28px rgba(255,255,255,0.08)',
             }}
           >
-            <span className="block whitespace-nowrap">Two thousand five hundred</span>
+            <span className="block whitespace-nowrap">Three thousand five hundred</span>
             <span className="block whitespace-nowrap">years of war</span>
           </h1>
           <div
@@ -595,7 +600,7 @@ export default function App() {
               marginRight: 'auto',
             }}
           >
-            From Marathon to Mariupol. Every battle worth remembering, mapped, dated, and named.
+            From Megiddo to Mariupol
           </p>
 
           {/* Indeterminate progress sliver. Stays subtle so the headline

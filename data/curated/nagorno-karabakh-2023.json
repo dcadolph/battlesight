@@ -1,0 +1,29 @@
+{
+  "id": "nagorno-karabakh-2023",
+  "name": "Azerbaijani offensive in Nagorno-Karabakh (2023)",
+  "year": 2023,
+  "date": "19 – 20 September 2023",
+  "lat": 39.815,
+  "lng": 46.752,
+  "era": "modern",
+  "war": "Nagorno-Karabakh conflict",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Azerbaijan",
+      "commander": "Ilham Aliyev (commander-in-chief)",
+      "strength": "Several brigades of the Azerbaijani Armed Forces, drone units, and special forces",
+      "casualties": "Around 200 killed and wounded"
+    },
+    {
+      "name": "Republic of Artsakh (Nagorno-Karabakh Defence Army)",
+      "commander": "Samvel Shahramanyan (Artsakh president), Defence Army command",
+      "strength": "Roughly 5,000 Artsakh Defence Army troops, isolated from Armenia by the nine-month Azerbaijani blockade of the Lachin Corridor",
+      "casualties": "At least 200 killed; the army surrendered within 24 hours"
+    }
+  ],
+  "victor": "Azerbaijan",
+  "summary": "After nine months of blockading the Lachin Corridor and cutting off food, fuel, and medicine to Karabakh, Azerbaijan launched a coordinated artillery and drone assault on the morning of the nineteenth of September. The Artsakh Defence Army, exhausted by the blockade and abandoned by Russian peacekeepers, agreed to a ceasefire and full disarmament within twenty-four hours. Over the following week the entire ethnic Armenian population of Karabakh, about 100,000 people, fled west into Armenia.",
+  "significance": "The offensive ended the thirty-year Republic of Artsakh and emptied Nagorno-Karabakh of its Armenian population in a week, the most concentrated ethnic-cleansing event in Europe since the Yugoslav wars. Russia's failure to enforce the 2020 peacekeeping mandate signalled the Kremlin's diminished writ in the south Caucasus as its army was tied down in Ukraine. The episode reshaped the regional balance toward Turkey and Azerbaijan and triggered the worst political crisis of the Pashinyan government in Yerevan.",
+  "wikipediaTitle": "2023 Azerbaijani offensive in Nagorno-Karabakh"
+}

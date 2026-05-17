@@ -1,0 +1,29 @@
+{
+  "id": "tsushima-1905",
+  "name": "Battle of Tsushima",
+  "year": 1905,
+  "date": "27 – 28 May 1905",
+  "lat": 34.6,
+  "lng": 129.55,
+  "era": "industrial",
+  "war": "Russo-Japanese War",
+  "battleType": "naval",
+  "sides": [
+    {
+      "name": "Empire of Japan",
+      "commander": "Tōgō Heihachirō (Combined Fleet)",
+      "strength": "4 battleships, 27 cruisers, 21 destroyers, 37 torpedo boats; modern Vickers-built capital ships and well-drilled crews",
+      "casualties": "117 killed, 583 wounded, 3 torpedo boats sunk"
+    },
+    {
+      "name": "Russian Empire",
+      "commander": "Zinovy Rozhestvensky (2nd Pacific Squadron), Nikolai Nebogatov (3rd Pacific Squadron, surrendered)",
+      "strength": "8 battleships, 8 cruisers, 9 destroyers, plus supply ships, after an 18,000-nautical-mile voyage from the Baltic via the Cape of Good Hope",
+      "casualties": "About 4,380 killed and 5,917 captured; 21 ships sunk including 7 battleships; only 3 ships reached Vladivostok"
+    }
+  ],
+  "victor": "Empire of Japan",
+  "summary": "Rozhestvensky's Baltic Fleet completed a seven-month voyage around the world to relieve Russian Pacific squadrons trapped at Port Arthur, only to find the port had fallen during the transit. Tōgō intercepted the Russians in the Tsushima Strait between Korea and Japan on the afternoon of the twenty-seventh of May. He executed a 180-degree turn-in-place (the \"Tōgō Turn\") under fire that crossed the Russian T and exposed each Russian battleship in succession to concentrated Japanese gunfire. By nightfall the Russian battle line was sinking. Destroyers and torpedo boats finished off survivors overnight. Nebogatov surrendered the remnant the next morning.",
+  "significance": "Tsushima was the first decisive fleet engagement won by an Asian power against a European one in the modern era, and a result that reshaped global geopolitics for decades. The defeat triggered the Russian Revolution of 1905, ended Russian eastward expansion, and emboldened Japanese militarism through the 1930s. Operationally it pinned a generation of pre-dreadnought design lessons that fed straight into the all-big-gun HMS Dreadnought launched the following year, opening the naval arms race that led to World War One at sea.",
+  "wikipediaTitle": "Battle of Tsushima"
+}

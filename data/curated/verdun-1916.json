@@ -1,0 +1,29 @@
+{
+  "id": "verdun-1916",
+  "name": "Battle of Verdun",
+  "year": 1916,
+  "date": "21 February – 18 December 1916",
+  "lat": 49.2092,
+  "lng": 5.4218,
+  "era": "world-war-1",
+  "war": "World War I",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "France",
+      "commander": "Philippe Pétain (until May), Robert Nivelle (May onward), Joseph Joffre (overall)",
+      "strength": "Roughly 1.14 million troops rotating through the line via the Voie Sacrée",
+      "casualties": "Around 377,000 killed, wounded, and missing (about 162,000 dead)"
+    },
+    {
+      "name": "German Empire",
+      "commander": "Erich von Falkenhayn (planning), Crown Prince Wilhelm (army group), Bruno von Mudra (V Corps)",
+      "strength": "Roughly 1.25 million troops in the German 5th Army across the campaign",
+      "casualties": "Around 337,000 killed, wounded, and missing (about 143,000 dead)"
+    }
+  ],
+  "victor": "France",
+  "summary": "Falkenhayn opened Operation Gericht on the twenty-first of February with the heaviest artillery preparation seen in human history to that point: more than a million shells fired across an eight-mile front in nine hours. The German plan was to bleed the French army to death at a fortress city whose loss was politically intolerable. Fort Douaumont fell to a handful of pioneers on the twenty-fifth and the front nearly collapsed. Pétain stabilised the line and organised the rolling system of unit rotation up the Voie Sacrée, the single road to Bar-le-Duc, that gave the battle its sustained French presence. The line stalled by midsummer. French counter-attacks in October recovered Fort Douaumont and most of the original positions by December.",
+  "significance": "Verdun became the symbol of French national endurance and the textbook case of attritional warfare. Falkenhayn's bleed-the-enemy strategy succeeded arithmetically (German losses lower than French) but failed politically (Pétain became a national hero, Falkenhayn was removed). The phrase \"Ils ne passeront pas\" (\"They shall not pass\") entered French civic memory and resonated through the rest of the twentieth century, including most famously in the Spanish Civil War.",
+  "wikipediaTitle": "Battle of Verdun"
+}

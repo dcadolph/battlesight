@@ -1,0 +1,29 @@
+{
+  "id": "pokrovsk-2024-2025",
+  "name": "Battle of Pokrovsk",
+  "year": 2024,
+  "date": "18 July 2024 – ongoing",
+  "lat": 48.2818,
+  "lng": 37.1764,
+  "era": "modern",
+  "war": "Russian invasion of Ukraine",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Oleksandr Syrskyi (Commander-in-Chief), Khortytsia Operational-Strategic Group",
+      "strength": "Several mechanized brigades including the 25th Airborne, 47th Mechanized, 68th Jaeger, plus drone and electronic warfare units",
+      "casualties": "Heavy but unpublished; reports of brigade rotations every six to eight weeks"
+    },
+    {
+      "name": "Russia",
+      "commander": "Andrey Mordvichev (Central Group of Forces)",
+      "strength": "Around 100,000 to 150,000 troops across the Pokrovsk axis at peak, with substantial glide-bomb and FPV drone support",
+      "casualties": "Tens of thousands killed and wounded; daily losses regularly above 1,000 across the front"
+    }
+  ],
+  "victor": "Russia (partial, ongoing); Ukrainian salient pushed back but the city itself held into mid-2025",
+  "summary": "After Avdiivka fell in February 2024, Russia turned its operational schwerpunkt toward Pokrovsk, a logistics hub on the H-15 highway that anchored Ukrainian rotations into the Donbas. Russian formations advanced through Ocheretyne, Selydove, and the coal towns south of Pokrovsk over the summer and autumn at the cost of staggering casualties. Ukrainian drone regiments and mined kill-zones slowed the advance to several hundred metres a week by late 2024. The front stabilised in early 2025 a few kilometres from the city.",
+  "significance": "Pokrovsk became the centerpiece test of the war's drone-and-attrition phase. Both sides industrialised FPV production, electronic-warfare jamming, and counter-drone tactics to a degree no prior war had seen. The slow Russian crawl, paid for in extreme manpower losses, demonstrated that the Kremlin would accept any casualty figure to keep operational momentum, while the Ukrainian defence proved that even cheap drones in volume could blunt a numerically superior army on terrain it had picked.",
+  "wikipediaTitle": "Battle of Pokrovsk"
+}

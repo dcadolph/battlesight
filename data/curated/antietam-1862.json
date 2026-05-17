@@ -1,0 +1,32 @@
+{
+  "id": "antietam-1862",
+  "name": "Battle of Antietam",
+  "year": 1862,
+  "date": "17 September 1862",
+  "lat": 39.4737,
+  "lng": -77.7444,
+  "era": "industrial",
+  "war": "American Civil War",
+  "battleType": "land",
+  "aliases": [
+    { "name": "Battle of Sharpsburg", "by": "Confederate naming convention" }
+  ],
+  "sides": [
+    {
+      "name": "Union (Army of the Potomac)",
+      "commander": "George B. McClellan, Joseph Hooker (I Corps), Edwin V. Sumner (II Corps), Ambrose Burnside (IX Corps)",
+      "strength": "About 75,000 troops in six corps",
+      "casualties": "Around 12,401 killed, wounded, or missing"
+    },
+    {
+      "name": "Confederacy (Army of Northern Virginia)",
+      "commander": "Robert E. Lee, Stonewall Jackson (left wing), James Longstreet (right wing)",
+      "strength": "About 38,000 troops, with the army split since Harper's Ferry and reuniting through the day",
+      "casualties": "Around 10,316 killed, wounded, or missing"
+    }
+  ],
+  "victor": "Union (tactical draw, strategic victory)",
+  "summary": "Lee took position behind Antietam Creek north of Sharpsburg, his army strung along three miles with his back to the Potomac. McClellan attacked in sequence rather than in concert: Hooker on the Cornfield at dawn, Sumner on the Sunken Road at midday, Burnside across the bridge in the afternoon. Each attack came close to breaking the Confederate line; each was stopped by reinforcements arriving from the inactive sectors. A. P. Hill's division marched seventeen miles from Harper's Ferry and arrived in time to crush Burnside's flank. The armies stood facing each other on the eighteenth and Lee withdrew across the Potomac on the night of the eighteenth into the nineteenth.",
+  "significance": "Antietam is the bloodiest single day in American military history. Lee's retreat back into Virginia gave Abraham Lincoln the political cover to issue the preliminary Emancipation Proclamation on the twenty-second of September, redefining the war as a war against slavery and foreclosing British and French recognition of the Confederacy. The battle did not destroy Lee's army (which McClellan refused to pursue), but it ended the first Confederate invasion of the North and turned the war diplomatically.",
+  "wikipediaTitle": "Battle of Antietam"
+}

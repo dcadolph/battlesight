@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { themeForYear } from '../theme/era';
 import { formatYear, formatCasualtyEstimate } from '../lib/format';
+import CloseButton from './CloseButton';
 
 interface WarSummaryShape {
   outcome?: string;
@@ -123,6 +124,13 @@ export default function WarCinematicOverlay({
           backdropFilter: 'blur(10px)',
         }}
       />
+
+      {/* Top-right close mark. Matches the global exit affordance used by
+          BattlePanel and WarPlayback so the user has the same out from
+          every modal mode, not a different gesture per surface. */}
+      <div className="absolute top-4 right-4 z-10">
+        <CloseButton onClick={onDismiss} label="Close cinematic (Esc)" tone="elevated" />
+      </div>
 
       {/* Soft era-themed bloom. */}
       <div

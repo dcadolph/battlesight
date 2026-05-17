@@ -1,0 +1,29 @@
+{
+  "id": "aleppo-fall-2024",
+  "name": "Fall of Aleppo (2024)",
+  "year": 2024,
+  "date": "27 November – 1 December 2024",
+  "lat": 36.2021,
+  "lng": 37.1343,
+  "era": "modern",
+  "war": "Syrian Civil War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Syrian opposition (HTS-led)",
+      "commander": "Abu Mohammad al-Julani (Hayat Tahrir al-Sham), Syrian National Army field commanders",
+      "strength": "Mobile light-infantry brigades of Hayat Tahrir al-Sham and allied Turkish-backed factions, perhaps 25,000 fighters across the front",
+      "casualties": "Light, in the low hundreds"
+    },
+    {
+      "name": "Syrian Arab Army (Assad government)",
+      "commander": "Suheil al-Hassan (regional command), Maher al-Assad (Republican Guard)",
+      "strength": "Several brigades on paper; many units below combat strength after years of attrition and the withdrawal of Russian air cover",
+      "casualties": "Tens killed, thousands captured or melted away into the city"
+    }
+  ],
+  "victor": "Syrian opposition (HTS-led)",
+  "summary": "Hayat Tahrir al-Sham launched Operation Deterrence of Aggression from Idlib on the twenty-seventh of November. The Syrian Army's defensive line broke within hours and the opposition rolled east through Saraqib, the M5 highway, and into the suburbs of Aleppo. By the night of the thirtieth the city was in rebel hands without a major urban battle. The collapse continued south toward Hama and Homs.",
+  "significance": "Aleppo's bloodless fall was the trigger event for the rapid collapse of the Assad government the following week. Russia, distracted in Ukraine, did not intervene. Iran's allied forces and Hezbollah, weakened by the Israeli campaign in Lebanon, did not arrive in time. Within ten days HTS fighters were in Damascus and Bashar al-Assad had fled to Moscow, ending fifty-four years of Assad family rule.",
+  "wikipediaTitle": "Fall of Aleppo (2024)"
+}

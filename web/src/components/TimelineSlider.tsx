@@ -17,7 +17,7 @@ interface TimelineSliderProps {
 const HISTOGRAM_BINS = 180;
 
 const ERA_RANGES: Record<string, [number, number]> = {
-  'ancient': [-500, 500],
+  'ancient': [-3000, 500],
   'medieval': [500, 1500],
   'early-modern': [1500, 1700],
   'napoleonic': [1700, 1820],

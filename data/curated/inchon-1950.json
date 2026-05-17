@@ -1,0 +1,29 @@
+{
+  "id": "inchon-1950",
+  "name": "Battle of Inchon",
+  "year": 1950,
+  "date": "15 – 19 September 1950",
+  "lat": 37.4634,
+  "lng": 126.6433,
+  "era": "modern",
+  "war": "Korean War",
+  "battleType": "amphibious",
+  "sides": [
+    {
+      "name": "United Nations (US X Corps and ROK)",
+      "commander": "Douglas MacArthur (UN command), Edward Almond (X Corps), Oliver P. Smith (1st Marine Division)",
+      "strength": "About 75,000 troops, 261 ships, 1st Marine Division as the spearhead",
+      "casualties": "Around 222 killed, 800 wounded"
+    },
+    {
+      "name": "Korean People's Army (DPRK)",
+      "commander": "Wŏl Ki-Chan (Inchon garrison), Kim Il Sung (overall)",
+      "strength": "About 6,500 troops in and around Inchon and Kimpo, plus the divisions besieging the Pusan Perimeter 300 kilometres south",
+      "casualties": "Around 1,350 killed, 7,000 captured; the supply line to the Pusan front cut"
+    }
+  ],
+  "victor": "United Nations",
+  "summary": "MacArthur staked his career on an amphibious landing 240 kilometres behind the North Korean front, at a port whose 32-foot tides, narrow approach channel, and seawall made it the textbook example of an unsuitable beach. The fleet bombarded Wolmi Island on the fifteenth at dawn, took it by 08:00, and waited for the evening tide to land the main force at Red and Blue beaches inside the city. Seoul fell on the twenty-fifth. The North Korean army, cut off from its supply line, dissolved as it retreated north.",
+  "significance": "Inchon reversed the entire course of the Korean War in eight days. North Korea was driven north of the thirty-eighth parallel within a fortnight and the United Nations approached the Yalu River by late October. Chinese intervention in November would then reverse the reversal, but Inchon stands as one of the most consequential operational decisions of the twentieth century and a permanent argument for risk taken on judgment rather than consensus.",
+  "wikipediaTitle": "Battle of Inchon"
+}

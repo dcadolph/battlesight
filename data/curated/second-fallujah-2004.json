@@ -1,0 +1,33 @@
+{
+  "id": "second-fallujah-2004",
+  "name": "Second Battle of Fallujah",
+  "year": 2004,
+  "date": "7 November – 23 December 2004",
+  "lat": 33.3489,
+  "lng": 43.7773,
+  "era": "modern",
+  "war": "Iraq War",
+  "battleType": "land",
+  "aliases": [
+    { "name": "Operation Phantom Fury", "by": "United States Marine Corps operational codename" },
+    { "name": "Operation Al-Fajr", "by": "Iraqi government codename meaning \"The Dawn\"" }
+  ],
+  "sides": [
+    {
+      "name": "Multi-National Force (US Marines and Army, UK, Iraqi government)",
+      "commander": "Richard Natonski (1st Marine Division), John Sattler (I MEF), Iraqi 36th Commando Battalion",
+      "strength": "About 13,500 troops including 4 Marine and 2 US Army battalions, plus British Black Watch armour and 2,000 Iraqi forces",
+      "casualties": "About 95 American and Iraqi killed, 560 wounded; 35 Black Watch killed and wounded"
+    },
+    {
+      "name": "Iraqi insurgents (Al-Qaeda in Iraq, Ansar al-Sunna, former Ba'athists)",
+      "commander": "Abdullah al-Janabi (council), Omar Hadid (military), Abu Musab al-Zarqawi (Al-Qaeda in Iraq, escaped before the assault)",
+      "strength": "About 3,000 to 4,000 fighters dug into a city of around 250 to 300,000 residents (most of whom had evacuated before the assault)",
+      "casualties": "Estimates 1,200 to 2,000 killed and around 1,500 captured; the city's combat infrastructure destroyed"
+    }
+  ],
+  "victor": "Multi-National Force",
+  "summary": "After the first attempt to clear Fallujah in April 2004 ended in a political pullback, US Marines returned in November under a different mandate and warning. Most civilians had fled in the weeks before the assault. The operation opened on the seventh of November with the Marines pushing south through the northern districts of Jolan and Askari. House-to-house combat was the densest American urban fighting since Hue City in 1968. Marines reached the southern industrial district by the thirteenth and the operation transitioned to a slow clearance of remaining cells through December.",
+  "significance": "Fallujah became the iconic urban battle of the Iraq War and the defining tactical experience of a generation of US Marines. The fighting also surfaced the human cost of insurgent doctrine in dense civilian terrain and produced the controversies over white phosphorus, civilian casualties, and detainee abuse that hardened opposition to the war at home. Operationally the city was cleared; strategically Al-Qaeda in Iraq survived to seed what later became the Islamic State.",
+  "wikipediaTitle": "Second Battle of Fallujah"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "adrianople-378",
+  "name": "Battle of Adrianople",
+  "year": 378,
+  "date": "9 August 378",
+  "lat": 41.6771,
+  "lng": 26.5557,
+  "era": "ancient",
+  "war": "Gothic War (376–382)",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Eastern Roman Empire",
+      "commander": "Valens (Emperor)",
+      "strength": "Roughly 15,000 to 20,000 legionaries and auxiliaries",
+      "casualties": "Two thirds of the army killed, including Valens himself"
+    },
+    {
+      "name": "Tervingi and Greuthungi Goths",
+      "commander": "Fritigern (Tervingi), Alatheus and Saphrax (Greuthungi)",
+      "strength": "About 15,000 to 20,000 infantry behind a wagon laager, plus Greuthungi heavy cavalry returning from foraging",
+      "casualties": "Around 1,500 killed"
+    }
+  ],
+  "victor": "Tervingi and Greuthungi Goths",
+  "summary": "Valens marched against the Goths without waiting for the western Emperor Gratian and his reinforcements. The Roman line attacked the Gothic laager in midsummer heat without water, while parley delayed deployment. The Greuthungi cavalry returned from foraging and struck the Roman cavalry on the left, then enveloped the legions. Valens died in the rout, the senior officer corps was destroyed, and the Roman tactical disaster of the late empire entered Western memory.",
+  "significance": "Adrianople ended the long Roman superiority of infantry over cavalry that had defined the legions since the Republic. The Eastern Empire had to settle the Goths inside its frontier as foederati and never recovered comfortable manpower margins on the lower Danube. Ammianus Marcellinus, the last great Latin historian, devoted his most famous passages to the disaster and called it the worst Roman defeat since Cannae five centuries earlier.",
+  "wikipediaTitle": "Battle of Adrianople"
+}

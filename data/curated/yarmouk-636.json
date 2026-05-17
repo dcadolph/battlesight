@@ -1,0 +1,29 @@
+{
+  "id": "yarmouk-636",
+  "name": "Battle of Yarmouk",
+  "year": 636,
+  "date": "15 – 20 August 636",
+  "lat": 32.737,
+  "lng": 35.967,
+  "era": "medieval",
+  "war": "Arab–Byzantine wars",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Rashidun Caliphate",
+      "commander": "Khalid ibn al-Walid, Abu Ubaidah ibn al-Jarrah",
+      "strength": "Approximately 25,000 to 40,000 mounted and foot Arab troops",
+      "casualties": "Around 4,000 killed"
+    },
+    {
+      "name": "Byzantine Empire",
+      "commander": "Vahan (Armenian magister militum), Theodore Trithyrius",
+      "strength": "Approximately 80,000 to 100,000 Byzantine, Armenian, and Christian Arab auxiliaries",
+      "casualties": "Estimates range from 45,000 to 70,000 killed or scattered"
+    }
+  ],
+  "victor": "Rashidun Caliphate",
+  "summary": "Khalid ibn al-Walid concentrated his cavalry against a Byzantine army drawn up along the Yarmouk gorge, a system of ravines feeding the Yarmouk River near the modern borders of Jordan, Israel, and Syria. Over six days the Arabs pressed both wings, exploited a sandstorm and a desertion among the Christian Arab Ghassanid auxiliaries, then broke the Byzantine right and drove the army into the ravines on the sixth day. The remnant could not reach Damascus.",
+  "significance": "Yarmouk ended Byzantine rule over the Levant. Within four years the Arabs took Damascus, Antioch, Jerusalem, and Alexandria. The intellectual and trade centers of the eastern Roman world transferred to a new Arab Muslim civilization, and the religious geography of the Mediterranean was reset for fourteen centuries.",
+  "wikipediaTitle": "Battle of the Yarmuk"
+}

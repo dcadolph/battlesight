@@ -1,0 +1,29 @@
+{
+  "id": "severodonetsk-2022",
+  "name": "Battle of Sievierodonetsk",
+  "year": 2022,
+  "date": "6 April – 25 June 2022",
+  "lat": 48.948,
+  "lng": 38.4922,
+  "era": "modern",
+  "war": "Russian invasion of Ukraine",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Roman Vlasenko, Serhiy Haidai",
+      "strength": "Approximately 5,000 troops including the 24th Mechanized Brigade and territorial defence units",
+      "casualties": "Hundreds killed and wounded, with daily losses approaching 100 in late May"
+    },
+    {
+      "name": "Russia",
+      "commander": "Gennady Zhidko",
+      "strength": "Roughly 25,000 troops with massed artillery, LPR militia, and Wagner contractors",
+      "casualties": "Heavy but unconfirmed losses, with multiple battalions reduced to combat-ineffective status"
+    }
+  ],
+  "victor": "Russia",
+  "summary": "Sievierodonetsk and its twin city Lysychansk anchored the last Ukrainian salient in Luhansk Oblast. Russia pressed in from three directions while artillery flattened residential districts and the Azot chemical plant became the redoubt where the final defenders held out. Ukrainian forces withdrew across the Siverskyi Donets River on the twenty-fifth of June to avoid encirclement.",
+  "significance": "The fall of Sievierodonetsk gave Russia near-total control of Luhansk Oblast and proved the war had become an artillery contest the Kremlin could win where Western howitzers were not yet present in numbers. Ukraine learned that holding pocketed cities at any cost was no longer survivable doctrine, a lesson that shaped the more elastic defense at Bakhmut and Avdiivka.",
+  "wikipediaTitle": "Battle of Sievierodonetsk (2022)"
+}

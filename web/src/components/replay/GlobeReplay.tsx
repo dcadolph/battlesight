@@ -7,7 +7,7 @@ import type { Feature, FeatureCollection, Geometry, Position } from 'geojson';
 
 import type { Battle } from '../../types/battle';
 import type { Phase, Replay, Faction, ControlRegion } from '../../types/replay';
-import { FACTION_COLOR } from '../../types/replay';
+import { factionColorFor } from '../../types/replay';
 import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../../data/cities';
 import { themeForEra } from '../../theme/era';
 import { playImpact } from '../../audio/sound';
@@ -417,7 +417,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
       });
     }
     (phase.controlRegions ?? []).forEach((r: ControlRegion) => {
-      const color = FACTION_COLOR[r.controller] ?? '#94a3b8';
+      const color = factionColorFor(r.controller, replay.aggressor) ?? '#94a3b8';
       const closed = r.ring.length > 0 && (
         r.ring[0][0] !== r.ring[r.ring.length - 1][0] ||
         r.ring[0][1] !== r.ring[r.ring.length - 1][1]
@@ -506,9 +506,9 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
           same info but during a fast-paced phase the user is watching the
           arrows, not the sidebar. */}
       <div className="absolute top-3 left-3 z-10 pointer-events-none flex flex-col gap-1.5">
-        <SideTag color={FACTION_COLOR.a} label={replay.factionA} />
-        <SideTag color={FACTION_COLOR.b} label={replay.factionB} />
-        {replay.factionC && <SideTag color={FACTION_COLOR.c} label={replay.factionC} />}
+        <SideTag color={factionColorFor('a', replay.aggressor)} label={replay.factionA} />
+        <SideTag color={factionColorFor('b', replay.aggressor)} label={replay.factionB} />
+        {replay.factionC && <SideTag color={factionColorFor('c', replay.aggressor)} label={replay.factionC} />}
       </div>
 
       <Globe
@@ -546,20 +546,21 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
               markerHeight="6.5"
               orient="auto-start-reverse"
             >
-              <path d="M 0 0 L 12 6 L 0 12 z" fill={FACTION_COLOR[f]} />
+              <path d="M 0 0 L 12 6 L 0 12 z" fill={factionColorFor(f, replay.aggressor)} />
             </marker>
           ))}
         </defs>
         {/* Defender units render under the arrows so an incoming arrow visibly
             terminates at the defender's position rather than vice versa. */}
         {units.filter((u) => u.visible).map((u) => (
-          <UnitMarker key={`unit-${phaseIdx}-${u.index}`} unit={u} phaseIdx={phaseIdx} />
+          <UnitMarker key={`unit-${phaseIdx}-${u.index}`} unit={u} phaseIdx={phaseIdx} aggressor={replay.aggressor} />
         ))}
         {arrows.filter((a) => a.visible).map((a) => (
           <ArrowVector
             key={`arrow-${phaseIdx}-${a.index}`}
             phaseIdx={phaseIdx}
             arrow={a}
+            aggressor={replay.aggressor}
           />
         ))}
         {/* Impact flashes timed to each arrow's individual trace duration, so
@@ -571,7 +572,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
             key={`flash-${phaseIdx}-${a.index}`}
             x={a.x2}
             y={a.y2}
-            color={FACTION_COLOR[a.faction]}
+            color={factionColorFor(a.faction, replay.aggressor)}
             delay={arrowTiming(a.kind, a.index).impactDelay}
           />
         ))}
@@ -585,7 +586,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
           <ArrowLabel
             key={`label-${phaseIdx}-${a.index}`}
             arrow={a}
-            color={FACTION_COLOR[a.faction]}
+            color={factionColorFor(a.faction, replay.aggressor)}
             timing={arrowTiming(a.kind, a.index)}
           />
         ))}
@@ -607,6 +608,7 @@ function hexWithAlpha(hex: string, alpha: number): string {
 interface ArrowVectorProps {
   phaseIdx: number;
   arrow: ProjectedArrow;
+  aggressor?: Faction;
 }
 
 // ArrowVector renders one phase movement as a curved SVG path. Three stacked
@@ -620,7 +622,7 @@ interface ArrowVectorProps {
 //      so the arrow keeps reading as a live movement.
 // Charges and flanks trace faster, retreats slower. Curve amount and stroke
 // width are kind-dependent so the type of movement is legible at a glance.
-function ArrowVector({ phaseIdx, arrow }: ArrowVectorProps) {
+function ArrowVector({ phaseIdx, arrow, aggressor }: ArrowVectorProps) {
   const { x1, y1, x2, y2, faction, kind, index } = arrow;
   const dx = x2 - x1;
   const dy = y2 - y1;
@@ -640,7 +642,7 @@ function ArrowVector({ phaseIdx, arrow }: ArrowVectorProps) {
   else if (kind === 'flank') stroke = 3.4;
   else if (kind === 'rout' || kind === 'retreat' || kind === 'withdrawal') stroke = 2.0;
 
-  const color = FACTION_COLOR[faction];
+  const color = factionColorFor(faction, aggressor);
   const markerId = `gr-arrow-${phaseIdx}-${faction}`;
   const path = `M ${x1} ${y1} Q ${cpX} ${cpY} ${x2} ${y2}`;
 
@@ -813,15 +815,16 @@ function ArrowLabel({ arrow, color, timing }: ArrowLabelProps) {
 interface UnitMarkerProps {
   phaseIdx: number;
   unit: ProjectedUnit;
+  aggressor?: Faction;
 }
 
 // UnitMarker renders a static defender / position marker at a unit's
 // projected screen position. The marker is a faction-colored disk with a
 // pale rim and a unit-type glyph in the center. Pop-in uses a slight
 // overshoot bezier so each unit lands with weight, not a flat fade.
-function UnitMarker({ unit }: UnitMarkerProps) {
+function UnitMarker({ unit, aggressor }: UnitMarkerProps) {
   const { x, y, faction, radius, unitType, status, index, label } = unit;
-  const color = FACTION_COLOR[faction];
+  const color = factionColorFor(faction, aggressor);
   const isBroken = status === 'broken' || status === 'routed' || status === 'destroyed';
   const fill = isBroken ? hexWithAlpha(color, 0.35) : hexWithAlpha(color, 0.75);
   const stroke = isBroken ? hexWithAlpha(color, 0.55) : '#f8fafc';

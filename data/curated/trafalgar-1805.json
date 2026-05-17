@@ -1,0 +1,29 @@
+{
+  "id": "trafalgar-1805",
+  "name": "Battle of Trafalgar",
+  "year": 1805,
+  "date": "21 October 1805",
+  "lat": 36.245,
+  "lng": -6.241,
+  "era": "napoleonic",
+  "war": "Napoleonic Wars",
+  "battleType": "naval",
+  "sides": [
+    {
+      "name": "Royal Navy",
+      "commander": "Horatio Nelson (Mediterranean Fleet, killed in action), Cuthbert Collingwood (succeeded to command)",
+      "strength": "27 ships of the line, 4 frigates, 2 schooners, 1 cutter",
+      "casualties": "1,663 killed and wounded; no ships lost; Nelson mortally wounded by a French sharpshooter aboard HMS Victory"
+    },
+    {
+      "name": "Combined Franco-Spanish Fleet",
+      "commander": "Pierre-Charles Villeneuve (overall, captured), Federico Gravina (Spanish, mortally wounded)",
+      "strength": "33 ships of the line and 7 frigates",
+      "casualties": "4,408 killed, 2,545 wounded, around 7,000 captured; 21 of 33 ships of the line taken or destroyed"
+    }
+  ],
+  "victor": "Royal Navy",
+  "summary": "Nelson approached the Franco-Spanish line in two columns perpendicular to the enemy's line of battle, deliberately exposing his lead ships to enfilade fire in order to cut Villeneuve's formation into three. Once through the line, the British wore round and engaged the divided enemy in close-quarters slugging matches their gunnery training won handily. By late afternoon the centre of Villeneuve's line had surrendered; Gravina led the survivors back to Cadiz. Nelson was struck down on Victory's quarterdeck at the height of the action and lived just long enough to learn the battle was won.",
+  "significance": "Trafalgar destroyed any prospect that Napoleon could invade Britain by sea and confirmed Royal Navy supremacy for the next century. Combined with the simultaneous collapse of the Third Coalition's land armies at Ulm and Austerlitz, it produced the strategic asymmetry of the Napoleonic period: Britain ruled the oceans, France dominated the European mainland, and neither could decisively reach the other. Nelson's death at the moment of victory made him the British navy's permanent patron saint.",
+  "wikipediaTitle": "Battle of Trafalgar"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "kadesh-1274bc",
+  "name": "Battle of Kadesh",
+  "year": -1274,
+  "date": "May 1274 BC",
+  "lat": 34.572,
+  "lng": 36.522,
+  "era": "ancient",
+  "war": "Egyptian–Hittite wars",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "New Kingdom Egypt",
+      "commander": "Ramesses II (Pharaoh)",
+      "strength": "About 20,000 troops in four divisions (Amun, Re, Ptah, Set) and 2,000 chariots",
+      "casualties": "Heavy on the Re and Amun divisions caught in the ambush"
+    },
+    {
+      "name": "Hittite Empire",
+      "commander": "Muwatalli II",
+      "strength": "About 40,000 troops including 2,500 to 3,500 chariots drawn from across the Anatolian confederacy",
+      "casualties": "Heavy chariot losses in the second-day counter-attack"
+    }
+  ],
+  "victor": "Tactical draw, strategic Hittite advantage; both kings later claimed victory",
+  "summary": "Ramesses II marched from Egypt to recover Kadesh on the Orontes. Hittite chariots ambushed his vanguard divisions in detail outside the city. The Amun division survived the initial shock around the pharaoh's tent, the Re division was broken, and the Ptah and Set divisions arrived in the afternoon to drive the Hittite chariotry back across the river. The two armies disengaged the next day. Kadesh remained in Hittite hands.",
+  "significance": "Kadesh is the earliest battle recorded from multiple independent sides; the Egyptian Poem and Bulletin of Ramesses at Karnak survive alongside Hittite cuneiform tablets recovered at Hattusa. The conflict produced the Egyptian-Hittite peace treaty of 1259 BC, the earliest surviving full text of a parity treaty between two equal states, a copy of which now hangs in the United Nations headquarters in New York.",
+  "wikipediaTitle": "Battle of Kadesh"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "cannae-216bc",
+  "name": "Battle of Cannae",
+  "year": -216,
+  "date": "2 August 216 BC",
+  "lat": 41.3056,
+  "lng": 16.1322,
+  "era": "ancient",
+  "war": "Second Punic War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Carthage",
+      "commander": "Hannibal Barca",
+      "strength": "About 50,000 infantry and 10,000 cavalry (Iberian, Gallic, and Numidian)",
+      "casualties": "Around 5,700 killed and wounded"
+    },
+    {
+      "name": "Roman Republic",
+      "commander": "Lucius Aemilius Paullus and Gaius Terentius Varro (consuls in alternating command)",
+      "strength": "About 80,000 infantry and 6,000 cavalry, eight legions plus allied wings",
+      "casualties": "Roughly 50,000 to 70,000 killed; 10,000 captured; Paullus and 80 senators among the dead"
+    }
+  ],
+  "victor": "Carthage",
+  "summary": "Hannibal arrayed his weakest infantry, the Iberians and Gauls, in a thin convex bulge at the centre of his line, with his veteran Libyan infantry held back on the wings. As the Roman maniples drove into the centre, the line bowed inward but did not break. Numidian and Iberian cavalry routed the Roman cavalry on both flanks and rode around the back. The Libyan veterans wheeled inward. The Romans found themselves compressed into a shrinking circle and slaughtered where they stood.",
+  "significance": "Cannae remains the textbook tactical envelopment, taught in every staff college from Carl von Clausewitz to the present. Strategically it failed: Rome refused to negotiate, recruited new legions, and ground Hannibal down. Politically it forced Rome to reform its command structure away from yearly consular rotation and toward longer professional commands, a shift that pointed forward to the late Republic and the principate.",
+  "wikipediaTitle": "Battle of Cannae"
+}

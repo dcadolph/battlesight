@@ -5617,6 +5617,7 @@
     "extentLatDeg": 4.5,
     "factionA": "Soviet Union",
     "factionB": "Nazi Germany + Axis allies",
+    "aggressor": "b",
     "phases": [
       {
         "title": "Drive to the Volga",
@@ -10315,6 +10316,7 @@
     "aspectRatio": 1.7,
     "factionA": "France + Britain",
     "factionB": "German Empire",
+    "aggressor": "b",
     "phases": [
       {
         "title": "The Great Wheel",
@@ -10660,6 +10662,7 @@
     "aspectRatio": 1.6,
     "factionA": "German Empire",
     "factionB": "Russian Empire",
+    "aggressor": "b",
     "phases": [
       {
         "title": "Two Russian Armies",
@@ -11492,6 +11495,7 @@
     "aspectRatio": 1.55,
     "factionA": "Allies (France, UK, Belgium, Netherlands)",
     "factionB": "Nazi Germany",
+    "aggressor": "b",
     "phases": [
       {
         "title": "Dyle Plan deployment",
@@ -15006,6 +15010,7 @@
     "aspectRatio": 1.5,
     "factionA": "France",
     "factionB": "German Empire",
+    "aggressor": "b",
     "phases": [
       {
         "title": "Operation Gericht opens",
@@ -16628,6 +16633,7 @@
     "aspectRatio": 1.7,
     "factionA": "RAF Fighter Command (UK)",
     "factionB": "Luftwaffe (Germany)",
+    "aggressor": "b",
     "phases": [
       {
         "title": "Kanalkampf, the Channel battle",
@@ -17876,6 +17882,7 @@
     "aspectRatio": 1.4,
     "factionA": "US Marines (26th Marines + ARVN Rangers)",
     "factionB": "People's Army of Vietnam (304th + 325C Divisions)",
+    "aggressor": "b",
     "phases": [
       {
         "title": "Encirclement",
@@ -18738,6 +18745,7 @@
     "extentLatDeg": 1.6,
     "factionA": "Allied (United States, United Kingdom, Belgium)",
     "factionB": "Nazi Germany",
+    "aggressor": "b",
     "phases": [
       {
         "title": "Watch on the Rhine",
@@ -19538,6 +19546,7 @@
     "aspectRatio": 1.4,
     "factionA": "Soviet Union (Voronezh + Central + Steppe Fronts)",
     "factionB": "Nazi Germany (Army Groups Center + South)",
+    "aggressor": "b",
     "phases": [
       {
         "title": "Citadel opens",
@@ -19967,6 +19976,7 @@
     "aspectRatio": 1.4,
     "factionA": "Allies (US TF 17 + RAN cruisers)",
     "factionB": "Empire of Japan (MO Operation)",
+    "aggressor": "b",
     "phases": [
       {
         "title": "MO Operation and the Allied trap",

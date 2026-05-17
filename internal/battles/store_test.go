@@ -156,3 +156,46 @@ func TestSanitizeFTS(t *testing.T) {
 		})
 	}
 }
+
+// TestParseCoordQuery pins the coordinate-pattern detection used by
+// Search to route lat/lng strings through the nearest-neighbor path.
+// The accepted shapes are conservative on purpose so a phrase like
+// "12 apostles" cannot accidentally trigger geo search.
+func TestParseCoordQuery(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		Name    string
+		In      string
+		WantLat float64
+		WantLng float64
+		WantOK  bool
+	}{
+		// Test 0: comma-separated coordinate copy-paste form.
+		{Name: "comma_form", In: "50.91, 0.49", WantLat: 50.91, WantLng: 0.49, WantOK: true},
+		// Test 1: space-separated form.
+		{Name: "space_form", In: "  -33.45  151.20  ", WantLat: -33.45, WantLng: 151.20, WantOK: true},
+		// Test 2: bare integer pair.
+		{Name: "integer_pair", In: "40, -74", WantLat: 40, WantLng: -74, WantOK: true},
+		// Test 3: out-of-range latitude rejected.
+		{Name: "lat_out_of_range", In: "120, 30", WantLat: 0, WantLng: 0, WantOK: false},
+		// Test 4: out-of-range longitude rejected.
+		{Name: "lng_out_of_range", In: "30, 200", WantLat: 0, WantLng: 0, WantOK: false},
+		// Test 5: free text is not a coord.
+		{Name: "free_text", In: "Battle of Hastings", WantLat: 0, WantLng: 0, WantOK: false},
+		// Test 6: only one number is not a coord.
+		{Name: "single_number", In: "1066", WantLat: 0, WantLng: 0, WantOK: false},
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
+			lat, lng, ok := parseCoordQuery(test.In)
+			if ok != test.WantOK {
+				t.Errorf("ok: want %v got %v", test.WantOK, ok)
+			}
+			if ok && (lat != test.WantLat || lng != test.WantLng) {
+				t.Errorf("coords: want (%v,%v) got (%v,%v)",
+					test.WantLat, test.WantLng, lat, lng)
+			}
+		})
+	}
+}

@@ -1,0 +1,29 @@
+{
+  "id": "hue-1968",
+  "name": "Battle of Huế",
+  "year": 1968,
+  "date": "31 January – 2 March 1968",
+  "lat": 16.4674,
+  "lng": 107.5905,
+  "era": "modern",
+  "war": "Vietnam War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "United States and South Vietnam (ARVN)",
+      "commander": "Stanley S. Hughes (1st Marines), Foster C. LaHue (Task Force X-Ray), Ngô Quang Trưởng (1st ARVN Division)",
+      "strength": "About 11 US Marine battalions and 11 ARVN battalions across the engagement",
+      "casualties": "About 668 US and ARVN killed, 3,707 wounded"
+    },
+    {
+      "name": "North Vietnamese Army and Viet Cong",
+      "commander": "Trần Văn Quang (planning), Lê Trọng Tấn (front)",
+      "strength": "About 10,000 PAVN and Viet Cong fighters in elements of 10 battalions inside the city",
+      "casualties": "About 5,000 killed and 89 captured; civilian dead in the thousands, including the Huế massacre"
+    }
+  ],
+  "victor": "United States and South Vietnam",
+  "summary": "PAVN and Viet Cong battalions seized the old Imperial Citadel of Huế and most of the new city south of the Perfume River on the morning of the lunar new year holiday. The Marines retook the new city in a week of building-by-building combat reminiscent of Stalingrad, then crossed the river and fought another three weeks to clear the Citadel's stone walls and the Imperial Palace itself. ARVN troops cleared the inner enclosure on the second of March.",
+  "significance": "Huế was the longest, costliest urban battle of the Vietnam War. The photographic coverage by Don McCullin, Larry Burrows, and Time-Life crews fed directly into the political effect of the broader Tet offensive on American public opinion. Inside Huế, the PAVN and Viet Cong rounded up and executed an estimated 2,800 to 6,000 civilians on lists of \"counter-revolutionaries\", the largest single atrocity of the war and a fact that has never been fully integrated into Western narratives of the period.",
+  "wikipediaTitle": "Battle of Huế"
+}

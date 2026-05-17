@@ -1,0 +1,29 @@
+{
+  "id": "somme-1916",
+  "name": "Battle of the Somme",
+  "year": 1916,
+  "date": "1 July – 18 November 1916",
+  "lat": 50.0167,
+  "lng": 2.6833,
+  "era": "world-war-1",
+  "war": "World War I",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Allied (British Empire and France)",
+      "commander": "Douglas Haig (BEF), Ferdinand Foch (French Northern Army Group), Henry Rawlinson (Fourth Army), Hubert Gough (Reserve Army)",
+      "strength": "About 1.5 million Allied troops across 13 British, 11 French, and 1 Indian division at peak",
+      "casualties": "Roughly 419,654 British (including dominion forces) and 204,253 French, around 624,000 in total"
+    },
+    {
+      "name": "German Empire",
+      "commander": "Erich von Falkenhayn (until August), Paul von Hindenburg and Erich Ludendorff (from August), Fritz von Below (2nd Army)",
+      "strength": "About 50 German divisions rotated through the front",
+      "casualties": "Roughly 465,000 to 600,000 killed, wounded, or missing"
+    }
+  ],
+  "victor": "Tactical Allied advance of about 10 kilometres; strategic stalemate",
+  "summary": "Haig's offensive opened on the morning of the first of July with a seven-day artillery preparation that did not cut the German barbed wire or destroy the deep dugouts. Around 120,000 British infantry climbed out of their trenches at 07:30 walking forward in line and were met by interlocking German machine guns. By dusk on the first day Britain had taken 57,470 casualties, including 19,240 killed, the worst single day in the history of the British army. Five months of grinding attacks followed. The first tanks in history were committed at Flers-Courcelette on the fifteenth of September. The line moved about ten kilometres east before the November weather closed the offensive down.",
+  "significance": "The Somme broke the British New Army, the volunteer Pals battalions raised in 1914 and 1915, and finished the world that produced them. It set the pattern for the Western Front for the rest of the war: vast offensives with negligible strategic gains and casualty figures that no civil society had ever absorbed. Operationally it accelerated the development of combined-arms doctrine and the rolling barrage, lessons that paid off at the Hundred Days Offensive in 1918, the campaign that ended the war.",
+  "wikipediaTitle": "Battle of the Somme"
+}

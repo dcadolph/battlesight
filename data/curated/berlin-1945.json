@@ -1,0 +1,29 @@
+{
+  "id": "berlin-1945",
+  "name": "Battle of Berlin",
+  "year": 1945,
+  "date": "16 April – 2 May 1945",
+  "lat": 52.5167,
+  "lng": 13.3833,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Soviet Union (1st Belorussian, 1st Ukrainian, 2nd Belorussian Fronts)",
+      "commander": "Georgy Zhukov (1st Belorussian Front), Ivan Konev (1st Ukrainian Front), Konstantin Rokossovsky (2nd Belorussian Front)",
+      "strength": "About 2.5 million troops, 6,250 tanks, 41,600 artillery pieces, 7,500 aircraft",
+      "casualties": "About 81,116 killed and 280,251 wounded; nearly 2,000 tanks lost"
+    },
+    {
+      "name": "Nazi Germany",
+      "commander": "Gotthard Heinrici (Army Group Vistula), Helmuth Weidling (Berlin Defence Area), Adolf Hitler (in the Führerbunker until his suicide on the thirtieth of April)",
+      "strength": "About 766,000 troops, plus Volkssturm militia and Hitler Youth detachments; armour starved of fuel",
+      "casualties": "At least 92,000 killed and 220,000 wounded; about 480,000 captured; civilian dead estimated above 22,000"
+    }
+  ],
+  "victor": "Soviet Union",
+  "summary": "Zhukov opened the offensive at 03:00 on the sixteenth of April with 16,000 guns firing along the Oder. Soviet armies broke through the Seelow Heights in three days at heavy cost and reached the eastern suburbs of Berlin on the twenty-first. The Red Army encircled the city by the twenty-fifth. Block-by-block fighting reduced government quarter and Tiergarten to rubble. Hitler shot himself in the Führerbunker on the thirtieth. The Reichstag was photographed under the Soviet flag the same evening. Weidling surrendered the garrison on the second of May.",
+  "significance": "Berlin's fall ended the European theatre. Karl Dönitz's caretaker government signed the unconditional surrender at Reims on the seventh of May and Karlshorst on the eighth. The Soviet flag over the Reichstag became one of the war's defining images and the moral charter of the postwar Soviet Union. Berlin's division into four occupation zones the following month set the political map of the Cold War.",
+  "wikipediaTitle": "Battle of Berlin"
+}

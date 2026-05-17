@@ -1,0 +1,29 @@
+{
+  "id": "krynky-2023-2024",
+  "name": "Battle of Krynky",
+  "year": 2023,
+  "date": "October 2023 – July 2024",
+  "lat": 46.6917,
+  "lng": 33.0167,
+  "era": "modern",
+  "war": "Russian invasion of Ukraine",
+  "battleType": "amphibious",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Marine Corps Command, Special Operations Forces",
+      "strength": "Marine infantry rotations of platoon to company strength using small boats across the Dnipro",
+      "casualties": "Roughly 1,000 killed and wounded across nine months of contested crossings"
+    },
+    {
+      "name": "Russia",
+      "commander": "Mikhail Teplinsky",
+      "strength": "Airborne troops and naval infantry holding the east bank with FPV drone teams and artillery",
+      "casualties": "Multiple thousands killed and wounded by Ukrainian artillery and drones"
+    }
+  ],
+  "victor": "Russia",
+  "summary": "Ukrainian marines crossed the Dnipro by small boat under cover of darkness and seized a foothold around the village of Krynky on the left bank in October 2023. The bridgehead never widened beyond a few hundred metres but it pinned Russian airborne units in place for nine months as the marines rotated through under near-constant glide-bomb and drone fire. Ukraine withdrew the last detachments in July 2024.",
+  "significance": "Krynky became the proof that Ukraine could project force across the Dnipro and the proof that holding a riverine bridgehead under modern drone surveillance is murderously costly. The operation absorbed Russian elite airborne formations that were needed elsewhere, but the human price exceeded the territorial gain and the experience reshaped Ukrainian doctrine on small-unit river assaults.",
+  "wikipediaTitle": "Battle of Krynky"
+}

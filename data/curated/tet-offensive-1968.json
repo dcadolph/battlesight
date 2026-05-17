@@ -1,0 +1,29 @@
+{
+  "id": "tet-offensive-1968",
+  "name": "Tet Offensive",
+  "year": 1968,
+  "date": "30 January – 23 September 1968",
+  "lat": 16.4498,
+  "lng": 107.5624,
+  "era": "modern",
+  "war": "Vietnam War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "United States, South Vietnam, and allies",
+      "commander": "William Westmoreland (MACV), Cao Văn Viên (RVN Joint General Staff), Creighton Abrams (deputy, later commander)",
+      "strength": "About 1.0 million US, ARVN, South Korean, and other allied troops in country",
+      "casualties": "Roughly 4,124 US killed, 19,295 wounded; about 4,954 ARVN killed; civilian deaths in the tens of thousands"
+    },
+    {
+      "name": "North Vietnam and the Viet Cong",
+      "commander": "Võ Nguyên Giáp (overall), Hoàng Văn Thái (planning)",
+      "strength": "About 84,000 fighters launching coordinated attacks on more than 100 towns and bases, plus the regular PAVN siege at Khe Sanh",
+      "casualties": "Roughly 45,000 killed, 6,991 captured; the southern Viet Cong infrastructure broken and never fully rebuilt"
+    }
+  ],
+  "victor": "Tactical defeat for North Vietnam and the Viet Cong, strategic political victory",
+  "summary": "On the morning of the lunar new year holiday, coordinated Viet Cong and PAVN units struck 36 of 44 provincial capitals, 64 of 245 district capitals, 5 of 6 autonomous cities, and the US embassy in Saigon. The fighting in the Imperial City of Huế lasted twenty-six days and produced the most photographed urban combat of the war. By March the offensive was militarily broken: the Viet Cong losses were never replaced, and the southern guerrilla movement was effectively decapitated. But the political effect inside the United States was the opposite of what the Westmoreland command had been claiming.",
+  "significance": "Tet collapsed American public belief in the official narrative that the war was being won. Walter Cronkite's editorial on the twenty-seventh of February, declaring the war a stalemate, prompted Lyndon Johnson's reported remark, \"If I've lost Cronkite, I've lost Middle America.\" Johnson withdrew from the presidential race five weeks later. The war continued for seven more years, but Tet is conventionally identified as the moment American public will tipped against it.",
+  "wikipediaTitle": "Tet offensive"
+}

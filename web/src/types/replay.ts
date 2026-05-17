@@ -13,6 +13,13 @@ export interface Replay {
   factionA: string;
   factionB: string;
   factionC?: string;
+  // aggressor optionally identifies which side opened hostilities. When set,
+  // the renderer guarantees that side gets the hostile red palette and the
+  // defender gets the cool blue palette, regardless of which letter slot
+  // the curator put them in. This avoids historical absurdities like Nazi
+  // Germany rendering blue at Stalingrad. Unset → fall back to positional
+  // (a=red, b=blue).
+  aggressor?: Faction;
   schematic?: boolean;
   phases: Phase[];
 }
@@ -169,3 +176,26 @@ export const FACTION_GLOW: Record<Faction, string> = {
   b: 'rgba(59, 130, 246, 0.35)',
   c: 'rgba(168, 85, 247, 0.35)',
 };
+
+// factionColorFor resolves a faction's display color taking the replay's
+// `aggressor` field into account. When aggressor is unset, the result is
+// the positional FACTION_COLOR — same as direct lookup. When the aggressor
+// sits in slot 'b', the red and blue palettes swap so the attacker still
+// reads red and the defender still reads blue. Faction 'c' (rare third
+// belligerent) keeps its purple regardless. This stops cases like Nazi
+// Germany on offense at Stalingrad showing up blue against red Soviets.
+export function factionColorFor(faction: Faction, aggressor?: Faction): string {
+  if (!aggressor || aggressor === 'a' || faction === 'c') return FACTION_COLOR[faction];
+  if (faction === 'a') return FACTION_COLOR.b;
+  if (faction === 'b') return FACTION_COLOR.a;
+  return FACTION_COLOR[faction];
+}
+
+// factionGlowFor mirrors factionColorFor for the soft halo palette used by
+// unit chips, side tags, and arrow stops.
+export function factionGlowFor(faction: Faction, aggressor?: Faction): string {
+  if (!aggressor || aggressor === 'a' || faction === 'c') return FACTION_GLOW[faction];
+  if (faction === 'a') return FACTION_GLOW.b;
+  if (faction === 'b') return FACTION_GLOW.a;
+  return FACTION_GLOW[faction];
+}

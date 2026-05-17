@@ -9,8 +9,14 @@
   "war": "Iraq War",
   "battleType": "land",
   "aliases": [
-    { "name": "Operation Phantom Fury", "by": "United States Marine Corps operational codename" },
-    { "name": "Operation Al-Fajr", "by": "Iraqi government codename meaning \"The Dawn\"" }
+    {
+      "name": "Operation Phantom Fury",
+      "by": "United States Marine Corps operational codename"
+    },
+    {
+      "name": "Operation Al-Fajr",
+      "by": "Iraqi government codename meaning \"The Dawn\""
+    }
   ],
   "sides": [
     {
@@ -28,6 +34,6 @@
   ],
   "victor": "Multi-National Force",
   "summary": "After the first attempt to clear Fallujah in April 2004 ended in a political pullback, US Marines returned in November under a different mandate and warning. Most civilians had fled in the weeks before the assault. The operation opened on the seventh of November with the Marines pushing south through the northern districts of Jolan and Askari. House-to-house combat was the densest American urban fighting since Hue City in 1968. Marines reached the southern industrial district by the thirteenth and the operation transitioned to a slow clearance of remaining cells through December.",
-  "significance": "Fallujah became the iconic urban battle of the Iraq War and the defining tactical experience of a generation of US Marines. The fighting also surfaced the human cost of insurgent doctrine in dense civilian terrain and produced the controversies over white phosphorus, civilian casualties, and detainee abuse that hardened opposition to the war at home. Operationally the city was cleared; strategically Al-Qaeda in Iraq survived to seed what later became the Islamic State.",
+  "significance": "Fallujah became the iconic urban battle of the Iraq War and the defining tactical experience of a generation of US Marines. The fighting also surfaced the human cost of insurgent doctrine in dense civilian terrain and produced the controversies over white phosphorus, civilian casualties, and detainee abuse that hardened opposition to the war at home. Operationally the city was cleared. Strategically Al-Qaeda in Iraq survived to seed what later became the Islamic State.",
   "wikipediaTitle": "Second Battle of Fallujah"
 }

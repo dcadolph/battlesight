@@ -1,0 +1,33 @@
+{
+  "id": "raqqa-2017",
+  "name": "Battle of Raqqa",
+  "year": 2017,
+  "date": "6 June – 17 October 2017",
+  "lat": 35.95,
+  "lng": 39.0167,
+  "era": "modern",
+  "war": "Syrian Civil War",
+  "battleType": "siege",
+  "aliases": [
+    { "name": "Operation Wrath of Euphrates", "by": "Syrian Democratic Forces operational name" },
+    { "name": "Operation Inherent Resolve (Raqqa phase)", "by": "U.S.-led coalition designation" }
+  ],
+  "sides": [
+    {
+      "name": "Syrian Democratic Forces and the U.S.-led coalition",
+      "commander": "Rojda Felat (SDF operational commander), Stephen J. Townsend (Combined Joint Task Force, until August), Paul Funk (from August)",
+      "strength": "About 25,000 SDF fighters supported by U.S. special operations forces, French and British artillery, and continuous coalition airpower",
+      "casualties": "Around 1,000 SDF killed; coalition lost a handful of advisers"
+    },
+    {
+      "name": "Islamic State of Iraq and the Levant",
+      "commander": "Abu Luqman (Raqqa governor), Abu Mohammad al-Adnani (killed 2016 before the assault)",
+      "strength": "About 3,000 to 4,000 defenders in the city itself with extensive tunnel networks, IEDs, and pre-positioned suicide vehicles",
+      "casualties": "About 2,000 killed, with hundreds of foreign fighters surrendered or evacuated under the controversial October convoy deal"
+    }
+  ],
+  "victor": "Syrian Democratic Forces and the U.S.-led coalition",
+  "summary": "The Syrian Democratic Forces opened the assault on Raqqa, the de facto capital of the Islamic State, in early June 2017 with U.S. and French artillery in support and round-the-clock coalition airstrikes overhead. Kurdish and Arab fighters cleared the old city block by block over four months, taking the National Hospital and the Stadium in mid-September. The final district fell on the seventeenth of October after a negotiated convoy carried local fighters out of the city. The U.S. military estimated that around 80 percent of Raqqa's built environment was rendered uninhabitable.",
+  "significance": "The fall of Raqqa ended the Islamic State's pretension to govern a caliphate from a fixed seat and dispersed the group's central command and propaganda apparatus. The campaign sealed the alliance between the U.S. military and the Kurdish-led SDF that has anchored American policy in north-east Syria ever since, despite the strategic friction with NATO ally Turkey. The civilian death toll, estimated at 1,600 by Amnesty International, made Raqqa one of the most destructive sieges of a major Arab city in the modern era and set a benchmark for the legal and humanitarian critique of urban precision warfare.",
+  "wikipediaTitle": "Battle of Raqqa (2017)"
+}

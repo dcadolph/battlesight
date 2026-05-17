@@ -1,0 +1,32 @@
+{
+  "id": "cabo-delgado-2017-2024",
+  "name": "Cabo Delgado Insurgency",
+  "year": 2017,
+  "date": "5 October 2017 – ongoing (curated through 2024)",
+  "lat": -11.4083,
+  "lng": 40.5234,
+  "era": "modern",
+  "war": "Insurgency in Cabo Delgado",
+  "battleType": "land",
+  "aliases": [
+    { "name": "Mozambique jihad", "by": "Local and regional press" }
+  ],
+  "sides": [
+    {
+      "name": "Mozambique, Rwanda, the Southern African Development Community Mission in Mozambique (SAMIM), and private military contractors",
+      "commander": "Filipe Nyusi (president), Cristóvão Chume (defence minister), Innocent Kabandana (Rwanda Defence Force task force in Cabo Delgado)",
+      "strength": "Estimated 6,000 Mozambican troops, around 2,500 Rwandan, 1,800 SAMIM contingents from Botswana, Tanzania, South Africa, and others; Wagner and Dyck Advisory Group at separate intervals",
+      "casualties": "Hundreds of soldiers killed and wounded across the multinational forces; figures partial"
+    },
+    {
+      "name": "Ansar al-Sunna (Ahlu Sunnah Wa-Jama, locally al-Shabaab Mozambique), aligned with the Islamic State Central Africa Province",
+      "commander": "Bonomade Machude Omar (alias Abu Sulayfa Muhammad, killed reported August 2023), Ibn Omar (operational)",
+      "strength": "Estimated 1,500 to 2,500 fighters fluctuating with seasonal recruitment from displaced communities",
+      "casualties": "Hundreds killed; senior commanders periodically targeted by Rwandan and Mozambican operations"
+    }
+  ],
+  "victor": "Counter-insurgency coalition holds the principal towns. Insurgency continues at low intensity in the interior",
+  "summary": "An armed jihadist movement that local communities and journalists initially called al-Shabaab opened operations in Mocímboa da Praia in October 2017 and grew through 2018 and 2019 by raiding police outposts and forcing locally recruited fighters into its ranks. In March 2020 the insurgents took Mocímboa da Praia and held it for over a year. In March 2021 they staged the assault on Palma that prompted Total to evacuate the Afungi liquefied natural gas project. Rwandan forces deployed in July 2021, recaptured Mocímboa da Praia in August, and held the principal coastal towns. Insurgent activity persists in the interior districts of Macomia, Nangade, and Quissanga through 2024.",
+  "significance": "Cabo Delgado is the operational base of the Islamic State's Central Africa Province and the most successful jihadist insurgency in southern Africa to date. The conflict has displaced over a million people, suspended Mozambique's planned export of liquefied natural gas to Europe and Asia, and brought Rwandan expeditionary deployment into a new arc of African intervention that has since extended to Mozambique, the Central African Republic, and the Sahel. The intervention is the largest external Rwandan military operation since the post-genocide period and is a template for South-South security partnerships outside the African Union framework.",
+  "wikipediaTitle": "Insurgency in Cabo Delgado"
+}

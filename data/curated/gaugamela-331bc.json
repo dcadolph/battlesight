@@ -1,0 +1,32 @@
+{
+  "id": "gaugamela-331bc",
+  "name": "Battle of Gaugamela",
+  "year": -331,
+  "date": "1 October 331 BC",
+  "lat": 36.36,
+  "lng": 43.25,
+  "era": "ancient",
+  "war": "Wars of Alexander the Great",
+  "battleType": "land",
+  "aliases": [
+    { "name": "Battle of Arbela", "by": "Roman and Byzantine historiography after the nearest town" }
+  ],
+  "sides": [
+    {
+      "name": "Macedon and the Hellenic League",
+      "commander": "Alexander III of Macedon (commanding the Companion cavalry on the right), Parmenion (commanding the Thessalian and Greek allied wing on the left), Craterus (left phalanx), Hephaestion",
+      "strength": "About 47,000 troops including roughly 7,000 cavalry and 31,000 Macedonian phalangites",
+      "casualties": "About 1,000 killed and 4,000 wounded"
+    },
+    {
+      "name": "Achaemenid Persia",
+      "commander": "Darius III of Persia (centre), Bessus (Bactrian cavalry on the left), Mazaeus (Babylonian and Mesopotamian troops on the right)",
+      "strength": "Possibly 100,000 to 200,000 troops including 40,000 cavalry, 200 scythed chariots, and 15 war elephants",
+      "casualties": "Tens of thousands killed; the army dispersed and the eastern empire ceased to exist as a fighting structure"
+    }
+  ],
+  "victor": "Macedon and the Hellenic League",
+  "summary": "Darius levelled the plain at Gaugamela to give his vast army room to deploy. Alexander advanced his line obliquely toward the right, pulling the Persian left after him until a gap opened in the Persian centre. He led the Companion cavalry through that gap in a wedge charge directly at Darius. The Great King fled the field, and the army behind him began to break apart as word spread that he had run. Parmenion on the Macedonian left held against Mazaeus through hours of grinding cavalry action until Alexander could wheel back and finish the Persian right. Darius escaped east and was murdered by his satrap Bessus the following summer.",
+  "significance": "Gaugamela was the decisive engagement in the conquest of the Achaemenid Empire, the largest political unit the human species had assembled to that date. Within months Babylon, Susa, and the imperial capital Persepolis surrendered to Alexander, and the structure of administration, taxation, and trade that the Achaemenids had run from the Indus to the Aegean fell into Macedonian hands. The Hellenistic age that produced Alexandria, the Septuagint, the Antigonid, Seleucid, and Ptolemaic kingdoms, and the cultural common-current that Roman conquest later inherited, begins on the plain of Gaugamela.",
+  "wikipediaTitle": "Battle of Gaugamela"
+}

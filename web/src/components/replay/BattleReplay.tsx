@@ -604,11 +604,28 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
   // side instead of a wall of commas.
   const sideStats = sides.slice(0, 4).map((s) => {
     const n = parseLargestNumber(s.casualties);
-    return { name: s.name, casualties: s.casualties, count: n };
+    return {
+      name: s.name,
+      commander: s.commander || '',
+      strength: s.strength || '',
+      casualties: s.casualties,
+      count: n,
+    };
   });
   const maxCount = sideStats.reduce((m, s) => Math.max(m, s.count), 0);
   const isVictorName = (name: string) =>
     !!victor && (name === battle.victor || victor.toLowerCase().includes(name.toLowerCase()));
+
+  // Sort references for the "Further reading" rail. Items with a URL come
+  // first so the linkable ones are easy to spot. Caps the rail at six entries
+  // so the outro stays readable on small screens.
+  const refs = (battle.references || [])
+    .slice()
+    .sort((a, b) => {
+      if (!!a.url !== !!b.url) return a.url ? -1 : 1;
+      return (a.title || '').localeCompare(b.title || '');
+    })
+    .slice(0, 6);
 
   return (
     <div
@@ -635,11 +652,11 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
         }}
       />
 
-      <div className="relative w-full max-w-[760px]">
+      <div className="relative w-full max-w-[820px] max-h-[92vh] overflow-y-auto px-1 py-6">
         {/* Top accent: a thin era-colored hairline with a soft glow, like the
             opening of a film frame. */}
         <div
-          className="mx-auto mb-7"
+          className="mx-auto mb-6"
           style={{
             width: 86,
             height: 1,
@@ -650,7 +667,7 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
         />
 
         <div
-          className="text-center text-[10.5px] font-semibold uppercase tracking-[0.5em] mb-5"
+          className="text-center text-[10.5px] font-semibold uppercase tracking-[0.5em] mb-4"
           style={{
             color: theme.accent,
             textShadow: '0 2px 14px rgba(0,0,0,0.7)',
@@ -660,102 +677,223 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
           The smoke clears
         </div>
 
+        {/* Hero is the battle name itself, set in the era serif at poster
+            scale. The previous version put the victor name in the hero slot
+            and pushed the battle name into a small subtitle next to "prevails
+            at", which read as "PREVAILS ATBATTLE OF" at narrow widths because
+            the tracked small-caps swallowed the separator. The battle name is
+            also what the reader came to learn about; the verdict belongs in a
+            ribbon below it, not in the title slot. */}
+        <h2
+          className="text-white leading-[0.96] tracking-tight mx-auto text-center"
+          style={{
+            fontFamily: theme.titleFont,
+            fontWeight: 600,
+            fontSize: 'clamp(34px, 4.8vw, 60px)',
+            letterSpacing: '-0.015em',
+            textShadow: '0 8px 36px rgba(0,0,0,0.85)',
+            maxWidth: '22ch',
+            animation: 'outro-text-rise 780ms 320ms cubic-bezier(.2,.7,.25,1) both',
+          }}
+        >
+          {battle.name}
+        </h2>
+
+        {/* Aliases. Battles that fought under more than one banner (Sharpsburg
+            / Antietam, Wacht am Rhein / the Bulge) get an italic alternate-
+            name line that reads as a chapter mark from an atlas. */}
+        {battle.aliases && battle.aliases.length > 0 && (
+          <div
+            className="mt-2 text-center text-[12.5px] italic text-slate-400/85"
+            style={{
+              fontFamily: theme.titleFont,
+              animation: 'outro-text-rise 700ms 400ms cubic-bezier(.2,.7,.25,1) both',
+            }}
+          >
+            also known as{' '}
+            {battle.aliases.slice(0, 2).map((a, i) => (
+              <span key={`${i}-${a.name}`}>
+                {i > 0 && <span className="text-slate-600 mx-1.5">·</span>}
+                <span className="text-slate-300">{a.name}</span>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Date and war strip immediately below the title so the basic
+            framing reads without scrolling. Dot separator and a thin
+            accent line keep the row light. */}
+        {(battle.date || battle.war) && (
+          <div
+            className="mt-3 flex items-center justify-center gap-3 text-[10.5px] tracking-[0.32em] uppercase text-slate-400/85 text-center"
+            style={{ animation: 'outro-text-rise 700ms 480ms cubic-bezier(.2,.7,.25,1) both' }}
+          >
+            {battle.date && <span>{battle.date}</span>}
+            {battle.date && battle.war && (
+              <span style={{ color: theme.accent }}>·</span>
+            )}
+            {battle.war && <span className="text-slate-300">{battle.war}</span>}
+          </div>
+        )}
+
+        {/* Verdict ribbon. A poster-style chip that names the victor clearly
+            and is hard to confuse with the rest of the typography. Renders as
+            a centered pill with era-accent framing. */}
         {victor ? (
           <div
-            className="text-center"
-            style={{ animation: 'outro-text-rise 780ms 320ms cubic-bezier(.2,.7,.25,1) both' }}
+            className="mt-7 flex items-center justify-center"
+            style={{ animation: 'outro-text-rise 780ms 580ms cubic-bezier(.2,.7,.25,1) both' }}
           >
-            <h2
-              className="text-white leading-[0.98] tracking-tight mx-auto"
+            <div
+              className="inline-flex items-center gap-3 px-5 py-2 rounded-full"
               style={{
-                fontFamily: theme.titleFont,
-                fontWeight: 600,
-                fontSize: 'clamp(36px, 5.2vw, 72px)',
-                letterSpacing: '-0.015em',
-                textShadow: '0 8px 36px rgba(0,0,0,0.8)',
-                maxWidth: '22ch',
+                background: `${theme.accent}1a`,
+                border: `1px solid ${theme.accent}55`,
+                boxShadow: `0 8px 26px -8px ${theme.accent}55`,
               }}
             >
-              {victor}
-            </h2>
-            <div className="mt-3 text-[11px] tracking-[0.42em] uppercase text-slate-400/90">
-              <span style={{ color: theme.accent }}>prevails at</span>
-              <span className="text-slate-300 ml-2">{battle.name}</span>
+              <span
+                className="text-[9.5px] font-semibold uppercase tracking-[0.32em]"
+                style={{ color: theme.accent }}
+              >
+                Victor
+              </span>
+              <span className="w-px h-3" style={{ background: `${theme.accent}55` }} />
+              <span
+                className="text-[14px] font-semibold text-white"
+                style={{ fontFamily: theme.titleFont }}
+              >
+                {victor}
+              </span>
             </div>
           </div>
         ) : (
           <div
-            className="text-center"
-            style={{ animation: 'outro-text-rise 780ms 320ms cubic-bezier(.2,.7,.25,1) both' }}
+            className="mt-7 flex items-center justify-center"
+            style={{ animation: 'outro-text-rise 780ms 580ms cubic-bezier(.2,.7,.25,1) both' }}
           >
-            <h2
-              className="text-white leading-[0.98] tracking-tight mx-auto"
+            <div
+              className="inline-flex items-center gap-3 px-5 py-2 rounded-full"
               style={{
-                fontFamily: theme.titleFont,
-                fontWeight: 600,
-                fontSize: 'clamp(30px, 4.4vw, 60px)',
-                letterSpacing: '-0.015em',
-                textShadow: '0 8px 36px rgba(0,0,0,0.8)',
-                maxWidth: '22ch',
+                background: 'rgba(148,163,184,0.12)',
+                border: '1px solid rgba(148,163,184,0.3)',
               }}
             >
-              {battle.name} ends
-            </h2>
+              <span className="text-[9.5px] font-semibold uppercase tracking-[0.32em] text-slate-400">
+                Outcome
+              </span>
+              <span className="w-px h-3 bg-slate-500/40" />
+              <span className="text-[14px] font-semibold text-slate-200" style={{ fontFamily: theme.titleFont }}>
+                Inconclusive
+              </span>
+            </div>
           </div>
         )}
 
-        {/* Casualty roll. When at least one side has a parseable count we
-            render proportional bars so the cost reads as a comparison at a
-            glance. Otherwise fall back to a clean two-up label/quote layout. */}
+        {/* Order of battle. A structured ledger of every belligerent in a
+            real table — the previous layout used a 1.6/1.5/1/1.2 ratio that
+            crushed the strength column and forced "(shore batteries)" or
+            "(garrison)" to wrap on every row. The new ratio gives commander
+            and strength real breathing room; the casualty column gets a tight
+            number plus a bar below, not both inline. The header now lives
+            inside the framed card and the columns line up properly. */}
         {sideStats.length > 0 && (
           <div
-            className="mx-auto mt-8 max-w-[540px]"
-            style={{ animation: 'outro-text-rise 780ms 560ms cubic-bezier(.2,.7,.25,1) both' }}
+            className="mx-auto mt-8 w-full max-w-[760px]"
+            style={{ animation: 'outro-text-rise 780ms 720ms cubic-bezier(.2,.7,.25,1) both' }}
           >
-            <div className="text-[10px] uppercase tracking-[0.42em] text-slate-500 mb-3 text-center">
-              Casualty&nbsp;roll
-            </div>
-            <div className="space-y-2.5">
+            <div
+              className="rounded-xl overflow-hidden border"
+              style={{
+                borderColor: 'rgba(71,80,109,0.55)',
+                background: 'rgba(10,12,20,0.55)',
+                boxShadow: '0 18px 48px -20px rgba(0,0,0,0.6)',
+              }}
+            >
+              <div
+                className="px-5 py-3 border-b flex items-baseline justify-between"
+                style={{ borderColor: 'rgba(71,80,109,0.55)' }}
+              >
+                <div className="text-[10px] uppercase tracking-[0.4em] font-semibold" style={{ color: theme.accent }}>
+                  Order&nbsp;of&nbsp;battle
+                </div>
+                <div className="text-[9.5px] uppercase tracking-[0.22em] text-slate-500 tabular-nums">
+                  {sideStats.length} {sideStats.length === 1 ? 'side' : 'sides'}
+                </div>
+              </div>
+              <div
+                className="hidden md:grid grid-cols-[1.5fr_1.8fr_1.3fr_1.4fr] gap-4 px-5 py-2.5 text-[9.5px] uppercase tracking-[0.18em] text-slate-500 border-b"
+                style={{ borderColor: 'rgba(71,80,109,0.45)' }}
+              >
+                <div>Side</div>
+                <div>Commander</div>
+                <div>Strength</div>
+                <div>Casualties</div>
+              </div>
               {sideStats.map((s, i) => {
                 const winner = isVictorName(s.name);
                 const pct = maxCount > 0 && s.count > 0
                   ? Math.max(6, Math.min(100, (s.count / maxCount) * 100))
                   : 0;
                 return (
-                  <div key={`${i}-${s.name}`} className="text-left">
-                    <div className="flex items-baseline justify-between gap-3 mb-1">
-                      <span
-                        className="text-[13px] font-semibold text-white truncate"
-                        style={{ maxWidth: '60%' }}
-                        title={s.name}
-                      >
+                  <div
+                    key={`${i}-${s.name}`}
+                    className="px-5 py-3.5 border-b last:border-b-0 grid grid-cols-1 md:grid-cols-[1.5fr_1.8fr_1.3fr_1.4fr] gap-x-4 gap-y-1.5 text-[12.5px] text-left"
+                    style={{
+                      borderColor: 'rgba(71,80,109,0.32)',
+                      background: winner ? `${theme.accent}10` : 'transparent',
+                    }}
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                      <span className="font-semibold text-white" title={s.name}>
                         {s.name}
                       </span>
-                      <span
-                        className="text-[12px] tabular-nums"
+                      {winner && (
+                        <span
+                          className="text-[9px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0"
+                          style={{ background: `${theme.accent}26`, color: theme.accent }}
+                        >
+                          Victor
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-slate-300 leading-snug">
+                      <span className="md:hidden text-[9.5px] uppercase tracking-[0.18em] text-slate-500 block mb-0.5">Commander</span>
+                      {s.commander || <span className="text-slate-600">Unknown</span>}
+                    </div>
+                    <div className="text-slate-300 tabular-nums leading-snug">
+                      <span className="md:hidden text-[9.5px] uppercase tracking-[0.18em] text-slate-500 block mb-0.5">Strength</span>
+                      {s.strength || <span className="text-slate-600">Unknown</span>}
+                    </div>
+                    <div className="leading-snug">
+                      <span className="md:hidden text-[9.5px] uppercase tracking-[0.18em] text-slate-500 block mb-0.5">Casualties</span>
+                      <div
+                        className="tabular-nums"
                         style={{ color: winner ? theme.accent : '#cbd5e1' }}
                       >
-                        {s.count > 0 ? formatCompactCasualties(s.count, s.casualties) : (s.casualties || 'Casualties unknown')}
-                      </span>
-                    </div>
-                    {pct > 0 && (
-                      <div
-                        className="h-[3px] rounded-full overflow-hidden"
-                        style={{ background: 'rgba(148,163,184,0.12)' }}
-                      >
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${pct}%`,
-                            background: winner
-                              ? `linear-gradient(90deg, ${theme.accent}66, ${theme.accent})`
-                              : 'linear-gradient(90deg, rgba(148,163,184,0.4), rgba(148,163,184,0.85))',
-                            boxShadow: winner ? `0 0 10px ${theme.accent}66` : 'none',
-                            animation: `outro-bar-grow 900ms ${720 + i * 90}ms cubic-bezier(.25,.7,.25,1) both`,
-                          }}
-                        />
+                        {s.count > 0
+                          ? formatCompactCasualties(s.count, s.casualties)
+                          : (s.casualties || <span className="text-slate-600">Unknown</span>)}
                       </div>
-                    )}
+                      {pct > 0 && (
+                        <div
+                          className="mt-1.5 h-[3px] rounded-full overflow-hidden"
+                          style={{ background: 'rgba(148,163,184,0.12)' }}
+                        >
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${pct}%`,
+                              background: winner
+                                ? `linear-gradient(90deg, ${theme.accent}66, ${theme.accent})`
+                                : 'linear-gradient(90deg, rgba(148,163,184,0.4), rgba(148,163,184,0.85))',
+                              boxShadow: winner ? `0 0 10px ${theme.accent}66` : 'none',
+                              animation: `outro-bar-grow 900ms ${860 + i * 90}ms cubic-bezier(.25,.7,.25,1) both`,
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -764,22 +902,84 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
         )}
 
         {battle.significance && (
-          <p
-            className="text-[14.5px] leading-[1.65] text-slate-200/90 mx-auto mt-8 max-w-[58ch] text-center"
-            style={{
-              fontFamily: theme.titleFont,
-              fontStyle: 'italic',
-              textShadow: '0 2px 14px rgba(0,0,0,0.55)',
-              animation: 'outro-text-rise 800ms 1100ms cubic-bezier(.2,.7,.25,1) both',
-            }}
+          <div
+            className="mx-auto mt-8 w-full max-w-[760px]"
+            style={{ animation: 'outro-text-rise 800ms 1240ms cubic-bezier(.2,.7,.25,1) both' }}
           >
-            {battle.significance}
-          </p>
+            <div
+              className="text-[10px] uppercase tracking-[0.4em] font-semibold mb-2"
+              style={{ color: theme.accent }}
+            >
+              Why&nbsp;it&nbsp;mattered
+            </div>
+            <p
+              className="text-[14.5px] leading-[1.65] text-slate-200/95 text-left"
+              style={{
+                fontFamily: theme.titleFont,
+                textShadow: '0 2px 14px rgba(0,0,0,0.55)',
+              }}
+            >
+              {battle.significance}
+            </p>
+          </div>
+        )}
+
+        {/* Further reading. Curated references with URLs render as inline
+            links so the reader can jump straight to a primary or scholarly
+            source. References without a URL still show up as a typed entry
+            but greyed; this is the most-honest rendering of the data we
+            have without inventing search links the user did not ask for. */}
+        {refs.length > 0 && (
+          <div
+            className="mx-auto mt-7 w-full max-w-[760px] text-left"
+            style={{ animation: 'outro-text-rise 800ms 1400ms cubic-bezier(.2,.7,.25,1) both' }}
+          >
+            <div
+              className="text-[10px] uppercase tracking-[0.4em] font-semibold mb-2"
+              style={{ color: theme.accent }}
+            >
+              Further&nbsp;reading
+            </div>
+            <ul className="space-y-1.5">
+              {refs.map((r, i) => {
+                const inner = (
+                  <span style={{ fontFamily: theme.titleFont }}>
+                    {r.title}
+                    {r.author ? <span className="text-slate-400 ml-1.5">· {r.author}</span> : null}
+                    {r.year ? <span className="text-slate-500 ml-1.5 tabular-nums">({r.year})</span> : null}
+                  </span>
+                );
+                return (
+                  <li key={`${i}-${r.title}`} className="text-[12.5px] text-slate-200/90 leading-snug flex items-start gap-2">
+                    <span
+                      className="mt-[8px] flex-shrink-0 rounded-full"
+                      style={{ width: 3, height: 3, background: theme.accent }}
+                    />
+                    {r.url ? (
+                      <a
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline transition-colors"
+                        style={{ color: '#e2e8f0' }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = theme.accent)}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = '#e2e8f0')}
+                      >
+                        {inner}
+                      </a>
+                    ) : (
+                      <span className="text-slate-400">{inner}</span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         )}
 
         <div
-          className="mt-9 flex items-center justify-center gap-3"
-          style={{ animation: 'outro-text-rise 700ms 1380ms cubic-bezier(.2,.7,.25,1) both' }}
+          className="mt-10 mb-2 flex items-center justify-center gap-3"
+          style={{ animation: 'outro-text-rise 700ms 1560ms cubic-bezier(.2,.7,.25,1) both' }}
         >
           <button
             type="button"
@@ -853,8 +1053,8 @@ function parseLargestNumber(s: string | undefined): number {
 
 // formatCompactCasualties formats a parsed casualty count for the outro
 // header. Mirrors thousands-shortening conventions so 117871 renders as
-// "117k" rather than dominating the line. Includes the original prose in
-// the title attribute via the calling site if needed.
+// "117k" rather than dominating the line. Singular handled at the low end so
+// "1 casualty" reads correctly instead of "1 casualties".
 function formatCompactCasualties(count: number, _raw: string): string {
   void _raw;
   if (count >= 1_000_000) {
@@ -866,6 +1066,7 @@ function formatCompactCasualties(count: number, _raw: string): string {
   if (count >= 1000) {
     return `${(count / 1000).toFixed(1)}k casualties`;
   }
+  if (count === 1) return '1 casualty';
   return `${count.toLocaleString()} casualties`;
 }
 

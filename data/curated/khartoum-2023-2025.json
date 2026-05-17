@@ -1,0 +1,29 @@
+{
+  "id": "khartoum-2023-2025",
+  "name": "Battle of Khartoum",
+  "year": 2023,
+  "date": "15 April 2023 – 26 March 2025",
+  "lat": 15.5007,
+  "lng": 32.5599,
+  "era": "modern",
+  "war": "Sudanese Civil War (2023–present)",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Sudanese Armed Forces and aligned forces",
+      "commander": "Abdel Fattah al-Burhan (chairman of the Transitional Sovereignty Council), Yasir al-Atta (joint chief of staff)",
+      "strength": "About 80,000 to 100,000 SAF regulars plus reservist and aligned forces in the greater Khartoum area",
+      "casualties": "Several thousand killed; many senior officers killed in the opening assault on the General Command Headquarters"
+    },
+    {
+      "name": "Rapid Support Forces",
+      "commander": "Mohamed Hamdan Dagalo (\"Hemedti\"), Abdul Rahim Dagalo",
+      "strength": "About 100,000 fighters across the wider RSF, with around 30,000 in the Khartoum area at the start of the war",
+      "casualties": "Several thousand killed across the two-year urban campaign"
+    }
+  ],
+  "victor": "Sudanese Armed Forces (March 2025 recapture of central Khartoum)",
+  "summary": "Fighting broke out across Khartoum on the morning of the fifteenth of April 2023 when Rapid Support Forces fighters seized the international airport, the presidential palace, the state television headquarters, and the central bank. Sudanese Armed Forces fighters held the General Command building and parts of Khartoum North and Omdurman. The war that followed gutted the largest urban area in north-east Africa. RSF held most of central Khartoum and Khartoum North through 2024. SAF counter-offensives from Omdurman crossed the White Nile in late 2024 and retook the Republican Palace on the twenty-sixth of March 2025. Combat in the suburbs continued through the spring.",
+  "significance": "The fight for Khartoum is the centrepiece of the Sudanese civil war, the deadliest African conflict of the 2020s by some independent estimates of total casualties when famine is counted. The war displaced over twelve million people, produced the largest displacement crisis in the world, and broke the political transition that had followed the 2019 revolution. Allegations of large-scale ethnically targeted violence in Darfur, particularly against Masalit communities in El Geneina, have produced United Nations investigations and U.S. determinations of genocide. The war reshaped Red Sea security and pulled the United Arab Emirates, Egypt, Saudi Arabia, Iran, Turkey, and Russia into competing roles around the lower Nile.",
+  "wikipediaTitle": "Battle of Khartoum (2023–2025)"
+}

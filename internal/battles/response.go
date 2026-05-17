@@ -58,6 +58,10 @@ type WarCount struct {
 	RolledCount int `json:"rolledCount"`
 	// RolledCasualties sums casualties across own row and all descendants.
 	RolledCasualties int `json:"rolledCasualties"`
+	// Countries lists the top present-day countries that fought in this war,
+	// inferred from the sides on each battle and ranked by frequency. Used by
+	// the war-list UI to group wars by belligerent.
+	Countries []string `json:"countries,omitempty"`
 }
 
 // Filter holds query parameters for listing battles.

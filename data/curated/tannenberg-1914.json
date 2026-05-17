@@ -1,0 +1,29 @@
+{
+  "id": "tannenberg-1914",
+  "name": "Battle of Tannenberg",
+  "year": 1914,
+  "date": "26 – 30 August 1914",
+  "lat": 53.5,
+  "lng": 20.1333,
+  "era": "world-war-1",
+  "war": "World War I",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "German Empire",
+      "commander": "Paul von Hindenburg (8th Army), Erich Ludendorff (chief of staff), Max Hoffmann (operations), Hermann von François (I Corps), August von Mackensen (XVII Corps)",
+      "strength": "About 150,000 troops in nine divisions",
+      "casualties": "About 13,873 killed, wounded, and missing"
+    },
+    {
+      "name": "Russian Empire",
+      "commander": "Alexander Samsonov (2nd Army, suicide 30 August), Yakov Zhilinsky (Northwestern Front, dismissed)",
+      "strength": "About 230,000 troops in fifteen divisions",
+      "casualties": "About 92,000 captured, 78,000 killed and wounded, 350 guns lost; the army ceased to exist as a fighting formation"
+    }
+  ],
+  "victor": "German Empire",
+  "summary": "Samsonov's 2nd Army advanced north into East Prussia while Rennenkampf's 1st Army moved west, the two armies forty miles apart and unable to support one another. German signals intercepts read Russian dispositions in real time. Ludendorff stripped the German line facing Rennenkampf to mass against Samsonov in the Masurian Lake corridor. François's I Corps swung south behind the Russian left, XVII Corps drove down the Russian right, and the central Russian corps were crushed in the pocket around Allenstein. Samsonov shot himself in a forest east of Frögenau on the night of the thirtieth rather than report the loss of his army to the Tsar. Hindenburg dated the dispatch from the village of Tannenberg, fifteen kilometres away, to give the victory the same name as the Polish-Lithuanian defeat of the Teutonic Knights in 1410.",
+  "significance": "Tannenberg destroyed an entire Russian army in five days and ended the Russian offensive into East Prussia for the duration of the war. It made Hindenburg and Ludendorff the most powerful military figures in the German Empire. From 1916 they ran a de facto military dictatorship that conducted the second half of the war. The defeat contributed to the Russian political collapse that produced the 1917 revolutions. Operationally the battle became the textbook case of using interior lines and signals intelligence to defeat a larger opponent in detail.",
+  "wikipediaTitle": "Battle of Tannenberg (1914)"
+}

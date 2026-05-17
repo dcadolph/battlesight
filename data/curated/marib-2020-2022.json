@@ -1,0 +1,29 @@
+{
+  "id": "marib-2020-2022",
+  "name": "Battle of Marib",
+  "year": 2020,
+  "date": "January 2020 – April 2022",
+  "lat": 15.4609,
+  "lng": 45.3164,
+  "era": "modern",
+  "war": "Yemeni Civil War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Government of Yemen and the Saudi-led coalition",
+      "commander": "Sultan al-Aradah (governor of Marib), Tariq Saleh (national resistance), Mahdi al-Mashat (in Saudi-led targeting cell)",
+      "strength": "About 30,000 Yemeni Army and tribal levies supplemented by extensive Saudi and Emirati airpower",
+      "casualties": "Around 8,000 to 15,000 killed across the long defensive campaign; many tribal fighters and civilians"
+    },
+    {
+      "name": "Houthi movement (Ansar Allah)",
+      "commander": "Abdul-Malik al-Houthi (overall), Mohammed Abdul-Salam (political), Yahya al-Razami (field commanders)",
+      "strength": "Tens of thousands rotating through the Marib axis, drawing on conscript-style mobilisations from north Yemeni provinces",
+      "casualties": "Tens of thousands killed and wounded across two years of frontal attacks against fortified ridgelines"
+    }
+  ],
+  "victor": "Government of Yemen and the Saudi-led coalition (defensive stalemate)",
+  "summary": "Marib city is the seat of the internationally recognised Yemeni government, the centre of the country's oil and gas infrastructure, and the strategic hinge between the highlands and the Empty Quarter. Houthi forces opened a sustained offensive from the north in January 2020 and pressed in from the west and south through 2021. The fighting peaked in late 2021 around Al-Balaq mountain, the Wadi Ubaydah valley, and the Sirwah front. Saudi and Emirati airpower broke up massed Houthi formations repeatedly. The lines stabilised after the United Nations cease-fire of the second of April 2022 took effect.",
+  "significance": "Marib was the most sustained ground campaign of the Yemeni civil war and the operational hinge that determined whether the Houthi movement could extend its control across the country. The successful defence preserved the Yemeni government's last urban capital on the highland plateau and the country's principal hydrocarbon revenues. The civilian displacement, estimated at over a million internally displaced persons by 2022, made Marib province one of the largest concentrations of war-displaced people on earth. The 2022 cease-fire remains the only durable pause in Yemen's nine-year war.",
+  "wikipediaTitle": "Battle of Marib"
+}

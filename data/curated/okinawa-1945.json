@@ -1,0 +1,33 @@
+{
+  "id": "okinawa-1945",
+  "name": "Battle of Okinawa",
+  "year": 1945,
+  "date": "1 April – 22 June 1945",
+  "lat": 26.3344,
+  "lng": 127.8056,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "amphibious",
+  "aliases": [
+    { "name": "Operation Iceberg", "by": "U.S. operational codename" },
+    { "name": "Tetsu no Ame", "by": "Japanese: 'Rain of Steel'" }
+  ],
+  "sides": [
+    {
+      "name": "United States and the British Pacific Fleet",
+      "commander": "Chester W. Nimitz (Pacific Ocean Areas), Raymond Spruance (5th Fleet), Simon Bolivar Buckner Jr. (10th Army, killed 18 June), Roy Geiger (III Amphibious Corps), Bruce Fraser (British Pacific Fleet)",
+      "strength": "About 541,000 troops in seven divisions ashore, 1,600 ships, around 1,300 aircraft",
+      "casualties": "About 12,500 killed including Buckner, 39,000 wounded; 36 ships sunk, 368 damaged by kamikaze; 763 aircraft lost"
+    },
+    {
+      "name": "Empire of Japan",
+      "commander": "Mitsuru Ushijima (32nd Army, suicide 22 June), Isamu Chō (chief of staff, suicide 22 June), Hiromichi Yahara (operations officer)",
+      "strength": "About 100,000 regular troops plus 24,000 conscripted Okinawan auxiliaries; about 4,000 aircraft including 1,900 kamikaze",
+      "casualties": "About 95,000 killed including Ushijima; 7,400 captured; the super-battleship Yamato and four destroyers sunk en route during Operation Ten-Go"
+    }
+  ],
+  "victor": "United States and the British Pacific Fleet",
+  "summary": "The largest amphibious operation of the Pacific war landed on the western coast of Okinawa on the first of April 1945. Ushijima fought a defence in depth from caves and concrete pillboxes around the Shuri Line, anchored on Sugar Loaf Hill, Conical Hill, and the Maeda Escarpment. American Marine and infantry divisions ground south for ten weeks under steady rain, blowing the defenders out of cave systems with satchel charges and flamethrowers. Around 1,900 kamikaze sorties struck the Allied fleet offshore, sinking 36 ships and damaging more than 360. Around 110,000 Okinawan civilians died, many in mass suicides driven by Japanese propaganda. Ushijima killed himself in his command bunker on the twenty-second of June.",
+  "significance": "Okinawa was the bloodiest single campaign of the Pacific war and the closest thing the Allies got to a preview of an invasion of the Japanese home islands. The civilian death toll, the cave fighting, and the cost of the kamikaze campaign shaped the calculations the Truman administration made about Operation Downfall and weighed in the decision to drop the atomic bombs on Hiroshima and Nagasaki six weeks after the island fell. The American military government that ran Okinawa for the next twenty-seven years embedded the U.S. base structure that still anchors East Asian alliances today.",
+  "wikipediaTitle": "Battle of Okinawa"
+}

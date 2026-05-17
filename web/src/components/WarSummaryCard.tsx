@@ -183,20 +183,41 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
           {summary.notable && summary.notable.length > 0 && (
             <Section theme={theme} label="Notable">
               <ul className="space-y-1.5">
-                {summary.notable.map((n, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-[13px] leading-snug text-slate-200/90">
-                    <span
-                      className="mt-[7px] flex-shrink-0 rounded-full"
-                      style={{
-                        width: 4,
-                        height: 4,
-                        background: theme.accent,
-                        boxShadow: `0 0 6px ${theme.accent}88`,
-                      }}
-                    />
-                    <span style={{ fontFamily: theme.titleFont }}>{n}</span>
-                  </li>
-                ))}
+                {summary.notable.map((n, i) => {
+                  // Each notable line names a person, treaty, event, or
+                  // engagement. We don't have curated URLs for them, so
+                  // hand the reader off to a Wikipedia article lookup —
+                  // close enough for first reference and easy to override
+                  // later if/when we wire authoritative URLs into the data.
+                  const url = `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(n)}&go=Go`;
+                  return (
+                    <li
+                      key={i}
+                      className="flex items-start gap-2.5 text-[13px] leading-snug text-slate-200/90"
+                    >
+                      <span
+                        className="mt-[7px] flex-shrink-0 rounded-full"
+                        style={{
+                          width: 4,
+                          height: 4,
+                          background: theme.accent,
+                          boxShadow: `0 0 6px ${theme.accent}88`,
+                        }}
+                      />
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline transition-colors"
+                        style={{ fontFamily: theme.titleFont, color: '#e2e8f0' }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = theme.accent)}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = '#e2e8f0')}
+                      >
+                        {n}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </Section>
           )}

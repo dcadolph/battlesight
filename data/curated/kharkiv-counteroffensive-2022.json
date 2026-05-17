@@ -1,0 +1,29 @@
+{
+  "id": "kharkiv-counteroffensive-2022",
+  "name": "Kharkiv Counter-offensive",
+  "year": 2022,
+  "date": "6 – 13 September 2022",
+  "lat": 49.7944,
+  "lng": 36.7986,
+  "era": "modern",
+  "war": "Russo-Ukrainian War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Valerii Zaluzhnyi (commander-in-chief), Oleksandr Syrskyi (Land Forces, sector commander), commanders of the 92nd Mechanised, 25th Airborne, 4th Tank, and 95th Air Assault Brigades",
+      "strength": "About six brigades concentrated for the breakthrough; Ukrainian official figures put combat troops in the operation at around 6,000 to 8,000 plus supporting units",
+      "casualties": "Hundreds killed and wounded; modest armour losses given the scale of ground covered"
+    },
+    {
+      "name": "Russian Federation",
+      "commander": "Aleksandr Lapin (Centre Group of Forces, dismissed October), commanders of the 1st Guards Tank Army elements left in the sector",
+      "strength": "Estimated 12,000 to 15,000 Russian troops thinly held the Izium–Balakliia–Kupiansk axis; most experienced units had been redeployed to Kherson against the publicised southern attack",
+      "casualties": "Several thousand killed, wounded, and captured; large quantities of armour, artillery, and ammunition stockpiles abandoned in the rapid retreat"
+    }
+  ],
+  "victor": "Ukraine",
+  "summary": "Ukrainian planners spent the summer of 2022 publicising preparations for a southern offensive against Kherson while quietly massing the assault force at Kharkiv. The attack opened on the sixth of September against the thin Russian screen between Balakliia and Kupiansk. Ukrainian mechanised columns covered fifty kilometres in the first three days, took Balakliia on the eighth, Izium on the tenth, and Kupiansk on the same day. Russian forces abandoned the entire east bank of the Oskil River and most of Kharkiv Oblast in seven days. The operation recovered roughly 12,000 square kilometres of territory.",
+  "significance": "The Kharkiv counter-offensive was the largest territorial change of any week of the war and forced the Kremlin into the mobilisation announcement of the twenty-first of September, the so-called partial mobilisation that brought roughly 300,000 reservists into the line by the end of the year. It punctured the assumption that Russian conventional forces could hold a line once the Ukrainian army had received Western precision artillery, and it shifted the political calculation in Western capitals that had previously hedged on long-range systems and tank deliveries.",
+  "wikipediaTitle": "2022 Kharkiv counteroffensive"
+}

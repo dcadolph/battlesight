@@ -1,0 +1,35 @@
+{
+  "id": "first-marne-1914",
+  "name": "First Battle of the Marne",
+  "year": 1914,
+  "date": "5 – 12 September 1914",
+  "lat": 48.95,
+  "lng": 3.55,
+  "era": "world-war-1",
+  "war": "World War I",
+  "battleType": "land",
+  "aliases": [
+    {
+      "name": "Miracle on the Marne",
+      "by": "French popular and ecclesiastical memory"
+    }
+  ],
+  "sides": [
+    {
+      "name": "France and the British Empire",
+      "commander": "Joseph Joffre (commander-in-chief), Michel-Joseph Maunoury (6th Army), Joseph Gallieni (Paris garrison), Ferdinand Foch (9th Army), John French (British Expeditionary Force)",
+      "strength": "About 1,071,000 troops in 39 French and 6 British divisions",
+      "casualties": "About 80,000 killed and 230,000 wounded or missing across the French armies; about 13,000 British"
+    },
+    {
+      "name": "German Empire",
+      "commander": "Helmuth von Moltke the Younger (Chief of the General Staff, dismissed during the battle), Alexander von Kluck (1st Army), Karl von Bülow (2nd Army), Albrecht of Württemberg (4th Army)",
+      "strength": "About 1,485,000 troops in 27 corps",
+      "casualties": "About 67,000 killed and 250,000 wounded or missing"
+    }
+  ],
+  "victor": "France and the British Empire",
+  "summary": "Kluck's 1st Army wheeled south-east of Paris instead of west of it, exposing his right flank to Maunoury's improvising 6th Army assembling around the capital. Gallieni sent reinforcements forward in 600 commandeered Renault taxis. The French and British counter-attack opened on the fifth of September into a thirty-mile gap that had opened between Kluck and Bülow as the German line shifted. Bülow ordered a withdrawal north on the ninth. Kluck had to conform. The Schlieffen plan died on the Marne, and the German army fell back to the Aisne where it dug in and the Western Front froze into the trench line that defined the next four years.",
+  "significance": "The Marne is the battle that prevented a six-week German victory and turned the First World War into a four-year industrial siege from the Channel to the Swiss frontier. Every subsequent strategic argument of 1915 onward, on every front, was downstream of the failure on the Marne. The phrase 'miracle on the Marne' entered the French national vocabulary. The taxi mobilisation became one of the foundational images of citizen mobilisation in twentieth-century war. Moltke was relieved within days, and the German General Staff never again attempted a single decisive opening offensive in the west on the Schlieffen pattern.",
+  "wikipediaTitle": "First Battle of the Marne"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "debaltseve-2015",
+  "name": "Battle of Debaltseve",
+  "year": 2015,
+  "date": "14 January – 20 February 2015",
+  "lat": 48.341,
+  "lng": 38.4178,
+  "era": "modern",
+  "war": "Russo-Ukrainian War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Viktor Muzhenko (general staff), Hryhoriy Kovalchuk (sector C operational command), commanders of the 128th Mountain Assault, 30th Mechanised, and 25th Airborne Brigades",
+      "strength": "About 8,000 troops in the salient including the 128th Mountain Assault Brigade as the core defence",
+      "casualties": "About 267 killed, 1,377 wounded across the encirclement battle and the corridor withdrawal; substantial armour, artillery, and electronic-warfare equipment lost"
+    },
+    {
+      "name": "Donetsk and Luhansk People's Republics and the Russian Armed Forces",
+      "commander": "Russian battalion tactical group commanders deployed across the eastern Donbas, including elements of the 5th Tank Brigade and 18th Motor Rifle Brigade",
+      "strength": "Estimated 19,000 separatist and Russian regular troops across the Debaltseve operation",
+      "casualties": "Several hundred killed and wounded across the separatist and Russian forces; figures disputed"
+    }
+  ],
+  "victor": "Donetsk and Luhansk People's Republics and the Russian Armed Forces",
+  "summary": "The Debaltseve salient was a wedge of Ukrainian-held territory pointing east into separatist lines, anchored on the strategic rail and road junction at Debaltseve itself. Beginning in mid-January 2015 the Russian-led offensive squeezed the salient at the base, cutting the M03 highway by the eighth of February. The Minsk II agreement signed on the twelfth of February required a cease-fire from the fifteenth, but Russian and separatist forces continued the offensive on the rationale that the pocket was already encircled. President Poroshenko ordered the withdrawal on the eighteenth. The Ukrainian columns broke out along secondary roads under continuous artillery and ambush fire.",
+  "significance": "Debaltseve closed the post-Ilovaisk phase of the Donbas war and produced the Minsk II framework that froze the contact line until February 2022. It demonstrated again that separatist forces operating under Russian regular command could conduct conventional operations of corps scale, and that political agreements brokered in Minsk could be signed and ignored as the situation on the ground dictated. The defeat triggered a multi-year Ukrainian rebuilding programme that produced the modern brigades and electronic-warfare capacity that fought the 2022 invasion.",
+  "wikipediaTitle": "Battle of Debaltseve"
+}

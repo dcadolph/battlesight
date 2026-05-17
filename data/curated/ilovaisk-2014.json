@@ -1,0 +1,29 @@
+{
+  "id": "ilovaisk-2014",
+  "name": "Battle of Ilovaisk",
+  "year": 2014,
+  "date": "7 August – 2 September 2014",
+  "lat": 47.929,
+  "lng": 38.207,
+  "era": "modern",
+  "war": "Russo-Ukrainian War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Volodymyr Zhytarev (sector D), Ihor Bilodid (51st Mechanised Brigade), Semen Semenchenko (Donbas Battalion), Andriy Filonenko (Dnipro-1)",
+      "strength": "About 5,000 to 6,000 troops drawn from the 51st, 17th, 92nd, 93rd Mechanised Brigades and from territorial defence and volunteer battalions",
+      "casualties": "About 366 killed and 429 wounded; 300 captured; tanks, IFVs, and artillery lost on the columns out of the pocket"
+    },
+    {
+      "name": "Donetsk People's Republic and the Russian Armed Forces",
+      "commander": "Aleksandr Khodakovsky (Vostok Battalion), Russian airborne commanders deployed across the Russian border",
+      "strength": "Around 3,500 separatist fighters reinforced by Russian battalion tactical groups from the 137th and 247th Airborne Regiments and the 18th Motor Rifle Brigade",
+      "casualties": "Russian and separatist losses disputed; multiple Russian VDV paratroopers killed and captured publicly displayed by Ukraine"
+    }
+  ],
+  "victor": "Donetsk People's Republic and the Russian Armed Forces",
+  "summary": "Ukrainian volunteer battalions and regular brigades drove east in mid-August 2014 to seize the rail junction at Ilovaisk and cut the separatist logistical artery to Donetsk. Russian regulars crossed the border in force on the twenty-fourth of August and closed the corridor behind them. Ukrainian forces negotiated a green corridor to withdraw on the twenty-ninth. Russian artillery opened fire on the retreating columns as they moved through it. Three of the four columns were destroyed. The defeat opened the road south toward the Sea of Azov and forced Kyiv into the cease-fire that became Minsk I within five days.",
+  "significance": "Ilovaisk was the first conventional intervention by Russian regular forces in the Donbas war and produced the highest single-engagement Ukrainian casualty total of the eight-year first phase. The catastrophe forced President Poroshenko to sign the Minsk Protocol on the fifth of September and froze the line of contact roughly where it stood. The treatment of the green-corridor columns shaped Ukrainian doctrine and political posture toward Russian assurances for the next decade and was the founding episode in the legal case Ukraine has since pursued against Russia at the International Court of Justice.",
+  "wikipediaTitle": "Battle of Ilovaisk"
+}

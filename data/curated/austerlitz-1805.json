@@ -1,0 +1,35 @@
+{
+  "id": "austerlitz-1805",
+  "name": "Battle of Austerlitz",
+  "year": 1805,
+  "date": "2 December 1805",
+  "lat": 49.128,
+  "lng": 16.762,
+  "era": "napoleonic",
+  "war": "War of the Third Coalition",
+  "battleType": "land",
+  "aliases": [
+    {
+      "name": "Battle of the Three Emperors",
+      "by": "Common name in nineteenth-century histories"
+    }
+  ],
+  "sides": [
+    {
+      "name": "First French Empire",
+      "commander": "Napoleon I, Jean Lannes (V Corps), Nicolas Soult (IV Corps), Louis-Nicolas Davout (III Corps), Joachim Murat (cavalry reserve)",
+      "strength": "About 73,000 troops and 139 guns",
+      "casualties": "Around 1,300 killed, 7,000 wounded, 573 captured"
+    },
+    {
+      "name": "Russian Empire and Austrian Empire",
+      "commander": "Mikhail Kutuzov (operational), Tsar Alexander I (overall), Emperor Francis II, Franz von Weyrother (chief of staff)",
+      "strength": "About 85,000 troops and 318 guns",
+      "casualties": "Around 16,000 killed or wounded; 20,000 captured; 180 guns and 50 standards lost"
+    }
+  ],
+  "victor": "First French Empire",
+  "summary": "Napoleon deliberately abandoned the Pratzen Heights to bait the allied army into a flanking attack on his weakened right. When the Russian and Austrian columns descended onto the lowland marshes at first light, Soult's corps stormed back up the heights through the morning mist and split the allied centre. The French rolled the line south through the day, broke the flanking columns against the frozen Satschan ponds, and shattered the coalition by dusk. Tsar Alexander wept on horseback as the army he had brought west disintegrated. The Holy Roman Empire was dissolved within months.",
+  "significance": "Austerlitz is the textbook example of a deliberate operational trap and remains taught in every staff college that trains officers to read terrain. It ended the War of the Third Coalition within weeks at the Peace of Pressburg, broke Austrian power in central Europe, and confirmed Napoleon's reputation at the height of the empire. The defeat ended the Holy Roman Empire the next year and forced Tsar Alexander into the temporary accommodation with Napoleon that culminated at Tilsit in 1807.",
+  "wikipediaTitle": "Battle of Austerlitz"
+}

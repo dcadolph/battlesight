@@ -1,0 +1,29 @@
+{
+  "id": "coral-sea-1942",
+  "name": "Battle of the Coral Sea",
+  "year": 1942,
+  "date": "4 – 8 May 1942",
+  "lat": -14.5,
+  "lng": 154.5,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "naval",
+  "sides": [
+    {
+      "name": "United States and Australia",
+      "commander": "Frank Jack Fletcher (Task Force 17, Yorktown), Aubrey Fitch (Task Force 11, Lexington), John Crace (RAN, Support Group)",
+      "strength": "2 fleet carriers, 9 cruisers, 13 destroyers, 128 aircraft",
+      "casualties": "About 656 killed; carrier Lexington and the destroyer Sims and the oiler Neosho sunk; carrier Yorktown damaged; 69 aircraft lost"
+    },
+    {
+      "name": "Empire of Japan",
+      "commander": "Shigeyoshi Inoue (Fourth Fleet), Takeo Takagi (carrier strike force), Aritomo Gotō (cruiser covering force), Kiyohide Shima (Tulagi invasion)",
+      "strength": "2 fleet carriers, 1 light carrier, 9 cruisers, 13 destroyers, 127 aircraft, plus the Port Moresby invasion convoy",
+      "casualties": "About 966 killed; light carrier Shōhō sunk; fleet carrier Shōkaku heavily damaged; 92 aircraft lost; the Port Moresby invasion turned back"
+    }
+  ],
+  "victor": "United States and Australia (strategic Allied victory; tactical draw)",
+  "summary": "Imperial Japanese Navy code traffic broken by station Hypo at Pearl Harbor revealed the planned Japanese invasion of Port Moresby in southern New Guinea. Fletcher's two carriers intercepted the covering force in the Coral Sea. On the seventh of May Lexington and Yorktown air groups sank the light carrier Shōhō (\"Scratch one flat-top,\" radioed Lieutenant Commander Dixon). The eighth saw the first carrier battle in history: two American carriers traded strikes with two Japanese carriers, never sighting one another. Lexington took two torpedoes and three bombs and was scuttled that evening. Shōkaku was crippled and Zuikaku's air group decimated. The Japanese invasion convoy turned north and Moresby was never taken by sea.",
+  "significance": "The Coral Sea was the first naval battle in history in which the opposing surface fleets never saw each other. Every blow was struck by carrier aircraft. The action confirmed the carrier as the principal capital ship of the modern navy and demoted the battleship to a supporting role overnight. Strategically, the diversion of Shōkaku and Zuikaku from the Midway operation a month later by damage and air-group attrition contributed materially to the four-to-zero loss of Japanese carriers at Midway. The protection of Port Moresby kept Allied air power within range of the southern New Guinea coast and made the long Allied advance up the New Guinea coast in 1943 and 1944 possible.",
+  "wikipediaTitle": "Battle of the Coral Sea"
+}

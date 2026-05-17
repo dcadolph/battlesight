@@ -1,0 +1,39 @@
+{
+  "id": "saratoga-1777",
+  "name": "Battles of Saratoga",
+  "year": 1777,
+  "date": "19 September – 17 October 1777",
+  "lat": 43.0114,
+  "lng": -73.6306,
+  "era": "napoleonic",
+  "war": "American Revolutionary War",
+  "battleType": "land",
+  "aliases": [
+    {
+      "name": "Battle of Freeman's Farm",
+      "by": "First action, 19 September 1777"
+    },
+    {
+      "name": "Battle of Bemis Heights",
+      "by": "Second action, 7 October 1777"
+    }
+  ],
+  "sides": [
+    {
+      "name": "United States and the Oneida Nation",
+      "commander": "Horatio Gates (Northern Department), Benedict Arnold (left wing, before relief), Daniel Morgan (riflemen), Enoch Poor",
+      "strength": "About 12,000 Continental and militia troops by the second action",
+      "casualties": "About 90 killed, 240 wounded across both actions"
+    },
+    {
+      "name": "Great Britain (regulars, Brunswick auxiliaries, Loyalist and Native allies)",
+      "commander": "John Burgoyne (Army of Canada), Simon Fraser (killed by Morgan's riflemen), Friedrich Adolf Riedesel (Brunswick contingent)",
+      "strength": "About 7,200 troops at the start of the campaign, dwindling to about 5,800 by the surrender",
+      "casualties": "About 1,000 killed and wounded across both actions; 6,222 surrendered as prisoners of war"
+    }
+  ],
+  "victor": "United States",
+  "summary": "Burgoyne's plan was to march south from Canada down the Hudson, link with William Howe pushing up from New York, and cut the rebellious colonies in two. Howe sailed for Philadelphia instead. Burgoyne's exhausted column ran into Gates's army dug in on Bemis Heights. Benedict Arnold drove a counterattack at Freeman's Farm on the nineteenth of September that broke the British centre. Daniel Morgan's Virginia riflemen shot down Fraser at long range during the second action on the seventh of October. Surrounded by ten thousand New England militia, his supplies exhausted and his line of retreat cut at Fort Edward, Burgoyne surrendered his entire army at Saratoga on the seventeenth.",
+  "significance": "Saratoga was the strategic decision point of the American Revolution. The surrender of an entire British army convinced Louis XVI's government to recognise the United States and conclude the Treaty of Alliance in February 1778, turning a colonial revolt into a global war Britain could no longer win. Spanish and Dutch entry followed in 1779 and 1780. Without French money, the French Atlantic fleet at Yorktown, and the French expeditionary force on the Hudson, the American republic does not come into being.",
+  "wikipediaTitle": "Battles of Saratoga"
+}

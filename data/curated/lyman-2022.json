@@ -1,0 +1,29 @@
+{
+  "id": "lyman-2022",
+  "name": "Battle of Lyman",
+  "year": 2022,
+  "date": "23 April – 1 October 2022",
+  "lat": 48.9819,
+  "lng": 37.7967,
+  "era": "modern",
+  "war": "Russo-Ukrainian War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Oleksandr Syrskyi (Land Forces commander), brigade commanders of the 81st Airmobile, 95th Air Assault, and 25th Airborne Brigades",
+      "strength": "About 4,000 to 5,000 troops in the assault on Lyman during the September to October counter-offensive",
+      "casualties": "Hundreds killed and wounded"
+    },
+    {
+      "name": "Russian Federation and Donbas separatists",
+      "commander": "Aleksandr Lapin (Centre Group, dismissed October), commanders of the 20th Combined Arms Army and the 144th Motor Rifle Division, with reinforcements from the LPR People's Militia",
+      "strength": "Estimated 5,000 Russian and separatist troops in the Lyman salient at the end of September",
+      "casualties": "Several hundred killed and captured; significant armour and ammunition stocks abandoned during the breakout"
+    }
+  ],
+  "victor": "Ukraine",
+  "summary": "Russian forces seized Lyman in late May 2022 during the broader Severodonetsk offensive. The rail town anchored Russian supply routes into the northern Donbas. Ukrainian brigades enveloped Lyman from the west and north during the Kharkiv counter-offensive of September 2022 and cut the supply road on the twenty-eighth. Russian forces in the salient withdrew on the night of the thirtieth of September, the same day President Putin announced the annexation of Donetsk Oblast. Ukrainian forces entered Lyman on the first of October and continued east toward Kreminna and Svatove.",
+  "significance": "The recapture of Lyman opened the door to Ukrainian operations on the eastern bank of the Oskil River and made the Russian defensive line in northern Donbas untenable through October and November. Coming the day after the formal annexation declarations, the loss was an immediate operational rebuke to the political ceremony and visibly destabilised the Russian operational command in the sector. The episode was a node in the chain of Russian setbacks that produced the dismissal of Aleksandr Lapin and the elevation of Sergey Surovikin to overall theatre command later in October.",
+  "wikipediaTitle": "Battle of Lyman (2022)"
+}

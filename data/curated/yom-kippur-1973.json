@@ -1,0 +1,39 @@
+{
+  "id": "yom-kippur-1973",
+  "name": "Yom Kippur War",
+  "year": 1973,
+  "date": "6 – 25 October 1973",
+  "lat": 30.6,
+  "lng": 32.5,
+  "era": "modern",
+  "war": "Arab–Israeli conflict",
+  "battleType": "land",
+  "aliases": [
+    {
+      "name": "Ramadan War",
+      "by": "Egyptian and Syrian designation"
+    },
+    {
+      "name": "October War",
+      "by": "Common Arab and academic designation"
+    }
+  ],
+  "sides": [
+    {
+      "name": "Egypt and Syria (with Iraqi, Jordanian, Moroccan, Saudi, and Kuwaiti contingents)",
+      "commander": "Anwar Sadat (Egypt), Hafez al-Assad (Syria), Saad El Shazly (Egyptian chief of staff), Mustafa Tlass (Syrian defence minister)",
+      "strength": "About 1,150,000 troops, 4,500 tanks, 1,150 aircraft across all coalition contributions",
+      "casualties": "Around 8,000 to 15,000 killed and 30,000 wounded across the coalition; about 2,250 tanks and 450 aircraft lost"
+    },
+    {
+      "name": "Israel",
+      "commander": "Golda Meir (prime minister), David Elazar (chief of staff), Ariel Sharon (Sinai counterattack), Moshe Dayan (defence minister), Rafael Eitan (Golan)",
+      "strength": "About 415,000 troops at peak mobilisation, 1,700 tanks, 440 aircraft",
+      "casualties": "About 2,656 killed, 7,250 wounded, 294 captured; 400 tanks destroyed, 200 disabled but recoverable; 102 aircraft lost"
+    }
+  ],
+  "victor": "Israel (operationally); strategic stalemate that opened peace negotiations",
+  "summary": "Egypt and Syria opened a coordinated surprise offensive across the Suez Canal and the Golan Heights on the holiest day in the Jewish calendar. The Egyptian Second and Third Armies broke the Bar Lev Line and seized a foothold east of the canal under a SAM umbrella that grounded the Israeli Air Force over the front. The Syrian armoured corps drove deep into the Golan and almost broke through to the upper Jordan. After ten days of catastrophic losses Israel mobilised, blunted the Syrian assault on the Golan, and on the fifteenth of October crossed the canal at the Chinese Farm under Sharon's 143rd Armoured Division. By the cease-fire the Israeli 162nd Division had encircled the Egyptian Third Army on the west bank and Israeli reconnaissance units were at Kilometre 101 on the Cairo road.",
+  "significance": "The October War shattered the post-1967 Israeli sense of invulnerability, ended Sadat's political reliance on the Soviet Union, and produced the diplomatic opening that culminated at Camp David in 1978 and the Egypt–Israel peace treaty of 1979. The OPEC oil embargo imposed in support of the Arab coalition quadrupled oil prices, broke Bretton Woods stagflation onto Western economies, and reshaped industrial policy worldwide. Soviet and American re-supply flights brought the superpowers to DEFCON 3 alert. The experience of the resupply convinced both general staffs that contemporary high-intensity war would burn through munitions at rates neither system could sustain for long.",
+  "wikipediaTitle": "Yom Kippur War"
+}

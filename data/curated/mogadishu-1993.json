@@ -9,7 +9,10 @@
   "war": "Somali Civil War",
   "battleType": "land",
   "aliases": [
-    { "name": "Black Hawk Down", "by": "Popular Western shorthand after the 1999 book and 2001 film" }
+    {
+      "name": "Black Hawk Down",
+      "by": "Popular Western shorthand after the 1999 book and 2001 film"
+    }
   ],
   "sides": [
     {
@@ -26,7 +29,7 @@
     }
   ],
   "victor": "Tactical American success (target snatched), strategic failure",
-  "summary": "Task Force Ranger launched a daylight helicopter raid on the Olympic Hotel to capture two of Aidid's senior lieutenants. The snatch succeeded in twenty minutes; the extraction did not. Two MH-60 Black Hawks were shot down by RPGs over the Bakaara Market. Rangers and Delta operators fought through the night around the crash sites until the rescue column of Pakistani M48 tanks and Malaysian Condor APCs broke through at dawn. The dead American helicopter pilot was dragged through the streets by Aidid's militia for a CNN camera.",
+  "summary": "Task Force Ranger launched a daylight helicopter raid on the Olympic Hotel to capture two of Aidid's senior lieutenants. The snatch succeeded in twenty minutes. The extraction did not. Two MH-60 Black Hawks were shot down by RPGs over the Bakaara Market. Rangers and Delta operators fought through the night around the crash sites until the rescue column of Pakistani M48 tanks and Malaysian Condor APCs broke through at dawn. The dead American helicopter pilot was dragged through the streets by Aidid's militia for a CNN camera.",
   "significance": "Mogadishu reshaped American foreign policy. Bill Clinton ordered the withdrawal of US forces from Somalia within days, an event that subsequently constrained intervention in the Rwandan genocide, the Bosnian war, and a generation of humanitarian crises. Osama bin Laden cited it as evidence that the United States would not absorb casualties for limited objectives, a calculation that informed the planning of subsequent al-Qaeda attacks.",
   "wikipediaTitle": "Battle of Mogadishu (1993)"
 }

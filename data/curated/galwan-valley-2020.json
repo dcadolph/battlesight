@@ -1,0 +1,29 @@
+{
+  "id": "galwan-valley-2020",
+  "name": "Galwan Valley Clash",
+  "year": 2020,
+  "date": "15 – 16 June 2020",
+  "lat": 34.7665,
+  "lng": 78.7831,
+  "era": "modern",
+  "war": "Sino-Indian border dispute",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "India",
+      "commander": "Colonel B. Santosh Babu (16th Bihar Regiment, killed in action), brigade officers of the Indian 3 Infantry Division",
+      "strength": "About 50 to 60 Indian soldiers at the disputed point",
+      "casualties": "20 killed including Colonel Babu; 76 wounded"
+    },
+    {
+      "name": "People's Republic of China",
+      "commander": "Officers of the PLA Xinjiang Military District local detachment",
+      "strength": "About 300 PLA soldiers in the immediate area",
+      "casualties": "4 to 45 killed (Chinese government acknowledged 4; outside estimates ranged higher); unknown wounded"
+    }
+  ],
+  "victor": "Contested; both sides withdrew from immediate contact and the border returned to a militarised stand-off",
+  "summary": "A patrol-level dispute over disengagement at Patrolling Point 14 in the Galwan River valley escalated on the night of the fifteenth of June into the deadliest fighting on the Sino-Indian border since 1975. The clash was fought with rocks, iron bars wrapped in barbed wire, and improvised clubs, in keeping with the 1996 and 2005 protocols that prohibited firearms within two kilometres of the Line of Actual Control. Colonel Babu of the 16th Bihar Regiment was killed early in the fight. Some soldiers fell into the Galwan River and died of hypothermia and shock injuries overnight before extraction parties reached them.",
+  "significance": "Galwan was the first deadly engagement on the Sino-Indian border in forty-five years and ended the working assumption that the Line of Actual Control could be managed through patrol protocols alone. The Modi government banned 59 Chinese mobile applications including TikTok and accelerated procurement from the United States, France, and Israel. India joined the Quad ministerial track. The People's Liberation Army accelerated infrastructure construction in Aksai Chin and Ladakh through 2021 and 2022. Both armies have since maintained tens of thousands of troops in winter positions along the disputed sector.",
+  "wikipediaTitle": "2020 China–India skirmishes"
+}

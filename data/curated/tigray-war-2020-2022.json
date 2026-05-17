@@ -1,0 +1,29 @@
+{
+  "id": "tigray-war-2020-2022",
+  "name": "Tigray War",
+  "year": 2020,
+  "date": "3 November 2020 – 3 November 2022",
+  "lat": 13.4969,
+  "lng": 39.4769,
+  "era": "modern",
+  "war": "Tigray War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Federal Democratic Republic of Ethiopia, the Eritrean Defence Forces, and Amhara regional forces (including the Fano militia)",
+      "commander": "Abiy Ahmed (Ethiopian prime minister), Berhanu Jula (Ethiopian chief of staff), Filipos Woldeyohannes (Eritrean chief of staff), Yilkal Kefale (Amhara president)",
+      "strength": "Roughly 200,000 Ethiopian federal troops plus an estimated 100,000 Eritrean and tens of thousands of Amhara regional and Fano militia at peak",
+      "casualties": "Tens of thousands killed across federal and Eritrean ranks"
+    },
+    {
+      "name": "Tigray People's Liberation Front and the Tigray Defence Forces",
+      "commander": "Debretsion Gebremichael (TPLF chairman), Tsadkan Gebretensae (operational commander), Tadesse Werede (chief of staff)",
+      "strength": "Estimated 250,000 troops including former Ethiopian Defence Forces members from the northern command and mass mobilisation of Tigrayan men and women",
+      "casualties": "Hundreds of thousands of casualties including civilian deaths from combat, famine, and atrocities"
+    }
+  ],
+  "victor": "Federal government and Eritrean forces; political settlement at Pretoria",
+  "summary": "Federal Ethiopian forces, the Eritrean Defence Forces, and Amhara regional fighters launched a coordinated offensive into Tigray on the third of November 2020 after federal troops were attacked at the Tigray Northern Command headquarters. Tigrayan units retreated into the mountains, retook Mekelle in June 2021, and drove south through Amhara as far as Debre Sina by late November. A federal counter-attack supported by Turkish and Emirati drones broke the Tigrayan offensive in early 2022 and rolled the front back into Tigray itself. The Pretoria cessation of hostilities agreement signed on the second of November 2022 ended the conventional fighting. Eritrean and Amhara forces remained in disputed western Tigray.",
+  "significance": "The Tigray War produced the highest death toll of any war in the world during its duration. Independent estimates of total fatalities range from 300,000 to 600,000, including civilian deaths from combat, famine engineered by the federal blockade, and atrocities documented in western Tigray and at Aksum. The war buried the 1995 federal compact that had organised Ethiopia along ethnic-federal lines for a generation. The Pretoria agreement excluded Eritrea, kept Amhara claims on western Tigray unresolved, and seeded the broader conflict that flared into the Amhara Fano insurgency in 2023 and into the Tigray-Eritrea tensions that have continued through 2024.",
+  "wikipediaTitle": "Tigray War"
+}

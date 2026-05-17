@@ -1,0 +1,33 @@
+{
+  "id": "battle-of-france-1940",
+  "name": "Battle of France",
+  "year": 1940,
+  "date": "10 May – 25 June 1940",
+  "lat": 50.0,
+  "lng": 4.5,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "land",
+  "aliases": [
+    { "name": "Fall of France", "by": "Anglo-American common usage" },
+    { "name": "Westfeldzug", "by": "German wartime designation" }
+  ],
+  "sides": [
+    {
+      "name": "France, United Kingdom, Belgium, Netherlands, Polish and Czechoslovak forces in exile",
+      "commander": "Maurice Gamelin (until 19 May), Maxime Weygand (from 19 May), Lord Gort (BEF), Léopold III (Belgium)",
+      "strength": "About 3.3 million troops, 13,974 artillery pieces, 3,383 tanks, 2,935 aircraft across all Allied contingents",
+      "casualties": "Around 360,000 killed or wounded; 1.9 million captured; 2,100 aircraft lost"
+    },
+    {
+      "name": "Nazi Germany and Fascist Italy",
+      "commander": "Gerd von Rundstedt (Army Group A), Fedor von Bock (Army Group B), Wilhelm Ritter von Leeb (Army Group C), Heinz Guderian (XIX Panzer Corps), Erwin Rommel (7th Panzer Division)",
+      "strength": "About 3.35 million German troops, 7,378 artillery pieces, 2,445 tanks, 5,638 aircraft; 700,000 Italian troops",
+      "casualties": "Around 27,000 killed and 111,000 wounded; 1,236 aircraft lost"
+    }
+  ],
+  "victor": "Nazi Germany and Fascist Italy",
+  "summary": "Manstein's plan threw the armoured punch through the supposedly impassable Ardennes against the seam of the French line at Sedan. Guderian crossed the Meuse on the thirteenth of May and tore a fifty-kilometre hole in the French centre. Within ten days German armour reached Abbeville on the Channel coast, severing the Allied northern army group from its supply base. The British Expeditionary Force evacuated from Dunkirk between the twenty-sixth of May and the fourth of June, leaving its heavy equipment behind. The Italians declared war on the tenth of June. Paris fell on the fourteenth, and the armistice was signed in the same railway carriage at Compiègne where Germany had surrendered in 1918.",
+  "significance": "The fall of France in six weeks was the most decisive operational victory of the modern era, a shock to every general staff that had budgeted on a 1914-style attritional grind. The defeat ejected Britain from the Continent, gave Hitler the strategic position and industrial base from which to invade the Soviet Union the following year, and gestated the Vichy regime, the Resistance, and the political afterlife that ran through the Liberation and the postwar settlement. The Manstein plan became the foundational case study for combined-arms breakthrough doctrine and is still taught in Anglo-American staff colleges as the high-water mark of operational genius in the twentieth century.",
+  "wikipediaTitle": "Battle of France"
+}

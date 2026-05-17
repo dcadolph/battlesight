@@ -1,0 +1,35 @@
+{
+  "id": "barbarossa-1941",
+  "name": "Operation Barbarossa",
+  "year": 1941,
+  "date": "22 June – 5 December 1941",
+  "lat": 53.9,
+  "lng": 27.5667,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "land",
+  "aliases": [
+    {
+      "name": "Eastern Front opening campaign",
+      "by": "Historiographic shorthand"
+    }
+  ],
+  "sides": [
+    {
+      "name": "Soviet Union",
+      "commander": "Joseph Stalin (Stavka), Georgy Zhukov (Reserve Front, then Western Front), Semyon Timoshenko (Western Direction), Kliment Voroshilov (Northwest), Semyon Budyonny (Southwest, relieved September)",
+      "strength": "About 2.9 million troops, 11,000 tanks, and 9,100 aircraft in the western military districts on the eve of invasion",
+      "casualties": "About 802,000 killed in action; around 3.3 million captured during the encirclement battles, of whom 2 million died in German captivity by spring 1942"
+    },
+    {
+      "name": "Nazi Germany, Romania, Finland, Hungary, Slovakia, Italy, and Croatia",
+      "commander": "Wilhelm Keitel (OKW), Franz Halder (OKH chief of staff), Wilhelm Ritter von Leeb (Army Group North), Fedor von Bock (Army Group Centre), Gerd von Rundstedt (Army Group South), Ion Antonescu (Romania), Carl Gustaf Mannerheim (Finland)",
+      "strength": "About 3.8 million troops in 153 divisions, 3,350 tanks, 7,200 artillery pieces, 2,770 aircraft, 600,000 horses",
+      "casualties": "About 250,000 killed; 500,000 wounded; 50,000 missing; 2,800 tanks and 2,100 aircraft lost"
+    }
+  ],
+  "victor": "Soviet Union (operationally inconclusive; German offensive halted)",
+  "summary": "The largest invasion force in history struck along a 2,900-kilometre front from the Baltic to the Black Sea before dawn on the twenty-second of June. Army Group North drove toward Leningrad, Army Group Centre split the Stalin Line at Minsk and Smolensk, Army Group South ground into Ukraine and took Kiev with 665,000 prisoners in September. The Soviet political and military leadership absorbed three catastrophic months and reconstituted thirty fresh armies behind the front. By late November Army Group Centre was within sight of the Kremlin but exhausted by frost and resistance. On the fifth of December Zhukov's counterattack rolled them back. The Wehrmacht reached its high-water mark and stopped advancing as a strategic offensive.",
+  "significance": "Barbarossa opened the largest, costliest, and most ideologically extreme campaign in human history. It produced the systematic murder of Soviet Jews in the rear areas by Einsatzgruppen, the death by starvation and exposure of two million Soviet prisoners of war within nine months, and a five-year industrial siege that consumed nearly four out of every five German divisions destroyed in the war. The campaign's failure determined that the Axis could not win the war it had started, and the demographic, political, and territorial consequences of the Eastern Front shaped the second half of the twentieth century.",
+  "wikipediaTitle": "Operation Barbarossa"
+}

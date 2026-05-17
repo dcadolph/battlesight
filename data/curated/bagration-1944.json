@@ -1,0 +1,35 @@
+{
+  "id": "bagration-1944",
+  "name": "Operation Bagration",
+  "year": 1944,
+  "date": "22 June – 19 August 1944",
+  "lat": 53.9,
+  "lng": 27.5667,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "land",
+  "aliases": [
+    {
+      "name": "Belorussian Strategic Offensive Operation",
+      "by": "Soviet General Staff designation"
+    }
+  ],
+  "sides": [
+    {
+      "name": "Soviet Union (and Polish 1st Army)",
+      "commander": "Georgy Zhukov and Aleksandr Vasilevsky (Stavka representatives), Ivan Bagramyan (1st Baltic Front), Ivan Chernyakhovsky (3rd Belorussian), Georgy Zakharov (2nd Belorussian), Konstantin Rokossovsky (1st Belorussian)",
+      "strength": "About 1.7 million troops, 4,000 tanks and self-propelled guns, 24,000 guns and mortars, 6,300 aircraft",
+      "casualties": "About 178,000 killed and missing, 587,000 wounded; 2,957 tanks lost"
+    },
+    {
+      "name": "Nazi Germany",
+      "commander": "Ernst Busch (Army Group Centre, relieved 28 June), Walter Model (Army Group Centre from 28 June), Georg-Hans Reinhardt (3rd Panzer Army), Kurt von Tippelskirch (4th Army)",
+      "strength": "About 800,000 troops in Army Group Centre, with around 550 tanks and 600 aircraft available",
+      "casualties": "About 400,000 to 500,000 killed, wounded, missing, and captured; twenty-eight of thirty-four divisions destroyed; 57,000 captured marched through Moscow in July"
+    }
+  ],
+  "victor": "Soviet Union",
+  "summary": "Stavka launched Bagration on the third anniversary of Barbarossa, masking the schwerpunkt with deception that drew German reserves to Ukraine. The four Soviet fronts struck on a 700-kilometre frontage in Belorussia in a coordinated breakthrough that ruptured Army Group Centre within forty-eight hours. Vitebsk, Mogilev, Bobruisk, and Minsk fell in a fortnight, each surrounded with whole German corps inside. Soviet armour reached the Vistula in eight weeks and the gates of Warsaw on the first of August. Twenty-eight of Army Group Centre's thirty-four divisions ceased to exist as fighting formations. The Wehrmacht's strategic situation in the East never recovered.",
+  "significance": "Bagration destroyed more German divisions than any other single offensive of the war and dwarfed the Western Allied landings in Normandy that opened sixteen days earlier in scale and material consequence. The operation was the technical zenith of Soviet operational art, anchored by maskirovka, deep operations, and combined-arms cooperation on a scale the Red Army had been building toward since 1942. It cleared Belorussia and most of the Baltic states, put Soviet armour within striking distance of Berlin, and made the autumn collapse of German allies in Romania, Bulgaria, and Finland inevitable.",
+  "wikipediaTitle": "Operation Bagration"
+}

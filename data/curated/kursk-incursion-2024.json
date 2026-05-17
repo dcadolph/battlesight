@@ -1,0 +1,29 @@
+{
+  "id": "kursk-incursion-2024",
+  "name": "Ukrainian Kursk Oblast Incursion",
+  "year": 2024,
+  "date": "6 August 2024 – ongoing through 2025",
+  "lat": 51.328,
+  "lng": 35.292,
+  "era": "modern",
+  "war": "Russo-Ukrainian War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Oleksandr Syrskyi (commander-in-chief), Mykhailo Drapatyi (Land Forces from late 2024), brigade commanders of the 22nd, 41st, 47th, 80th, 82nd, and 92nd brigades among others",
+      "strength": "Around 10,000 troops in the opening incursion, scaled to several brigades and supporting units through the autumn",
+      "casualties": "Thousands killed and wounded across the operation. Specific figures not officially disclosed"
+    },
+    {
+      "name": "Russian Federation, supplemented by Democratic People's Republic of Korea contingents from late 2024",
+      "commander": "Aleksey Dyumin (presidential aide and sector lead), Yevgeny Nikiforov (Northern Group), DPRK general staff observer mission",
+      "strength": "Around 11,000 North Korean troops deployed from October 2024 alongside Russian conscripts, motor rifle brigades, and Akhmat Chechen units",
+      "casualties": "Several thousand killed and wounded including significant DPRK casualties acknowledged by South Korean intelligence"
+    }
+  ],
+  "victor": "Inconclusive (Russian counter-attacks rolled back most Ukrainian gains by spring 2025)",
+  "summary": "Ukrainian armoured columns crossed the international border into Russia's Kursk Oblast at dawn on the sixth of August 2024 in the largest foreign incursion into Russian territory since 1941. The advance took the border town of Sudzha and the Kursk gas-transit metering station within days. The Kremlin declared a federal emergency and evacuated tens of thousands of civilians. Russian forces fell back to defensible lines around Lgov and Korenevo while Kyiv consolidated the salient through August and September. Russia deployed roughly 11,000 troops from the Democratic People's Republic of Korea into the sector from October. Russian counter-attacks supported by glide bombs and saturation drone strikes rolled Ukrainian positions back through the winter, retaking Sudzha in March 2025. Ukrainian forces retained limited positions in the border area through the spring.",
+  "significance": "The Kursk Oblast incursion was the first cross-border ground offensive by a foreign army into the Russian Federation since the German invasion of 1941. It punctured the Kremlin's narrative that the war was a defensive special military operation, embarrassed the Russian command in front of a domestic audience, and forced Russia to redeploy units from Donbas in the autumn of 2024. The arrival of DPRK troops on a European battlefield was the first sustained Korean expeditionary deployment outside the Korean peninsula since the Korean War and reshaped the strategic geometry of north-east Asia. The salience of the operation in 2024 American election season and the Trump administration's subsequent approach to a negotiated settlement is still being argued by analysts.",
+  "wikipediaTitle": "Battle of Kursk (2024)"
+}

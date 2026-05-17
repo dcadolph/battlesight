@@ -1,0 +1,29 @@
+{
+  "id": "fort-sumter-1861",
+  "name": "Battle of Fort Sumter",
+  "year": 1861,
+  "date": "12 – 13 April 1861",
+  "lat": 32.7711,
+  "lng": -79.927,
+  "era": "industrial",
+  "war": "American Civil War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "United States (Union)",
+      "commander": "Major Robert Anderson (1st U.S. Artillery)",
+      "strength": "About 85 officers and enlisted, plus 43 civilian workmen",
+      "casualties": "None killed in action; one man killed and three wounded by an accidental cannon burst during the surrender salute"
+    },
+    {
+      "name": "Confederate States of America",
+      "commander": "Brigadier General P. G. T. Beauregard (Department of South Carolina)",
+      "strength": "About 500 troops manning 19 batteries with around 43 guns and mortars across Charleston Harbor",
+      "casualties": "None killed in the bombardment"
+    }
+  ],
+  "victor": "Confederate States of America",
+  "summary": "Beauregard's batteries opened fire on Fort Sumter at 04:30 on the morning of the twelfth of April, walking shells across the harbor wall for thirty-four hours. Major Anderson's outnumbered Federal garrison had short rations, no relief, and one third of the casemate guns disabled by the end of the second day. After negotiations with former senator Louis Wigfall on the fort wall on the afternoon of the thirteenth, Anderson surrendered without a single soldier killed in action. He marched out the next day to a salute of fifty guns, during which an accidental cartridge explosion killed Private Daniel Hough, the only fatality of the engagement and the first death of the American Civil War.",
+  "significance": "Fort Sumter was the opening shot of a war that killed more Americans than every foreign war combined and ended chattel slavery in the United States. Lincoln's call for seventy-five thousand volunteers in response to the surrender drove four additional slave states (Virginia, North Carolina, Tennessee, Arkansas) out of the Union, doubled the Confederacy's white population, and gave the rebellion the capital, the Army of Northern Virginia's recruiting base, and Richmond. The siege of the same fort in 1863 became one of the longest in modern history. The symbolism of the place ran through the entire war.",
+  "wikipediaTitle": "Battle of Fort Sumter"
+}

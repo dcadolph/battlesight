@@ -36,7 +36,10 @@ interface WarCount {
   parent?: string;
   rolledCount: number;
   rolledCasualties: number;
+  countries?: string[];
 }
+
+type WarSort = 'casualties' | 'battles' | 'alpha' | 'chrono' | 'country';
 
 interface BattleGroup {
   battles: Battle[];
@@ -64,7 +67,7 @@ function groupConcurrentBattles(battles: Battle[]): BattleGroup[] {
 export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onPlayReplay, onCloseReplay, initialWar }: WarPlaybackProps) {
   const [wars, setWars] = useState<WarCount[]>([]);
   const [warSearch, setWarSearch] = useState('');
-  const [warSort, setWarSort] = useState<'casualties' | 'battles' | 'alpha' | 'chrono'>('casualties');
+  const [warSort, setWarSort] = useState<WarSort>('casualties');
   const [selectedWar, setSelectedWar] = useState(initialWar || '');
   const [battles, setBattles] = useState<Battle[]>([]);
   const [groups, setGroups] = useState<BattleGroup[]>([]);
@@ -249,7 +252,66 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     return 0;
   };
 
-  const tree = (() => {
+  // A row in the war list is either a war (clickable) or a country header
+  // (groups several wars). Country headers only appear under the "By Country"
+  // sort and are not selectable.
+  type Row =
+    | { kind: 'country'; name: string; warCount: number; casualties: number; depth: 0 }
+    | (WarCount & { kind: 'war'; depth: 0 | 1 });
+
+  const tree: Row[] = (() => {
+    if (warSort === 'country') {
+      // Build country buckets. Each war is filed under every country it had
+      // a recognized belligerent in, so a multi-belligerent war like World
+      // War II appears under United States, Germany, Russia, etc. Children
+      // (theaters and campaigns) inherit their parent's country set when the
+      // child itself has none; otherwise they file under their own.
+      const parents = new Map(wars.filter((w) => !w.parent).map((w) => [w.name, w]));
+      const byCountry = new Map<string, WarCount[]>();
+      for (const w of wars) {
+        let countries = w.countries && w.countries.length ? w.countries : undefined;
+        if (!countries && w.parent) {
+          const parent = parents.get(w.parent);
+          countries = parent?.countries;
+        }
+        if (!countries || countries.length === 0) continue;
+        for (const c of countries) {
+          const list = byCountry.get(c) ?? [];
+          list.push(w);
+          byCountry.set(c, list);
+        }
+      }
+      const countryNames = [...byCountry.keys()].sort((a, b) =>
+        a.localeCompare(b),
+      );
+      const flat: Row[] = [];
+      for (const country of countryNames) {
+        const warsInCountry = (byCountry.get(country) ?? [])
+          .slice()
+          .sort((a, b) => {
+            const ca = a.rolledCasualties || a.casualties;
+            const cb = b.rolledCasualties || b.casualties;
+            if (ca !== cb) return cb - ca;
+            return a.name.localeCompare(b.name);
+          });
+        const totalCas = warsInCountry.reduce(
+          (s, w) => s + (w.rolledCasualties || w.casualties),
+          0,
+        );
+        flat.push({
+          kind: 'country',
+          name: country,
+          warCount: warsInCountry.length,
+          casualties: totalCas,
+          depth: 0,
+        });
+        for (const w of warsInCountry) {
+          flat.push({ ...w, kind: 'war', depth: 1 });
+        }
+      }
+      return flat;
+    }
+
     const parents = wars.filter((w) => !w.parent);
     const childrenByParent = new Map<string, WarCount[]>();
     for (const w of wars) {
@@ -265,13 +327,13 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     });
     // Sort children alphabetically inside each parent group to keep the tree
     // stable regardless of which sort the user picked at the top level.
-    const flat: Array<WarCount & { depth: number }> = [];
+    const flat: Row[] = [];
     for (const p of topSorted) {
-      flat.push({ ...p, depth: 0 });
+      flat.push({ ...p, kind: 'war', depth: 0 });
       const kids = (childrenByParent.get(p.name) ?? []).slice().sort((a, b) =>
         a.name.localeCompare(b.name),
       );
-      for (const k of kids) flat.push({ ...k, depth: 1 });
+      for (const k of kids) flat.push({ ...k, kind: 'war', depth: 1 });
     }
     return flat;
   })();
@@ -284,13 +346,39 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   const bloodFiltered =
     warSort === 'casualties'
       ? tree.filter((w) => {
+          if (w.kind !== 'war') return true;
           const v = w.depth === 0 ? w.rolledCasualties || w.casualties : w.casualties;
           return v > 0;
         })
       : tree;
-  const filteredWars = warSearch
-    ? bloodFiltered.filter((w) => w.name.toLowerCase().includes(warSearch.toLowerCase()))
-    : bloodFiltered;
+  // Search applies to war names only. When in country mode, also keep a
+  // country header if any of its wars survive the filter.
+  const filteredWars = (() => {
+    if (!warSearch) return bloodFiltered;
+    const q = warSearch.toLowerCase();
+    if (warSort !== 'country') {
+      return bloodFiltered.filter(
+        (w) => w.kind === 'war' && w.name.toLowerCase().includes(q),
+      );
+    }
+    const out: Row[] = [];
+    let pendingHeader: Row | null = null;
+    let headerEmitted = false;
+    for (const row of bloodFiltered) {
+      if (row.kind === 'country') {
+        pendingHeader = row;
+        headerEmitted = false;
+        continue;
+      }
+      if (!row.name.toLowerCase().includes(q)) continue;
+      if (pendingHeader && !headerEmitted) {
+        out.push(pendingHeader);
+        headerEmitted = true;
+      }
+      out.push(row);
+    }
+    return out;
+  })();
 
   const currentGroup = groups[groupIndex];
   const currentBattle = currentGroup?.battles[subIndex];
@@ -319,8 +407,14 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
               placeholder="Find a war..."
               className="w-full h-9 px-3 mb-2 bg-[#1e2030] border border-slate-600/40 rounded-lg text-[13px] text-white placeholder-slate-500 focus:outline-none focus:border-blue-400/60"
             />
-            <div className="flex gap-1 mb-2">
-              {([['casualties', 'Bloodiest'], ['battles', 'Most Battles'], ['chrono', 'Oldest First'], ['alpha', 'A-Z']] as const).map(([key, label]) => (
+            <div className="flex gap-1 mb-2 flex-wrap">
+              {([
+                ['casualties', 'Bloodiest'],
+                ['battles', 'Most Battles'],
+                ['chrono', 'Oldest First'],
+                ['alpha', 'A-Z'],
+                ['country', 'By Country'],
+              ] as const).map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setWarSort(key)}
@@ -333,25 +427,43 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
               ))}
             </div>
             <div className="space-y-0.5 pr-1">
-              {filteredWars.map((w) => {
+              {filteredWars.map((row) => {
+                if (row.kind === 'country') {
+                  return (
+                    <div
+                      key={`country:${row.name}`}
+                      className="px-3 pt-3 pb-1.5 flex items-baseline justify-between text-[11px] uppercase tracking-[0.18em] font-semibold text-blue-300/80 border-b border-slate-800/60 first:border-t-0"
+                    >
+                      <span>{row.name}</span>
+                      <span className="text-[10px] text-slate-600 tabular-nums normal-case tracking-normal font-normal">
+                        {row.warCount} {row.warCount === 1 ? 'war' : 'wars'}
+                      </span>
+                    </div>
+                  );
+                }
+                const w = row;
                 const showVal =
                   warSort === 'casualties'
                     ? (w.depth === 0 ? w.rolledCasualties : w.casualties)
                     : warSort === 'chrono'
                     ? w.minYear
+                    : warSort === 'country'
+                    ? (w.rolledCasualties || w.casualties)
                     : (w.depth === 0 ? w.rolledCount : w.count);
                 return (
                   <button
-                    key={w.name}
+                    key={`war:${w.name}:${w.depth}`}
                     onClick={() => setSelectedWar(w.name)}
                     className={`w-full text-left rounded-lg text-[13px] hover:bg-slate-800/50 hover:text-white transition-colors flex justify-between items-center ${
-                      w.depth === 0
+                      warSort === 'country'
+                        ? 'px-3 py-1.5 text-slate-300'
+                        : w.depth === 0
                         ? 'px-3 py-2 text-slate-300 font-medium'
                         : 'pl-7 pr-3 py-1.5 text-slate-400 text-[12px]'
                     }`}
                   >
                     <span className="truncate pr-2">
-                      {w.depth > 0 && (
+                      {warSort !== 'country' && w.depth > 0 && (
                         <span className="text-slate-700 mr-1" aria-hidden="true">└</span>
                       )}
                       {w.name}
@@ -361,6 +473,10 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                         ? `${(showVal / 1000).toFixed(0)}k`
                         : warSort === 'chrono'
                         ? formatYear(showVal)
+                        : warSort === 'country' && showVal > 0
+                        ? `${(showVal / 1000).toFixed(0)}k`
+                        : warSort === 'country'
+                        ? `${w.rolledCount || w.count}`
                         : `${showVal}`}
                     </span>
                   </button>
@@ -378,24 +494,16 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
 
   return (
     <div className="fixed top-0 right-0 h-full w-[420px] max-w-[92vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 flex flex-col">
-      {/* Header gives the user two unambiguous exits in fixed positions:
-          a back arrow on the left that returns to the war picker (one
-          level up), and the standard X close on the right that exits the
-          mode entirely back to the globe. Previously the back affordance
-          was a near-invisible slate-500 text link buried inside the
-          scroll area, which made the level-up gesture undiscoverable. */}
+      {/* Header carries a single, unambiguous exit (top-right X) that
+          drops the user straight back to the globe. The previous version
+          also had a back arrow that returned to the war picker, but the
+          picker is itself a mid-flow state, not a destination, so giving
+          it a top-bar slot suggested it was the default exit when the
+          user actually wanted out. To pick a different war the user re-
+          opens war mode from the main page; the "pick another war" link
+          below is preserved for in-flow swapping. */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-slate-800/60 flex-shrink-0 gap-2">
-        <button
-          onClick={() => { setSelectedWar(''); setPlaying(false); setDetail(null); }}
-          className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-slate-900/55 backdrop-blur border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-800/80 hover:border-slate-500/80 transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-300/70"
-          aria-label="Back to wars list"
-          title="Back to wars list"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none" aria-hidden="true">
-            <path d="M9 2 L4 7 L9 12" />
-          </svg>
-        </button>
-        <h3 className="text-xs font-semibold text-white tracking-wide uppercase truncate flex-1 min-w-0 text-center">
+        <h3 className="text-xs font-semibold text-white tracking-wide uppercase truncate flex-1 min-w-0 text-left">
           {selectedWar}
         </h3>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -428,7 +536,10 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
             )}
 
             {detail?.summary && (
-              <p className="text-[12px] text-slate-400 leading-relaxed line-clamp-3">{detail.summary}</p>
+              <p className="text-[12px] text-slate-300 leading-relaxed">{detail.summary}</p>
+            )}
+            {detail?.significance && (
+              <p className="text-[12px] text-slate-400 leading-relaxed italic mt-2">{detail.significance}</p>
             )}
           </div>
         )}
@@ -539,14 +650,17 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         summary={warSummary}
         sides={cinematicSides}
         onDismiss={() => {
-          // Skipping the overture: keep cinematic mode on and start
-          // playing immediately. Dismissing the aftermath: stop the
-          // cinematic stage and stay on the war detail panel.
+          // Overture dismiss is a "skip the title card and start watching"
+          // gesture, not an exit. Aftermath dismiss is an "I'm done with
+          // this war" gesture: route the user all the way back to the
+          // globe rather than dumping them on the war detail panel, which
+          // is itself a mid-flow state not a destination.
           if (cinematicStage === 'overture') {
             setCinematicStage('playing');
             setPlaying(true);
           } else if (cinematicStage === 'aftermath') {
             setCinematicStage('none');
+            onClose();
           }
         }}
         onBegin={() => {

@@ -1,0 +1,29 @@
+{
+  "id": "leyte-gulf-1944",
+  "name": "Battle of Leyte Gulf",
+  "year": 1944,
+  "date": "23 – 26 October 1944",
+  "lat": 10.5,
+  "lng": 125.5,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "naval",
+  "sides": [
+    {
+      "name": "United States and Australia",
+      "commander": "William Halsey (3rd Fleet), Thomas C. Kinkaid (7th Fleet), Marc Mitscher (Task Force 38), Clifton Sprague (Taffy 3), John C. Collins (Australian cruisers)",
+      "strength": "Around 300 ships including 8 fleet carriers, 8 light carriers, 18 escort carriers, 12 battleships, 24 cruisers, 141 destroyers; about 1,500 aircraft",
+      "casualties": "Around 3,000 killed; 1 light carrier, 2 escort carriers, 2 destroyers, 1 destroyer escort lost; 200 aircraft lost"
+    },
+    {
+      "name": "Empire of Japan",
+      "commander": "Soemu Toyoda (Combined Fleet), Takeo Kurita (Centre Force), Jisaburō Ozawa (Northern Force decoy), Shōji Nishimura (Southern Force), Kiyohide Shima (Second Striking Force)",
+      "strength": "About 67 ships including 1 fleet carrier, 3 light carriers, 7 battleships, 20 cruisers, 35 destroyers; first organised kamikaze unit",
+      "casualties": "About 12,500 killed; 4 carriers, 3 battleships including the Musashi, 10 cruisers, 11 destroyers lost"
+    }
+  ],
+  "victor": "United States",
+  "summary": "Japan staked the Imperial Navy on Operation Shō-Gō, a coordinated three-pronged thrust meant to destroy the American invasion fleet at Leyte. Ozawa's carriers sailed north as decoys. Kurita's battleship force, including the super-battleships Yamato and Musashi, came east through the Sibuyan Sea. Halsey took the bait and chased Ozawa, leaving the San Bernardino Strait uncovered. Kurita emerged at dawn on the twenty-fifth and ran into Taffy 3, a screen of escort carriers and destroyers off Samar that fought back with a fury that masked its weakness. Kurita broke off and withdrew. Nishimura's force was annihilated overnight in the last battleship line action in history at Surigao Strait. The first organised kamikaze unit appeared on the morning of the twenty-fifth and sank the escort carrier St. Lo.",
+  "significance": "Leyte Gulf was the largest naval battle in history by total tonnage engaged and by area. It destroyed the Imperial Japanese Navy as a fighting force, took every remaining capital ship out of the equation for the rest of the war, and severed Japan's connection to the oil and rubber of the East Indies. Surigao Strait was the last engagement between battleship lines ever fought. The introduction of the kamikaze on the twenty-fifth of October opened the suicide weapon era that ran through Okinawa and into the planning of the Allied invasion of Japan.",
+  "wikipediaTitle": "Battle of Leyte Gulf"
+}

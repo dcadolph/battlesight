@@ -1,0 +1,32 @@
+{
+  "id": "snake-island-2022",
+  "name": "Battle of Snake Island",
+  "year": 2022,
+  "date": "24 February – 30 June 2022",
+  "lat": 45.2575,
+  "lng": 30.2014,
+  "era": "modern",
+  "war": "Russo-Ukrainian War",
+  "battleType": "amphibious",
+  "aliases": [
+    { "name": "Zmiinyi Island", "by": "Ukrainian transliteration" }
+  ],
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Roman Hrybov (initial garrison), Oleksiy Neizhpapa (Naval Forces commander), operators from the Special Operations Forces and 73rd Maritime Centre",
+      "strength": "13 border guards in the opening day garrison; subsequent rotations and naval drone operators in the following months",
+      "casualties": "Initial garrison captured; later strikes inflicted casualties on Russian rotating forces"
+    },
+    {
+      "name": "Russian Federation",
+      "commander": "Igor Osipov (Black Sea Fleet, dismissed in March), Viktor Sokolov (Black Sea Fleet from August), commander of the cruiser Moskva (Anton Kuprin, killed in action)",
+      "strength": "Black Sea Fleet surface group at the start, rotating garrisons of marines and air-defence assets through the spring",
+      "casualties": "Cruiser Moskva sunk 14 April after Neptune anti-ship missile strike, with the loss of around 60 sailors and the flagship of the Black Sea Fleet. Hundreds of additional casualties through repeated airstrikes and partisan operations on the island"
+    }
+  ],
+  "victor": "Ukraine (Russian withdrawal 30 June 2022)",
+  "summary": "The Russian flagship Moskva and the patrol ship Vasily Bykov approached the thirteen-man Ukrainian Border Guard garrison on Snake Island at dawn on the twenty-fourth of February 2022 and demanded surrender. The senior sergeant's reply, delivered over open VHF, became the most-cited line of the early war. The garrison was captured. The Moskva was sunk on the fourteenth of April by two Ukrainian-built Neptune anti-ship missiles fired from the Odesa coast, the first sinking of an enemy capital ship by Ukraine in the conflict and the largest Russian warship lost since the Second World War. Ukrainian Bayraktar drones, HIMARS strikes, and successive special operations raids drove Russian forces off the island on the thirtieth of June.",
+  "significance": "Snake Island became the symbolic engagement of the opening months of the 2022 invasion. The sinking of the Moskva broke the Russian Black Sea Fleet's tactical freedom of action, lifted the threat of a Russian amphibious landing west of the Crimea, and unblocked the Odesa grain corridor that the United Nations was able to negotiate with Turkey and Russia in July. The episode validated Ukrainian shore-to-ship and unmanned-surface-vessel doctrine and previewed the campaign that has since driven the bulk of the Black Sea Fleet from Sevastopol to Novorossiysk.",
+  "wikipediaTitle": "Attack on Snake Island"
+}

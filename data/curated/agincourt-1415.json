@@ -1,0 +1,29 @@
+{
+  "id": "agincourt-1415",
+  "name": "Battle of Agincourt",
+  "year": 1415,
+  "date": "25 October 1415",
+  "lat": 50.4625,
+  "lng": 2.1419,
+  "era": "medieval",
+  "war": "Hundred Years' War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Kingdom of England",
+      "commander": "Henry V, Edward of Norwich (vanguard), Thomas Erpingham (archers), Humphrey of Gloucester",
+      "strength": "About 6,000 to 9,000 troops, around five sixths of them longbowmen",
+      "casualties": "Around 400 killed, including Edward of Norwich and several knights"
+    },
+    {
+      "name": "Kingdom of France",
+      "commander": "Charles d'Albret (constable), Jean le Maingre (marshal Boucicaut), Charles I d'Orléans, Jean I, Duke of Bourbon",
+      "strength": "About 14,000 to 25,000 troops, dominated by men-at-arms on foot and horse",
+      "casualties": "Around 6,000 killed including the constable, three dukes, and most of the high French nobility; 1,500 captured"
+    }
+  ],
+  "victor": "Kingdom of England",
+  "summary": "Henry V's exhausted army, three weeks marching from Harfleur to Calais, found the French host blocking the road at a narrow defile between the woods of Agincourt and Tramecourt. The English drew up with their longbowmen on the wings behind hammered stakes. The French men-at-arms attacked across a freshly ploughed and rain-sodden field, were funnelled into a killing ground by the woodlines, and were shot down by the arrowstorm before they could close. Henry ordered the killing of most of the noble prisoners during a second French rush, fearing a renewed attack from the rear. By evening the cream of the French aristocracy lay dead in the mud.",
+  "significance": "Agincourt entered English national myth at Shakespeare's hand and remains the most cited demonstration of the late-medieval English longbow against armoured cavalry. The political consequence was the Treaty of Troyes (1420), which made Henry V heir to the French throne and produced the dual monarchy under his infant son. The military lesson, the value of dismounted men-at-arms supported by missile troops on chosen ground, foreshadowed the end of mounted feudal warfare in western Europe.",
+  "wikipediaTitle": "Battle of Agincourt"
+}

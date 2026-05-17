@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -498,6 +499,7 @@ func rollupWarHierarchy(counts []WarCount) []WarCount {
 	// Roll up children into parents. One level of nesting is sufficient for
 	// the patterns warParent classifies today; if hierarchy ever goes deeper
 	// this loop would need transitive closure.
+	parentCountryTally := map[string]map[string]int{}
 	for i := range counts {
 		c := &counts[i]
 		if c.Parent == "" {
@@ -511,6 +513,44 @@ func rollupWarHierarchy(counts []WarCount) []WarCount {
 		p.RolledCasualties += c.Casualties
 		if c.MinYear != 0 && (p.MinYear == 0 || c.MinYear < p.MinYear) {
 			p.MinYear = c.MinYear
+		}
+		tally := parentCountryTally[p.Name]
+		if tally == nil {
+			tally = map[string]int{}
+			parentCountryTally[p.Name] = tally
+		}
+		for _, country := range p.Countries {
+			tally[country]++
+		}
+		for _, country := range c.Countries {
+			tally[country]++
+		}
+	}
+	for parentName, tally := range parentCountryTally {
+		p := byName[parentName]
+		if p == nil {
+			continue
+		}
+		type entry struct {
+			Name  string
+			Count int
+		}
+		ordered := make([]entry, 0, len(tally))
+		for name, count := range tally {
+			ordered = append(ordered, entry{name, count})
+		}
+		sort.Slice(ordered, func(i, j int) bool {
+			if ordered[i].Count != ordered[j].Count {
+				return ordered[i].Count > ordered[j].Count
+			}
+			return ordered[i].Name < ordered[j].Name
+		})
+		if len(ordered) > 6 {
+			ordered = ordered[:6]
+		}
+		p.Countries = p.Countries[:0]
+		for _, e := range ordered {
+			p.Countries = append(p.Countries, e.Name)
 		}
 	}
 
@@ -560,6 +600,50 @@ func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
 		casRows.Scan(&war, &cas)
 		if idx, ok := warIdx[war]; ok {
 			counts[idx].Casualties += ParseCasualtyNumber(cas)
+		}
+	}
+
+	// Populate the country list for each war from the sides table. Group sides
+	// per (war, battle) so each battle contributes its own set of countries
+	// without one prolific battle skewing the ranking.
+	sideRows, err := s.db.QueryContext(ctx,
+		`SELECT b.war, bs.battle_id, bs.name FROM battle_sides bs
+		 JOIN battles b ON b.id = bs.battle_id
+		 WHERE b.war != '' AND `+trustedWarSQL("b.war"))
+	if err == nil {
+		defer sideRows.Close()
+		type key struct {
+			war      string
+			battleID string
+		}
+		groups := map[string][]string{}
+		seenKey := map[key]map[string]bool{}
+		for sideRows.Next() {
+			var war, battleID, name string
+			if err := sideRows.Scan(&war, &battleID, &name); err != nil {
+				continue
+			}
+			k := key{war, battleID}
+			if seenKey[k] == nil {
+				seenKey[k] = map[string]bool{}
+			}
+			if seenKey[k][name] {
+				continue
+			}
+			seenKey[k][name] = true
+			gk := war + "\x00" + battleID
+			groups[gk] = append(groups[gk], name)
+		}
+		byWar := map[string][][]string{}
+		for gk, sides := range groups {
+			parts := strings.SplitN(gk, "\x00", 2)
+			war := parts[0]
+			byWar[war] = append(byWar[war], sides)
+		}
+		for i := range counts {
+			if sides, ok := byWar[counts[i].Name]; ok {
+				counts[i].Countries = rankCountriesForWar(sides, 6)
+			}
 		}
 	}
 

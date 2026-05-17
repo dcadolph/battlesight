@@ -193,7 +193,7 @@ export default function WarCinematicOverlay({
 
         {stage === 'overture' && sides.length > 0 && (
           <div
-            className="mt-7 mx-auto max-w-[60ch]"
+            className="mt-7 mx-auto max-w-[60ch] text-left"
             style={{ animation: 'wc-rise 850ms 760ms cubic-bezier(.2,.7,.25,1) both' }}
           >
             <div className="text-[10px] uppercase tracking-[0.36em] text-slate-500 mb-2">
@@ -210,7 +210,7 @@ export default function WarCinematicOverlay({
 
         {stage === 'aftermath' && summary?.outcome && (
           <p
-            className="mt-7 mx-auto max-w-[64ch] text-[15.5px] leading-[1.65] text-slate-100/95"
+            className="mt-7 mx-auto max-w-[64ch] text-[15.5px] leading-[1.65] text-slate-100/95 text-left"
             style={{
               fontFamily: theme.titleFont,
               animation: 'wc-rise 850ms 720ms cubic-bezier(.2,.7,.25,1) both',
@@ -222,7 +222,7 @@ export default function WarCinematicOverlay({
 
         {stage === 'aftermath' && summary?.aftermath && (
           <p
-            className="mt-4 mx-auto max-w-[64ch] text-[13.5px] leading-[1.7] text-slate-300/85 italic"
+            className="mt-4 mx-auto max-w-[64ch] text-[13.5px] leading-[1.7] text-slate-300/85 italic text-left"
             style={{
               fontFamily: theme.titleFont,
               animation: 'wc-rise 900ms 980ms cubic-bezier(.2,.7,.25,1) both',

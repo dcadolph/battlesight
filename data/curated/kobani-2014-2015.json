@@ -1,0 +1,32 @@
+{
+  "id": "kobani-2014-2015",
+  "name": "Siege of Kobani",
+  "year": 2014,
+  "date": "13 September 2014 – 27 January 2015",
+  "lat": 36.8861,
+  "lng": 38.3522,
+  "era": "modern",
+  "war": "Syrian Civil War",
+  "battleType": "siege",
+  "aliases": [
+    { "name": "Battle of Ain al-Arab", "by": "Syrian government and Arabic press" }
+  ],
+  "sides": [
+    {
+      "name": "People's Protection Units (YPG) and Women's Protection Units (YPJ), with Iraqi peshmerga, Free Syrian Army units, and U.S.-led coalition air support",
+      "commander": "Mahmoud Barkhodan (YPG Kobani commander), Mayssa Abdo (\"Narin Afrin\", YPJ overall), Esmat al-Sheikh (Free Syrian Army contingent)",
+      "strength": "Around 2,000 YPG and YPJ fighters reinforced by about 200 Iraqi peshmerga from October and 50 FSA fighters",
+      "casualties": "Around 1,000 YPG and YPJ killed; small peshmerga and FSA losses"
+    },
+    {
+      "name": "Islamic State of Iraq and the Levant",
+      "commander": "Abu Khattab al-Kurdi (Kurdish IS commander, killed January 2015)",
+      "strength": "Estimated 9,000 fighters at peak, supported by captured American armour, Humvees, and artillery taken from the Iraqi army in June",
+      "casualties": "Around 4,000 killed in 134 days of fighting"
+    }
+  ],
+  "victor": "People's Protection Units (YPG) and U.S.-led coalition",
+  "summary": "Islamic State columns drove on the Kurdish enclave of Kobani in mid-September 2014, taking 300 surrounding villages within two weeks and pinning the YPG inside the town itself. President Erdoğan publicly told reporters in early October that Kobani was about to fall, while Turkish armour parked on the border watched without intervening. The U.S. military, after intense lobbying by Kurdish diplomats and a public airlift of supplies to the defenders, began near-continuous airstrikes on Islamic State positions inside and around the town. Iraqi peshmerga arrived through Turkey on the thirty-first of October with heavy weapons. Block by block, often under coalition aircraft loitering above the same streets, the YPG and YPJ rolled the Islamic State back. The town was declared cleared on the twenty-seventh of January 2015.",
+  "significance": "Kobani was the first city Islamic State tried to capture from a regular force and was defeated. It made the YPG and YPJ the dominant Kurdish actor in Syria and started the partnership with U.S. Central Command that became the Syrian Democratic Forces. The footage of Kurdish women fighters and the round-the-clock American air campaign reshaped the political image of the Syrian war in Western media, lifted the AKP government's diplomatic cost of standing aside, and prefigured the urban-clearance pattern that ran through Raqqa, Manbij, and Mosul over the following three years.",
+  "wikipediaTitle": "Siege of Kobanî"
+}

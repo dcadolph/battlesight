@@ -1,0 +1,35 @@
+{
+  "id": "constantinople-1453",
+  "name": "Fall of Constantinople",
+  "year": 1453,
+  "date": "6 April – 29 May 1453",
+  "lat": 41.0186,
+  "lng": 28.9736,
+  "era": "medieval",
+  "war": "Byzantine–Ottoman Wars",
+  "battleType": "siege",
+  "aliases": [
+    {
+      "name": "Conquest of Constantinople",
+      "by": "Ottoman historiography"
+    }
+  ],
+  "sides": [
+    {
+      "name": "Byzantine Empire (and Genoese and Venetian volunteers)",
+      "commander": "Emperor Constantine XI Palaiologos, Giovanni Giustiniani Longo (Genoese commander of the land walls), Loukas Notaras (megas doux)",
+      "strength": "About 7,000 defenders, of whom around 2,000 were foreign volunteers, holding fourteen miles of walls",
+      "casualties": "About 4,000 killed including the emperor; the survivors enslaved or ransomed"
+    },
+    {
+      "name": "Ottoman Empire",
+      "commander": "Sultan Mehmed II, Çandarlı Halil Pasha (grand vizier), Zaganos Pasha, Orban (Hungarian cannon-maker)",
+      "strength": "About 80,000 troops including the Janissary corps, supported by 70 large cannon and a fleet of 126 ships",
+      "casualties": "About 30,000 killed during the seven-week siege; final assault losses estimated at 8,000"
+    }
+  ],
+  "victor": "Ottoman Empire",
+  "summary": "Mehmed brought up the largest siege train in history to that point, including the 8.2-metre bronze bombard cast by Orban, and battered the land walls for fifty-three days. When the Byzantines blocked the Golden Horn with a chain boom, Ottoman engineers hauled seventy galleys overland on greased rollers from the Bosphorus to the harbor in a single night and outflanked the seawall. The final assault came before dawn on the twenty-ninth of May after a final mass in Hagia Sophia. Constantine XI led the last counter-charge and fell at the Saint Romanus Gate beside his Genoese commander. The empire that had begun under Augustus ended that morning.",
+  "significance": "The fall of Constantinople closed the Roman political line that ran 1,480 years from the foundation of the city by Septimius Severus and set the Ottoman Empire as the dominant Mediterranean power for the next 250 years. The Greek scholars who fled west carried the manuscripts of Aristotle, Plato, and Homer into Italian humanism. The closure of the overland trade routes accelerated Iberian search for sea routes around Africa and west across the Atlantic. The conventional periodisation of the Middle Ages ends at this date.",
+  "wikipediaTitle": "Fall of Constantinople"
+}

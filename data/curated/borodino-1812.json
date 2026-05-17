@@ -1,0 +1,29 @@
+{
+  "id": "borodino-1812",
+  "name": "Battle of Borodino",
+  "year": 1812,
+  "date": "7 September 1812",
+  "lat": 55.5181,
+  "lng": 35.8244,
+  "era": "napoleonic",
+  "war": "French invasion of Russia",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Russian Empire",
+      "commander": "Mikhail Kutuzov (commander-in-chief), Pyotr Bagration (2nd Western Army, mortally wounded), Mikhail Barclay de Tolly (1st Western Army), Nikolai Raevsky (held the central redoubt)",
+      "strength": "About 120,000 troops and 624 guns",
+      "casualties": "About 45,000 killed and wounded including Bagration and seventeen other general officers"
+    },
+    {
+      "name": "First French Empire and its allies",
+      "commander": "Napoleon I, Joachim Murat (cavalry reserve), Eugène de Beauharnais (IV Corps), Louis-Nicolas Davout (I Corps, wounded), Michel Ney (III Corps)",
+      "strength": "About 130,000 troops and 587 guns drawn from France, Italy, Poland, Germany, and the satellite states",
+      "casualties": "About 35,000 killed and wounded including 49 generals"
+    }
+  ],
+  "victor": "Tactical French victory; strategic Russian withdrawal",
+  "summary": "Kutuzov drew his army up across the Old Smolensk road at Borodino, 120 kilometres west of Moscow, behind hastily dug earthworks anchored on the Raevsky redoubt and the Bagration flèches. Napoleon refused his marshals' request to commit the Imperial Guard and battered the Russian centre with a fifteen-hour frontal assault. The flèches changed hands seven times. Bagration was struck down leading a counter-attack. By evening Kutuzov held a thinned line behind the original position and withdrew that night in good order. A week later the Russian army marched through Moscow, leaving the city to be burned around the French army that occupied it.",
+  "significance": "Borodino was the bloodiest single day of the Napoleonic Wars, with roughly 80,000 casualties in a fifteen-hour engagement. Tactically Napoleon held the field, but strategically Russia kept her army intact, drew the Grande Armée deeper into the country, and set the stage for the catastrophic retreat from Moscow that destroyed the largest army Western Europe had ever assembled. The battle became the climactic engagement of Tolstoy's War and Peace and the centrepiece of nineteenth-century Russian national mythology around the patriotic war of 1812.",
+  "wikipediaTitle": "Battle of Borodino"
+}

@@ -1,0 +1,32 @@
+{
+  "id": "donetsk-airport-2014",
+  "name": "Battles of Donetsk Airport",
+  "year": 2014,
+  "date": "26 May 2014 – 21 January 2015",
+  "lat": 48.0167,
+  "lng": 37.7397,
+  "era": "modern",
+  "war": "Russo-Ukrainian War",
+  "battleType": "siege",
+  "aliases": [
+    { "name": "Cyborgs of Donetsk Airport", "by": "Ukrainian popular and media designation for the defenders" }
+  ],
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Yevhen Sydorenko (95th Air Assault Brigade), Andriy Reva (90th Battalion), Maksym Shapoval (Special Forces)",
+      "strength": "About 200 defenders rotating through the terminal complex at any time, drawn from the 79th, 80th, 81st, 95th Air Assault Brigades and Right Sector volunteers",
+      "casualties": "About 100 killed, 440 wounded across the 242-day defence; the new terminal destroyed"
+    },
+    {
+      "name": "Donetsk People's Republic (Russian-backed separatists) and Russian Federation",
+      "commander": "Mikhail Tolstykh (\"Givi\"), Arsen Pavlov (\"Motorola\"), Igor Bezler",
+      "strength": "Several thousand fighters rotating through the assault, with Russian regular reinforcements during the January 2015 final assault",
+      "casualties": "Several hundred killed and wounded; figures disputed"
+    }
+  ],
+  "victor": "Donetsk People's Republic (Russian-backed separatists) and Russian Federation",
+  "summary": "Ukrainian airborne and special forces held the old and new terminals of Sergey Prokofiev International Airport for 242 days against waves of separatist and Russian assault, becoming the symbolic core of Ukrainian resistance during the first year of the Donbas war. The defenders nicknamed themselves the Cyborgs because of how often they returned after wounds. The new terminal was reduced to rubble by tank fire and the underground levels were finally cleared in mid-January 2015 by Russian-led assault groups using explosives to collapse the floors onto the defenders. The fall of the airport set the conditions for the broader breakthrough that culminated at Debaltseve weeks later.",
+  "significance": "The Donetsk Airport defence shaped Ukrainian military identity and propaganda through the first eight years of the war and became the source of the Cyborg legend used to recruit volunteers in 2022. Operationally it bled Ukrainian airborne units against a strongpoint of limited strategic value because political leadership could not be seen to abandon it. The fall on the twenty-first of January 2015 was followed within days by the rout at Debaltseve that brought Ukraine to the Minsk II talks and froze the line of contact along the Donbas frontline until February 2022.",
+  "wikipediaTitle": "Second Battle of Donetsk Airport"
+}

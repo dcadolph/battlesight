@@ -1,0 +1,32 @@
+{
+  "id": "operation-serval-2013",
+  "name": "Operation Serval",
+  "year": 2013,
+  "date": "11 January – 15 July 2013",
+  "lat": 16.7666,
+  "lng": -3.0026,
+  "era": "modern",
+  "war": "Mali War",
+  "battleType": "land",
+  "aliases": [
+    { "name": "Battle of Konna", "by": "Opening engagement of the operation" }
+  ],
+  "sides": [
+    {
+      "name": "France, Mali, Chad, and the African-led International Support Mission to Mali (AFISMA)",
+      "commander": "François Hollande (president), Édouard Guillaud (chief of the defence staff), Bernard Barrera (Land Forces command), Idriss Déby (Chad), Dioncounda Traoré (Mali)",
+      "strength": "About 4,000 French troops at peak, 2,200 Chadian troops, several thousand Malian and West African troops",
+      "casualties": "9 French and around 70 Chadian troops killed; some hundreds Malian"
+    },
+    {
+      "name": "Ansar Dine, al-Qaeda in the Islamic Maghreb (AQIM), and the Movement for Oneness and Jihad in West Africa (MUJAO)",
+      "commander": "Iyad Ag Ghaly (Ansar Dine), Mokhtar Belmokhtar (AQIM splinter), Abdelhamid Abou Zeid (killed February 2013)",
+      "strength": "Estimated 1,200 to 3,000 fighters spread across the northern Mali towns of Gao, Timbuktu, Kidal, and the Ifoghas mountains",
+      "casualties": "Several hundred killed including senior AQIM emir Abou Zeid"
+    }
+  ],
+  "victor": "France, Mali, and the African-led coalition",
+  "summary": "Three jihadist movements had ruled the northern two thirds of Mali since 2012 and on the tenth of January 2013 began driving south from Konna toward the government-held centre of the country. The French Air Force struck the columns within hours. French paratroopers and armoured columns landed at Bamako and pushed north along the Niger River, taking Gao on the twenty-sixth, Timbuktu on the twenty-eighth, and Kidal on the thirtieth. From February to May Operation Panther fought the AQIM redoubt in the Adrar des Ifoghas mountains, killing Abdelhamid Abou Zeid in the process. The operation transitioned to the Sahel-wide Operation Barkhane on the first of August.",
+  "significance": "Operation Serval stopped what looked like the imminent jihadist conquest of a sovereign African capital and recovered the northern Mali towns from al-Qaeda's territorial control. Its success defined the French Sahel commitment that ran for the next nine years under Operation Barkhane, employed up to 5,000 French troops, and ended in withdrawal under the Malian junta in 2022. The campaign was the largest French solo expeditionary operation since Algeria and the founding episode in the contemporary phase of Sahelian counter-insurgency that has since extended across Burkina Faso, Niger, and the wider region.",
+  "wikipediaTitle": "Operation Serval"
+}

@@ -66,6 +66,11 @@ export const ERA_COLORS: Record<string, string> = {
   'napoleonic': '#3b82f6',
   'industrial': '#6366f1',
   'world-war-1': '#ec4899',
+  // Interwar reads as a "tarnished amber" between the two world wars,
+  // distinct from ancient's brighter #f59e0b. Without this slot the 341
+  // interwar battles fall back to the white fallback in BattleGlobe and
+  // render as bright white pillars.
+  'interwar': '#a16207',
   'world-war-2': '#f43f5e',
   'modern': '#10b981',
 };
@@ -77,6 +82,7 @@ export const ERA_LABELS: Record<string, string> = {
   'napoleonic': 'Napoleonic',
   'industrial': 'Industrial Age',
   'world-war-1': 'World War I',
+  'interwar': 'Interwar',
   'world-war-2': 'World War II',
   'modern': 'Modern',
 };

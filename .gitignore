@@ -8,5 +8,6 @@
 *.db-shm
 data/cdb90/
 data/wikidata_battles_raw.json
+data/.wikicache/
 web/node_modules/
 web/dist/

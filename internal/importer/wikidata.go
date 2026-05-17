@@ -215,7 +215,7 @@ func fetchSPARQLQuery(ctx context.Context, query string) ([]sparqlBinding, error
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", "BattleTrace/1.0 (https://github.com/dcadolph/battletrace)")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := wikiHTTPDo(req)
 	if err != nil {
 		return nil, fmt.Errorf("sparql request: %w", err)
 	}

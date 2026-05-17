@@ -21,9 +21,23 @@ func main() {
 	wikidata := flag.Bool("wikidata", false, "import battles from Wikidata SPARQL")
 	enrich := flag.Bool("enrich", false, "fetch Wikipedia summaries for battles missing them")
 	infobox := flag.Bool("infobox", false, "fetch Wikipedia infobox data (sides, commanders, casualties)")
+	significance := flag.Bool("significance", false, "fetch Wikipedia aftermath/legacy sections for battles missing significance")
+	references := flag.Bool("references", false, "extract citation URLs from Wikipedia articles into battle_references")
+	warsEnrich := flag.Bool("wars", false, "enrich data/wars.json from Wikipedia for every war with at least 3 battles in the catalog")
+	warsPath := flag.String("wars-file", "data/wars.json", "path to wars.json output for -wars enrichment")
 	all := flag.Bool("all", false, "run all import and enrichment steps")
 	validate := flag.Bool("validate", false, "validate curated JSON + curated/ dir without writing to the DB; exits non-zero on any error")
+	// network defaults to true. When set false, every Wikipedia/Wikidata
+	// fetcher in the importer package short-circuits with ErrNetworkDisabled
+	// and only cached responses serve. This is the panic switch for users
+	// who want to guarantee no third-party HTTP, e.g. after a paid-API scare.
+	network := flag.Bool("network", true, "allow Wikipedia/Wikidata HTTP (default true). Set -network=false to refuse all network calls and serve only from the disk cache.")
 	flag.Parse()
+
+	importer.SetNetworkAllowed(*network)
+	if !*network {
+		log.Println("network disabled: all Wikipedia/Wikidata fetchers will serve only from data/.wikicache/")
+	}
 
 	// Validate-only path: short-circuit before opening the DB so a curator
 	// can sanity-check a file without side effects. Returns a non-zero exit
@@ -42,13 +56,16 @@ func main() {
 		*wikidata = true
 		*enrich = true
 		*infobox = true
+		*significance = true
+		*references = true
+		*warsEnrich = true
 		if *jsonPath == "" {
 			*jsonPath = "data/battles.json"
 		}
 	}
 
-	if *jsonPath == "" && !*wikidata && !*enrich && !*infobox {
-		log.Fatal("at least one action required: -json, -wikidata, -enrich, -infobox, -validate, or -all")
+	if *jsonPath == "" && !*wikidata && !*enrich && !*infobox && !*significance && !*references && !*warsEnrich {
+		log.Fatal("at least one action required: -json, -wikidata, -enrich, -infobox, -significance, -references, -wars, -validate, or -all")
 	}
 
 	database, err := db.Open(*dbPath)
@@ -99,6 +116,36 @@ func main() {
 			log.Printf("coordinate enrichment failed: %v (continuing)", err)
 		} else {
 			log.Printf("enriched %d battles with coordinates", coordCount)
+		}
+	}
+
+	if *significance {
+		log.Println("enriching significance from Wikipedia aftermath/legacy sections...")
+		count, err := importer.EnrichSignificance(ctx, database)
+		if err != nil {
+			log.Printf("significance enrichment failed: %v (continuing)", err)
+		} else {
+			log.Printf("enriched %d battles with significance", count)
+		}
+	}
+
+	if *references {
+		log.Println("extracting citation URLs into battle_references...")
+		count, err := importer.EnrichReferences(ctx, database)
+		if err != nil {
+			log.Printf("reference enrichment failed: %v (continuing)", err)
+		} else {
+			log.Printf("added %d references across battles", count)
+		}
+	}
+
+	if *warsEnrich {
+		log.Println("enriching wars.json narratives from Wikipedia...")
+		count, err := importer.EnrichWars(ctx, database, *warsPath)
+		if err != nil {
+			log.Printf("war enrichment failed: %v (continuing)", err)
+		} else {
+			log.Printf("enriched %d war narratives in %s", count, *warsPath)
 		}
 	}
 }

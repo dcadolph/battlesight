@@ -120,16 +120,33 @@ func EnrichFromWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 	return enriched, nil
 }
 
-// fetchExtracts fetches plain-text introductions for up to 20 Wikipedia articles.
+// fetchExtracts fetches plain-text introductions for up to 20 Wikipedia
+// articles. Each title is checked against the disk cache first; only the
+// uncached subset hits the network, and freshly fetched extracts are written
+// back so the next run for the same title costs nothing.
 func fetchExtracts(ctx context.Context, titles []string) (map[string]string, error) {
+	extracts := make(map[string]string, len(titles))
+	var missing []string
+	for _, t := range titles {
+		if v, ok := wikiCacheGet("extract", t); ok {
+			normal := strings.ReplaceAll(t, "_", " ")
+			extracts[normal] = v
+			continue
+		}
+		missing = append(missing, t)
+	}
+	if len(missing) == 0 {
+		return extracts, nil
+	}
+
 	params := url.Values{
-		"action":        {"query"},
-		"prop":          {"extracts"},
-		"exintro":       {"true"},
-		"explaintext":   {"true"},
+		"action":          {"query"},
+		"prop":            {"extracts"},
+		"exintro":         {"true"},
+		"explaintext":     {"true"},
 		"exsectionformat": {"plain"},
-		"titles":        {strings.Join(titles, "|")},
-		"format":        {"json"},
+		"titles":          {strings.Join(missing, "|")},
+		"format":          {"json"},
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, wikipediaAPI+"?"+params.Encode(), nil)
@@ -138,7 +155,7 @@ func fetchExtracts(ctx context.Context, titles []string) (map[string]string, err
 	}
 	req.Header.Set("User-Agent", "BattleTrace/1.0 (https://github.com/dcadolph/battletrace)")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := wikiHTTPDo(req)
 	if err != nil {
 		return nil, fmt.Errorf("wikipedia request: %w", err)
 	}
@@ -153,10 +170,12 @@ func fetchExtracts(ctx context.Context, titles []string) (map[string]string, err
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
-	extracts := make(map[string]string, len(result.Query.Pages))
 	for _, page := range result.Query.Pages {
 		if page.Extract != "" {
 			extracts[page.Title] = page.Extract
+			// Cache under the underscore-form key so the next batch hit
+			// reads from disk regardless of which form the caller passes.
+			wikiCacheSet("extract", strings.ReplaceAll(page.Title, " ", "_"), page.Extract)
 		}
 	}
 

@@ -41,7 +41,8 @@ export const ERA_RANGES: Array<[string, number, number]> = [
   ['napoleonic', 1700, 1820],
   ['industrial', 1820, 1914],
   ['world-war-1', 1914, 1919],
-  ['world-war-2', 1919, 1946],
+  ['interwar', 1919, 1939],
+  ['world-war-2', 1939, 1946],
   ['modern', 1946, 2025],
 ];
 
@@ -99,6 +100,14 @@ const THEMES: Record<string, EraTheme> = {
     titleFont: SANS,
     mood: 'The Great War',
     era: 'world-war-1',
+  },
+  'interwar': {
+    atmosphere: '#d4a574',
+    vignette: 'rgba(30, 22, 10, 0.7)',
+    accent: '#a16207',
+    titleFont: SANS,
+    mood: 'Interwar',
+    era: 'interwar',
   },
   'world-war-2': {
     atmosphere: '#fb7185',

@@ -23,6 +23,7 @@ const ERA_RANGES: Record<string, [number, number]> = {
   'napoleonic': [1700, 1820],
   'industrial': [1820, 1914],
   'world-war-1': [1914, 1918],
+  'interwar': [1919, 1938],
   'world-war-2': [1939, 1945],
   'modern': [1945, 2025],
 };
@@ -36,6 +37,7 @@ const PILL_LABEL: Record<string, string> = {
   'napoleonic': 'Napoleonic',
   'industrial': 'Industrial',
   'world-war-1': 'WWI',
+  'interwar': 'Interwar',
   'world-war-2': 'WWII',
   'modern': 'Modern',
 };

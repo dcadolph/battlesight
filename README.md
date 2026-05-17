@@ -6,19 +6,21 @@ tactical replay map.
 
 ## What's here
 
-- **Globe view** — every battle with known coordinates rendered as a colored
-  marker on a 3D globe, scaled by casualty magnitude when known. Click for
-  details. Era colors, search, year-range timeline, war stories playback.
-- **Phased replays** — hand-crafted tactical reenactments for landmark
+- **Globe view.** Every battle with known coordinates rendered as a
+  colored marker on a 3D globe, scaled by casualty magnitude when known.
+  Click for details. Era colors, search, year-range timeline, war stories
+  playback.
+- **Phased replays.** Hand-crafted tactical reenactments for landmark
   battles, with narrated phases, animated unit movements, and terrain.
-- **Three-tier trust contract** — every battle is classified as
+- **Three-tier trust contract.** Every battle is classified as
   **Reconstructed** (hand-built phase replay), **Documented** (curated or
   Wikipedia-enriched with full sides and a clean war attribution), or
-  **Indexed** (sparse Wikidata pointer — treat as a deep link to Wikipedia).
-  The tier badge is visible in the panel, the globe tooltip, and the filter.
-- **Bulk dataset** — ~12,000 battle records harvested from Wikidata and
-  enriched from Wikipedia infoboxes. Filtered by tier so you always know
-  what kind of record you are looking at.
+  **Indexed** (sparse Wikidata pointer; treat as a deep link to
+  Wikipedia). The tier badge is visible in the panel, the globe tooltip,
+  and the filter.
+- **Bulk dataset.** Around 12,000 battle records harvested from Wikidata
+  and enriched from Wikipedia infoboxes. Filtered by tier so you always
+  know what kind of record you are looking at.
 
 ## Replays included
 
@@ -44,10 +46,10 @@ labels, terrain features, and time markers. Phase data lives in
 Requirements: Go 1.26+, Node 20+.
 
 ```bash
-# 1. Backend on :8080 — loads phases.json + seeds curated battles
+# 1. Backend on :8080 (loads phases.json and seeds curated battles).
 go run ./cmd/battletrace
 
-# 2. Frontend on :5173 — proxies /api to the Go server
+# 2. Frontend on :5173 (proxies /api to the Go server).
 cd web && npm install && npm run dev
 ```
 
@@ -150,10 +152,12 @@ The Share button in the battle panel copies a deep link to the clipboard.
 
 ## Keyboard
 
-- `/` — focus the search box
-- `Esc` — close panel / dismiss intro / exit replay
-- `Space` — play/pause replay
-- `← →` — previous/next replay phase
+| Key       | Action                                       |
+|-----------|----------------------------------------------|
+| `/`       | Focus the search box.                        |
+| `Esc`     | Close panel, dismiss intro, exit replay.     |
+| `Space`   | Play or pause the replay.                    |
+| `← →`     | Previous or next replay phase.               |
 
 ## Tests
 
@@ -162,5 +166,5 @@ go test ./...
 ```
 
 Parser tests cover the dates, casualties, Wikipedia infobox cleanup, and
-victor inference paths — the historically brittle parts of the import
-pipeline. They are pure functions, no DB or network required.
+victor inference paths. These are the historically brittle parts of the
+import pipeline. They run as pure functions, no DB or network required.

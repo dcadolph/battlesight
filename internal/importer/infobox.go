@@ -198,14 +198,30 @@ func EnrichInfoboxes(ctx context.Context, db *sql.DB) (int, error) {
 	return enriched, nil
 }
 
-// fetchWikitext gets raw wikitext for up to 50 pages via the Wikipedia Action API.
+// fetchWikitext gets raw wikitext for up to 50 pages via the Wikipedia
+// Action API. Cached titles bypass the network entirely; only the uncached
+// subset is fetched, and successful responses are written back to the cache
+// so the next run for the same title is free.
 func fetchWikitext(ctx context.Context, titles []string) (map[string]string, error) {
+	out := make(map[string]string, len(titles))
+	var missing []string
+	for _, t := range titles {
+		if v, ok := wikiCacheGet("wikitext", t); ok {
+			out[strings.ReplaceAll(t, "_", " ")] = v
+			continue
+		}
+		missing = append(missing, t)
+	}
+	if len(missing) == 0 {
+		return out, nil
+	}
+
 	params := url.Values{
 		"action":  {"query"},
 		"prop":    {"revisions"},
 		"rvprop":  {"content"},
 		"rvslots": {"main"},
-		"titles":  {strings.Join(titles, "|")},
+		"titles":  {strings.Join(missing, "|")},
 		"format":  {"json"},
 	}
 
@@ -215,7 +231,7 @@ func fetchWikitext(ctx context.Context, titles []string) (map[string]string, err
 	}
 	req.Header.Set("User-Agent", "BattleTrace/1.0 (https://github.com/dcadolph/battletrace)")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := wikiHTTPDo(req)
 	if err != nil {
 		return nil, err
 	}
@@ -230,10 +246,11 @@ func fetchWikitext(ctx context.Context, titles []string) (map[string]string, err
 		return nil, err
 	}
 
-	out := make(map[string]string)
 	for _, page := range result.Query.Pages {
 		if len(page.Revisions) > 0 {
-			out[page.Title] = page.Revisions[0].Slots.Main.Content
+			body := page.Revisions[0].Slots.Main.Content
+			out[page.Title] = body
+			wikiCacheSet("wikitext", strings.ReplaceAll(page.Title, " ", "_"), body)
 		}
 	}
 	return out, nil
@@ -267,10 +284,12 @@ func parseInfobox(wikitext string) parsedInfobox {
 	}
 }
 
-// cleanWikitext strips wiki markup, HTML tags, and templates from a field
-// value and decodes the common named HTML entities that appear in raw
-// Wikipedia infobox text.
-func cleanWikitext(s string) string {
+// stripWikitextMarkup removes wiki templates, refs, HTML tags, flag
+// templates, bold/italic markers and named entities from raw wikitext.
+// Returns the cleaned string without applying any length cap; callers that
+// need a short field value (e.g. infobox combatant) call cleanWikitext
+// instead, which adds the 300-char cap on top.
+func stripWikitextMarkup(s string) string {
 	s = refTag.ReplaceAllString(s, "")
 	s = brTag.ReplaceAllString(s, ", ")
 	s = flagTemplate.ReplaceAllString(s, "$1")
@@ -288,8 +307,18 @@ func cleanWikitext(s string) string {
 	s = strings.ReplaceAll(s, "&quot;", "\"")
 	s = strings.ReplaceAll(s, "&#39;", "'")
 	s = strings.ReplaceAll(s, "&apos;", "'")
-	s = strings.ReplaceAll(s, "  ", " ")
-	s = strings.TrimSpace(s)
+	for strings.Contains(s, "  ") {
+		s = strings.ReplaceAll(s, "  ", " ")
+	}
+	return strings.TrimSpace(s)
+}
+
+// cleanWikitext strips wiki markup like stripWikitextMarkup, then applies
+// the 300-char cap and the "no leading pipe" rejection used by infobox
+// field values. Long-form callers (significance, summary) should use
+// stripWikitextMarkup and apply their own cap.
+func cleanWikitext(s string) string {
+	s = stripWikitextMarkup(s)
 	// Reject template-fragment leftovers like "| image       =" or "|date=".
 	// These reach us when the parser sees a multi-line value that crossed
 	// into the next infobox field. Storing them as user-facing text causes

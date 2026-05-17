@@ -7,6 +7,7 @@ import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import type { FeatureCollection, Feature, Geometry, Position } from 'geojson';
 import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../data/cities';
+import { formatNumberWithCommas } from '../lib/format';
 
 interface BattleGlobeProps {
   battles: Battle[];
@@ -71,10 +72,10 @@ function totalCasualties(b: Battle): number {
   return total;
 }
 
-// formatNumber renders an integer with thousands separators (en-US style).
-function formatNumber(n: number): string {
-  return n.toLocaleString('en-US');
-}
+// formatNumber is a thin alias for the shared comma-formatter, kept so the
+// existing call sites in this file (tooltip strings) read unchanged while
+// the actual implementation lives in one place.
+const formatNumber = formatNumberWithCommas;
 
 // escapeHTML protects user-supplied text against the dangerouslyInnerHTML-style
 // tooltip rendering path used by react-globe.gl.
@@ -110,6 +111,35 @@ function darkenHex(hex: string, factor: number): string {
   return `#${pad(r)}${pad(g)}${pad(b)}`;
 }
 
+// midpoint returns the geographic midpoint between two points, handling
+// antimeridian wrap so a Pearl Harbor → Doolittle Raid pair midpoints in the
+// Pacific rather than over Africa. Latitude is a simple average; longitude
+// chooses the shorter great-arc path.
+function midpoint(a: { lat: number; lng: number }, b: { lat: number; lng: number }): { lat: number; lng: number } {
+  let dlng = b.lng - a.lng;
+  if (dlng > 180) dlng -= 360;
+  if (dlng < -180) dlng += 360;
+  let midLng = a.lng + dlng / 2;
+  if (midLng > 180) midLng -= 360;
+  if (midLng < -180) midLng += 360;
+  return { lat: (a.lat + b.lat) / 2, lng: midLng };
+}
+
+// arcDistance is a cheap surrogate for great-circle distance in degrees,
+// using haversine on a unit sphere. Returns 0–180. Good enough to scale
+// camera altitude on the war-playback flythrough without pulling in a real
+// geo dependency.
+function arcDistance(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const phi1 = toRad(a.lat);
+  const phi2 = toRad(b.lat);
+  const dphi = toRad(b.lat - a.lat);
+  const dlambda = toRad(b.lng - a.lng);
+  const h = Math.sin(dphi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dlambda / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  return (c * 180) / Math.PI;
+}
+
 // battleMagnitude estimates the scale of a battle from its sides' casualties.
 // Returns 0 when unknown. Uses log scale so a million-casualty battle isn't
 // a million times bigger than a 200-casualty one.
@@ -131,14 +161,18 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
   const [countries, setCountries] = useState<Feature<Geometry>[]>([]);
 
   // visibleBattles filters to the active year window and drops anything
-  // without usable geography. (0, 0) is the importer's "no coords" sentinel
-  // and is treated as missing; a real battle would never land on Null Island.
-  // Out-of-range coords (typos, bad imports) are silently excluded so they
-  // do not render off the back of the globe or shove the camera into space.
+  // without usable geography. An exact 0 on either axis is treated as the
+  // importer's "no coords" sentinel rather than a real location. Real
+  // battles essentially never land on Null Island, the Prime Meridian
+  // exactly, or the equator exactly; permitting them put the Courland
+  // Pocket in the North Sea and the Battle of the Atlantic on the equator.
+  // Better to hide a battle than to lie about where it happened.
+  // Out-of-range coords (typos, bad imports) are silently excluded too so
+  // they do not render off the back of the globe or shove the camera.
   const visibleBattles = useMemo(
     () => battles.filter((b) => {
       if (b.year < yearRange[0] || b.year > yearRange[1]) return false;
-      if (b.lat === 0 && b.lng === 0) return false;
+      if (b.lat === 0 || b.lng === 0) return false;
       if (!Number.isFinite(b.lat) || !Number.isFinite(b.lng)) return false;
       if (b.lat < -90 || b.lat > 90) return false;
       if (b.lng < -180 || b.lng > 180) return false;
@@ -501,7 +535,11 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       onPointClick={handleBattleClick}
       pointsMerge={false}
       pointsTransitionDuration={0}
-      pointResolution={6}
+      // pointResolution drives the segment count of the extruded point
+      // cylinders. 6 reads as hexagonal prisms which feels chunky at globe
+      // scale; 20 reads as smooth pillars without measurable GPU cost at
+      // this point count.
+      pointResolution={20}
       ringsData={rings}
       ringLat="lat"
       ringLng="lng"

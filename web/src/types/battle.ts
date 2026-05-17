@@ -5,6 +5,15 @@ export interface Side {
   casualties: string;
 }
 
+export interface Alias {
+  // name is the alternative name itself (e.g. "Battle of Sharpsburg").
+  name: string;
+  // by is the belligerent or tradition that used this name (e.g.
+  // "Confederate"). Optional. When omitted the alias renders as just an
+  // alternative name without an attributed perspective.
+  by?: string;
+}
+
 export interface Reference {
   type: string;
   title: string;
@@ -17,6 +26,7 @@ export interface Reference {
 export interface Battle {
   id: string;
   name: string;
+  aliases?: Alias[];
   year: number;
   date: string;
   lat: number;

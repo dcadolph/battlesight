@@ -82,6 +82,14 @@ func TestCanonWarKey(t *testing.T) {
 	}{
 		{Inputs: []string{"World War II", "world war II", "The World War II"}, Want: "world war ii"},
 		{Inputs: []string{"Russo-Japanese War", "Russo–Japanese War"}, Want: "russo-japanese war"},
+		// Pure WW aliases must collapse onto the canonical roman form.
+		{Inputs: []string{"World War II", "Second World War", "the Second World War"}, Want: "world war ii"},
+		{Inputs: []string{"World War I", "First World War", "Great War", "The Great War"}, Want: "world war i"},
+		// Parenthetical theaters and British "theatre" spelling collapse.
+		{Inputs: []string{"Eastern Front of World War II", "Eastern Front (World War II)"}, Want: "eastern front of world war ii"},
+		{Inputs: []string{"Pacific Theater of World War II", "Pacific Theatre of World War II"}, Want: "pacific theater of world war ii"},
+		// "Of the Second World War" rewrites end-to-end so theater names align.
+		{Inputs: []string{"Battle of the Mediterranean of World War II", "Battle of the Mediterranean of the Second World War"}, Want: "battle of the mediterranean of world war ii"},
 	}
 	for _, test := range tests {
 		keys := make(map[string]bool)

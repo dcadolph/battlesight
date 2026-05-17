@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS } from '../types/battle';
 import WarSummaryCard from './WarSummaryCard';
+import WarCinematicOverlay from './WarCinematicOverlay';
 import { usePauseOnHidden } from '../hooks/usePauseOnHidden';
+import { formatYear } from '../lib/format';
 
 interface WarPlaybackProps {
   onBattleFocus: (battle: Battle) => void;
@@ -19,6 +21,10 @@ interface WarPlaybackProps {
   // when ready to advance to the next battle.
   onPlayReplay?: (battle: Battle) => void;
   onCloseReplay?: () => void;
+  // initialWar optionally pre-selects a war on mount so an external action
+  // (search-bar war click, deep link, etc.) can open WarPlayback already
+  // pointing at the war the user named.
+  initialWar?: string;
 }
 
 interface WarCount {
@@ -37,9 +43,6 @@ interface BattleGroup {
   concurrent: boolean;
 }
 
-function formatYear(year: number): string {
-  return year < 0 ? `${Math.abs(year)} BC` : `${year}`;
-}
 
 function groupConcurrentBattles(battles: Battle[]): BattleGroup[] {
   if (battles.length === 0) return [];
@@ -57,11 +60,11 @@ function groupConcurrentBattles(battles: Battle[]): BattleGroup[] {
   return groups;
 }
 
-export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onPlayReplay, onCloseReplay }: WarPlaybackProps) {
+export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onPlayReplay, onCloseReplay, initialWar }: WarPlaybackProps) {
   const [wars, setWars] = useState<WarCount[]>([]);
   const [warSearch, setWarSearch] = useState('');
   const [warSort, setWarSort] = useState<'casualties' | 'battles' | 'alpha' | 'chrono'>('casualties');
-  const [selectedWar, setSelectedWar] = useState('');
+  const [selectedWar, setSelectedWar] = useState(initialWar || '');
   const [battles, setBattles] = useState<Battle[]>([]);
   const [groups, setGroups] = useState<BattleGroup[]>([]);
   const [groupIndex, setGroupIndex] = useState(0);
@@ -70,6 +73,15 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   const [cinematic, setCinematic] = useState(false);
   const [speed, setSpeed] = useState(4000);
   const [detail, setDetail] = useState<Battle | null>(null);
+  // cinematicStage drives the full-screen war overlay: an opening title
+  // card before the first battle plays, the playthrough itself, then a
+  // closing aftermath card. The existing per-battle playback loop runs
+  // unchanged under the 'playing' stage; the overlay is purely additive.
+  const [cinematicStage, setCinematicStage] = useState<'none' | 'overture' | 'playing' | 'aftermath'>('none');
+  // warSummary mirrors the data the WarSummaryCard fetches so the
+  // cinematic overlay can show outcome and aftermath text on the
+  // closing card without a second round trip.
+  const [warSummary, setWarSummary] = useState<{ outcome?: string; aftermath?: string; notable?: string[]; yearStart: number; yearEnd: number; battleCount: number; totalCasualties: number; finalVictor?: string } | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
@@ -112,6 +124,39 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // motivation as the replay version: nobody wants to come back and find
   // their war scrubbed silently to the last battle.
   usePauseOnHidden(useCallback(() => setPlaying(false), []));
+
+  // Fetch the war summary for the cinematic overlay. Same endpoint the
+  // WarSummaryCard uses; keeping a local copy lets the overlay render its
+  // closing aftermath card without waiting on a child re-render.
+  useEffect(() => {
+    if (!selectedWar) { setWarSummary(null); return; }
+    let cancelled = false;
+    fetch(`/api/wars/summary?name=${encodeURIComponent(selectedWar)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s) => { if (!cancelled && s) setWarSummary(s); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [selectedWar]);
+
+  // Deduplicated belligerent labels surfaced on the cinematic opening
+  // card. Pulled from each battle's sides[].name set rather than from
+  // war metadata because the war record does not carry sides.
+  const cinematicSides = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const b of battles) {
+      for (const s of b.sides || []) {
+        const name = (s.name || '').trim();
+        if (!name) continue;
+        const key = name.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(name);
+        if (out.length >= 6) return out;
+      }
+    }
+    return out;
+  }, [battles]);
 
   const focusBattle = useCallback((battle: Battle) => {
     onBattleFocus(battle);
@@ -177,6 +222,13 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         goTo(groupIndex + 1, 0);
       } else {
         setPlaying(false);
+        // End of the campaign. If the user entered this run via the
+        // cinematic overture, land on the aftermath card so the war has
+        // a proper closing beat. Falls through silently for a non-
+        // cinematic run; the WarSummaryCard already emphasizes itself.
+        if (cinematicStage === 'playing') {
+          setCinematicStage('aftermath');
+        }
       }
     }, dwellMs);
     return () => clearTimeout(timerRef.current);
@@ -223,9 +275,21 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     return flat;
   })();
 
+  // Under the Bloodiest sort, drop rows whose rolled casualty total is zero.
+  // A "0k" badge under a sort named Bloodiest reads as "this war was bloodless"
+  // when it really means "we have no casualty figures for the battles in our
+  // index". Hiding those rows keeps the ranking truthful. Other sorts keep
+  // every row so a user looking by name or chronology still finds them.
+  const bloodFiltered =
+    warSort === 'casualties'
+      ? tree.filter((w) => {
+          const v = w.depth === 0 ? w.rolledCasualties || w.casualties : w.casualties;
+          return v > 0;
+        })
+      : tree;
   const filteredWars = warSearch
-    ? tree.filter((w) => w.name.toLowerCase().includes(warSearch.toLowerCase()))
-    : tree;
+    ? bloodFiltered.filter((w) => w.name.toLowerCase().includes(warSearch.toLowerCase()))
+    : bloodFiltered;
 
   const currentGroup = groups[groupIndex];
   const currentBattle = currentGroup?.battles[subIndex];
@@ -371,6 +435,32 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           </div>
         )}
 
+        {/* The "Trace this war" button is the cinematic entry point. Lifts
+            the user out of the per-battle stepper into a full-screen
+            overtüre, then plays the campaign end-to-end and lands on an
+            aftermath card. Reserved for wars with at least two battles
+            so it does not pretend a single-battle war has a campaign
+            arc to it. */}
+        {battles.length >= 2 && (
+          <button
+            onClick={() => {
+              setCinematic(true);
+              setCinematicStage('overture');
+              setGroupIndex(0);
+              setSubIndex(0);
+              setPlaying(false);
+            }}
+            className="w-full mb-3 group relative overflow-hidden rounded-lg border border-blue-500/40 bg-gradient-to-r from-blue-500/15 to-blue-500/5 hover:from-blue-500/25 hover:to-blue-500/10 transition-colors px-3 py-2.5 text-left"
+            title="Begin a cinematic trace of the whole war: opening title, every battle in sequence, closing aftermath."
+          >
+            <div className="text-[10px] uppercase tracking-[0.22em] text-blue-300/90">Trace the campaign</div>
+            <div className="text-[12.5px] text-white mt-0.5">
+              ▶ Cinematic, end to end
+              <span className="text-slate-400/80 ml-2 text-[11px]">{battles.length} battles</span>
+            </div>
+          </button>
+        )}
+
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1.5">
             <button onClick={() => goTo(groupIndex - 1)} disabled={groupIndex === 0}
@@ -442,6 +532,30 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           }}
         />
       </div>
+      {/* Cinematic full-screen overlay. Mounted via portal-style fixed
+          positioning rather than inside the side panel so the title
+          card owns the whole viewport, not just a 420px column. */}
+      <WarCinematicOverlay
+        stage={cinematicStage === 'overture' ? 'overture' : cinematicStage === 'aftermath' ? 'aftermath' : 'none'}
+        warName={selectedWar}
+        summary={warSummary}
+        sides={cinematicSides}
+        onDismiss={() => {
+          // Skipping the overture: keep cinematic mode on and start
+          // playing immediately. Dismissing the aftermath: stop the
+          // cinematic stage and stay on the war detail panel.
+          if (cinematicStage === 'overture') {
+            setCinematicStage('playing');
+            setPlaying(true);
+          } else if (cinematicStage === 'aftermath') {
+            setCinematicStage('none');
+          }
+        }}
+        onBegin={() => {
+          setCinematicStage('playing');
+          setPlaying(true);
+        }}
+      />
     </div>
   );
 }

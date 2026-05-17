@@ -1,0 +1,29 @@
+{
+  "id": "aleppo-2012-2016",
+  "name": "Battle of Aleppo",
+  "year": 2012,
+  "date": "19 July 2012 – 22 December 2016",
+  "lat": 36.2021,
+  "lng": 37.1343,
+  "era": "modern",
+  "war": "Syrian Civil War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Syrian government and allies",
+      "commander": "Suheil al-Hassan, Qasem Soleimani",
+      "strength": "Syrian Arab Army, Russian Aerospace Forces, Hezbollah, Iranian advisors; tens of thousands",
+      "casualties": "Several thousand killed across more than four years"
+    },
+    {
+      "name": "Syrian opposition and Islamist factions",
+      "commander": "Various; Free Syrian Army and Jaish al-Fatah commands",
+      "strength": "Roughly 8,000 fighters in eastern Aleppo at the final pocket",
+      "casualties": "Several thousand killed; survivors evacuated to Idlib under Russian-Turkish deal"
+    }
+  ],
+  "victor": "Syrian government and allies",
+  "summary": "The economic capital of Syria split in half in 2012 and stayed split for four and a half years. The east, held by anti-government factions, ran on smuggling and field hospitals. The west, government-held, ran on regime services and an air bridge. The siege closed in 2016 once Russian air power and Iranian-led ground forces severed the final supply corridor from Turkey.",
+  "significance": "Aleppo was the turning point of the Syrian Civil War. After it fell the opposition could no longer hold a major city, the contest narrowed to Idlib and the rural northwest, and the Assad government's survival was no longer in doubt. The price was the urban destruction of one of the oldest continuously inhabited cities in the world.",
+  "wikipediaTitle": "Battle of Aleppo (2012–2016)"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "hostomel-airport-2022",
+  "name": "Battle of Antonov Airport",
+  "aliases": [
+    { "name": "Battle of Hostomel Airport" },
+    { "name": "Battle of Hostomel" }
+  ],
+  "year": 2022,
+  "date": "24 February – 1 April 2022",
+  "lat": 50.6033,
+  "lng": 30.1939,
+  "era": "modern",
+  "war": "Russian invasion of Ukraine",
+  "battleType": "air",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Mykola Oleshchuk, Oleksandr Syrskyi",
+      "strength": "Air Assault Forces, 4th Rapid Reaction Brigade, National Guard",
+      "casualties": "Reported light"
+    },
+    {
+      "name": "Russia",
+      "commander": "Andrei Serdyukov",
+      "strength": "VDV airborne, helicopter assault force of ~200–300",
+      "casualties": "Multiple Ka-52 and Mi-8 helicopters lost, several hundred paratroopers killed or captured"
+    }
+  ],
+  "victor": "Ukraine",
+  "summary": "On the first morning of the Russian invasion, a Russian airborne force lifted from Belarus and dropped onto Antonov Airport at Hostomel, a twenty-mile drive from central Kyiv. The plan was to seize the runway, fly in heavy reinforcements within hours, and crack Kyiv before the city could organize a defence. Ukrainian Air Assault troops, National Guard units, and territorial defence volunteers fought the paratroopers across the apron and the surrounding woods for the rest of the day and into the next.",
+  "significance": "By nightfall the runway was cratered and unusable. The expected Russian air bridge to Kyiv never opened. The fall of the capital was supposed to take seventy-two hours; instead Russian armoured columns stalled on the highways while Ukraine bought the time it needed to mobilise. Hostomel is the moment the original Russian war plan died on the tarmac.",
+  "wikipediaTitle": "Battle of Antonov Airport"
+}

@@ -1,17 +1,15 @@
 import type { Battle } from '../types/battle';
 import { themeForEra } from '../theme/era';
+import { formatYear } from '../lib/format';
 
 interface BattleTitleCardProps {
   battle: Battle;
 }
 
-// formatYearLabel mirrors the same labeling used elsewhere in the app so a
-// 490 BC battle reads "490 BC" not "-490".
-function formatYearLabel(year: number): string {
-  if (year === 0) return '';
-  if (year < 0) return `${Math.abs(year)} BC`;
-  return `${year}`;
-}
+// formatYearLabel keeps the function name the file already used while
+// routing through the shared formatter. Returns "" for year 0 so the
+// card's caller can suppress the year line on unknown-year entries.
+const formatYearLabel = (year: number) => (year === 0 ? '' : formatYear(year));
 
 // BattleTitleCard is a fixed full-bleed overlay that flashes a film-style
 // title card whenever a new battle is selected. The parent mounts it with a

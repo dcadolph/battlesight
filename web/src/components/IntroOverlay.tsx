@@ -1,14 +1,11 @@
 import type { Battle } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
+import { formatYear } from '../lib/format';
 
 interface IntroOverlayProps {
   featured: Battle;
   onDismiss: () => void;
   onStart: () => void;
-}
-
-function formatYear(year: number): string {
-  return year < 0 ? `${Math.abs(year)} BC` : `${year}`;
 }
 
 export default function IntroOverlay({ featured, onDismiss, onStart }: IntroOverlayProps) {

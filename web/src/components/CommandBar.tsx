@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
+import { formatYear } from '../lib/format';
 
 interface NameCount { name: string; count: number; }
 interface StatsData {
@@ -28,10 +29,14 @@ interface CommandBarProps {
   // soundOn / onToggleSound expose the ambient audio toggle in the chrome.
   soundOn: boolean;
   onToggleSound: () => void;
-}
-
-function formatYear(year: number): string {
-  return year < 0 ? `${Math.abs(year)} BC` : `${year}`;
+  // onResetView is the "home" action fired when the user clicks the
+  // BattleTrace wordmark. Clears every transient selection so the app
+  // returns to the bare landing globe.
+  onResetView: () => void;
+  // onWarSelect opens the war playback panel preselected on the named
+  // war. Used when a search match resolves to a war rather than to a
+  // single battle, so the user lands inside the right curated context.
+  onWarSelect: (warName: string) => void;
 }
 
 export default function CommandBar({
@@ -46,9 +51,12 @@ export default function CommandBar({
   historyActive,
   soundOn,
   onToggleSound,
+  onResetView,
+  onWarSelect,
 }: CommandBarProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Battle[]>([]);
+  const [warResults, setWarResults] = useState<NameCount[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [panel, setPanel] = useState<'none' | 'filters'>('none');
@@ -61,12 +69,31 @@ export default function CommandBar({
   }, []);
 
   const search = useCallback((q: string) => {
-    if (q.length < 2) { setResults([]); setSearchOpen(false); return; }
+    if (q.length < 2) {
+      setResults([]);
+      setWarResults([]);
+      setSearchOpen(false);
+      return;
+    }
+    // Battle results from the FTS index.
     fetch(`/api/battles/search?q=${encodeURIComponent(q)}&limit=8`)
       .then((r) => r.json())
       .then((d) => { setResults(d.battles || []); setSearchOpen(true); setActiveIndex(-1); })
       .catch(() => setResults([]));
-  }, []);
+    // War results filtered client-side from the stats endpoint's war list.
+    // No need for a dedicated war search endpoint when the full set fits in
+    // memory and a substring match covers the typical "I'm hunting for a
+    // war by name" use case (Vietnam, Mongol, Hundred Years, etc.).
+    if (stats && stats.wars) {
+      const needle = q.toLowerCase();
+      const matches = stats.wars
+        .filter((w) => w.name.toLowerCase().includes(needle))
+        .slice(0, 5);
+      setWarResults(matches);
+    } else {
+      setWarResults([]);
+    }
+  }, [stats]);
 
   const handleChange = (v: string) => {
     setQuery(v);
@@ -86,8 +113,17 @@ export default function CommandBar({
   const handleClear = () => {
     setQuery('');
     setResults([]);
+    setWarResults([]);
     setSearchOpen(false);
     onIsolate(null);
+  };
+
+  const handleWarSelect = (warName: string) => {
+    setQuery('');
+    setResults([]);
+    setWarResults([]);
+    setSearchOpen(false);
+    onWarSelect(warName);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -119,9 +155,15 @@ export default function CommandBar({
           panel's chrome lane permanently. */}
       <div className="fixed top-4 left-5 z-40 select-none">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold text-white tracking-tight leading-none">
+          <button
+            type="button"
+            onClick={onResetView}
+            className="text-xl font-bold text-white tracking-tight leading-none hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 rounded-sm"
+            title="Back to the main globe"
+            aria-label="Reset view: back to the main globe"
+          >
             Battle<span className="text-blue-400">Trace</span>
-          </h1>
+          </button>
           <span className="text-[11px] text-slate-600 tabular-nums leading-none pt-[2px]">
             {battleCount.toLocaleString()} battles
             {stats && stats.replayCount > 0 && (
@@ -156,9 +198,9 @@ export default function CommandBar({
             value={query}
             onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            onFocus={() => results.length > 0 && setSearchOpen(true)}
+            onFocus={() => (results.length > 0 || warResults.length > 0) && setSearchOpen(true)}
             onBlur={() => setTimeout(() => setSearchOpen(false), 150)}
-            placeholder="Search battles..."
+            placeholder="Search battles or wars..."
             className="w-full h-10 px-4 bg-[#1e2030] border border-slate-600/50 rounded-xl text-[13px] text-white placeholder-slate-500 focus:outline-none focus:border-blue-400/70 focus:bg-[#232538] shadow-lg transition-all"
           />
           {query && (
@@ -166,89 +208,154 @@ export default function CommandBar({
           )}
         </div>
 
-        {/* Search results dropdown */}
-        {searchOpen && results.length > 0 && (
+        {/* Search dropdown. Wars surface first (small section) since a
+            named war is usually the bigger umbrella the user is hunting
+            for; battles follow underneath. Either section is suppressed
+            when it has no matches. */}
+        {searchOpen && (warResults.length > 0 || results.length > 0) && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-[#16171f] border border-slate-700/60 rounded-lg overflow-hidden shadow-xl z-[100]">
-            {results.map((b, i) => (
-              <button
-                key={b.id}
-                onMouseDown={() => handleSelect(b)}
-                className={`w-full text-left px-3 py-2 text-[12px] transition-colors ${
-                  i === activeIndex ? 'bg-slate-700/50' : 'hover:bg-slate-800/50'
-                } ${i > 0 ? 'border-t border-slate-800/50' : ''}`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: ERA_COLORS[b.era] || '#666' }} />
-                  <span className="text-slate-200 truncate flex-1">{b.name}</span>
-                  {b.hasReplay && (
-                    <span className="text-[9px] text-blue-300 px-1 rounded bg-blue-500/20" title="Has phase replay">▶</span>
-                  )}
-                  <span className="text-[10px] text-slate-600 flex-shrink-0">{formatYear(b.year)}</span>
+            {warResults.length > 0 && (
+              <div>
+                <div className="px-3 pt-2 pb-1 text-[9px] uppercase tracking-[0.22em] text-slate-500 bg-slate-900/40">
+                  Wars
                 </div>
-              </button>
-            ))}
+                {warResults.map((w) => (
+                  <button
+                    key={`war-${w.name}`}
+                    onMouseDown={() => handleWarSelect(w.name)}
+                    className="w-full text-left px-3 py-2 text-[12px] transition-colors hover:bg-slate-800/60 border-t border-slate-800/40"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-blue-400" />
+                      <span className="text-white truncate flex-1 font-medium">{w.name}</span>
+                      <span className="text-[10px] text-slate-500 flex-shrink-0 tabular-nums">
+                        {w.count.toLocaleString()} battles
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            {results.length > 0 && (
+              <div>
+                {warResults.length > 0 && (
+                  <div className="px-3 pt-2 pb-1 text-[9px] uppercase tracking-[0.22em] text-slate-500 bg-slate-900/40 border-t border-slate-800/60">
+                    Battles
+                  </div>
+                )}
+                {results.map((b, i) => (
+                  <button
+                    key={b.id}
+                    onMouseDown={() => handleSelect(b)}
+                    className={`w-full text-left px-3 py-2 text-[12px] transition-colors ${
+                      i === activeIndex ? 'bg-slate-700/50' : 'hover:bg-slate-800/50'
+                    } border-t border-slate-800/50`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: ERA_COLORS[b.era] || '#666' }} />
+                      <span className="text-slate-200 truncate flex-1">{b.name}</span>
+                      {b.hasReplay && (
+                        <span className="text-[9px] text-blue-300 px-1 rounded bg-blue-500/20" title="Has phase replay">▶</span>
+                      )}
+                      <span className="text-[10px] text-slate-600 flex-shrink-0">{formatYear(b.year)}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {searchOpen && query.length >= 2 && results.length === 0 && (
+        {searchOpen && query.length >= 2 && results.length === 0 && warResults.length === 0 && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-[#16171f] border border-slate-700/60 rounded-lg p-3 text-center text-[12px] text-slate-600 shadow-xl z-[100]">
             No results
           </div>
         )}
       </div>
 
-      {/* Mode tabs */}
+      {/* Mode tabs. Three primary modes (Explore / Wars / History) wrapped
+          in a single glass capsule. Active mode pops with a soft accent
+          fill and a tracked label; inactive modes hover to slate. SVG
+          glyphs disambiguate at a glance. The previous border-underline
+          treatment was functional but felt like a vanilla nav bar; this
+          reads as crafted chrome. */}
       <div className="fixed top-[88px] left-5 z-30">
-        <div className="flex items-center gap-5 px-1">
-          <button
+        <div
+          className="inline-flex items-center gap-1 rounded-full p-1 backdrop-blur-md"
+          style={{
+            background: 'rgba(8, 10, 18, 0.6)',
+            border: '1px solid rgba(148, 163, 184, 0.16)',
+            boxShadow: '0 8px 24px -10px rgba(0, 0, 0, 0.55)',
+          }}
+        >
+          <ModeTab
+            label="Explore"
+            active={!playbackActive && !historyActive}
             onClick={() => { setPanel('none'); }}
-            className={`h-8 text-[12px] font-medium tracking-wide transition-colors border-b-2 ${
-              !playbackActive && !historyActive
-                ? 'text-white border-blue-400'
-                : 'text-slate-500 hover:text-slate-300 border-transparent'
-            }`}
-          >
-            Explore
-          </button>
-          <button
+            icon={
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <circle cx="6" cy="6" r="4.5" />
+                <path d="M6 1.5 V 10.5 M1.5 6 H 10.5" />
+              </svg>
+            }
+          />
+          <ModeTab
+            label="Wars"
+            active={playbackActive}
             onClick={onPlaybackOpen}
-            className={`h-8 text-[12px] font-medium tracking-wide transition-colors border-b-2 ${
-              playbackActive
-                ? 'text-white border-blue-400'
-                : 'text-slate-500 hover:text-slate-300 border-transparent'
-            }`}
-          >
-            Wars
-          </button>
-          <button
+            icon={
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M2 1.5 V 10.5 M2 1.5 L 9 4 L 2 6" />
+              </svg>
+            }
+          />
+          <ModeTab
+            label="History"
+            active={historyActive}
             onClick={onHistoryPlay}
-            className={`h-8 text-[12px] font-medium tracking-wide transition-colors border-b-2 ${
-              historyActive
-                ? 'text-white border-blue-400'
-                : 'text-slate-500 hover:text-slate-300 border-transparent'
-            }`}
             title="Play 2,500 years of history in 90 seconds"
-          >
-            ▶ History
-          </button>
+            icon={
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M2.5 1.5 L 10.5 6 L 2.5 10.5 Z" />
+              </svg>
+            }
+          />
         </div>
 
         {!playbackActive && (
-          <div className="flex gap-1.5 mt-2">
+          <div className="flex gap-1.5 mt-3">
             <button
               onClick={() => setPanel(panel === 'filters' ? 'none' : 'filters')}
-              className={`h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1 ${
+              className={`h-8 px-3 rounded-full text-[11px] font-semibold tracking-wide transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 ${
                 panel === 'filters' || hasFilters
-                  ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
-                  : 'bg-[#1e2030] text-slate-400 border border-slate-600/50 hover:text-white hover:border-slate-500/60'
+                  ? 'bg-blue-500/20 text-blue-200 border border-blue-500/40'
+                  : 'bg-slate-800/70 text-slate-300 border border-slate-600/50 hover:text-white hover:border-slate-500/70 backdrop-blur-md'
               }`}
             >
-              Filters{hasFilters ? ` (${[filters.era, filters.war, filters.battleType, filters.quality].filter(Boolean).length})` : ''}
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                <path d="M1 2.5 H 11 M3 6 H 9 M5 9.5 H 7" />
+              </svg>
+              Filters
+              {hasFilters && (
+                <span
+                  className="ml-0.5 inline-flex items-center justify-center text-[9px] font-bold tabular-nums"
+                  style={{
+                    minWidth: 14,
+                    height: 14,
+                    padding: '0 4px',
+                    borderRadius: 9999,
+                    background: 'rgba(96,165,250,0.35)',
+                    color: '#fff',
+                  }}
+                >
+                  {[filters.era, filters.war, filters.battleType, filters.quality].filter(Boolean).length}
+                </span>
+              )}
             </button>
             {hasFilters && (
               <button
                 onClick={() => onFiltersChange({ era: '', war: '', battleType: '', quality: '' })}
-                className="h-7 px-2 rounded-md text-[10px] text-slate-600 hover:text-slate-300 transition-colors"
+                className="h-8 px-3 rounded-full text-[10px] font-semibold tracking-wide text-slate-400 hover:text-rose-200 hover:bg-rose-500/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
               >
                 Clear
               </button>
@@ -325,5 +432,41 @@ export default function CommandBar({
         </div>
       )}
     </>
+  );
+}
+
+// ModeTab is one chip inside the top-left mode capsule. Active mode fills
+// with a soft accent; inactive modes are slate with a hover lift. Icon
+// sits to the left of the label. Used by Explore / Wars / History.
+function ModeTab({
+  label,
+  active,
+  onClick,
+  icon,
+  title,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  title?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      aria-pressed={active}
+      className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[11px] font-semibold tracking-wide transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40"
+      style={{
+        background: active ? 'rgba(96, 165, 250, 0.18)' : 'transparent',
+        color: active ? '#fff' : '#94a3b8',
+        border: active ? '1px solid rgba(96, 165, 250, 0.45)' : '1px solid transparent',
+      }}
+    >
+      <span style={{ color: active ? '#93c5fd' : '#64748b', display: 'inline-flex' }}>
+        {icon}
+      </span>
+      {label}
+    </button>
   );
 }

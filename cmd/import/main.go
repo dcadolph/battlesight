@@ -2,9 +2,15 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 
+	"github.com/dcadolph/battletrace/internal/battles"
 	"github.com/dcadolph/battletrace/internal/db"
 	"github.com/dcadolph/battletrace/internal/importer"
 )
@@ -16,7 +22,21 @@ func main() {
 	enrich := flag.Bool("enrich", false, "fetch Wikipedia summaries for battles missing them")
 	infobox := flag.Bool("infobox", false, "fetch Wikipedia infobox data (sides, commanders, casualties)")
 	all := flag.Bool("all", false, "run all import and enrichment steps")
+	validate := flag.Bool("validate", false, "validate curated JSON + curated/ dir without writing to the DB; exits non-zero on any error")
 	flag.Parse()
+
+	// Validate-only path: short-circuit before opening the DB so a curator
+	// can sanity-check a file without side effects. Returns a non-zero exit
+	// code on any error so this slots straight into a pre-commit check.
+	if *validate {
+		if *jsonPath == "" {
+			*jsonPath = "data/battles.json"
+		}
+		if err := runValidate(*jsonPath); err != nil {
+			log.Fatalf("validation failed: %v", err)
+		}
+		return
+	}
 
 	if *all {
 		*wikidata = true
@@ -28,7 +48,7 @@ func main() {
 	}
 
 	if *jsonPath == "" && !*wikidata && !*enrich && !*infobox {
-		log.Fatal("at least one action required: -json, -wikidata, -enrich, -infobox, or -all")
+		log.Fatal("at least one action required: -json, -wikidata, -enrich, -infobox, -validate, or -all")
 	}
 
 	database, err := db.Open(*dbPath)
@@ -81,4 +101,72 @@ func main() {
 			log.Printf("enriched %d battles with coordinates", coordCount)
 		}
 	}
+}
+
+// runValidate loads the curated battles JSON + every file under the
+// sibling curated/ directory and runs the validator without writing to the
+// DB. Prints a human-readable report and returns an error when any
+// blocking issue is found so callers exit non-zero.
+func runValidate(jsonPath string) error {
+	data, err := os.ReadFile(jsonPath)
+	if err != nil {
+		return fmt.Errorf("read %s: %w", jsonPath, err)
+	}
+	var raw []battles.Battle
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return fmt.Errorf("parse %s: %w", jsonPath, err)
+	}
+
+	curatedDir := filepath.Join(filepath.Dir(jsonPath), "curated")
+	extra, err := loadValidationCuratedDir(curatedDir)
+	if err != nil {
+		return err
+	}
+	raw = append(raw, extra...)
+
+	rep := importer.ValidateBattles(raw)
+	if formatted := rep.FormatReport(); formatted != "" {
+		fmt.Fprint(os.Stderr, formatted)
+	}
+	fmt.Fprintf(os.Stdout, "validated %d battle(s): %d error(s), %d warning(s)\n",
+		len(raw), len(rep.Errors), len(rep.Warnings))
+	if rep.HasErrors() {
+		return fmt.Errorf("%d blocking issue(s) found", len(rep.Errors))
+	}
+	return nil
+}
+
+// loadValidationCuratedDir duplicates the small directory walk used by
+// ImportJSON because validate runs before the DB is open and we want the
+// reader to be standalone. Missing directory is not an error.
+func loadValidationCuratedDir(dir string) ([]battles.Battle, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("read curated dir %s: %w", dir, err)
+	}
+	var out []battles.Battle
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(strings.ToLower(e.Name()), ".json") {
+			continue
+		}
+		full := filepath.Join(dir, e.Name())
+		data, err := os.ReadFile(full)
+		if err != nil {
+			return nil, fmt.Errorf("read %s: %w", full, err)
+		}
+		var arr []battles.Battle
+		if err := json.Unmarshal(data, &arr); err == nil {
+			out = append(out, arr...)
+			continue
+		}
+		var one battles.Battle
+		if err := json.Unmarshal(data, &one); err != nil {
+			return nil, fmt.Errorf("parse %s: %w", full, err)
+		}
+		out = append(out, one)
+	}
+	return out, nil
 }

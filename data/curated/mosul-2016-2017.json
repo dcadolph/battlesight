@@ -1,0 +1,29 @@
+{
+  "id": "mosul-2016-2017",
+  "name": "Battle of Mosul",
+  "year": 2016,
+  "date": "16 October 2016 – 20 July 2017",
+  "lat": 36.3499,
+  "lng": 43.1331,
+  "era": "modern",
+  "war": "War against the Islamic State",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Iraq and coalition",
+      "commander": "Abdul Amir Yarallah, Stephen Townsend",
+      "strength": "Iraqi Army, Counter-Terrorism Service, Federal Police, Peshmerga, US-led air support; about 100,000",
+      "casualties": "About 8,200 Iraqi security forces and Peshmerga killed; civilian dead in the thousands"
+    },
+    {
+      "name": "Islamic State",
+      "commander": "Abu Bakr al-Baghdadi",
+      "strength": "Estimated 5,000–12,000 fighters in the city",
+      "casualties": "Nearly all killed; a few hundred surrendered"
+    }
+  ],
+  "victor": "Iraq and coalition",
+  "summary": "Mosul was the largest city held by the Islamic State and the place where al-Baghdadi declared the caliphate in 2014. The Iraqi army's counter-offensive, supported by Kurdish Peshmerga and US-led coalition air power, took nine months. The Old City was reduced to rubble by the time it fell.",
+  "significance": "Mosul was the end of the territorial caliphate as a state-shaped thing. Modern urban warfare on a scale not seen since the Second World War, fought block by block with drones, tunnels, and improvised armour. The reconstruction is still incomplete.",
+  "wikipediaTitle": "Battle of Mosul (2016–2017)"
+}

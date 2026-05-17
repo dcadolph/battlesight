@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Battle, Reference } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS, TIER_LABELS, TIER_DESCRIPTIONS } from '../types/battle';
 import { themeForEra } from '../theme/era';
+import { formatYear, formatBattleDate } from '../lib/format';
 
 interface BattlePanelProps {
   battle: Battle;
@@ -26,10 +27,6 @@ function groupRefs(refs: Reference[]): Map<string, Reference[]> {
     if (items.length > 0) groups.set(type, items);
   }
   return groups;
-}
-
-function formatYear(year: number): string {
-  return year < 0 ? `${Math.abs(year)} BC` : `${year}`;
 }
 
 // firstSentence pulls the first complete sentence out of a longer prose block.
@@ -64,6 +61,30 @@ function stakeLine(b: Battle): string {
   return '';
 }
 
+// SectionHeading is the dossier's chapter mark. Tracked small caps in the
+// era accent, with a thin underline hairline that suggests an editorial
+// rule without committing to one. Reused at every section break so the
+// dossier reads as a single typeset spread rather than a list of cards.
+function SectionHeading({ theme, children }: { theme: { accent: string }; children: React.ReactNode }) {
+  return (
+    <div className="mb-3">
+      <h3
+        className="text-[10px] font-semibold uppercase tracking-[0.3em]"
+        style={{ color: theme.accent }}
+      >
+        {children}
+      </h3>
+      <div
+        className="mt-1.5 h-px"
+        style={{
+          width: 36,
+          background: `linear-gradient(90deg, ${theme.accent}aa 0%, transparent 100%)`,
+        }}
+      />
+    </div>
+  );
+}
+
 export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }: BattlePanelProps) {
   const color = ERA_COLORS[battle.era] || '#ffffff';
   const theme = themeForEra(battle.era);
@@ -87,8 +108,8 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
   const groupedRefs = groupRefs(refs);
   const hasReplay = detail.hasReplay ?? battle.hasReplay;
   const hasSchematic = (detail.hasSchematic ?? battle.hasSchematic) && !hasReplay;
-  const showDate = battle.date && battle.date !== '0';
   const yearKnown = battle.year !== 0;
+  const dateDisplay = formatBattleDate(battle.date, battle.year);
   const stake = stakeLine(detail);
   // Summary repeats if it's already shorter than the stake threshold (stakeLine
   // would have returned the whole summary verbatim). Suppress the dedicated
@@ -97,16 +118,23 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
 
   return (
     <div className="fixed top-0 right-0 h-full w-[420px] max-w-[90vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 overflow-y-auto">
-      <div className="p-6">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-slate-800/90 border border-slate-600/70 text-slate-100 hover:bg-slate-700 hover:border-slate-400 transition-all"
-          aria-label="Close panel (Esc)"
-          title="Close (Esc)"
-        >
-          <span className="text-base leading-none">×</span>
-          <span className="text-[11px] font-semibold tracking-wide">Close</span>
-        </button>
+      {/* Sticky close button. Lives in a fixed-position layer rather than
+          inside the scrolling body so it never disappears under a long
+          dossier. Larger and higher-contrast than the previous version so
+          the eye finds it the first time, every time. */}
+      <button
+        onClick={onClose}
+        className="sticky top-3 ml-auto mr-3 mt-3 z-10 inline-flex items-center gap-1.5 h-9 pl-2.5 pr-3.5 rounded-full bg-white text-slate-900 shadow-[0_8px_18px_-8px_rgba(0,0,0,0.7)] hover:bg-slate-100 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1019]"
+        aria-label="Close panel (Esc)"
+        title="Close (Esc)"
+        style={{ float: 'right' }}
+      >
+        <svg width="11" height="11" viewBox="0 0 11 11" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+          <path d="M1 1 L10 10 M10 1 L1 10" />
+        </svg>
+        <span className="text-[12px] font-semibold tracking-wide">Close</span>
+      </button>
+      <div className="p-6 pt-2 clear-both">
 
         {/* Era stamp: tracked small caps in the era accent. Sits above the
             hero title like a chapter mark. */}
@@ -146,6 +174,35 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
             opacity: 0.7,
           }}
         />
+
+        {/* Aliases. Alternative names for the battle attributed to the
+            belligerent or tradition that used them. Sharpsburg was the
+            Confederate name for Antietam; the Field of Blackbirds was the
+            Serbian name for Kosovo Polje. Drops silently when the curator
+            has not entered any. */}
+        {(detail.aliases ?? battle.aliases ?? []).length > 0 && (
+          <div className="mb-4 -mt-1">
+            <div className="text-[10px] uppercase tracking-[0.28em] text-slate-500 mb-1.5">
+              Also known as
+            </div>
+            <ul className="flex flex-wrap gap-x-3 gap-y-1.5">
+              {(detail.aliases ?? battle.aliases ?? []).map((a, i) => (
+                <li
+                  key={`${i}-${a.name}`}
+                  className="text-[12.5px] leading-snug"
+                  style={{ fontFamily: theme.titleFont, color: 'rgba(226,232,240,0.9)' }}
+                >
+                  <span style={{ fontStyle: 'italic' }}>{a.name}</span>
+                  {a.by && (
+                    <span className="text-slate-500 not-italic ml-1.5 text-[10.5px] tracking-wide">
+                      · {a.by}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Stake line: the one-sentence punch that frames why this battle
             matters. Drops cleanly when no usable prose is available. */}
@@ -190,7 +247,7 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
             hero so the dossier opens cinematically and the chrome stays out
             of the way until the reader wants it. */}
         <p className="text-slate-400 text-sm mb-1">
-          {showDate ? battle.date : yearKnown ? formatYear(battle.year) : 'Date unknown'}
+          {yearKnown ? dateDisplay : 'Date unknown'}
         </p>
         <div className="flex items-center gap-3 mb-4 flex-wrap">
           {battle.war && <span className="text-slate-500 text-sm">{battle.war}</span>}
@@ -274,17 +331,12 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
           </button>
         )}
 
-        {battle.battleType && (
-          <div className="mb-5">
-            <div className="text-center">
-              <span className="inline-block px-3 py-1 rounded-full text-sm bg-slate-800 text-slate-300 capitalize">
-                {battle.battleType}
-              </span>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-3 mb-6">
+        {/* Order of battle. Side cards keep sans-serif for data density
+            (tabular numbers, commander names, casualty figures) but the
+            headline is reset as serif so the section opens cinematically
+            and the cards land underneath as a clean ledger. */}
+        <SectionHeading theme={theme}>Order of battle</SectionHeading>
+        <div className="space-y-2.5 mb-7">
           {(detail.sides || []).map((side, i) => {
             const isVictor = side.name === detail.victor;
             return (
@@ -293,72 +345,101 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
                 className="rounded-lg p-4"
                 style={{
                   backgroundColor: isVictor ? `${color}10` : 'rgba(30,32,44,0.8)',
-                  border: isVictor ? `1px solid ${color}30` : '1px solid rgba(51,55,76,0.5)',
+                  border: isVictor ? `1px solid ${color}3a` : '1px solid rgba(51,55,76,0.5)',
                 }}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-white text-sm">{side.name}</span>
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="font-semibold text-white text-[14px]">{side.name}</span>
                   {isVictor && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: `${color}25`, color }}>
+                    <span
+                      className="text-[9px] uppercase tracking-[0.18em] px-2 py-0.5 rounded-full font-semibold"
+                      style={{ backgroundColor: `${color}26`, color }}
+                    >
                       Victor
                     </span>
                   )}
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
+                <dl className="grid grid-cols-3 gap-3 text-[11.5px]">
                   <div>
-                    <div className="text-slate-500 mb-0.5">Commander</div>
-                    <div className="text-slate-300">{side.commander || 'Unknown'}</div>
+                    <dt className="text-slate-500 mb-0.5 text-[10px] uppercase tracking-[0.14em]">Commander</dt>
+                    <dd className="text-slate-200 leading-snug">{side.commander || 'Unknown'}</dd>
                   </div>
                   <div>
-                    <div className="text-slate-500 mb-0.5">Strength</div>
-                    <div className="text-slate-300">{side.strength || 'Unknown'}</div>
+                    <dt className="text-slate-500 mb-0.5 text-[10px] uppercase tracking-[0.14em]">Strength</dt>
+                    <dd className="text-slate-200 leading-snug tabular-nums">{side.strength || 'Unknown'}</dd>
                   </div>
                   <div>
-                    <div className="text-slate-500 mb-0.5">Casualties</div>
-                    <div className="text-slate-300">{side.casualties || 'Unknown'}</div>
+                    <dt className="text-slate-500 mb-0.5 text-[10px] uppercase tracking-[0.14em]">Casualties</dt>
+                    <dd className="text-slate-200 leading-snug tabular-nums">{side.casualties || 'Unknown'}</dd>
                   </div>
-                </div>
+                </dl>
               </div>
             );
           })}
         </div>
 
         {detail.summary && !stakeReusesSummary && (
-          <div className="mb-5">
-            <h3 className="text-xs text-slate-500 uppercase tracking-wider mb-2">Summary</h3>
-            <p className="text-slate-300 text-sm leading-relaxed">{detail.summary}</p>
+          <div className="mb-7">
+            <SectionHeading theme={theme}>Summary</SectionHeading>
+            <p
+              className="text-[15px] leading-[1.65] text-slate-200/90"
+              style={{ fontFamily: theme.titleFont }}
+            >
+              {detail.summary}
+            </p>
           </div>
         )}
 
         {detail.significance && (
-          <div className="mb-5">
-            <h3 className="text-xs text-slate-500 uppercase tracking-wider mb-2">Significance</h3>
-            <p className="text-slate-300 text-sm leading-relaxed">{detail.significance}</p>
+          <div className="mb-7">
+            <SectionHeading theme={theme}>Significance</SectionHeading>
+            <p
+              className="text-[15px] leading-[1.65] text-slate-200/90"
+              style={{ fontFamily: theme.titleFont }}
+            >
+              {detail.significance}
+            </p>
           </div>
         )}
 
         {!detail.summary && !detail.significance && (
-          <div className="mb-5 text-center py-4">
-            <p className="text-slate-500 text-sm">Detailed information not yet available for this battle.</p>
+          <div className="mb-6 rounded-lg border border-slate-800/60 bg-slate-900/40 px-4 py-5 text-center">
+            <p
+              className="text-[13px] text-slate-500 italic"
+              style={{ fontFamily: theme.titleFont }}
+            >
+              Detailed information not yet available for this battle.
+            </p>
           </div>
         )}
 
         {groupedRefs.size > 0 && (
-          <div className="border-t border-slate-800 pt-5">
-            <h3 className="text-xs text-slate-500 uppercase tracking-wider mb-3">References</h3>
+          <div className="border-t border-slate-800/80 pt-6">
+            <SectionHeading theme={theme}>References</SectionHeading>
             {Array.from(groupedRefs.entries()).map(([type, items]) => (
               <div key={type} className="mb-4">
-                <h4 className="text-[11px] text-slate-400 font-semibold mb-2">
+                <h4 className="text-[10px] text-slate-500 font-semibold uppercase tracking-[0.18em] mb-2">
                   {REF_TYPE_LABELS[type] || type}
                 </h4>
                 <div className="space-y-2">
                   {items.map((ref, i) => (
-                    <div key={i} className="rounded-lg bg-slate-800/40 border border-slate-700/30 p-3">
+                    <div key={i} className="rounded-lg bg-slate-800/40 border border-slate-700/30 p-3 transition-colors hover:border-slate-600/50">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <div className="text-sm text-white font-medium leading-tight">
+                          <div
+                            className="text-[14px] text-white leading-snug"
+                            style={{ fontFamily: theme.titleFont, fontWeight: 600 }}
+                          >
                             {ref.url ? (
-                              <a href={ref.url} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
+                              <a
+                                href={ref.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:underline transition-colors"
+                                style={{ color: '#fff' }}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = theme.accent)}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = '#fff')}
+                              >
                                 {ref.title}
                               </a>
                             ) : (
@@ -366,15 +447,22 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
                             )}
                           </div>
                           {ref.author && (
-                            <div className="text-xs text-slate-400 mt-0.5">{ref.author}</div>
+                            <div className="text-[11.5px] text-slate-400 mt-0.5">{ref.author}</div>
                           )}
                         </div>
                         {ref.year !== undefined && ref.year > 0 && (
-                          <span className="text-[10px] text-slate-500 font-mono flex-shrink-0">{ref.year}</span>
+                          <span className="text-[10px] text-slate-500 font-mono flex-shrink-0 tabular-nums pt-0.5">
+                            {ref.year}
+                          </span>
                         )}
                       </div>
                       {ref.note && (
-                        <div className="text-xs text-slate-500 mt-1.5 leading-relaxed">{ref.note}</div>
+                        <div
+                          className="text-[12px] text-slate-400/90 mt-1.5 leading-relaxed italic"
+                          style={{ fontFamily: theme.titleFont }}
+                        >
+                          {ref.note}
+                        </div>
                       )}
                     </div>
                   ))}

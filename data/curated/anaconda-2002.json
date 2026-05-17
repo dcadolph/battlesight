@@ -1,0 +1,29 @@
+{
+  "id": "operation-anaconda-2002",
+  "name": "Operation Anaconda",
+  "year": 2002,
+  "date": "2 March – 18 March 2002",
+  "lat": 33.4344,
+  "lng": 69.4419,
+  "era": "modern",
+  "war": "War in Afghanistan (2001–2021)",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "United States and coalition",
+      "commander": "Franklin Hagenbeck, Pete Blaber",
+      "strength": "10th Mountain Division, 101st Airborne, Special Operations Task Force 11, Afghan militia; about 2,000 in the valley",
+      "casualties": "8 killed, 80 wounded"
+    },
+    {
+      "name": "al-Qaeda and Taliban",
+      "commander": "Saif al-Adel (reported)",
+      "strength": "Estimated 500–1,000 dug into the Shah-i-Kot valley and surrounding ridges",
+      "casualties": "Estimated 500+ killed, hundreds escaped"
+    }
+  ],
+  "victor": "United States and coalition",
+  "summary": "The first large conventional US ground operation of the Afghan war. American infantry helicoptered into the Shah-i-Kot valley in eastern Paktia province to seal al-Qaeda fighters between US blocking positions and Afghan militia. The plan assumed a thin enemy presence; on day one the assault force walked into a heavily fortified network of caves, mortar pits, and ridgelines, and the fight ran for sixteen days.",
+  "significance": "The Battle of Takur Ghar, where a Navy SEAL fell from a Chinook ramp and the rescue operation cost seven Americans killed, became the defining vignette of the campaign. Operation Anaconda exposed how thin the US-Afghan partnership really was and how deep the enemy had dug in. It set the template for a war that would last twenty years.",
+  "wikipediaTitle": "Operation Anaconda"
+}

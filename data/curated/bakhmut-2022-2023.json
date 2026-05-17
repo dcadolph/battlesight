@@ -1,0 +1,29 @@
+{
+  "id": "bakhmut-2022-2023",
+  "name": "Battle of Bakhmut",
+  "year": 2022,
+  "date": "1 August 2022 – 20 May 2023",
+  "lat": 48.5957,
+  "lng": 37.9988,
+  "era": "modern",
+  "war": "Russian invasion of Ukraine",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Oleksandr Syrskyi",
+      "strength": "Elements of multiple brigades rotated through; tens of thousands total",
+      "casualties": "Tens of thousands killed and wounded; exact figures classified"
+    },
+    {
+      "name": "Russia and Wagner Group",
+      "commander": "Yevgeny Prigozhin, Sergei Surovikin",
+      "strength": "Wagner mercenaries, convict recruits, Russian regulars; an estimated 60,000+ committed",
+      "casualties": "Estimated 20,000–30,000 killed, including the bulk of Wagner's convict assault force"
+    }
+  ],
+  "victor": "Russia and Wagner Group",
+  "summary": "Bakhmut was a salt-mining town of seventy thousand before the war. From the summer of 2022 it became the centerpiece of the longest battle of the conflict. The Wagner private military company, supplied by tens of thousands of Russian prison recruits, attacked in human waves backed by artillery, slowly grinding through the eastern districts while Ukraine fed in brigades to hold the western half.",
+  "significance": "By May 2023 Russia held the ruin of the city, but the price was the strategic depletion of Wagner and the political fracture between Prigozhin and the Russian Ministry of Defence. Two months later Prigozhin staged his mutiny. Bakhmut shaped the war's middle act: trench attrition on a First World War scale, conducted with drones and thermobarics.",
+  "wikipediaTitle": "Battle of Bakhmut"
+}

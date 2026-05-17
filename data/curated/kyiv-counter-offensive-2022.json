@@ -1,0 +1,29 @@
+{
+  "id": "kyiv-2022",
+  "name": "Battle of Kyiv",
+  "year": 2022,
+  "date": "25 February – 2 April 2022",
+  "lat": 50.4501,
+  "lng": 30.5234,
+  "era": "modern",
+  "war": "Russian invasion of Ukraine",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Volodymyr Zelenskyy, Valery Zaluzhnyi, Oleksandr Syrskyi",
+      "strength": "Armed Forces of Ukraine, Territorial Defence Forces, National Guard, foreign volunteers",
+      "casualties": "Several thousand killed and wounded"
+    },
+    {
+      "name": "Russia",
+      "commander": "Aleksandr Chayko",
+      "strength": "Eastern Military District, VDV, naval infantry; an estimated 40,000+ in the northern axis",
+      "casualties": "Estimated 7,000–10,000 killed, plus heavy armour losses"
+    }
+  ],
+  "victor": "Ukraine",
+  "summary": "Russian armoured columns crossed from Belarus on the second day of the war, expecting to take the capital in seventy-two hours. Their forward elements reached the Kyiv suburbs of Hostomel, Bucha, and Irpin within days but were unable to encircle the city. Stalled supply lines, ambushed columns on the Zhytomyr highway, and counter-attacks out of Kyiv ground them down. By the end of March the Russian command ordered a withdrawal to the east.",
+  "significance": "The defence of Kyiv ended any chance of a quick Russian victory and reframed the war as one of attrition. The atrocities discovered in Bucha and Irpin after the Russian retreat became the moral indictment that locked in Western support. Kyiv is the battle that decided the war would continue.",
+  "wikipediaTitle": "Battle of Kyiv (2022)"
+}

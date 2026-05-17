@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type { HistoryBeat } from '../data/history-beats';
 import { themeForEra } from '../theme/era';
+import { formatYear } from '../lib/format';
 
 interface HistoryBeatCardProps {
   beat: HistoryBeat;
@@ -14,13 +15,6 @@ interface HistoryBeatCardProps {
   // onLearnMore opens the battle dossier without auto-playing the replay.
   // Falls back to onJump when the parent doesn't distinguish the two.
   onLearnMore?: (battleId: string) => void;
-}
-
-// formatBeatYear renders the canonical year-only display used when no
-// finer-grained date string is attached to the beat.
-function formatBeatYear(year: number): string {
-  if (year < 0) return `${Math.abs(year)} BC`;
-  return `${year}`;
 }
 
 // HistoryBeatCard is the chapter-break overlay that mounts when the history
@@ -46,7 +40,7 @@ export default function HistoryBeatCard({ beat, onContinue, onJump, onLearnMore 
   }, [onContinue]);
 
   const hasBattle = !!beat.battleId;
-  const dateLine = beat.date ?? formatBeatYear(beat.year);
+  const dateLine = beat.date ?? formatYear(beat.year);
 
   return (
     <div className="fixed inset-0 z-30 pointer-events-auto flex items-center justify-center px-6">

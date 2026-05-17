@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EraTheme } from '../theme/era';
 import { ERA_RANGES, themeForEra } from '../theme/era';
 import type { HistoryBeat } from '../data/history-beats';
+import { formatYear } from '../lib/format';
 
 interface HistoryPlayheadProps {
   // year currently being highlighted on the timeline.
@@ -29,12 +30,6 @@ interface HistoryPlayheadProps {
   // onSeekBeat fires when the user clicks a beat marker. The host jumps to
   // that beat's year and surfaces the beat title card.
   onSeekBeat: (beatIndex: number) => void;
-}
-
-// formatYear is the human label for the year display above the thumb.
-function formatYear(year: number): string {
-  if (year < 0) return `${Math.abs(year)} BC`;
-  return `${year}`;
 }
 
 // HistoryPlayhead is the cinematic control surface shown while the history

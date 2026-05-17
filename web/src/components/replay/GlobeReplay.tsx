@@ -500,6 +500,17 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
 
   return (
     <div ref={wrapRef} className="w-full h-full relative">
+      {/* On-stage side legend. Floats at the top-left of the replay stage
+          so the eye can always map an arrow color to a faction without
+          looking off into the sidebar. The sidebar's SideRow shows the
+          same info but during a fast-paced phase the user is watching the
+          arrows, not the sidebar. */}
+      <div className="absolute top-3 left-3 z-10 pointer-events-none flex flex-col gap-1.5">
+        <SideTag color={FACTION_COLOR.a} label={replay.factionA} />
+        <SideTag color={FACTION_COLOR.b} label={replay.factionB} />
+        {replay.factionC && <SideTag color={FACTION_COLOR.c} label={replay.factionC} />}
+      </div>
+
       <Globe
         ref={globeRef as React.MutableRefObject<GlobeMethods | undefined>}
         width={dims.width}
@@ -562,6 +573,20 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
             y={a.y2}
             color={FACTION_COLOR[a.faction]}
             delay={arrowTiming(a.kind, a.index).impactDelay}
+          />
+        ))}
+        {/* Arrow labels. Each labelled movement gets a small pill at its
+            midpoint after the trace lands. Previously the label field on a
+            movement was invisible: curators wrote "Mi-8 air assault lands
+            on apron" and the user saw a generic swoosh. The pill now
+            attaches that prose to the geometry so the arrow tells the
+            story instead of needing the sidebar narration to do it. */}
+        {arrows.filter((a) => a.visible && a.label).map((a) => (
+          <ArrowLabel
+            key={`label-${phaseIdx}-${a.index}`}
+            arrow={a}
+            color={FACTION_COLOR[a.faction]}
+            timing={arrowTiming(a.kind, a.index)}
           />
         ))}
       </svg>
@@ -681,6 +706,110 @@ function ArrowVector({ phaseIdx, arrow }: ArrowVectorProps) {
   );
 }
 
+// SideTag is the on-stage faction badge. Color swatch + name in a dark
+// glass pill. Bold enough to read at a glance during an arrow flurry but
+// quiet enough to fade behind the cinematic action.
+function SideTag({ color, label }: { color: string; label: string }) {
+  return (
+    <div
+      className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 backdrop-blur-md"
+      style={{
+        background: 'rgba(8, 10, 18, 0.78)',
+        border: `1px solid ${color}88`,
+        boxShadow: `0 6px 16px -6px ${color}55`,
+      }}
+    >
+      <span
+        className="flex-shrink-0 rounded-full"
+        style={{
+          width: 10,
+          height: 10,
+          background: color,
+          boxShadow: `0 0 8px ${color}`,
+        }}
+      />
+      <span
+        className="text-[12px] font-semibold tracking-wide text-white whitespace-nowrap max-w-[260px] truncate"
+        title={label}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
+interface ArrowLabelProps {
+  arrow: ProjectedArrow;
+  color: string;
+  timing: { appearDelay: number; traceMs: number; marchSpeed: number; impactDelay: number };
+}
+
+// ArrowLabel renders the movement's prose label (e.g. "Mi-8 air assault
+// lands on apron") as a small color-rimmed pill at the arrow's midpoint.
+// Pops in just as the trace completes so the story arrives with the force.
+// Curators on hand-crafted replays write these labels; for schematic
+// replays the field is empty and the label silently drops, which is the
+// right behavior because schematic arrows are generic and there is nothing
+// honest to caption them with.
+function ArrowLabel({ arrow, color, timing }: ArrowLabelProps) {
+  const { x1, y1, x2, y2, label } = arrow;
+  if (!label) return null;
+  // Place at the geometric midpoint and lift slightly perpendicular to the
+  // arrow line so the pill does not sit on top of the stroke. The lift
+  // direction matches the curve direction in ArrowVector so the label
+  // hugs the outside of the arc and never crosses the line itself.
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+  const sign = arrow.index % 2 === 0 ? 1 : -1;
+  const midX = (x1 + x2) / 2 + (-dy / len) * 14 * sign;
+  const midY = (y1 + y2) / 2 + (dx / len) * 14 * sign;
+  const appearAt = timing.appearDelay + timing.traceMs - 200;
+  return (
+    <g
+      transform={`translate(${midX} ${midY})`}
+      style={{
+        opacity: 0,
+        animation: `arrow-label-in 500ms ${appearAt}ms cubic-bezier(.2,.7,.25,1) forwards`,
+        pointerEvents: 'none',
+      }}
+    >
+      <foreignObject
+        x={-110}
+        y={-13}
+        width={220}
+        height={26}
+        style={{ overflow: 'visible' }}
+      >
+        <div
+          xmlns="http://www.w3.org/1999/xhtml"
+          style={{
+            display: 'inline-block',
+            padding: '3px 9px',
+            borderRadius: 9999,
+            background: 'rgba(8, 10, 18, 0.86)',
+            border: `1px solid ${color}80`,
+            color: '#fff',
+            fontFamily: "'Inter', system-ui, sans-serif",
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '0.01em',
+            lineHeight: 1.3,
+            whiteSpace: 'nowrap',
+            boxShadow: `0 6px 18px -6px rgba(0,0,0,0.6), 0 0 14px -4px ${color}55`,
+            transform: 'translate(-50%, -50%)',
+            position: 'relative',
+            left: '50%',
+            top: '50%',
+          }}
+        >
+          {label}
+        </div>
+      </foreignObject>
+    </g>
+  );
+}
+
 interface UnitMarkerProps {
   phaseIdx: number;
   unit: ProjectedUnit;
@@ -737,6 +866,46 @@ function UnitMarker({ unit }: UnitMarkerProps) {
           strokeWidth={1.5}
           strokeLinecap="round"
         />
+      )}
+      {/* Persistent unit caption underneath the marker. Was previously only
+          shown on hover via the SVG <title>, which is invisible on touch
+          devices and easy to miss with the cursor on the move. Captioning
+          the marker directly tells the user "this is the 4th Rapid
+          Reaction Brigade" without making them hunt for it. */}
+      {label && (
+        <foreignObject
+          x={-90}
+          y={radius + 4}
+          width={180}
+          height={20}
+          style={{ overflow: 'visible', pointerEvents: 'none' }}
+        >
+          <div
+            xmlns="http://www.w3.org/1999/xhtml"
+            style={{
+              display: 'inline-block',
+              padding: '1.5px 7px',
+              borderRadius: 9999,
+              background: 'rgba(8, 10, 18, 0.78)',
+              border: `1px solid ${color}66`,
+              color: '#e2e8f0',
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontSize: 10,
+              fontWeight: 500,
+              lineHeight: 1.25,
+              whiteSpace: 'nowrap',
+              transform: 'translateX(-50%)',
+              position: 'relative',
+              left: '50%',
+              opacity: 0.92,
+              maxWidth: 180,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {label}
+          </div>
+        </foreignObject>
       )}
     </g>
   );

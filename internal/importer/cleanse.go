@@ -67,7 +67,179 @@ func Cleanse(ctx context.Context, db *sql.DB) (CleanseReport, error) {
 	} else {
 		rep.DuplicatesRemoved = n
 	}
+	if n, err := applyCoordOverrides(ctx, db); err != nil {
+		return rep, err
+	} else {
+		rep.CoordsOverridden = n
+	}
+	if n, err := rebuildRichSearch(ctx, db); err != nil {
+		return rep, err
+	} else {
+		rep.RichSearchRowsIndexed = n
+	}
 	return rep, nil
+}
+
+// rebuildRichSearch rebuilds the battles_rich_fts index from a per-battle
+// denormalized blob that pulls in everything searchable: side names
+// (countries / factions), commanders, era, battle type, date, victor, war,
+// summary, significance. This is the index Search queries; the older
+// battles_fts is left alone for backwards compatibility but is no longer
+// the authoritative search corpus.
+//
+// Wipe-and-reload rather than incremental updates because cleanse runs once
+// per server start and the corpus is small enough that a full rebuild costs
+// less than maintaining triggers across two tables.
+func rebuildRichSearch(ctx context.Context, db *sql.DB) (int, error) {
+	if _, err := db.ExecContext(ctx, "DELETE FROM battles_rich_fts"); err != nil {
+		return 0, fmt.Errorf("clear rich fts: %w", err)
+	}
+
+	rows, err := db.QueryContext(ctx, `
+		SELECT
+			b.id,
+			b.name || ' ' ||
+			COALESCE(b.war, '') || ' ' ||
+			COALESCE(b.victor, '') || ' ' ||
+			COALESCE(b.summary, '') || ' ' ||
+			COALESCE(b.significance, '') || ' ' ||
+			COALESCE(b.battle_type, '') || ' ' ||
+			COALESCE(b.era, '') || ' ' ||
+			COALESCE(b.date, '') || ' ' ||
+			COALESCE((
+				SELECT GROUP_CONCAT(s.name || ' ' || COALESCE(s.commander, ''), ' ')
+				FROM battle_sides s
+				WHERE s.battle_id = b.id
+			), '') || ' ' ||
+			COALESCE((
+				SELECT GROUP_CONCAT(a.name || ' ' || COALESCE(a.by_text, ''), ' ')
+				FROM battle_aliases a
+				WHERE a.battle_id = b.id
+			), '') AS blob
+		FROM battles b
+	`)
+	if err != nil {
+		return 0, fmt.Errorf("query battle text: %w", err)
+	}
+	defer rows.Close()
+
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("begin rich fts tx: %w", err)
+	}
+	stmt, err := tx.PrepareContext(ctx, "INSERT INTO battles_rich_fts(battle_id, blob) VALUES (?, ?)")
+	if err != nil {
+		tx.Rollback()
+		return 0, fmt.Errorf("prepare rich fts insert: %w", err)
+	}
+	defer stmt.Close()
+
+	n := 0
+	for rows.Next() {
+		var id, blob string
+		if err := rows.Scan(&id, &blob); err != nil {
+			tx.Rollback()
+			return n, fmt.Errorf("scan rich fts row: %w", err)
+		}
+		if _, err := stmt.ExecContext(ctx, id, blob); err != nil {
+			tx.Rollback()
+			return n, fmt.Errorf("insert rich fts row %s: %w", id, err)
+		}
+		n++
+	}
+	if err := rows.Err(); err != nil {
+		tx.Rollback()
+		return n, fmt.Errorf("iter rich fts rows: %w", err)
+	}
+	if err := tx.Commit(); err != nil {
+		return n, fmt.Errorf("commit rich fts: %w", err)
+	}
+	return n, nil
+}
+
+// CoordOverride is a curated correction for a single battle whose imported
+// coordinates were wrong. Wikidata occasionally returns a centroid that
+// places a land battle at a default meridian or equator, dropping the
+// battle into the wrong ocean. Curated corrections live here in code so
+// the fix is reviewable and survives reimport.
+type CoordOverride struct {
+	// ID is the canonical battle ID slug.
+	ID string
+	// Lat is the corrected latitude in decimal degrees.
+	Lat float64
+	// Lng is the corrected longitude in decimal degrees.
+	Lng float64
+	// Note explains why this battle was corrected; kept for the next
+	// curator to read.
+	Note string
+}
+
+// coordOverrides lists every known-wrong import we have hand-corrected.
+// Add to this list whenever a user reports a battle in the wrong place;
+// always include a Note so the next curator does not undo the fix.
+var coordOverrides = []CoordOverride{
+	{
+		ID:   "courland-pocket",
+		Lat:  57.0,
+		Lng:  22.5,
+		Note: "Latvia, Courland peninsula. Wikidata imported lng=0 which put it in the North Sea.",
+	},
+	{
+		ID:   "battle-of-darzab-2018",
+		Lat:  36.4,
+		Lng:  65.6,
+		Note: "Darzab district, Jowzjan province, Afghanistan. Imported lng was 0.",
+	},
+	{
+		ID:   "ethnic-cleansing-of-georgians-in-sukhumi",
+		Lat:  43.0,
+		Lng:  41.0,
+		Note: "Sukhumi, Abkhazia, Georgia. Imported lng was 0.",
+	},
+	{
+		ID:   "battle-of-the-atlantic",
+		Lat:  50.0,
+		Lng:  -30.0,
+		Note: "Ocean-spanning Atlantic campaign. Centroid placed on the North Atlantic convoy lanes (~mid-Atlantic, 50N) rather than the equator default the importer produced.",
+	},
+	{
+		ID:   "battle-of-shen-liao",
+		Lat:  40.0,
+		Lng:  117.5,
+		Note: "Shen-Liao region of north-east China (Liaoning area). Imported lng=0.",
+	},
+	{
+		ID:   "action-of-10-march-1917",
+		Lat:  50.0,
+		Lng:  -30.0,
+		Note: "First World War North Atlantic action. Importer left at (0,-30).",
+	},
+	{
+		ID:   "operation-teardrop",
+		Lat:  50.0,
+		Lng:  -30.0,
+		Note: "Atlantic U-boat hunt, April-May 1945. Centroid placed on the North Atlantic.",
+	},
+}
+
+// applyCoordOverrides updates each curated entry's lat/lng in place. Returns
+// the number of rows updated so the cleanse report shows the work done.
+// Idempotent: rerunning is a no-op when the DB already matches.
+func applyCoordOverrides(ctx context.Context, db *sql.DB) (int, error) {
+	var updated int
+	for _, ov := range coordOverrides {
+		res, err := db.ExecContext(ctx,
+			"UPDATE battles SET lat = ?, lng = ? WHERE id = ? AND (lat != ? OR lng != ?)",
+			ov.Lat, ov.Lng, ov.ID, ov.Lat, ov.Lng,
+		)
+		if err != nil {
+			return updated, fmt.Errorf("coord override %s: %w", ov.ID, err)
+		}
+		if n, err := res.RowsAffected(); err == nil {
+			updated += int(n)
+		}
+	}
+	return updated, nil
 }
 
 // CleanseReport is what the migration returns so the caller can log the work
@@ -82,6 +254,8 @@ type CleanseReport struct {
 	BlankSidesDropped     int
 	WarNamesCanonicalised int
 	DuplicatesRemoved     int
+	CoordsOverridden      int
+	RichSearchRowsIndexed int
 }
 
 // Total returns the sum of every fix bucket. Cheap signal for "did the
@@ -89,7 +263,8 @@ type CleanseReport struct {
 func (r CleanseReport) Total() int {
 	return r.BattleTextFixed + r.SideTextFixed + r.MissingDatesBackfilled +
 		r.YearsAligned + r.YearsDerived + r.ErasRecomputed +
-		r.BlankSidesDropped + r.WarNamesCanonicalised + r.DuplicatesRemoved
+		r.BlankSidesDropped + r.WarNamesCanonicalised + r.DuplicatesRemoved +
+		r.CoordsOverridden + r.RichSearchRowsIndexed
 }
 
 // --- Text normalisation -----------------------------------------------------
@@ -837,7 +1012,16 @@ func canonicaliseWarNames(ctx context.Context, db *sql.DB) (int, error) {
 		if len(variants) < 2 {
 			continue
 		}
+		// Prefer the canonical surface form over alias phrasings even when
+		// counts tilt the other way. "Second World War", "Great War", British
+		// "theatre", and parenthetical "(World War I/II)" labels all carry an
+		// alias scent the user does not want surfaced.
 		sort.Slice(variants, func(i, j int) bool {
+			iAlias := hasAliasPhrase(variants[i].name)
+			jAlias := hasAliasPhrase(variants[j].name)
+			if iAlias != jAlias {
+				return !iAlias
+			}
 			if variants[i].count != variants[j].count {
 				return variants[i].count > variants[j].count
 			}
@@ -919,13 +1103,71 @@ func repairCommaWar(name string) string {
 	return before
 }
 
+// hasAliasPhrase reports whether the war name uses an alias surface form
+// that the user should not see when a canonical phrasing exists. Used as
+// the primary sort key in the variant-collapse pass so the canonical form
+// always wins, regardless of which variant happens to have more battles.
+func hasAliasPhrase(name string) bool {
+	n := strings.ToLower(name)
+	switch {
+	case strings.Contains(n, "second world war"),
+		strings.Contains(n, "first world war"),
+		strings.Contains(n, "great war"),
+		strings.Contains(n, "theatre"),
+		strings.Contains(n, "(world war i"):
+		return true
+	}
+	return false
+}
+
+// canonWarKey normalises a war name into a stable lookup key so variant
+// spellings of the same conflict collapse into one bucket. The variant pass
+// in canonicaliseWarNames groups all rows that share a key and rewrites
+// every variant to whichever exact form has the most battles, so the user
+// sees one entry per real war instead of a fragmented list. Rules:
+//   - Lowercase, trim, normalise dash glyphs, drop a leading "the ".
+//   - "Second World War" ⇄ "World War II", "First/Great War" ⇄ "World War I"
+//     (pure aliases; identical conflict under a different surface form).
+//   - "(World War II)" ⇄ "World War II" inside compound names, so
+//     "Eastern Front (World War II)" and "Eastern Front of World War II"
+//     collapse to the same theater.
+//   - British "theatre" → American "theater" so the panel doesn't list
+//     "Pacific Theatre" beside "Pacific Theater".
+//   - Strip the "of (the) " connector between a sub-conflict and its parent
+//     so "Battle of the Mediterranean of World War II" and "Battle of the
+//     Mediterranean of the Second World War" share a key.
 func canonWarKey(w string) string {
 	s := strings.ToLower(strings.TrimSpace(w))
 	s = strings.NewReplacer("–", "-", "—", "-", "−", "-").Replace(s)
 	if strings.HasPrefix(s, "the ") {
 		s = s[4:]
 	}
-	return s
+	// Fold WW alias surface forms to their canonical roman-numeral form.
+	// Order matters: "second world war" must rewrite before any rule that
+	// touches "world war" alone, and "first world war" before "great war"
+	// rewrites (no overlap, but kept explicit for the reader).
+	s = strings.ReplaceAll(s, "second world war", "world war ii")
+	s = strings.ReplaceAll(s, "first world war", "world war i")
+	s = strings.ReplaceAll(s, "the great war", "world war i")
+	if s == "great war" {
+		s = "world war i"
+	}
+	// Collapse parenthetical "(World War II)" suffixes used by Wikidata
+	// labels into the prose form so the variant pass treats them as the
+	// same theater.
+	s = strings.ReplaceAll(s, "(world war ii)", "of world war ii")
+	s = strings.ReplaceAll(s, "(world war i)", "of world war i")
+	// Spelling normalisations.
+	s = strings.ReplaceAll(s, "theatre", "theater")
+	// Strip the "of (the) " connector before "world war" so "Battle of X of
+	// World War II" and "Battle of X of the Second World War" (already
+	// rewritten to "world war ii" above) collapse.
+	s = strings.ReplaceAll(s, "of the world war", "of world war")
+	// Collapse run-on whitespace introduced by the rewrites.
+	for strings.Contains(s, "  ") {
+		s = strings.ReplaceAll(s, "  ", " ")
+	}
+	return strings.TrimSpace(s)
 }
 
 // --- Wikipedia-title duplicates --------------------------------------------

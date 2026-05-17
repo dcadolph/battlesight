@@ -128,5 +128,65 @@
       "European energy market restructured away from Russian gas",
       "ICC arrest warrant issued for Vladimir Putin (March 2023)"
     ]
+  },
+  "Russian invasion of Ukraine": {
+    "outcome": "Ongoing as of mid-2026. The full-scale invasion began before dawn on 24 February 2022 with cruise missile strikes across Ukraine and ground crossings from Belarus, Russia, and Crimea.",
+    "aftermath": "The initial Russian plan to seize Kyiv and decapitate the government within 72 hours failed at Hostomel and along the highways north of the capital. By April 2022 Russian forces had withdrawn from northern Ukraine and shifted focus to the Donbas and the southern land bridge to Crimea. The war has produced the largest tank engagements, drone campaigns, and urban sieges in Europe since 1945. Estimated casualties exceed 500,000 across both sides. The Wagner Group's June 2023 mutiny was a domestic political consequence; Prigozhin died two months later in a plane crash widely attributed to the Kremlin.",
+    "keyTerms": "No peace treaty. The Black Sea Grain Initiative (July 2022 to July 2023) was the most significant negotiated agreement before its Russian withdrawal.",
+    "notable": [
+      "Failed Russian offensive on Kyiv ends the initial war plan",
+      "Annexation referenda in four Ukrainian oblasts (September 2022), unrecognized internationally",
+      "Wagner Group mutiny and march on Moscow (June 2023)",
+      "Ukrainian incursion into Kursk Oblast (August 2024), the first foreign occupation of Russian territory since World War II",
+      "Tactical innovations: FPV drones, naval drones, Storm Shadow and ATACMS strikes into occupied territory"
+    ]
+  },
+  "War in Afghanistan (2001–2021)": {
+    "outcome": "Taliban victory. The US-backed Afghan government collapsed on 15 August 2021 as the Taliban entered Kabul. The final American withdrawal completed 30 August 2021.",
+    "aftermath": "Twenty years and an estimated 176,000 deaths, including ~2,400 US service members and tens of thousands of Afghan security forces and civilians. The United States spent over two trillion dollars. The Taliban reimposed restrictive social policy, particularly affecting women and girls. The departure created a refugee outflow of hundreds of thousands. Al-Qaeda's central leadership was severely degraded over the war but reconstituted in different geographies; ISIS-K emerged as a competitor. NATO's first and longest combat deployment ended without a treaty.",
+    "keyTerms": "Doha Agreement (29 February 2020) between the United States and the Taliban set the conditions for US withdrawal. No agreement with the Afghan government.",
+    "notable": [
+      "Initial defeat of the Taliban government (October–November 2001)",
+      "Battle of Tora Bora and bin Laden's escape (December 2001)",
+      "Operation Anaconda (March 2002), first large conventional US ground action",
+      "Surge and counterinsurgency strategy (2009–2012)",
+      "Fall of Kabul and the Kabul Airport evacuation (August 2021)"
+    ]
+  },
+  "Iraq War": {
+    "outcome": "US-led coalition victory in the conventional phase (April 2003). Multi-decade insurgency, civil war, and counter-insurgency that followed. Combat operations formally ended 31 December 2011; a residual presence returned in 2014 against the Islamic State.",
+    "aftermath": "The Ba'athist government was dismantled; Saddam Hussein was captured (December 2003), tried, and executed (December 2006). The de-Ba'athification and disbandment of the Iraqi Army created the conditions for the insurgency. An estimated 200,000 to over a million Iraqis died across the decade, depending on methodology. Sectarian civil war (2006–2008) reshaped Baghdad neighborhoods. Iran's regional influence expanded. The legitimacy of intelligence-led war was permanently damaged in Western politics by the absence of weapons of mass destruction.",
+    "keyTerms": "US–Iraq Status of Forces Agreement (2008) set the withdrawal timeline. No peace treaty in the conventional sense; the war faded into the broader counter-IS campaign.",
+    "notable": [
+      "Capture of Baghdad and the fall of Saddam (April 2003)",
+      "Mahdi Army and Sunni insurgency (2003 onward)",
+      "Battles of Fallujah I and II (2004)",
+      "Sectarian civil war following the Samarra bombing (2006)",
+      "The Surge and Anbar Awakening (2007–2008)"
+    ]
+  },
+  "War against the Islamic State": {
+    "outcome": "Coalition victory. The territorial caliphate declared by Abu Bakr al-Baghdadi in Mosul in June 2014 was destroyed by March 2019 with the fall of Baghouz, Syria. The organization persists as an insurgency and franchise.",
+    "aftermath": "Over five years of intense urban warfare reshaped Mosul, Raqqa, Fallujah, Ramadi, Tikrit, and other cities. The Syrian Democratic Forces, led by the Kurdish YPG, emerged as a US partner that strained the US–Turkey relationship for years after. Tens of thousands of civilians and combatants died; the displacement was on the scale of millions across Iraq and Syria. Baghdadi died in a US raid in Idlib (October 2019). ISIS affiliates remain active in West Africa, the Sahel, Afghanistan-Pakistan (ISIS-K), and elsewhere.",
+    "keyTerms": "No treaty. The end of the territorial caliphate was declared after the fall of Baghouz on 23 March 2019.",
+    "notable": [
+      "Fall of Mosul to ISIS and the proclamation of the caliphate (June 2014)",
+      "Battles of Kobani (2014–2015) and the rise of the SDF",
+      "Battle of Mosul (2016–2017) and Battle of Raqqa (2017)",
+      "Death of Baghdadi in Idlib (October 2019)",
+      "Ongoing insurgency in Syria's Badia and northern Iraq"
+    ]
+  },
+  "Syrian Civil War": {
+    "outcome": "Ongoing as of mid-2026. The Assad government has held all major cities since the fall of eastern Aleppo (December 2016). Idlib and the northwest remain under Hayat Tahrir al-Sham and Turkish-backed opposition forces; the northeast remains under the Syrian Democratic Forces.",
+    "aftermath": "Roughly 500,000 dead. About half the prewar population displaced, more than six million as refugees outside Syria. Russia retained its naval base at Tartus and air base at Khmeimim. Iran consolidated a land corridor from Tehran to Beirut. The Captagon trade financed parts of the post-2016 government economy. Reconstruction has barely begun.",
+    "keyTerms": "Multiple ceasefires (Astana, Moscow) have been local and partial. No comprehensive peace.",
+    "notable": [
+      "Russian intervention reverses the war (September 2015)",
+      "Battle of Aleppo and the loss of the eastern districts (2016)",
+      "Chemical weapons attacks on Khan Shaykhun (2017) and Douma (2018)",
+      "Turkish operations against the SDF in northern Syria (Olive Branch 2018, Peace Spring 2019)",
+      "Captagon as a state-sponsored narcotics economy"
+    ]
   }
 }

@@ -120,18 +120,31 @@ func TestPrefixCols(t *testing.T) {
 	}
 }
 
-// TestSanitizeFTS confirms FTS5 query terms are quoted to prevent operator
-// injection from user input.
+// TestSanitizeFTS confirms FTS5 query terms are stripped of operator
+// characters and suffixed with a prefix wildcard so partial-word searches
+// hit. The previous quoting-based implementation gave us injection safety
+// at the cost of any partial match, which broke "falluja" → Fallujah and
+// every similar query.
 func TestSanitizeFTS(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		In   string
 		Want string
 	}{
-		{In: "marathon", Want: `"marathon"`},
-		{In: "Battle of Cannae", Want: `"Battle" "of" "Cannae"`},
+		// Test 0: Single term, plain ASCII.
+		{In: "marathon", Want: "marathon*"},
+		// Test 1: Multi-word query becomes multiple prefix terms (FTS5 AND).
+		{In: "Battle of Cannae", Want: "Battle* of* Cannae*"},
+		// Test 2: Empty query stays empty.
 		{In: ``, Want: ``},
-		{In: `quote " inside`, Want: `"quote" """" "inside"`},
+		// Test 3: Operator characters get stripped so a stray quote can
+		// not escape into the FTS grammar.
+		{In: `quote " inside`, Want: `quote* inside*`},
+		// Test 4: Partial spellings still produce a useful query.
+		{In: "falluja", Want: "falluja*"},
+		// Test 5: Hyphenated terms tokenize on the hyphen so "salah-ad-din"
+		// matches each fragment independently.
+		{In: "salah-ad-din", Want: "salah* ad* din*"},
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("test %d", i), func(t *testing.T) {

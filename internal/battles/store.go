@@ -74,6 +74,12 @@ func (s *Store) ByID(ctx context.Context, id string) (Battle, bool, error) {
 	}
 	b.References = refs
 
+	aliases, err := s.aliasesForBattle(ctx, b.ID)
+	if err != nil {
+		return Battle{}, false, err
+	}
+	b.Aliases = aliases
+
 	return b, true, nil
 }
 
@@ -98,6 +104,11 @@ func (s *Store) RandomVerified(ctx context.Context) (Battle, bool, error) {
 		return Battle{}, false, err
 	}
 	b.References = refs
+	aliases, err := s.aliasesForBattle(ctx, b.ID)
+	if err != nil {
+		return Battle{}, false, err
+	}
+	b.Aliases = aliases
 	return b, true, nil
 }
 
@@ -142,7 +153,15 @@ func (s *Store) List(ctx context.Context, f Filter) ([]Battle, int, error) {
 	return battles, total, nil
 }
 
-// Search performs full-text search across battle names, wars, summaries, and significance.
+// Search performs full-text search across the entire searchable corpus of
+// each battle: name, war, victor, summary, significance, era, battle type,
+// date, side names (countries / factions), and commanders. The rich index
+// is built by cleanse.rebuildRichSearch; this function only queries it.
+//
+// Diacritic folding is enabled at the tokenizer level (unicode61
+// remove_diacritics=2), so "mohacs" matches "Mohács" and "yi sun sin"
+// matches "Yi Sun-sin". sanitizeFTS adds a prefix wildcard to every term
+// so partial typing finds the full word.
 func (s *Store) Search(ctx context.Context, query string, limit, offset int) ([]Battle, int, error) {
 	if limit <= 0 {
 		limit = 50
@@ -152,8 +171,8 @@ func (s *Store) Search(ctx context.Context, query string, limit, offset int) ([]
 
 	bTrusted := trustedWarSQL("b.war")
 	countSQL := `SELECT COUNT(*) FROM battles b
-		JOIN battles_fts fts ON b.rowid = fts.rowid
-		WHERE fts.battles_fts MATCH ?
+		JOIN battles_rich_fts fts ON fts.battle_id = b.id
+		WHERE fts.blob MATCH ?
 		  AND (b.lat != 0 OR b.lng != 0)
 		  AND ` + bTrusted
 	var total int
@@ -163,8 +182,8 @@ func (s *Store) Search(ctx context.Context, query string, limit, offset int) ([]
 
 	searchSQL := `SELECT ` + prefixCols("b", battleColumns) + `
 		FROM battles b
-		JOIN battles_fts fts ON b.rowid = fts.rowid
-		WHERE fts.battles_fts MATCH ?
+		JOIN battles_rich_fts fts ON fts.battle_id = b.id
+		WHERE fts.blob MATCH ?
 		  AND (b.lat != 0 OR b.lng != 0)
 		  AND ` + bTrusted + `
 		ORDER BY b.verified DESC, rank
@@ -535,6 +554,27 @@ func findRange(s string, nums []int) ([2]int, bool) {
 	return [2]int{}, false
 }
 
+// aliasesForBattle returns the alternative names for a single battle in
+// curator-defined order. Empty slice when the battle has no aliases; never
+// returns nil error and nil slice together.
+func (s *Store) aliasesForBattle(ctx context.Context, battleID string) ([]Alias, error) {
+	rows, err := s.db.QueryContext(ctx,
+		"SELECT name, by_text FROM battle_aliases WHERE battle_id = ? ORDER BY alias_index", battleID)
+	if err != nil {
+		return nil, fmt.Errorf("query aliases for %s: %w", battleID, err)
+	}
+	defer rows.Close()
+	var aliases []Alias
+	for rows.Next() {
+		var a Alias
+		if err := rows.Scan(&a.Name, &a.By); err != nil {
+			return nil, fmt.Errorf("scan alias: %w", err)
+		}
+		aliases = append(aliases, a)
+	}
+	return aliases, rows.Err()
+}
+
 // refsForBattle returns the references for a single battle.
 func (s *Store) refsForBattle(ctx context.Context, battleID string) ([]Reference, error) {
 	rows, err := s.db.QueryContext(ctx,
@@ -616,14 +656,42 @@ func buildWhere(f Filter) (string, []any) {
 	return " WHERE " + strings.Join(conditions, " AND "), args
 }
 
-// sanitizeFTS prepares a user query for FTS5 by quoting each term.
+// sanitizeFTS prepares a user query for FTS5. Each term is stripped of
+// characters that would corrupt the query grammar, then suffixed with a
+// prefix wildcard so "falluja" matches "Fallujah" and "stalingr" matches
+// "Stalingrad". Quoting (the previous behavior) forced exact phrase
+// matching, which silently broke partial-word searches that any modern
+// search box is expected to handle.
 func sanitizeFTS(query string) string {
-	terms := strings.Fields(query)
-	quoted := make([]string, len(terms))
-	for i, t := range terms {
-		quoted[i] = `"` + strings.ReplaceAll(t, `"`, `""`) + `"`
+	// Hyphens, slashes, and underscores inside a typed query should split
+	// terms rather than corrupt them. Replace with spaces before tokenizing.
+	pre := strings.NewReplacer("-", " ", "/", " ", "_", " ").Replace(query)
+	terms := strings.Fields(pre)
+	out := make([]string, 0, len(terms))
+	for _, t := range terms {
+		var b strings.Builder
+		for _, r := range t {
+			// Keep letters, digits, apostrophes, and the Latin-1 / Latin
+			// Extended range so accented names like Mohács survive the pass.
+			// Drop everything else so FTS5 operators like ( ) " * ^ cannot
+			// escape from the user-controlled string.
+			if (r >= 'a' && r <= 'z') ||
+				(r >= 'A' && r <= 'Z') ||
+				(r >= '0' && r <= '9') ||
+				r == '\'' ||
+				(r >= 0x00C0 && r <= 0x024F) {
+				b.WriteRune(r)
+			}
+		}
+		clean := b.String()
+		if clean == "" {
+			continue
+		}
+		// Trailing wildcard for prefix match. FTS5 treats this as a real
+		// prefix search on the tokenized form.
+		out = append(out, clean+"*")
 	}
-	return strings.Join(quoted, " ")
+	return strings.Join(out, " ")
 }
 
 // scanBattles reads battle rows into a slice (without sides).

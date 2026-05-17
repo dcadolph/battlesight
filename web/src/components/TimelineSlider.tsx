@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 import type { Battle } from '../types/battle';
+import { formatYear } from '../lib/format';
 
 interface TimelineSliderProps {
   min: number;
@@ -38,11 +39,6 @@ const PILL_LABEL: Record<string, string> = {
   'world-war-2': 'WWII',
   'modern': 'Modern',
 };
-
-function formatYear(year: number): string {
-  if (year < 0) return `${Math.abs(year)} BC`;
-  return `${year}`;
-}
 
 const SERIF_DISPLAY = "'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif";
 

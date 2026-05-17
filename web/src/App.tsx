@@ -3,6 +3,7 @@ import BattleGlobe from './components/BattleGlobe';
 import TimelineSlider from './components/TimelineSlider';
 import BattlePanel from './components/BattlePanel';
 import CommandBar from './components/CommandBar';
+import EraLegend from './components/EraLegend';
 import WarPlayback from './components/WarPlayback';
 import BattleReplay from './components/replay/BattleReplay';
 import IntroOverlay from './components/IntroOverlay';
@@ -82,6 +83,12 @@ export default function App() {
   const [soundOn, setSoundOn] = useState(false);
   const rafRef = useRef<number | null>(null);
   const lastTickRef = useRef<number | null>(null);
+  // splashStartRef pins the timestamp the loading splash mounted so we can
+  // enforce a minimum visible duration. On localhost the battles fetch
+  // returns in under 100ms and the splash used to flash in and right back
+  // out before its own entrance animation finished, which read as broken.
+  const splashStartRef = useRef<number>(Date.now());
+  const [splashReady, setSplashReady] = useState(false);
 
   const fetchBattles = useCallback(() => {
     const params = new URLSearchParams();
@@ -119,6 +126,21 @@ export default function App() {
   useEffect(() => {
     fetchBattles();
   }, [fetchBattles]);
+
+  // Enforce a minimum splash time so the loading state always gets to land
+  // on screen and finish its entrance animation, even when localhost
+  // responds in 30ms. Two seconds is long enough for the eye to read the
+  // headline; not so long it feels like the app is broken on a hot reload.
+  useEffect(() => {
+    const elapsed = Date.now() - splashStartRef.current;
+    const minMs = 2000;
+    if (elapsed >= minMs) {
+      setSplashReady(true);
+      return;
+    }
+    const t = setTimeout(() => setSplashReady(true), minMs - elapsed);
+    return () => clearTimeout(t);
+  }, []);
 
   // Load featured battle for first visit / intro card.
   useEffect(() => {
@@ -373,6 +395,49 @@ export default function App() {
     firedBeatsRef.current.clear();
   }, []);
 
+  // initialWar holds a war name a search result wants WarPlayback to open
+  // on. Set by handleSearchWarSelect and consumed by the WarPlayback prop
+  // below. Cleared back to "" after WarPlayback mounts so a subsequent
+  // user-initiated open of the panel does not jump back to the last
+  // search result.
+  const [initialWar, setInitialWar] = useState('');
+
+  // handleSearchWarSelect is the wire from the search dropdown's war
+  // section to WarPlayback. Filters the globe to the war so battle dots
+  // outside the war fade, opens the war panel, and primes it on the
+  // chosen war so the user lands inside the right curated context.
+  const handleSearchWarSelect = useCallback((warName: string) => {
+    setSelectedBattle(null);
+    setIsolatedBattle(null);
+    setReplayBattle(null);
+    setReplayPhase(0);
+    setHistoryMode(false);
+    setHistoryBeat(null);
+    setFilters((f) => ({ ...f, war: warName }));
+    setInitialWar(warName);
+    setShowPlayback(true);
+  }, []);
+
+  // handleResetView is the "back to the bare globe" action exposed via the
+  // BattleTrace wordmark. Clears every transient selection so a user who
+  // has spelunked deep into a battle, war, or history sweep can get back
+  // to the cold landing globe in one click.
+  const handleResetView = useCallback(() => {
+    setSelectedBattle(null);
+    setIsolatedBattle(null);
+    setPlaybackBattles(null);
+    setShowPlayback(false);
+    setReplayBattle(null);
+    setReplayPhase(0);
+    setHistoryMode(false);
+    setHistoryPaused(false);
+    setHistoryYear(MIN_YEAR);
+    setHistoryBeat(null);
+    firedBeatsRef.current.clear();
+    setYearRange([MIN_YEAR, MAX_YEAR]);
+    setFilters({ era: '', war: '', battleType: '', quality: '' });
+  }, []);
+
   // handleHistoryScrub moves the playhead to an explicit year and rewrites
   // the fired-beats set so a beat is not fired twice (when scrubbing forward
   // past a beat we already saw) and a beat can fire again if we scrubbed
@@ -454,75 +519,111 @@ export default function App() {
     ? [MIN_YEAR, Math.floor(historyYear) + 1]
     : yearRange;
 
-  if (loading) {
+  if (loading || !splashReady) {
     return (
       <div
         className="w-full h-full flex items-center justify-center bg-[#06070d] relative overflow-hidden"
         role="status"
         aria-live="polite"
       >
-        {/* Backdrop: deep night with a soft radial bloom that reads as
-            "atmosphere coming up." No spinning element; the bloom and the
-            bar carry motion. */}
+        {/* Atmospheric bloom only; no entrance animation on the text so the
+            headline never appears half-opacity. The bloom breathes
+            independently of any state change so the eye reads "alive"
+            from the first frame. */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              'radial-gradient(ellipse at 50% 60%, rgba(122,185,255,0.22) 0%, rgba(122,185,255,0.07) 28%, transparent 60%)',
-            animation: 'splash-bloom 4400ms ease-in-out infinite',
+              'radial-gradient(ellipse at 50% 55%, rgba(147,197,253,0.18) 0%, rgba(147,197,253,0.05) 32%, transparent 65%)',
+            animation: 'splash-bloom 5000ms ease-in-out infinite',
           }}
         />
 
-        <div className="relative text-center px-8" style={{ animation: 'splash-block-in 800ms cubic-bezier(.2,.65,.25,1) both' }}>
+        <div
+          className="relative text-center px-8 mx-auto w-full max-w-[1200px]"
+          style={{ textAlign: 'center' }}
+        >
           <div
-            className="text-[10px] font-semibold uppercase tracking-[0.5em] text-sky-300/85 mb-4"
-            style={{ textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}
+            className="font-semibold uppercase mb-6"
+            style={{
+              fontSize: 11,
+              letterSpacing: '0.55em',
+              color: '#93c5fd',
+              textShadow: '0 2px 14px rgba(0,0,0,0.7), 0 0 24px rgba(147,197,253,0.35)',
+            }}
           >
-            Battle&nbsp;Trace
+            BATTLE TRACE
           </div>
+          {/* Headline: two clean lines with explicit <span> blocks per
+              line. Previously a single string with <br/> let the renderer
+              break the first line on its own ("Two thousand five" / "hundred")
+              at large viewports because the headline outgrew the container.
+              Forcing each line into its own block locks the layout. */}
           <h1
-            className="text-white leading-[1.0] tracking-tight mb-3"
+            className="leading-[0.95] tracking-tight"
             style={{
               fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif",
               fontWeight: 600,
-              fontSize: 'clamp(48px, 8vw, 96px)',
-              letterSpacing: '-0.015em',
-              textShadow: '0 8px 32px rgba(0,0,0,0.7)',
+              fontSize: 'clamp(40px, 6.4vw, 82px)',
+              letterSpacing: '-0.018em',
+              color: '#ffffff',
+              textShadow: '0 10px 40px rgba(0,0,0,0.85), 0 0 28px rgba(255,255,255,0.08)',
             }}
           >
-            Two thousand five hundred
-            <br />years of war
+            <span className="block whitespace-nowrap">Two thousand five hundred</span>
+            <span className="block whitespace-nowrap">years of war</span>
           </h1>
+          <div
+            className="mx-auto mt-8 mb-6 h-px"
+            style={{
+              width: 140,
+              background: 'linear-gradient(90deg, transparent 0%, rgba(147,197,253,0.85) 50%, transparent 100%)',
+              boxShadow: '0 0 10px rgba(147,197,253,0.6)',
+            }}
+          />
           <p
-            className="text-[14px] md:text-[15px] text-slate-300/80 italic mt-2 max-w-[60ch] mx-auto leading-relaxed"
-            style={{ fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif" }}
+            className="italic mx-auto"
+            style={{
+              fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif",
+              fontSize: 17,
+              lineHeight: 1.55,
+              color: 'rgba(226,232,240,0.92)',
+              textShadow: '0 2px 14px rgba(0,0,0,0.7)',
+              maxWidth: '92ch',
+              textAlign: 'center',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }}
           >
-            Cataloguing every battle worth remembering, from Marathon to Mariupol.
+            From Marathon to Mariupol. Every battle worth remembering, mapped, dated, and named.
           </p>
 
-          {/* Indeterminate progress bar. A bright sliver chases across a
-              hairline track. Reads as "machinery turning over" without
-              looking like a corporate page loader. */}
-          <div className="mt-10 mx-auto w-[280px] h-[2px] bg-slate-700/40 rounded-full overflow-hidden">
+          {/* Indeterminate progress sliver. Stays subtle so the headline
+              owns the frame; reads as "machinery turning over." */}
+          <div
+            className="mt-10 mx-auto rounded-full overflow-hidden"
+            style={{
+              width: 320,
+              height: 2,
+              background: 'rgba(148,163,184,0.16)',
+            }}
+          >
             <div
               className="h-full rounded-full"
               style={{
-                width: '34%',
+                width: '32%',
                 background: 'linear-gradient(90deg, transparent 0%, #93c5fd 50%, transparent 100%)',
-                animation: 'splash-progress 2200ms ease-in-out infinite',
+                animation: 'splash-progress 2400ms ease-in-out infinite',
+                boxShadow: '0 0 18px rgba(147,197,253,0.5)',
               }}
             />
           </div>
         </div>
 
         <style>{`
-          @keyframes splash-block-in {
-            from { opacity: 0; transform: translateY(14px); }
-            to   { opacity: 1; transform: translateY(0); }
-          }
           @keyframes splash-bloom {
-            0%, 100% { opacity: 0.55; transform: scale(1); }
-            50%      { opacity: 0.9;  transform: scale(1.04); }
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50%      { opacity: 0.95; transform: scale(1.05); }
           }
           @keyframes splash-progress {
             0%   { transform: translateX(-110%); }
@@ -579,6 +680,8 @@ export default function App() {
         historyActive={historyMode}
         soundOn={soundOn}
         onToggleSound={handleToggleSound}
+        onResetView={handleResetView}
+        onWarSelect={handleSearchWarSelect}
       />
 
       <BattleGlobe
@@ -589,6 +692,16 @@ export default function App() {
         dramatic={showPillars}
         atmosphereColor={activeTheme.atmosphere}
       />
+
+      {/* Era legend chip. Visible while the user is browsing the globe.
+          Hidden during history mode (the playhead and beat cards own the
+          top edge) and during replay (full-screen overlay covers it). */}
+      {!historyMode && !replayBattle && (
+        <EraLegend
+          selectedEra={filters.era}
+          onSelect={(era) => setFilters((f) => ({ ...f, era }))}
+        />
+      )}
 
       {/* Era-tinted screen vignette. A full-bleed overlay with a soft radial
           gradient that pulls the eye toward the center while staining the
@@ -638,10 +751,11 @@ export default function App() {
         <WarPlayback
           onBattleFocus={handleBattleClick}
           onBattlesLoaded={setPlaybackBattles}
-          onClose={handlePlaybackClose}
+          onClose={() => { setInitialWar(''); handlePlaybackClose(); }}
           onWarSelected={handleWarSelected}
           onPlayReplay={handleWarOpenReplay}
           onCloseReplay={handleWarCloseReplay}
+          initialWar={initialWar}
         />
       )}
 

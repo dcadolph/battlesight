@@ -206,6 +206,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           12% { opacity: 0.95; }
           100% { opacity: 0; transform: scale(4.5); }
         }
+        /* Arrow label pop-in. The label pill ramps in just before the
+           trace completes so the story arrives with the force, not after. */
+        @keyframes arrow-label-in {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
         .replay-fade-in {
           animation: fade-in 0.6s ease-out;
         }
@@ -493,30 +499,50 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         </aside>
       </div>
 
-      {/* Bottom controls */}
-      <footer className="flex items-center gap-4 px-6 py-3 border-t border-slate-800/80 bg-[#0a0d18]/90">
+      {/* Transport bar. SVG icons replace the angle-bracket and unicode play
+          glyphs the previous version used so the controls read as crafted
+          chrome rather than shareware. The active state hugs the era accent
+          so the bar coheres with everything else inside the replay. */}
+      <footer className="flex items-center gap-3 px-6 py-3 border-t border-slate-800/80 bg-[#0a0d18]/90">
         <button
           onClick={() => goto(phaseIdx - 1)}
           disabled={phaseIdx === 0}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 disabled:opacity-25"
+          className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800/80 border border-slate-700/40 text-slate-200 hover:bg-slate-700 hover:text-white disabled:opacity-25 disabled:hover:bg-slate-800/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
           title="Previous (←)"
+          aria-label="Previous chapter"
         >
-          ‹
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7.5 1.5 L3 5.5 L7.5 9.5" />
+          </svg>
         </button>
         <button
           onClick={() => setPlaying((p) => !p)}
-          className="w-11 h-11 flex items-center justify-center rounded-full bg-blue-500/25 text-blue-300 hover:bg-blue-500/40 transition-colors"
+          className="w-11 h-11 flex items-center justify-center rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0d18]"
+          style={{
+            background: `${theme.accent}33`,
+            border: `1px solid ${theme.accent}77`,
+            color: '#fff',
+            boxShadow: `0 4px 18px -6px ${theme.accent}88`,
+          }}
           title={playing ? 'Pause (Space)' : 'Play (Space)'}
+          aria-label={playing ? 'Pause' : 'Play'}
         >
-          {playing ? '⏸' : '▶'}
+          {playing ? (
+            <svg width="12" height="13" viewBox="0 0 12 13" fill="currentColor"><rect x="0.5" y="0.5" width="3.5" height="12" rx="1"/><rect x="8" y="0.5" width="3.5" height="12" rx="1"/></svg>
+          ) : (
+            <svg width="12" height="13" viewBox="0 0 12 13" fill="currentColor"><path d="M1 0.8 L1 12.2 L11 6.5 Z"/></svg>
+          )}
         </button>
         <button
           onClick={() => goto(phaseIdx + 1)}
           disabled={phaseIdx >= replay.phases.length - 1}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 disabled:opacity-25"
+          className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800/80 border border-slate-700/40 text-slate-200 hover:bg-slate-700 hover:text-white disabled:opacity-25 disabled:hover:bg-slate-800/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
           title="Next (→)"
+          aria-label="Next chapter"
         >
-          ›
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3.5 1.5 L8 5.5 L3.5 9.5" />
+          </svg>
         </button>
 
         <div className="flex-1 px-3">
@@ -526,21 +552,32 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             max={replay.phases.length - 1}
             value={phaseIdx}
             onChange={(e) => goto(parseInt(e.target.value))}
-            className="w-full accent-blue-500 h-1 bg-slate-800 rounded-full appearance-none cursor-pointer"
+            className="w-full h-1 rounded-full appearance-none cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, ${theme.accent} 0%, ${theme.accent} ${(phaseIdx / Math.max(1, replay.phases.length - 1)) * 100}%, rgba(30,33,46,0.85) ${(phaseIdx / Math.max(1, replay.phases.length - 1)) * 100}%, rgba(30,33,46,0.85) 100%)`,
+              accentColor: theme.accent,
+            }}
+            aria-label="Phase position"
           />
         </div>
 
-        <select
-          value={speed}
-          onChange={(e) => setSpeed(Number(e.target.value))}
-          className="bg-slate-800 border border-slate-700/60 rounded text-xs text-slate-300 px-2 py-1 focus:outline-none"
-          title="Playback speed"
-        >
-          <option value={0.5}>0.5×</option>
-          <option value={1}>1×</option>
-          <option value={1.5}>1.5×</option>
-          <option value={2}>2×</option>
-        </select>
+        <div className="flex items-center gap-1.5 bg-slate-800/70 border border-slate-700/40 rounded-full p-0.5">
+          {([0.5, 1, 1.5, 2] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setSpeed(s)}
+              className="h-7 px-2.5 text-[10.5px] font-semibold tracking-wide rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/50"
+              style={{
+                color: s === speed ? '#fff' : '#94a3b8',
+                background: s === speed ? `${theme.accent}33` : 'transparent',
+              }}
+              title={`Playback speed ${s}×`}
+              aria-pressed={s === speed}
+            >
+              {s}×
+            </button>
+          ))}
+        </div>
       </footer>
     </div>
   );
@@ -562,152 +599,219 @@ interface BattleOutroProps {
 }
 
 function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: BattleOutroProps) {
-  // Victor wins precedence: explicit field on the battle record. Fall back
-  // to "Decisive" attribution from the replay title if neither side claims
-  // it (most curated replays still name the winner).
   void replay;
   const victor = (battle.victor || '').trim();
   const sides = battle.sides || [];
+
+  // Extract the largest casualty figure from each side's freeform string so
+  // the outro can render a real bar chart instead of dumping prose. The
+  // comparator gives the eye a single visual signal of the cost on each
+  // side instead of a wall of commas.
+  const sideStats = sides.slice(0, 4).map((s) => {
+    const n = parseLargestNumber(s.casualties);
+    return { name: s.name, casualties: s.casualties, count: n };
+  });
+  const maxCount = sideStats.reduce((m, s) => Math.max(m, s.count), 0);
+  const isVictorName = (name: string) =>
+    !!victor && (name === battle.victor || victor.toLowerCase().includes(name.toLowerCase()));
+
   return (
     <div
       className="pointer-events-auto absolute inset-0 flex items-center justify-center px-6"
-      style={{ animation: 'outro-veil-in 720ms ease-out both' }}
+      style={{ animation: 'outro-veil-in 600ms ease-out both' }}
     >
+      {/* Dual-layer backdrop. First layer is a near-black wash that drops the
+          underlying globe to a faint silhouette so the type owns the frame.
+          Second is a wide era-accent bloom that pulls the eye to the center
+          without flashing color. */}
       <div
         className="absolute inset-0"
         style={{
-          background: `radial-gradient(ellipse at center, ${theme.accent}10 0%, rgba(7,9,18,0.78) 60%, rgba(7,9,18,0.88) 100%)`,
-          backdropFilter: 'blur(6px)',
-          animation: 'outro-bg-fade 720ms ease-out both',
+          background: 'rgba(4,6,12,0.86)',
+          backdropFilter: 'blur(10px)',
+          animation: 'outro-veil-in 600ms ease-out both',
         }}
       />
       <div
-        className="relative max-w-[640px] w-full text-center"
-        style={{ animation: 'outro-block-in 820ms cubic-bezier(.2,.65,.25,1) both' }}
-      >
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse 60% 50% at 50% 45%, ${theme.accent}22 0%, transparent 65%)`,
+          animation: 'outro-bloom-in 1400ms ease-out both',
+        }}
+      />
+
+      <div className="relative w-full max-w-[760px]">
+        {/* Top accent: a thin era-colored hairline with a soft glow, like the
+            opening of a film frame. */}
         <div
-          className="text-[11px] font-semibold uppercase tracking-[0.42em] mb-3"
-          style={{ color: theme.accent, textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}
+          className="mx-auto mb-7"
+          style={{
+            width: 86,
+            height: 1,
+            background: `linear-gradient(90deg, transparent 0%, ${theme.accent} 50%, transparent 100%)`,
+            boxShadow: `0 0 10px ${theme.accent}aa`,
+            animation: 'outro-line-in 700ms 80ms ease-out both',
+          }}
+        />
+
+        <div
+          className="text-center text-[10.5px] font-semibold uppercase tracking-[0.5em] mb-5"
+          style={{
+            color: theme.accent,
+            textShadow: '0 2px 14px rgba(0,0,0,0.7)',
+            animation: 'outro-text-rise 700ms 180ms cubic-bezier(.2,.7,.25,1) both',
+          }}
         >
           The smoke clears
         </div>
 
         {victor ? (
-          <>
-            <div
-              className="text-white leading-[1.04] tracking-tight"
+          <div
+            className="text-center"
+            style={{ animation: 'outro-text-rise 780ms 320ms cubic-bezier(.2,.7,.25,1) both' }}
+          >
+            <h2
+              className="text-white leading-[0.98] tracking-tight mx-auto"
               style={{
                 fontFamily: theme.titleFont,
                 fontWeight: 600,
-                fontSize: 'clamp(34px, 5.8vw, 64px)',
-                letterSpacing: '-0.01em',
-                textShadow: '0 6px 32px rgba(0,0,0,0.7)',
+                fontSize: 'clamp(36px, 5.2vw, 72px)',
+                letterSpacing: '-0.015em',
+                textShadow: '0 8px 36px rgba(0,0,0,0.8)',
+                maxWidth: '22ch',
               }}
             >
               {victor}
+            </h2>
+            <div className="mt-3 text-[11px] tracking-[0.42em] uppercase text-slate-400/90">
+              <span style={{ color: theme.accent }}>prevails at</span>
+              <span className="text-slate-300 ml-2">{battle.name}</span>
             </div>
-            <div className="mt-1 text-[12px] tracking-[0.32em] uppercase text-slate-300/85">
-              prevails at {battle.name}
-            </div>
-          </>
+          </div>
         ) : (
           <div
-            className="text-white leading-[1.04] tracking-tight"
-            style={{
-              fontFamily: theme.titleFont,
-              fontWeight: 600,
-              fontSize: 'clamp(30px, 4.6vw, 52px)',
-              letterSpacing: '-0.01em',
-              textShadow: '0 6px 32px rgba(0,0,0,0.7)',
-            }}
+            className="text-center"
+            style={{ animation: 'outro-text-rise 780ms 320ms cubic-bezier(.2,.7,.25,1) both' }}
           >
-            {battle.name} ends
+            <h2
+              className="text-white leading-[0.98] tracking-tight mx-auto"
+              style={{
+                fontFamily: theme.titleFont,
+                fontWeight: 600,
+                fontSize: 'clamp(30px, 4.4vw, 60px)',
+                letterSpacing: '-0.015em',
+                textShadow: '0 8px 36px rgba(0,0,0,0.8)',
+                maxWidth: '22ch',
+              }}
+            >
+              {battle.name} ends
+            </h2>
           </div>
         )}
 
-        <div
-          className="mx-auto mt-5 mb-4 h-px"
-          style={{
-            width: 140,
-            background: `linear-gradient(90deg, transparent 0%, ${theme.accent} 50%, transparent 100%)`,
-          }}
-        />
-
-        {sides.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-[540px] mx-auto mb-5 text-left">
-            {sides.slice(0, 4).map((s, i) => {
-              const isVictor = victor && s.name === battle.victor;
-              return (
-                <div
-                  key={`${i}-${s.name}`}
-                  className="rounded-lg px-3 py-2.5 border"
-                  style={{
-                    borderColor: isVictor ? `${theme.accent}66` : 'rgba(148,163,184,0.18)',
-                    background: isVictor ? `${theme.accent}10` : 'rgba(15,18,28,0.55)',
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="text-[13px] font-semibold text-white truncate"
-                      title={s.name}
-                    >
-                      {s.name}
-                    </span>
-                    {isVictor && (
+        {/* Casualty roll. When at least one side has a parseable count we
+            render proportional bars so the cost reads as a comparison at a
+            glance. Otherwise fall back to a clean two-up label/quote layout. */}
+        {sideStats.length > 0 && (
+          <div
+            className="mx-auto mt-8 max-w-[540px]"
+            style={{ animation: 'outro-text-rise 780ms 560ms cubic-bezier(.2,.7,.25,1) both' }}
+          >
+            <div className="text-[10px] uppercase tracking-[0.42em] text-slate-500 mb-3 text-center">
+              Casualty&nbsp;roll
+            </div>
+            <div className="space-y-2.5">
+              {sideStats.map((s, i) => {
+                const winner = isVictorName(s.name);
+                const pct = maxCount > 0 && s.count > 0
+                  ? Math.max(6, Math.min(100, (s.count / maxCount) * 100))
+                  : 0;
+                return (
+                  <div key={`${i}-${s.name}`} className="text-left">
+                    <div className="flex items-baseline justify-between gap-3 mb-1">
                       <span
-                        className="text-[9px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded-full"
-                        style={{ color: theme.accent, background: `${theme.accent}26` }}
+                        className="text-[13px] font-semibold text-white truncate"
+                        style={{ maxWidth: '60%' }}
+                        title={s.name}
                       >
-                        Victor
+                        {s.name}
                       </span>
+                      <span
+                        className="text-[12px] tabular-nums"
+                        style={{ color: winner ? theme.accent : '#cbd5e1' }}
+                      >
+                        {s.count > 0 ? formatCompactCasualties(s.count, s.casualties) : (s.casualties || 'Casualties unknown')}
+                      </span>
+                    </div>
+                    {pct > 0 && (
+                      <div
+                        className="h-[3px] rounded-full overflow-hidden"
+                        style={{ background: 'rgba(148,163,184,0.12)' }}
+                      >
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${pct}%`,
+                            background: winner
+                              ? `linear-gradient(90deg, ${theme.accent}66, ${theme.accent})`
+                              : 'linear-gradient(90deg, rgba(148,163,184,0.4), rgba(148,163,184,0.85))',
+                            boxShadow: winner ? `0 0 10px ${theme.accent}66` : 'none',
+                            animation: `outro-bar-grow 900ms ${720 + i * 90}ms cubic-bezier(.25,.7,.25,1) both`,
+                          }}
+                        />
+                      </div>
                     )}
                   </div>
-                  <div className="mt-1 text-[11px] text-slate-400">
-                    {s.casualties ? (
-                      <>Casualties · <span className="text-slate-200">{s.casualties}</span></>
-                    ) : (
-                      <span className="text-slate-500">Casualties unknown</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
 
         {battle.significance && (
           <p
-            className="text-[14px] leading-[1.6] text-slate-200/90 mx-auto mb-6 max-w-[58ch]"
+            className="text-[14.5px] leading-[1.65] text-slate-200/90 mx-auto mt-8 max-w-[58ch] text-center"
             style={{
               fontFamily: theme.titleFont,
               fontStyle: 'italic',
-              textShadow: '0 2px 12px rgba(0,0,0,0.5)',
+              textShadow: '0 2px 14px rgba(0,0,0,0.55)',
+              animation: 'outro-text-rise 800ms 1100ms cubic-bezier(.2,.7,.25,1) both',
             }}
           >
             {battle.significance}
           </p>
         )}
 
-        <div className="flex items-center justify-center gap-2.5">
+        <div
+          className="mt-9 flex items-center justify-center gap-3"
+          style={{ animation: 'outro-text-rise 700ms 1380ms cubic-bezier(.2,.7,.25,1) both' }}
+        >
           <button
             type="button"
             onClick={onRestart}
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-[13px] font-semibold tracking-wide border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
+            className="inline-flex items-center gap-2 h-11 px-6 rounded-full text-[13px] font-semibold tracking-wide border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02]"
             style={{
               color: theme.accent,
               borderColor: `${theme.accent}66`,
-              background: `${theme.accent}1a`,
+              background: `${theme.accent}14`,
             }}
           >
-            ⟲ Replay from start
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1.5 6 A4.5 4.5 0 1 1 6 10.5" />
+              <path d="M1.5 3 L1.5 6 L4.5 6" />
+            </svg>
+            Replay from start
           </button>
           <button
             type="button"
             onClick={onBackToStory}
             autoFocus
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-[13px] font-semibold tracking-wide bg-white text-slate-900 hover:bg-slate-100 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
+            className="inline-flex items-center gap-2 h-11 px-6 rounded-full text-[13px] font-semibold tracking-wide bg-white text-slate-900 hover:bg-slate-100 transition-all shadow-[0_8px_24px_-8px_rgba(255,255,255,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02]"
           >
             Back to the story
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 1.5 L8.5 6 L4 10.5" />
+            </svg>
           </button>
         </div>
       </div>
@@ -717,17 +821,57 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
           from { opacity: 0; }
           to   { opacity: 1; }
         }
-        @keyframes outro-bg-fade {
-          from { opacity: 0; backdrop-filter: blur(0px); }
-          to   { opacity: 1; backdrop-filter: blur(6px); }
+        @keyframes outro-bloom-in {
+          from { opacity: 0; transform: scale(0.94); }
+          to   { opacity: 1; transform: scale(1); }
         }
-        @keyframes outro-block-in {
-          from { opacity: 0; transform: translateY(18px) scale(0.97); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes outro-line-in {
+          from { opacity: 0; transform: scaleX(0); }
+          to   { opacity: 1; transform: scaleX(1); }
+        }
+        @keyframes outro-text-rise {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes outro-bar-grow {
+          from { width: 0%; }
         }
       `}</style>
     </div>
   );
+}
+
+// parseLargestNumber pulls the biggest comma-separated integer it can find
+// out of freeform casualty prose. Caps at 10M to skip page numbers and
+// stray reference markers. Returns 0 when nothing parses cleanly.
+function parseLargestNumber(s: string | undefined): number {
+  if (!s) return 0;
+  const matches = s.replace(/,/g, '').match(/\d+/g);
+  if (!matches) return 0;
+  let best = 0;
+  for (const m of matches) {
+    const n = parseInt(m, 10);
+    if (n > best && n <= 10_000_000) best = n;
+  }
+  return best;
+}
+
+// formatCompactCasualties formats a parsed casualty count for the outro
+// header. Mirrors thousands-shortening conventions so 117871 renders as
+// "117k" rather than dominating the line. Includes the original prose in
+// the title attribute via the calling site if needed.
+function formatCompactCasualties(count: number, _raw: string): string {
+  void _raw;
+  if (count >= 1_000_000) {
+    return `${(count / 1_000_000).toFixed(count >= 10_000_000 ? 0 : 1)}M casualties`;
+  }
+  if (count >= 10_000) {
+    return `${Math.round(count / 1000).toLocaleString()}k casualties`;
+  }
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}k casualties`;
+  }
+  return `${count.toLocaleString()} casualties`;
 }
 
 // NarrationReveal renders phase narration word-by-word with a soft fade so

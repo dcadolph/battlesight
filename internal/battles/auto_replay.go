@@ -198,12 +198,28 @@ func schematicDeployment(b Battle, a, bSide Side, unitType string, terrain []Ter
 	}
 }
 
-// schematicEngagement is the second phase: forces meet.
+// schematicEngagement is the second phase: forces meet. Narration is
+// composed sentence-by-sentence so two commanders read as a clean two-line
+// rather than a comma-stuffed run. The lead commander gets pulled out so
+// the prose drops names where it has them and stays generic otherwise.
 func schematicEngagement(a, bSide Side, unitType string) Phase {
 	narration := "Both sides close to engagement range. Lines meet near the center of the field."
-	if a.Commander != "" && bSide.Commander != "" {
-		narration = fmt.Sprintf("Lines under %s and %s close to engagement range and meet near the center of the field.",
-			a.Commander, bSide.Commander)
+	switch {
+	case a.Commander != "" && bSide.Commander != "":
+		narration = fmt.Sprintf(
+			"%s closes on %s. Lines meet near the center of the field.",
+			a.Commander, bSide.Commander,
+		)
+	case a.Commander != "":
+		narration = fmt.Sprintf(
+			"%s presses forward. Lines meet near the center of the field.",
+			a.Commander,
+		)
+	case bSide.Commander != "":
+		narration = fmt.Sprintf(
+			"%s holds the line. The opposing force closes to engagement range.",
+			bSide.Commander,
+		)
 	}
 	return Phase{
 		Title:      "Engagement",
@@ -222,13 +238,16 @@ func schematicEngagement(a, bSide Side, unitType string) Phase {
 }
 
 // schematicOutcome is the final phase: victor advances, loser broken.
+// Narration is composed sentence-by-sentence rather than concatenating raw
+// casualty strings, so a plural victor like "United States and allies"
+// does not produce "...carries the field" and so multi-side casualty
+// figures land as clean sentences rather than a semicolon-separated run.
 func schematicOutcome(b Battle, a, bSide Side, unitType string) Phase {
 	loserStatus := "broken"
-	winnerNote := "carries the field"
 	if b.Victor == "" {
 		return Phase{
 			Title:      "Outcome",
-			Narration:  "The action concludes; the engagement is recorded as indecisive in the available record.",
+			Narration:  "The action concludes. The engagement is recorded as indecisive in the available sources.",
 			TimeMarker: "End of action",
 			DurationMs: 5000,
 			Units: []Unit{
@@ -237,19 +256,21 @@ func schematicOutcome(b Battle, a, bSide Side, unitType string) Phase {
 			},
 		}
 	}
-	narration := fmt.Sprintf("%s %s.", b.Victor, winnerNote)
-	if a.Casualties != "" || bSide.Casualties != "" {
-		var cas []string
-		if a.Casualties != "" {
-			cas = append(cas, fmt.Sprintf("%s casualties for %s", a.Casualties, shortFaction(a)))
-		}
-		if bSide.Casualties != "" {
-			cas = append(cas, fmt.Sprintf("%s for %s", bSide.Casualties, shortFaction(bSide)))
-		}
-		if len(cas) > 0 {
-			narration += " " + strings.Join(cas, "; ") + "."
-		}
+
+	// Verb that works whether the subject is singular ("Hannibal") or plural
+	// ("United States and allies"). "holds the field" reads as both.
+	narration := fmt.Sprintf("%s holds the field.", strings.TrimSpace(b.Victor))
+
+	// Casualty roll, one sentence per side. Pull a parsed number when we
+	// can so the prose reads "About 95,000 men lost." rather than dumping
+	// the freeform casualty string into the line.
+	if line := casualtySentence(a); line != "" {
+		narration += " " + line
 	}
+	if line := casualtySentence(bSide); line != "" {
+		narration += " " + line
+	}
+
 	return Phase{
 		Title:      "Outcome",
 		Narration:  narration,
@@ -266,30 +287,166 @@ func schematicOutcome(b Battle, a, bSide Side, unitType string) Phase {
 	}
 }
 
+// casualtySentence renders one side's casualty figure as a single clean
+// sentence for the outcome narration. Returns "" when the side has no
+// parseable casualty data so the caller can skip cleanly.
+//
+// Number extraction reads the largest plausible integer out of the raw
+// freeform casualty string (capped at 10M to skip page numbers and noise).
+// The prose form swallows "1,200-2,000 killed, ~1,500 captured" into
+// "About 2,000 men lost" rather than reprinting all of it.
+func casualtySentence(s Side) string {
+	name := shortFaction(s)
+	if name == "" {
+		return ""
+	}
+	count := parseLargestCasualtyNumber(s.Casualties)
+	if count > 0 {
+		return fmt.Sprintf("%s lost about %s.", name, humanizeCount(count))
+	}
+	return ""
+}
+
+// parseLargestCasualtyNumber pulls the biggest comma-separated integer in
+// the freeform casualty string. Caps at 10M to skip page numbers and stray
+// reference markers; returns 0 if nothing parses.
+func parseLargestCasualtyNumber(s string) int {
+	if s == "" {
+		return 0
+	}
+	cleaned := strings.ReplaceAll(s, ",", "")
+	var best int
+	var run strings.Builder
+	flush := func() {
+		if run.Len() == 0 {
+			return
+		}
+		var n int
+		fmt.Sscanf(run.String(), "%d", &n)
+		if n > best && n <= 10_000_000 {
+			best = n
+		}
+		run.Reset()
+	}
+	for _, r := range cleaned {
+		if r >= '0' && r <= '9' {
+			run.WriteRune(r)
+			continue
+		}
+		flush()
+	}
+	flush()
+	return best
+}
+
+// humanizeCount renders a count for narration prose. 117871 becomes
+// "117,000 men", 95 stays "95 men". The "men" suffix is generic across
+// eras; "soldiers" would feel wrong for Marathon and "troops" wrong for
+// Cannae.
+func humanizeCount(n int) string {
+	if n >= 1_000_000 {
+		return fmt.Sprintf("%.1f million men", float64(n)/1_000_000)
+	}
+	if n >= 10_000 {
+		// Round to nearest thousand for readability.
+		rounded := (n / 1000) * 1000
+		return fmt.Sprintf("%s men", commaInt(rounded))
+	}
+	if n >= 1000 {
+		return fmt.Sprintf("%s men", commaInt(n))
+	}
+	return fmt.Sprintf("%d men", n)
+}
+
+// commaInt formats an integer with thousands separators. Avoids pulling in
+// golang.org/x/text/message for one call site.
+func commaInt(n int) string {
+	in := fmt.Sprintf("%d", n)
+	if len(in) <= 3 {
+		return in
+	}
+	var out strings.Builder
+	rem := len(in) % 3
+	if rem > 0 {
+		out.WriteString(in[:rem])
+		if len(in) > rem {
+			out.WriteString(",")
+		}
+	}
+	for i := rem; i < len(in); i += 3 {
+		out.WriteString(in[i : i+3])
+		if i+3 < len(in) {
+			out.WriteString(",")
+		}
+	}
+	return out.String()
+}
+
 // buildDeploymentNarration writes the opening narration using whatever side
-// metadata is available.
+// metadata is available. Composed as discrete sentences (no semicolons, no
+// parenthetical-soup) so a side with both strength and commander reads as
+// "Athens fields 10,000 men. Miltiades commands." rather than as a
+// run-on. Parses strength to a number when possible so the prose reads
+// "about 10,000 men" not "10,000 (Miltiades)".
 func buildDeploymentNarration(b Battle, a, bSide Side) string {
-	parts := []string{}
 	left := shortFaction(a)
 	right := shortFaction(bSide)
-	if a.Strength != "" && bSide.Strength != "" {
-		parts = append(parts, fmt.Sprintf("%s (%s) faces %s (%s).", left, a.Strength, right, bSide.Strength))
-	} else if a.Strength != "" {
-		parts = append(parts, fmt.Sprintf("%s deploys %s opposite %s.", left, a.Strength, right))
-	} else if bSide.Strength != "" {
-		parts = append(parts, fmt.Sprintf("%s deploys against %s (%s).", left, right, bSide.Strength))
-	} else if right != "" {
-		parts = append(parts, fmt.Sprintf("%s deploys opposite %s.", left, right))
-	} else if left != "" {
+	var parts []string
+
+	// Opening: who faces whom. Drops cleanly when names are missing.
+	switch {
+	case left != "" && right != "":
+		parts = append(parts, fmt.Sprintf("%s faces %s.", left, right))
+	case left != "":
 		parts = append(parts, fmt.Sprintf("%s takes the field.", left))
-	}
-	if a.Commander != "" && bSide.Commander != "" {
-		parts = append(parts, fmt.Sprintf("Commanded by %s and %s respectively.", a.Commander, bSide.Commander))
-	}
-	if len(parts) == 0 {
+	case right != "":
+		parts = append(parts, fmt.Sprintf("%s holds the field against an approaching enemy.", right))
+	default:
 		parts = append(parts, "Both sides take the field.")
 	}
+
+	// Strength sentences. One per side when known. parseLargestCasualtyNumber
+	// also reads strength strings since both are freeform integers with
+	// commas and surrounding prose; the function name speaks of casualties
+	// but the parser is generic.
+	if line := strengthSentence(left, a.Strength); line != "" {
+		parts = append(parts, line)
+	}
+	if line := strengthSentence(right, bSide.Strength); line != "" {
+		parts = append(parts, line)
+	}
+
+	// Commander sentence. Single line in both directions so we are not
+	// rendering "Commanded by X and Y respectively." which always reads
+	// awkward when one commander is unknown.
+	switch {
+	case a.Commander != "" && bSide.Commander != "":
+		parts = append(parts, fmt.Sprintf("%s commands against %s.", a.Commander, bSide.Commander))
+	case a.Commander != "":
+		parts = append(parts, fmt.Sprintf("%s commands.", a.Commander))
+	case bSide.Commander != "":
+		parts = append(parts, fmt.Sprintf("%s commands the defence.", bSide.Commander))
+	}
+
+	// b is unused beyond the side data above; reference it so the linter
+	// stays quiet without changing the function signature.
+	_ = b
+
 	return strings.Join(parts, " ")
+}
+
+// strengthSentence renders one side's troop strength as a single clean
+// sentence. Returns "" when there is no parseable number so the caller can
+// drop the line entirely rather than emit "Athens deploys ." with a blank.
+func strengthSentence(name, strength string) string {
+	if name == "" || strength == "" {
+		return ""
+	}
+	count := parseLargestCasualtyNumber(strength)
+	if count > 0 {
+		return fmt.Sprintf("%s fields about %s.", name, humanizeCount(count))
+	}
+	return ""
 }
 
 // factionDisplay returns the cleaned faction name, falling back to "" if

@@ -25050,5 +25050,626 @@
         ]
       }
     ]
+  },
+
+  "sekigahara-1600": {
+    "title": "Sekigahara: The Defection at Noon",
+    "intro": "Twenty-first of October, 1600. Tokugawa Ieyasu marches the Eastern Army into a narrow pass in Mino province where Ishida Mitsunari's Western Army has held the heights since before dawn. Eighty thousand men on each side. Fog so thick on the floor of the pass that the lines cannot see each other at first light. The Western Army holds the better ground. The Eastern Army holds something more useful. A letter, signed weeks earlier, from one of the Western generals.",
+    "battlefieldDesc": "The Sekigahara pass on the Nakasendō highway. Wooded mountains close on the north, Mount Matsuo dominates the southern flank. The road runs east to west along the floor.",
+    "aspectRatio": 1.6,
+    "extentLatDeg": 0.07,
+    "extentLngDeg": 0.07,
+    "factionA": "Eastern Army (Tokugawa)",
+    "factionB": "Western Army (Ishida)",
+    "phases": [
+      {
+        "title": "Deployment in the Fog",
+        "timeMarker": "Before dawn",
+        "narration": "Ishida posts his army across the northern heights and along the southern slope of Mount Matsuo. Kobayakawa Hideaki takes Matsuo with fifteen thousand men. Ōtani Yoshitsugu, sickly and carried in a litter, sits at the base of Matsuo with five thousand. The Eastern Army arrives in column and deploys along the floor of the pass before the fog has begun to lift.",
+        "durationMs": 6500,
+        "cameraAltitude": 0.2,
+        "units": [
+          { "label": "Ishida Mitsunari, Western centre", "faction": "b", "unitType": "infantry", "x": 30, "y": 28, "w": 8, "h": 6, "strength": 3, "status": "pressing" },
+          { "label": "Ukita Hideie, Western left-centre", "faction": "b", "unitType": "infantry", "x": 44, "y": 32, "w": 8, "h": 6, "strength": 3 },
+          { "label": "Ōtani Yoshitsugu at Matsuo's foot", "faction": "b", "unitType": "infantry", "x": 64, "y": 42, "w": 6, "h": 6, "strength": 2 },
+          { "label": "Kobayakawa Hideaki on Mount Matsuo", "faction": "b", "unitType": "command", "x": 80, "y": 30, "w": 8, "h": 8, "strength": 3 },
+          { "label": "Shimazu Yoshihiro on the Western left", "faction": "b", "unitType": "cavalry", "x": 22, "y": 38, "w": 6, "h": 6, "strength": 2 },
+          { "label": "Ii Naomasa, Eastern vanguard", "faction": "a", "unitType": "cavalry", "x": 36, "y": 70, "w": 7, "h": 6, "strength": 3, "status": "pressing" },
+          { "label": "Tokugawa Ieyasu, Eastern centre", "faction": "a", "unitType": "command", "x": 50, "y": 80, "w": 9, "h": 7, "strength": 4 },
+          { "label": "Honda Tadakatsu, Eastern right", "faction": "a", "unitType": "cavalry", "x": 64, "y": 70, "w": 7, "h": 6, "strength": 3 }
+        ],
+        "movements": []
+      },
+      {
+        "title": "The Lines Close",
+        "timeMarker": "Around 8 AM",
+        "narration": "The fog burns off. Ii Naomasa, who has been forbidden the honour of opening the battle, fires the first matchlock anyway. Eastern infantry advances up the floor of the pass. Ukita and the Western centre charge down to meet them. The action becomes general within the hour.",
+        "durationMs": 6500,
+        "cameraAltitude": 0.18,
+        "units": [
+          { "label": "Eastern infantry advancing", "faction": "a", "unitType": "infantry", "x": 40, "y": 60, "w": 18, "h": 6, "strength": 3, "status": "pressing" },
+          { "label": "Western centre, descending", "faction": "b", "unitType": "infantry", "x": 40, "y": 42, "w": 18, "h": 6, "strength": 3, "status": "pressing" },
+          { "label": "Kobayakawa, holding on Matsuo", "faction": "b", "unitType": "command", "x": 80, "y": 30, "w": 8, "h": 8, "strength": 3 }
+        ],
+        "movements": [
+          { "faction": "a", "fromX": 36, "fromY": 70, "toX": 40, "toY": 55, "kind": "charge", "label": "Ii Naomasa fires the first shot" },
+          { "faction": "b", "fromX": 30, "fromY": 28, "toX": 38, "toY": 50, "kind": "charge", "label": "Ukita charges down the slope" }
+        ]
+      },
+      {
+        "title": "Indecisive Hours",
+        "timeMarker": "Mid-morning to noon",
+        "narration": "The lines grind against each other in the centre. Shimazu refuses to advance from the Western left. Mōri, posted in the far rear, never moves. A letter from Tokugawa has bought his neutrality. On Mount Matsuo, Kobayakawa watches and does nothing. Tokugawa, growing impatient, orders his arquebusiers to fire a volley up the slope. It is a signal, not an attack.",
+        "durationMs": 6500,
+        "cameraAltitude": 0.18,
+        "units": [
+          { "label": "Shimazu, refusing the order", "faction": "b", "unitType": "cavalry", "x": 18, "y": 38, "w": 6, "h": 6, "strength": 2 },
+          { "label": "Mōri Hidemoto, neutralised in the rear", "faction": "b", "unitType": "infantry", "x": 88, "y": 20, "w": 6, "h": 6, "strength": 2, "status": "broken" },
+          { "label": "Kobayakawa, still watching", "faction": "b", "unitType": "command", "x": 80, "y": 30, "w": 8, "h": 8, "strength": 3 },
+          { "label": "Tokugawa's volley signal", "faction": "a", "unitType": "infantry", "x": 60, "y": 75, "w": 6, "h": 6, "strength": 3, "status": "pressing" }
+        ],
+        "movements": [
+          { "faction": "a", "fromX": 60, "fromY": 75, "toX": 76, "toY": 34, "kind": "charge", "label": "Volley fired up Mount Matsuo to force the issue" }
+        ]
+      },
+      {
+        "title": "Kobayakawa Defects",
+        "timeMarker": "Around noon",
+        "narration": "Kobayakawa orders his fifteen thousand down the southern slope of Mount Matsuo. They do not attack the Eastern Army. They attack Ōtani. The man Kobayakawa had been ordered to support all morning watches the army he had been promised charge into his flank.",
+        "durationMs": 7000,
+        "cameraAltitude": 0.16,
+        "units": [
+          { "label": "Ōtani, betrayed at the foot of Matsuo", "faction": "b", "unitType": "infantry", "x": 64, "y": 42, "w": 6, "h": 6, "strength": 1, "status": "broken" },
+          { "label": "Kobayakawa, switching sides", "faction": "a", "unitType": "cavalry", "x": 72, "y": 36, "w": 8, "h": 8, "strength": 4, "status": "pressing" }
+        ],
+        "movements": [
+          { "faction": "a", "fromX": 80, "fromY": 30, "toX": 66, "toY": 42, "kind": "charge", "label": "Kobayakawa charges Ōtani's flank" }
+        ]
+      },
+      {
+        "title": "Collapse",
+        "timeMarker": "Afternoon",
+        "narration": "Ōtani holds for an hour against the new attack from the side, then is overwhelmed. With his position taken, the Western centre is unhinged. Ishida's army dissolves westward through the Nakasendō pass. Shimazu cuts an immortal retreat straight through the Eastern lines and rides home. Ishida, captured days later, is executed in Kyoto. Tokugawa Ieyasu has won Japan.",
+        "durationMs": 7000,
+        "cameraAltitude": 0.2,
+        "units": [
+          { "label": "Eastern Army holds the field", "faction": "a", "unitType": "infantry", "x": 50, "y": 50, "w": 30, "h": 12, "strength": 4, "status": "pressing" },
+          { "label": "Western remnants", "faction": "b", "unitType": "infantry", "x": 16, "y": 36, "w": 8, "h": 6, "strength": 1, "status": "broken" }
+        ],
+        "movements": [
+          { "faction": "b", "fromX": 30, "fromY": 30, "toX": 4, "toY": 30, "kind": "rout", "label": "Western collapse westward down the pass" },
+          { "faction": "b", "fromX": 22, "fromY": 38, "toX": 96, "toY": 86, "kind": "retreat", "label": "Shimazu rides through the Eastern lines" }
+        ]
+      }
+    ]
+  },
+
+  "mariupol-2022": {
+    "title": "Mariupol: Eighty-Two Days",
+    "intro": "Late February 2022. Russian and DPR columns converge on the port city from Donetsk to the east and Crimea to the west. The ring closes by the first of March. Eighty-two days later the last defenders walk out of an underground steel plant on the eastern edge of the city. By then the city is a ruin.",
+    "battlefieldDesc": "Mariupol on the Sea of Azov. Port and rail yards on the southern shoreline, residential districts north of the centre, Azovstal steelworks at the south-east edge against the Kalmius river.",
+    "aspectRatio": 1.4,
+    "extentLatDeg": 0.18,
+    "extentLngDeg": 0.18,
+    "factionA": "Russia and Donetsk People's Republic",
+    "factionB": "Ukraine",
+    "phases": [
+      {
+        "title": "The Ring Closes",
+        "timeMarker": "24 February – 2 March",
+        "narration": "Russian armour rolls west out of Donetsk while naval infantry pushes east from Berdyansk and Crimea. The two columns meet north of the city in the first days of March. Mariupol's land corridor to the rest of Ukraine is cut. The siege begins.",
+        "durationMs": 6500,
+        "cameraAltitude": 0.28,
+        "units": [
+          {
+            "label": "Mariupol garrison",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 50,
+            "w": 24,
+            "h": 16,
+            "strength": 4,
+            "status": "pressing"
+          }
+        ],
+        "movements": [
+          {
+            "faction": "a",
+            "fromX": 95,
+            "fromY": 50,
+            "toX": 70,
+            "toY": 45,
+            "kind": "advance",
+            "label": "DPR column from Donetsk"
+          },
+          {
+            "faction": "a",
+            "fromX": 5,
+            "fromY": 55,
+            "toX": 32,
+            "toY": 55,
+            "kind": "advance",
+            "label": "Naval infantry from Crimea"
+          },
+          {
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 8,
+            "toX": 50,
+            "toY": 30,
+            "kind": "flank",
+            "label": "Northern axis closes the ring"
+          }
+        ]
+      },
+      {
+        "title": "Block by Block",
+        "timeMarker": "March",
+        "narration": "Artillery and air strikes walk in from every cardinal direction. The Drama Theatre, marked DETI (children) on its roof, is bombed on the sixteenth of March with hundreds sheltering inside. The Mariupol Hospital is hit days earlier. Ukrainian Azov Regiment and 36th Marine Brigade trade fire down arterial roads in armoured fighting vehicles and on foot. The civilian death toll begins to be counted in the thousands.",
+        "durationMs": 7000,
+        "cameraAltitude": 0.24,
+        "units": [
+          {
+            "label": "Ukrainian defenders, centre",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 50,
+            "w": 20,
+            "h": 12,
+            "strength": 3,
+            "status": "pressing"
+          },
+          {
+            "label": "Russian armour, north",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 50,
+            "y": 22,
+            "w": 16,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "Russian armour, west",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 22,
+            "y": 50,
+            "w": 6,
+            "h": 14,
+            "strength": 3
+          },
+          {
+            "label": "Russian armour, east",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 78,
+            "y": 50,
+            "w": 6,
+            "h": 14,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 22,
+            "toX": 50,
+            "toY": 42,
+            "kind": "charge",
+            "label": "Northern axis presses into the centre"
+          },
+          {
+            "faction": "a",
+            "fromX": 22,
+            "fromY": 50,
+            "toX": 38,
+            "toY": 50,
+            "kind": "charge",
+            "label": "Western advance into residential blocks"
+          },
+          {
+            "faction": "a",
+            "fromX": 78,
+            "fromY": 50,
+            "toX": 62,
+            "toY": 50,
+            "kind": "charge",
+            "label": "Eastern advance from Sartana"
+          }
+        ]
+      },
+      {
+        "title": "Into Azovstal",
+        "timeMarker": "April",
+        "narration": "The Ukrainian command consolidates inside the Azovstal steelworks at the south-east edge of the city. The plant is a sprawling Soviet-era complex of bunkers, galleries, and underground passages built deep enough that no surface-launched munition reaches the lowest levels. Civilians shelter in the same tunnels. Russian forces seal the perimeter and shift to bombardment.",
+        "durationMs": 6500,
+        "cameraAltitude": 0.2,
+        "units": [
+          {
+            "label": "Azov Regiment, 36th Marines inside Azovstal",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 76,
+            "y": 70,
+            "w": 14,
+            "h": 14,
+            "strength": 3,
+            "status": "pressing"
+          },
+          {
+            "label": "Russian perimeter on the plant",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 76,
+            "y": 50,
+            "w": 18,
+            "h": 6,
+            "strength": 3,
+            "status": "pressing"
+          }
+        ],
+        "movements": [
+          {
+            "faction": "b",
+            "fromX": 50,
+            "fromY": 50,
+            "toX": 74,
+            "toY": 68,
+            "kind": "withdrawal",
+            "label": "Defenders consolidate inside Azovstal"
+          },
+          {
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 38,
+            "toX": 60,
+            "toY": 55,
+            "kind": "advance",
+            "label": "Russians take the city centre"
+          }
+        ]
+      },
+      {
+        "title": "Underground",
+        "timeMarker": "Late April – Mid May",
+        "narration": "Russian air strikes target the plant for weeks. Bunker-buster munitions are reported. The defenders broadcast appeals from underground galleries with cracked ceilings and emergency lighting. Civilians are extracted under a UN- and ICRC-brokered corridor. The garrison continues to fight from the deepest levels.",
+        "durationMs": 6500,
+        "cameraAltitude": 0.18,
+        "units": [
+          {
+            "label": "Azovstal garrison, underground",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 76,
+            "y": 70,
+            "w": 12,
+            "h": 12,
+            "strength": 2,
+            "status": "pressing"
+          },
+          {
+            "label": "Russian bombardment ring",
+            "faction": "a",
+            "unitType": "artillery",
+            "x": 76,
+            "y": 50,
+            "w": 18,
+            "h": 6,
+            "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "faction": "a",
+            "fromX": 76,
+            "fromY": 50,
+            "toX": 76,
+            "toY": 68,
+            "kind": "charge",
+            "label": "Air strikes on the steelworks"
+          },
+          {
+            "faction": "a",
+            "fromX": 90,
+            "fromY": 60,
+            "toX": 80,
+            "toY": 70,
+            "kind": "charge",
+            "label": "Coastal pressure"
+          }
+        ]
+      },
+      {
+        "title": "Surrender at Azovstal",
+        "timeMarker": "16 – 20 May",
+        "narration": "Kyiv orders the garrison to stand down. Over a thousand defenders walk out of the plant under Russian guard. Many will be exchanged later. The Mariupol Drama Theatre, the maternity hospital, the apartment blocks of Prymorskyi district are all in the public record. The city has fallen. The defenders have entered the national memory.",
+        "durationMs": 6500,
+        "cameraAltitude": 0.22,
+        "units": [
+          {
+            "label": "Russia and DPR in the city",
+            "faction": "a",
+            "unitType": "armor",
+            "x": 50,
+            "y": 50,
+            "w": 30,
+            "h": 20,
+            "strength": 4
+          },
+          {
+            "label": "Azovstal garrison surrenders",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 76,
+            "y": 70,
+            "w": 12,
+            "h": 8,
+            "strength": 1,
+            "status": "broken"
+          }
+        ],
+        "movements": [
+          {
+            "faction": "b",
+            "fromX": 76,
+            "fromY": 70,
+            "toX": 92,
+            "toY": 78,
+            "kind": "withdrawal",
+            "label": "Garrison exits Azovstal under Russian escort"
+          }
+        ]
+      }
+    ]
+  },
+  "hostomel-airport-2022": {
+    "title": "Hostomel: The Airport Drop",
+    "intro": "Twenty-four February 2022. A Russian air assault force lifts from Belarus before first light and sets course for Antonov Airport at Hostomel, twenty miles north-west of Kyiv. The plan is simple. Take the apron, hold it for an hour, fly in heavy reinforcements, drive on the capital that same day. The runway has other ideas.",
+    "battlefieldDesc": "Antonov Airport, Hostomel. The apron runs east-west, the woods of Hostomel close on the north and south, the M07 highway from Kyiv lies along the east edge.",
+    "aspectRatio": 1.7,
+    "extentLatDeg": 0.05,
+    "extentLngDeg": 0.05,
+    "factionA": "Russia",
+    "factionB": "Ukraine",
+    "phases": [
+      {
+        "title": "Helicopter Strike",
+        "timeMarker": "Morning, 24 February",
+        "narration": "Thirty-four helicopters cross the Dnipro at low altitude. Ka-52 gunships peel off to suppress the Ukrainian National Guard company holding the apron while Mi-8 transports settle onto the tarmac. Paratroopers spill out, fan along the runway, and take the eastern half of the field within the hour.",
+        "durationMs": 6500,
+        "cameraAltitude": 0.22,
+        "units": [
+          {
+            "label": "National Guard 4th Brigade",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 24,
+            "y": 52,
+            "w": 12,
+            "h": 8,
+            "strength": 2,
+            "status": "pressing"
+          },
+          {
+            "label": "Ka-52 gunships",
+            "faction": "a",
+            "unitType": "aircraft",
+            "x": 50,
+            "y": 18,
+            "w": 8,
+            "h": 6,
+            "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 10,
+            "toX": 60,
+            "toY": 50,
+            "kind": "charge",
+            "label": "Mi-8 air assault lands on apron"
+          },
+          {
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 15,
+            "toX": 30,
+            "toY": 55,
+            "kind": "flank",
+            "label": "Suppressing fire on west revetments"
+          }
+        ]
+      },
+      {
+        "title": "Counter-Attack from the Woods",
+        "timeMarker": "Midday, 24 February",
+        "narration": "Ukrainian Air Assault Brigade elements race north from Kyiv on the M07 highway and dismount in the treeline east of the runway. Artillery batteries firing from positions further south register the apron. The paratroopers, dug in among the parked transport planes, find themselves pinned without the reinforcements the plan required.",
+        "durationMs": 6500,
+        "cameraAltitude": 0.2,
+        "units": [
+          {
+            "label": "VDV paratroopers",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 60,
+            "y": 52,
+            "w": 16,
+            "h": 8,
+            "strength": 3,
+            "status": "pressing"
+          },
+          {
+            "label": "4th Rapid Reaction Brigade",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 90,
+            "y": 55,
+            "w": 8,
+            "h": 10,
+            "strength": 4,
+            "status": "pressing"
+          }
+        ],
+        "movements": [
+          {
+            "faction": "b",
+            "fromX": 92,
+            "fromY": 50,
+            "toX": 72,
+            "toY": 50,
+            "kind": "charge",
+            "label": "Air Assault Brigade onto the apron"
+          },
+          {
+            "faction": "b",
+            "fromX": 75,
+            "fromY": 88,
+            "toX": 65,
+            "toY": 60,
+            "kind": "flank",
+            "label": "Flank from the southern woods"
+          }
+        ]
+      },
+      {
+        "title": "Cratering the Runway",
+        "timeMarker": "Afternoon, 24 February",
+        "narration": "Ukrainian artillery, fired from positions outside the airport, walks rounds across the tarmac. Concrete cracks, the runway lights die, the centre line opens into trenches. Whatever lifts from Pskov next will have nowhere to land.",
+        "durationMs": 6000,
+        "cameraAltitude": 0.22,
+        "units": [
+          {
+            "label": "Ukrainian artillery (off-map east)",
+            "faction": "b",
+            "unitType": "artillery",
+            "x": 96,
+            "y": 70,
+            "w": 6,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "VDV pinned on apron",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 55,
+            "y": 50,
+            "w": 18,
+            "h": 8,
+            "strength": 2,
+            "status": "broken"
+          }
+        ],
+        "movements": [
+          {
+            "faction": "b",
+            "fromX": 96,
+            "fromY": 65,
+            "toX": 55,
+            "toY": 45,
+            "kind": "charge",
+            "label": "Artillery strike on the runway"
+          },
+          {
+            "faction": "b",
+            "fromX": 96,
+            "fromY": 75,
+            "toX": 65,
+            "toY": 55,
+            "kind": "charge",
+            "label": "Artillery strike on the apron"
+          }
+        ]
+      },
+      {
+        "title": "The Night Holds",
+        "timeMarker": "Night, 24 February",
+        "narration": "Russian paratroopers consolidate at the eastern end of the field, where their helicopters still squat among the wrecked Mi-8s. Ukrainian forces hold the western half and the surrounding woods. No transport ever lands. The air bridge to Kyiv is closed before midnight.",
+        "durationMs": 6000,
+        "cameraAltitude": 0.22,
+        "units": [
+          {
+            "label": "VDV perimeter",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 65,
+            "y": 50,
+            "w": 14,
+            "h": 8,
+            "strength": 2,
+            "status": "pressing"
+          },
+          {
+            "label": "Ukrainian forces",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 50,
+            "w": 14,
+            "h": 8,
+            "strength": 3,
+            "status": "pressing"
+          },
+          {
+            "label": "Wrecked Mi-8 transports",
+            "faction": "a",
+            "unitType": "aircraft",
+            "x": 70,
+            "y": 60,
+            "w": 6,
+            "h": 5,
+            "strength": 1,
+            "status": "broken"
+          }
+        ],
+        "movements": []
+      },
+      {
+        "title": "Withdrawal Toward Bucha",
+        "timeMarker": "Late March, weeks later",
+        "narration": "Russian airborne and ground forces, never reinforced as the plan required, fall back south-east along the Bucha and Irpin axis. Ukraine reoccupies the apron and finds what is left of the Mi-8 fleet on the tarmac. The airport that was supposed to open Kyiv ended up closing it.",
+        "durationMs": 6500,
+        "cameraAltitude": 0.24,
+        "units": [
+          {
+            "label": "Ukrainian forces, apron reoccupied",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 50,
+            "w": 30,
+            "h": 8,
+            "strength": 4,
+            "status": "pressing"
+          }
+        ],
+        "movements": [
+          {
+            "faction": "a",
+            "fromX": 65,
+            "fromY": 50,
+            "toX": 90,
+            "toY": 80,
+            "kind": "retreat",
+            "label": "Russian withdrawal toward Bucha"
+          },
+          {
+            "faction": "b",
+            "fromX": 30,
+            "fromY": 50,
+            "toX": 55,
+            "toY": 50,
+            "kind": "advance",
+            "label": "Ukrainian advance onto apron"
+          }
+        ]
+      }
+    ]
   }
 }

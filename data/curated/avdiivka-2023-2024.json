@@ -1,0 +1,29 @@
+{
+  "id": "avdiivka-2023-2024",
+  "name": "Battle of Avdiivka",
+  "year": 2023,
+  "date": "10 October 2023 – 17 February 2024",
+  "lat": 48.1397,
+  "lng": 37.7424,
+  "era": "modern",
+  "war": "Russian invasion of Ukraine",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Oleksandr Tarnavskyi",
+      "strength": "110th, 47th, and 3rd Assault Brigades and supporting units",
+      "casualties": "Heavy; figures not disclosed"
+    },
+    {
+      "name": "Russia",
+      "commander": "Andrey Mordvichev",
+      "strength": "Around 40,000 across multiple axes",
+      "casualties": "Estimated 16,000+ killed and wounded; hundreds of armoured vehicles destroyed"
+    }
+  ],
+  "victor": "Russia",
+  "summary": "Avdiivka was the closest Ukrainian-held town to occupied Donetsk and had been fortified since 2014. From October 2023 Russia launched the largest offensive of the year against it, attempting to encircle the city from the coke-plant district to the north and Vodyane to the south. Ukrainian brigades held for four months while air-defence munitions ran low, then withdrew on 17 February 2024 to avoid encirclement.",
+  "significance": "The first major Russian gain since Bakhmut and a signal that the strategic momentum had shifted again. The retreat exposed the consequences of the months-long delay in US aid that summer. Avdiivka is where the war's second winter announced that the lines would keep moving.",
+  "wikipediaTitle": "Battle of Avdiivka (2022–2024)"
+}

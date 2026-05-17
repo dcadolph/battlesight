@@ -1,0 +1,29 @@
+{
+  "id": "mariupol-2022",
+  "name": "Siege of Mariupol",
+  "year": 2022,
+  "date": "24 February – 20 May 2022",
+  "lat": 47.0951,
+  "lng": 37.5413,
+  "era": "modern",
+  "war": "Russian invasion of Ukraine",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Denys Prokopenko, Serhiy Volyna",
+      "strength": "Azov Regiment, 36th Marine Brigade, National Police, civilian volunteers; roughly 8,000 fighters",
+      "casualties": "About 2,500 killed, the rest captured. Civilian dead in the tens of thousands."
+    },
+    {
+      "name": "Russia and Donetsk People's Republic",
+      "commander": "Mikhail Mizintsev",
+      "strength": "Around 14,000 troops, naval infantry, DPR militia, Chechen units",
+      "casualties": "Estimated 4,000–5,000 killed and wounded"
+    }
+  ],
+  "victor": "Russia and Donetsk People's Republic",
+  "summary": "The port city on the Sea of Azov was the link Russia needed for its land bridge to Crimea. Encircled in the first week of the war, Mariupol held out for almost three months while Russian artillery and air strikes destroyed it block by block. The last defenders consolidated inside the Azovstal steelworks, a sprawling Soviet-era plant of bunkers and underground galleries, and held there until Kyiv ordered them to surrender on the twentieth of May.",
+  "significance": "Mariupol made the human cost of the war visible to the world. The Mariupol Drama Theatre and the maternity hospital are now in the lexicon. Russia took the city it wanted but paid for it in months of stalled offensives elsewhere, and the Azovstal defenders became a national symbol of refusal that Ukraine has rallied behind since.",
+  "wikipediaTitle": "Siege of Mariupol"
+}

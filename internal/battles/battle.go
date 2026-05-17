@@ -12,6 +12,22 @@ type Side struct {
 	Casualties string `json:"casualties"`
 }
 
+// Alias is an alternative name for a battle or war, optionally attributed
+// to the belligerent who used the name. Sharpsburg is Antietam by another
+// name; the Confederate side called it Sharpsburg after the nearest town
+// and the Union called it Antietam after the creek. Both names are
+// historical and both should resolve to the same record. Search and the
+// dossier surface every alias so a curator who looks up the name they
+// know lands on the canonical entry.
+type Alias struct {
+	// Name is the alternative name itself.
+	Name string `json:"name"`
+	// By is the belligerent (or culture, era, language) that used this
+	// name. Optional. Useful for "American Civil War" / "War Between the
+	// States" / "War of Northern Aggression" where the perspective matters.
+	By string `json:"by,omitempty"`
+}
+
 // Reference is a book, film, documentary, or article about a battle.
 type Reference struct {
 	// Type is the kind of reference: book, film, documentary, article.
@@ -34,6 +50,11 @@ type Battle struct {
 	ID string `json:"id"`
 	// Name is the common name of the battle.
 	Name string `json:"name"`
+	// Aliases holds alternative names for this battle (Sharpsburg for
+	// Antietam, the Field of Blackbirds for Kosovo Polje, etc.). Indexed
+	// in the search corpus and rendered in the dossier so the curator
+	// who looks up the name they grew up with finds the right record.
+	Aliases []Alias `json:"aliases,omitempty"`
 	// Year is the primary year (negative for BC).
 	Year int `json:"year"`
 	// Date is a human-readable date string.

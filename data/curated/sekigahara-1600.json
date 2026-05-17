@@ -1,0 +1,33 @@
+{
+  "id": "sekigahara-1600",
+  "name": "Battle of Sekigahara",
+  "aliases": [
+    { "name": "関ヶ原の戦い", "by": "Japanese" },
+    { "name": "Tenka wakeme no tatakai", "by": "Japanese (\"the battle that divided the realm\")" }
+  ],
+  "year": 1600,
+  "date": "21 October 1600",
+  "lat": 35.3705,
+  "lng": 136.4616,
+  "era": "early-modern",
+  "war": "Sengoku period",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Eastern Army (Tokugawa)",
+      "commander": "Tokugawa Ieyasu, Ii Naomasa, Honda Tadakatsu",
+      "strength": "About 75,000",
+      "casualties": "Light"
+    },
+    {
+      "name": "Western Army (Ishida)",
+      "commander": "Ishida Mitsunari, Ukita Hideie, Shimazu Yoshihiro, Mōri Hidemoto",
+      "strength": "About 120,000 on paper; perhaps 80,000 actually committed",
+      "casualties": "About 30,000 killed"
+    }
+  ],
+  "victor": "Eastern Army (Tokugawa)",
+  "summary": "On a foggy October morning in the mountain pass at Sekigahara in Mino province, two coalitions of daimyō clashed for control of Japan. Tokugawa Ieyasu led the Eastern Army; Ishida Mitsunari, regent for the late Toyotomi Hideyoshi's heir, led the Western. The Western Army held the heights and outnumbered the Eastern on the field, but had spent months gathering allies whose loyalties were uncertain. The fog lifted around eight in the morning and the battle opened along the floor of the pass.",
+  "significance": "At about noon Kobayakawa Hideaki, posted on Mount Matsuo with fifteen thousand men, defected to the Eastern side and charged Ōtani Yoshitsugu's flank. The Western centre collapsed. By mid-afternoon Ishida was a fugitive and Tokugawa had won Japan. Three years later Ieyasu took the title of shogun and his family held it for two and a half centuries. Sekigahara is the battle that ended the Sengoku period.",
+  "wikipediaTitle": "Battle of Sekigahara"
+}

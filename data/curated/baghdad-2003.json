@@ -1,0 +1,29 @@
+{
+  "id": "baghdad-2003",
+  "name": "Battle of Baghdad",
+  "year": 2003,
+  "date": "3 April – 12 April 2003",
+  "lat": 33.3128,
+  "lng": 44.3615,
+  "era": "modern",
+  "war": "Iraq War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "United States and coalition",
+      "commander": "David McKiernan, Buford Blount, James Mattis",
+      "strength": "3rd Infantry Division, 1st Marine Division, supporting brigades; about 25,000 in the immediate assault",
+      "casualties": "About 35 killed, 200 wounded"
+    },
+    {
+      "name": "Iraq",
+      "commander": "Saddam Hussein, Qusay Hussein",
+      "strength": "Republican Guard, Special Republican Guard, Fedayeen Saddam, an estimated 50,000+ regular and irregular forces",
+      "casualties": "About 2,500 killed, thousands more wounded or captured"
+    }
+  ],
+  "victor": "United States and coalition",
+  "summary": "After three weeks of a fast desert advance from Kuwait, US armoured columns made two demonstrative thunder runs straight into central Baghdad. The second one, on the seventh of April, took and held the Republican Palace and the Tigris bridges. By the twelfth Iraqi resistance had dissolved and statues of Saddam were being pulled down in Firdos Square for the live cameras.",
+  "significance": "The conventional phase of the Iraq War ended at Baghdad. The next phase, an insurgency that would shape the next decade, started inside the same week. Baghdad is the moment a quick victory revealed how long the war would actually last.",
+  "wikipediaTitle": "Battle of Baghdad (2003)"
+}

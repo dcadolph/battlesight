@@ -1,0 +1,29 @@
+{
+  "id": "monte-cassino-1944",
+  "name": "Battle of Monte Cassino",
+  "year": 1944,
+  "date": "17 January to 18 May 1944",
+  "lat": 41.4892,
+  "lng": 13.8139,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Allies (United States, United Kingdom, France, Poland, New Zealand, India)",
+      "commander": "Harold Alexander, Mark Clark, Władysław Anders, Bernard Freyberg, Alphonse Juin",
+      "strength": "Around 240,000 troops across four offensives",
+      "casualties": "About 55,000 killed, wounded, and missing"
+    },
+    {
+      "name": "Nazi Germany",
+      "commander": "Albert Kesselring, Heinrich von Vietinghoff, Fridolin von Senger und Etterlin",
+      "strength": "Around 140,000 troops, the 10th Army defending the Gustav Line",
+      "casualties": "About 20,000 killed, wounded, and missing"
+    }
+  ],
+  "victor": "Allies (United States, United Kingdom, France, Poland, New Zealand, India)",
+  "summary": "Four Allied offensives over four months against the German Gustav Line anchored on the abbey of Monte Cassino above the Liri valley. The first three drove uphill against fallschirmjäger paratroopers in stone farmhouses and rubble and were thrown back at the cost of the New Zealand corps. The 15 February air bombardment that destroyed the eighth-century Benedictine abbey turned its ruins into a defensible fortress and accomplished nothing tactical. The fourth assault in May, Operation Diadem, finally cracked the line; Polish II Corps planted its flag in the rubble of the abbey on 18 May.",
+  "significance": "The hardest fighting of the Italian campaign and a strategic argument that ran through the rest of the war. Churchill called Italy the \"soft underbelly\" of Europe; Cassino proved otherwise. The campaign tied down German divisions that might have reinforced Normandy, but at a cost that the British and American chiefs of staff would not repeat. The destruction of the abbey became a touchstone in the postwar debate over the bombing of cultural targets and the limits of military necessity.",
+  "wikipediaTitle": "Battle of Monte Cassino"
+}

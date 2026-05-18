@@ -5,11 +5,14 @@
   "date": "30 April 2019 – 6 March 2020",
   "lat": 35.93,
   "lng": 36.6333,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Syrian Civil War",
   "battleType": "land",
   "aliases": [
-    { "name": "Idlib Offensive", "by": "Common Western press usage" }
+    {
+      "name": "Idlib Offensive",
+      "by": "Common Western press usage"
+    }
   ],
   "sides": [
     {

@@ -116,42 +116,13 @@
     "wikipediaTitle": "Battle of Breitenfeld (1631)"
   },
   {
-    "id": "bulge-1944",
-    "name": "Battle of the Bulge",
-    "year": 1944,
-    "date": "16 December 1944–25 January 1945",
-    "lat": 50.05,
-    "lng": 5.75,
-    "era": "world-war-2",
-    "war": "World War II",
-    "battleType": "land",
-    "sides": [
-      {
-        "name": "Western Allies",
-        "commander": "Eisenhower & Patton",
-        "strength": "610,000",
-        "casualties": "89,000 killed/wounded/captured"
-      },
-      {
-        "name": "Nazi Germany",
-        "commander": "Gerd von Rundstedt",
-        "strength": "410,000",
-        "casualties": "100,000 killed/wounded/captured"
-      }
-    ],
-    "victor": "Western Allies",
-    "summary": "Germany's last major offensive in the West. A surprise attack through the Ardennes created a bulge in Allied lines, but Patton's Third Army relieved Bastogne and the offensive collapsed.",
-    "significance": "Exhausted Germany's last strategic reserves. The road to the Rhine and into Germany was open.",
-    "wikipediaTitle": "Battle of the Bulge"
-  },
-  {
     "id": "73-easting-1991",
     "name": "Battle of 73 Easting",
     "year": 1991,
     "date": "26 February 1991",
     "lat": 28.3486,
     "lng": 47.3714,
-    "era": "modern",
+    "era": "contemporary",
     "war": "Gulf War",
     "battleType": "land",
     "sides": [
@@ -317,35 +288,6 @@
     "victor": "Carthage",
     "summary": "Hannibal goads Sempronius into crossing the freezing Trebia at dawn. Numidian cavalry envelops the Roman flanks. Mago's concealed force hits the Roman rear. The Roman center cuts through and escapes. Both wings are destroyed.",
     "significance": "First of three catastrophic Roman defeats by Hannibal in eighteen months, followed by Lake Trasimene and Cannae. Establishes his tactical signature of envelopment."
-  },
-  {
-    "id": "zama-202bc",
-    "name": "Battle of Zama",
-    "year": -202,
-    "date": "19 October 202 BC",
-    "lat": 35.8833,
-    "lng": 9.7833,
-    "era": "ancient",
-    "war": "Second Punic War",
-    "battleType": "land",
-    "wikipediaTitle": "Battle of Zama",
-    "sides": [
-      {
-        "name": "Roman Republic + Numidian allies",
-        "commander": "Scipio Africanus, Masinissa",
-        "strength": "~35,000",
-        "casualties": "~1,500 killed, 4,000 wounded"
-      },
-      {
-        "name": "Carthage",
-        "commander": "Hannibal Barca",
-        "strength": "~36,000 + 80 war elephants",
-        "casualties": "~20,000 killed, ~20,000 captured"
-      }
-    ],
-    "victor": "Roman Republic",
-    "summary": "Hannibal opens with a charge of eighty war elephants. Scipio has arrayed lanes in his infantry that funnel the panicking animals harmlessly through. Masinissa's Numidian cavalry routs the Carthaginian cavalry, then returns to strike the Carthaginian rear, the same trap Hannibal sprang at Cannae.",
-    "significance": "Ends the Second Punic War. Hannibal's only major battlefield defeat. Carthage is reduced to a Roman client state and finally destroyed in 146 BC."
   },
   {
     "id": "pharsalus-48bc",
@@ -876,71 +818,13 @@
     "significance": "One of the few unambiguous British successes of the war. Baden-Powell becomes a national hero and founds the Boy Scouts in 1907."
   },
   {
-    "id": "jutland-1916",
-    "name": "Battle of Jutland",
-    "year": 1916,
-    "date": "31 May - 1 June 1916",
-    "lat": 56.6667,
-    "lng": 6.0,
-    "era": "world-war-1",
-    "war": "World War I",
-    "battleType": "naval",
-    "wikipediaTitle": "Battle of Jutland",
-    "sides": [
-      {
-        "name": "Royal Navy",
-        "commander": "John Jellicoe, David Beatty",
-        "strength": "151 ships",
-        "casualties": "6,094 killed, 14 ships lost (113,300 tons)"
-      },
-      {
-        "name": "German High Seas Fleet",
-        "commander": "Reinhard Scheer, Franz Hipper",
-        "strength": "99 ships",
-        "casualties": "2,551 killed, 11 ships lost (62,300 tons)"
-      }
-    ],
-    "victor": "Indecisive (strategic British victory)",
-    "summary": "The only major fleet engagement of the war. The British Grand Fleet \"crosses the T\" of the High Seas Fleet twice. Scheer escapes in the dusk and fog. Three British battlecruisers blow up from magazine penetrations.",
-    "significance": "Tactical German victory by casualties, but strategically the High Seas Fleet never sortied again. Britain keeps command of the North Sea for the rest of the war."
-  },
-  {
-    "id": "chosin-reservoir-1950",
-    "name": "Battle of Chosin Reservoir",
-    "year": 1950,
-    "date": "27 November - 13 December 1950",
-    "lat": 40.4781,
-    "lng": 127.3169,
-    "era": "modern",
-    "war": "Korean War",
-    "battleType": "land",
-    "wikipediaTitle": "Battle of Chosin Reservoir",
-    "sides": [
-      {
-        "name": "United Nations Command",
-        "commander": "Edward Almond, Oliver P. Smith",
-        "strength": "~30,000 (1st Marine Division core)",
-        "casualties": "17,843 casualties, including 7,338 frostbite"
-      },
-      {
-        "name": "People's Republic of China",
-        "commander": "Song Shilun",
-        "strength": "~120,000 (9th Army)",
-        "casualties": "~19,200-29,000 killed plus tens of thousands of cold-weather casualties"
-      }
-    ],
-    "victor": "Strategic indecisive. UN withdrawal accomplished",
-    "summary": "After MacArthur dismisses warnings of Chinese intervention, X Corps is surrounded by nine Chinese divisions at -30°F. The 1st Marine Division fights its way 78 miles to the port of Hungnam. O.P. Smith: \"Retreat, hell, we're attacking in a different direction.\"",
-    "significance": "Largest American military evacuation since Dunkirk. Halts the UN advance to the Yalu and locks the Korean War into a stalemate around the 38th parallel."
-  },
-  {
     "id": "pork-chop-hill-1953",
     "name": "Battle of Pork Chop Hill",
     "year": 1953,
     "date": "16–18 April and 6–11 July 1953",
     "lat": 38.2333,
     "lng": 126.9167,
-    "era": "modern",
+    "era": "cold-war",
     "war": "Korean War",
     "battleType": "land",
     "wikipediaTitle": "Battle of Pork Chop Hill",
@@ -969,7 +853,7 @@
     "date": "14–18 November 1965",
     "lat": 13.6,
     "lng": 107.7167,
-    "era": "modern",
+    "era": "cold-war",
     "war": "Vietnam War",
     "battleType": "land",
     "wikipediaTitle": "Battle of Ia Drang",
@@ -998,7 +882,7 @@
     "date": "7–8 January 1988",
     "lat": 33.0833,
     "lng": 70.1167,
-    "era": "modern",
+    "era": "cold-war",
     "war": "Soviet-Afghan War",
     "battleType": "land",
     "wikipediaTitle": "Battle for Hill 3234",
@@ -1027,7 +911,7 @@
     "date": "31 December 1994–8 March 1995",
     "lat": 43.3168,
     "lng": 45.6979,
-    "era": "modern",
+    "era": "contemporary",
     "war": "First Chechen War",
     "battleType": "siege",
     "wikipediaTitle": "Battle of Grozny (1994–1995)",
@@ -1050,42 +934,13 @@
     "significance": "Worst tank disaster in Russian history. Triggers the Khasavyurt Accord and Chechen de facto independence, a settlement that lasts until the Second Chechen War in 1999."
   },
   {
-    "id": "tora-bora-2001",
-    "name": "Battle of Tora Bora",
-    "year": 2001,
-    "date": "6–17 December 2001",
-    "lat": 34.1167,
-    "lng": 70.2167,
-    "era": "modern",
-    "war": "War in Afghanistan (2001–2021)",
-    "battleType": "land",
-    "wikipediaTitle": "Battle of Tora Bora",
-    "sides": [
-      {
-        "name": "United States + Northern Alliance",
-        "commander": "Hazret Ali, Haji Zaman. US SOF and CIA SAD",
-        "strength": "~70 US operators + ~2,500 Afghan",
-        "casualties": "0 US killed. Northern Alliance casualties unknown"
-      },
-      {
-        "name": "Al-Qaeda + Taliban",
-        "commander": "Osama bin Laden",
-        "strength": "~1,500-2,000",
-        "casualties": "~200 killed, ~52 captured"
-      }
-    ],
-    "victor": "United States and allies (mixed. Bin Laden escaped)",
-    "summary": "US air strikes pound suspected cave complexes in the White Mountains while Afghan Northern Alliance allies advance on the ground. Bin Laden is believed to have been present but escapes, almost certainly into Pakistan, through gaps in the Afghan cordon.",
-    "significance": "Lost opportunity to capture bin Laden in the immediate aftermath of 9/11. Cited as the seminal case study of why local proxy forces alone are insufficient for high-value-target operations. Bin Laden lives for another ten years."
-  },
-  {
     "id": "fall-of-baghdad-2003",
     "name": "Fall of Baghdad (2003)",
     "year": 2003,
     "date": "3–9 April 2003",
     "lat": 33.3152,
     "lng": 44.3661,
-    "era": "modern",
+    "era": "contemporary",
     "war": "Iraq War",
     "battleType": "land",
     "wikipediaTitle": "Battle of Baghdad (2003)",
@@ -1369,42 +1224,13 @@
     "significance": "Preserves the trained core of the British army for the rest of the war. Hitler's controversial halt order before Dunkirk, letting the Luftwaffe rather than the panzers finish the pocket, is debated as one of the war's pivotal mistakes."
   },
   {
-    "id": "guadalcanal-1942",
-    "name": "Guadalcanal Campaign",
-    "year": 1942,
-    "date": "7 August 1942, 9 February 1943",
-    "lat": -9.428,
-    "lng": 160.0492,
-    "era": "world-war-2",
-    "war": "World War II",
-    "battleType": "land",
-    "wikipediaTitle": "Guadalcanal campaign",
-    "sides": [
-      {
-        "name": "United States + Australia + New Zealand",
-        "commander": "Alexander Vandegrift, William Halsey, Robert Ghormley, Richmond K. Turner",
-        "strength": "~60,000 ground forces engaged",
-        "casualties": "~7,100 killed, 7,800 wounded. 29 ships lost"
-      },
-      {
-        "name": "Empire of Japan",
-        "commander": "Harukichi Hyakutake, Isoroku Yamamoto, Mikawa Gunichi",
-        "strength": "~36,200 ground forces engaged",
-        "casualties": "~31,000 killed (mostly disease and starvation). 38 ships lost"
-      }
-    ],
-    "victor": "United States and allies",
-    "summary": "The first major US offensive of the Pacific War turns on a single airstrip, Henderson Field. Six months of jungle warfare, seven major naval battles, and constant air combat exhaust Japanese ability to contest the South Pacific. The Tokyo Express runs reinforcements in at night. \"Cactus Air Force\" hammers them by day.",
-    "significance": "Halts Japanese expansion in the Pacific and shifts strategic initiative to the Allies for the rest of the war. The campaign's attritional naval battles around Savo Sound (\"Iron Bottom Sound\") cripple Japan's pre-war elite cruiser and destroyer force."
-  },
-  {
     "id": "tet-saigon-1968",
     "name": "Tet Offensive: Saigon (US Embassy attack)",
     "year": 1968,
     "date": "30 January, 7 March 1968",
     "lat": 10.7831,
     "lng": 106.7004,
-    "era": "modern",
+    "era": "cold-war",
     "war": "Vietnam War",
     "battleType": "land",
     "wikipediaTitle": "Battle of Saigon (1968)",

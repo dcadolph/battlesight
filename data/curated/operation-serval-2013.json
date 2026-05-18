@@ -5,11 +5,14 @@
   "date": "11 January – 15 July 2013",
   "lat": 16.7666,
   "lng": -3.0026,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Mali War",
   "battleType": "land",
   "aliases": [
-    { "name": "Battle of Konna", "by": "Opening engagement of the operation" }
+    {
+      "name": "Battle of Konna",
+      "by": "Opening engagement of the operation"
+    }
   ],
   "sides": [
     {

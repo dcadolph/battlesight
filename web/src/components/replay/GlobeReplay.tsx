@@ -998,15 +998,28 @@ interface ImpactFlashProps {
   delay: number;
 }
 
-// ImpactFlash renders a single expanding ring + bright core at (x, y), keyed
-// so it plays once per phase per arrow. It signals "the arrow has arrived"
-// in the same way a hit-effect telegraphs contact in a real-time map. The
-// associated low-frequency thump is scheduled in lockstep with the visual.
+// ImpactFlash renders an expanding ring + bright core + a starburst of
+// outward-flying sparks at (x, y), keyed so it plays once per phase per
+// arrow. It signals "the arrow has arrived" with more visual weight than a
+// single ring. The associated low-frequency thump is scheduled in lockstep.
 function ImpactFlash({ x, y, color, delay }: ImpactFlashProps) {
   useEffect(() => {
     const id = setTimeout(() => playImpact(), delay);
     return () => clearTimeout(id);
   }, [delay]);
+  // Eight sparks evenly distributed around the impact point. Each gets its
+  // own CSS custom property for the destination offset so they fly outward
+  // in different directions without needing eight @keyframes definitions.
+  const SPARK_COUNT = 8;
+  const sparks = Array.from({ length: SPARK_COUNT }, (_, i) => {
+    const angle = (Math.PI * 2 * i) / SPARK_COUNT;
+    const dist = 22;
+    return {
+      i,
+      dx: Math.cos(angle) * dist,
+      dy: Math.sin(angle) * dist,
+    };
+  });
   return (
     <g transform={`translate(${x} ${y})`} style={{ pointerEvents: 'none' }}>
       <circle
@@ -1044,6 +1057,19 @@ function ImpactFlash({ x, y, color, delay }: ImpactFlashProps) {
           animation: `impact-ring 1500ms ${delay + 200}ms cubic-bezier(.2,.6,.25,1) forwards`,
         }}
       />
+      {sparks.map((s) => (
+        <circle
+          key={`spark-${s.i}`}
+          r={1.6}
+          fill="#ffffff"
+          style={{
+            opacity: 0,
+            ['--sx' as string]: `${s.dx}px`,
+            ['--sy' as string]: `${s.dy}px`,
+            animation: `impact-spark 800ms ${delay + 40}ms cubic-bezier(.25,.65,.25,1) forwards`,
+          }}
+        />
+      ))}
     </g>
   );
 }

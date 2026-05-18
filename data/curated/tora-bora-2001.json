@@ -1,0 +1,29 @@
+{
+  "id": "tora-bora-2001",
+  "name": "Battle of Tora Bora",
+  "year": 2001,
+  "date": "30 November to 17 December 2001",
+  "lat": 34.116,
+  "lng": 70.224,
+  "era": "contemporary",
+  "war": "War in Afghanistan (2001–2021)",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "United States, United Kingdom, and Eastern Alliance Afghan militias",
+      "commander": "Gary Berntsen (CIA), Dalton Fury (Delta), Hazrat Ali, Haji Zahir, Haji Zaman Ghamsharik",
+      "strength": "Around 70 American special operations personnel and CIA paramilitary officers, plus 2,500 to 3,000 allied Afghan militia",
+      "casualties": "No American killed; light Afghan militia losses"
+    },
+    {
+      "name": "Al-Qaeda",
+      "commander": "Osama bin Laden, Ayman al-Zawahiri",
+      "strength": "Around 1,500 to 2,000 fighters in the White Mountain cave complex",
+      "casualties": "Around 200 killed; most slipped through the porous Pakistani border with bin Laden into the Federally Administered Tribal Areas"
+    }
+  ],
+  "victor": "United States, United Kingdom, and Eastern Alliance Afghan militias (tactically); strategic failure",
+  "summary": "After the fall of Kabul and Kandahar, US intelligence located bin Laden in the cave complexes at Tora Bora in the Spīn Ghar range south of Jalalabad. A small Joint Special Operations Command and CIA element directed B-52 strikes and called the line for two Eastern Alliance militias attempting to seal the mountain passes north and south. The southern route into Pakistan went uncovered; requests for 800 US Army Rangers to plug the line were denied at theater command level. Bin Laden and his inner circle walked out over the passes into Pakistan in the second week of December.",
+  "significance": "The strategic failure that defined the next two decades. Bin Laden's escape would haunt the war for ten years until SEAL Team Six found him in Abbottabad in May 2011. The political decision to rely on Afghan proxies rather than commit American conventional forces to seal the border became the case study every postwar review returned to. The campaign that began with a swift collapse of the Taliban in November ended in December with the man it had been launched to kill walking across an open mountain.",
+  "wikipediaTitle": "Battle of Tora Bora"
+}

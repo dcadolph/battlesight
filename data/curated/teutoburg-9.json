@@ -1,0 +1,29 @@
+{
+  "id": "teutoburg-9",
+  "name": "Battle of the Teutoburg Forest",
+  "year": 9,
+  "date": "September AD 9",
+  "lat": 52.0911,
+  "lng": 8.1303,
+  "era": "ancient",
+  "war": "Roman wars in Germania",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Germanic tribal coalition (Cherusci, Bructeri, Marsi, Chatti, Sicambri)",
+      "commander": "Arminius",
+      "strength": "Roughly 15,000 to 20,000 warriors hidden in the forest",
+      "casualties": "Light"
+    },
+    {
+      "name": "Roman Empire",
+      "commander": "Publius Quinctilius Varus",
+      "strength": "Three legions (XVII, XVIII, XIX) with auxiliaries and camp followers, around 20,000 men",
+      "casualties": "Essentially all three legions destroyed; Varus killed by his own sword"
+    }
+  ],
+  "victor": "Germanic tribal coalition (Cherusci, Bructeri, Marsi, Chatti, Sicambri)",
+  "summary": "Arminius, a Cheruscan prince raised in Rome and serving as a Roman auxiliary officer, lured Varus's three legions off the Roman road into the Kalkriese defile under the pretext of putting down a local revolt. The column strung out for kilometres through forest and bog when the Cherusci attacks began. Three days of running ambush in driving rain turned the legions to mud-locked exhaustion. Varus fell on his sword to avoid capture. The eagles of the XVII, XVIII, and XIX were carried into the forest as trophies.",
+  "significance": "The Rhine became the permanent northern frontier of the Roman world. Augustus is said to have wandered the palace crying \"Varus, give me back my legions.\" Germania east of the Rhine never became a province; the cultural and political fault line that ran through the forest of 9 AD ran through European history for two millennia, separating a Latin Mediterranean south from a Germanic north.",
+  "wikipediaTitle": "Battle of the Teutoburg Forest"
+}

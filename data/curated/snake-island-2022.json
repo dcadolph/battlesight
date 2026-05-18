@@ -5,11 +5,14 @@
   "date": "24 February – 30 June 2022",
   "lat": 45.2575,
   "lng": 30.2014,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Russo-Ukrainian War",
   "battleType": "amphibious",
   "aliases": [
-    { "name": "Zmiinyi Island", "by": "Ukrainian transliteration" }
+    {
+      "name": "Zmiinyi Island",
+      "by": "Ukrainian transliteration"
+    }
   ],
   "sides": [
     {

@@ -371,13 +371,21 @@ function eraVoices(era: string): VoiceConfig[] {
         { freq: note(53), type: 'sine', detune: 4, pan: 0.25, gain: 0.12 },
         { freq: note(57), type: 'sine', detune: -4, pan: 0.05, gain: 0.07 },
       ];
-    case 'modern':
-      // E phrygian (E + F + B), suspended and modern.
+    case 'cold-war':
+      // E phrygian (E + F + B), suspended and tense — air-raid-siren key.
       return [
         { freq: note(40), type: 'sawtooth', detune: -8, pan: 0, gain: 0.16 },
         { freq: note(52), type: 'triangle', detune: 0, pan: -0.25, gain: 0.16 },
         { freq: note(53), type: 'sine', detune: 4, pan: 0.25, gain: 0.10 },
         { freq: note(59), type: 'sine', detune: -3, pan: 0.05, gain: 0.08 },
+      ];
+    case 'contemporary':
+      // F# minor with major-7 colour, glass-and-fibre key.
+      return [
+        { freq: note(42), type: 'sawtooth', detune: -8, pan: 0, gain: 0.15 },
+        { freq: note(54), type: 'triangle', detune: 0, pan: -0.25, gain: 0.16 },
+        { freq: note(57), type: 'sine', detune: 4, pan: 0.25, gain: 0.10 },
+        { freq: note(65), type: 'sine', detune: -3, pan: 0.05, gain: 0.07 },
       ];
     default:
       // Neutral C major open: used on the splash and any unset era.
@@ -403,7 +411,8 @@ function eraFilterCutoff(era: string): number {
     case 'world-war-1': return 980;
     case 'interwar': return 1040;
     case 'world-war-2': return 1100;
-    case 'modern': return 1280;
+    case 'cold-war': return 1240;
+    case 'contemporary': return 1320;
     default: return 880;
   }
 }

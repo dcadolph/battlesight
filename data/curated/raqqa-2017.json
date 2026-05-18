@@ -5,12 +5,18 @@
   "date": "6 June – 17 October 2017",
   "lat": 35.95,
   "lng": 39.0167,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Syrian Civil War",
   "battleType": "siege",
   "aliases": [
-    { "name": "Operation Wrath of Euphrates", "by": "Syrian Democratic Forces operational name" },
-    { "name": "Operation Inherent Resolve (Raqqa phase)", "by": "U.S.-led coalition designation" }
+    {
+      "name": "Operation Wrath of Euphrates",
+      "by": "Syrian Democratic Forces operational name"
+    },
+    {
+      "name": "Operation Inherent Resolve (Raqqa phase)",
+      "by": "U.S.-led coalition designation"
+    }
   ],
   "sides": [
     {

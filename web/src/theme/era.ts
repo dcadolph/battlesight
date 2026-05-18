@@ -47,7 +47,14 @@ export const ERA_RANGES: Array<[string, number, number]> = [
   ['world-war-1', 1914, 1919],
   ['interwar', 1919, 1939],
   ['world-war-2', 1939, 1946],
-  ['modern', 1946, 2025],
+  // "Modern" used to span 1946 → today, which lumped Korea, Vietnam, the
+  // Falklands, Desert Storm, the Yugoslav wars, Iraq, Afghanistan, and the
+  // Russia-Ukraine war into a single 80-year bucket — visually flat, and
+  // historiographically wrong. Split at 1991 (USSR collapses) so the Cold
+  // War years read as their own era and the contemporary era frames the
+  // post-Soviet, drone-and-cyber-age conflicts.
+  ['cold-war', 1946, 1991],
+  ['contemporary', 1991, 2030],
 ];
 
 // Serif display face for periods that feel literary: manuscripts, dispatches,
@@ -121,13 +128,36 @@ const THEMES: Record<string, EraTheme> = {
     mood: 'World War',
     era: 'world-war-2',
   },
-  'modern': {
-    atmosphere: '#5eead4',
-    vignette: 'rgba(6, 18, 18, 0.6)',
-    accent: '#10b981',
+  'cold-war': {
+    // Steel-gray atmosphere with a desaturated jade accent reads as
+    // satellite-image and tactical-map: the visual vocabulary of the era.
+    atmosphere: '#9ca3af',
+    vignette: 'rgba(14, 18, 20, 0.7)',
+    accent: '#34d399',
     titleFont: SANS,
-    mood: 'Modern',
-    era: 'modern',
+    mood: 'Cold War',
+    era: 'cold-war',
+  },
+  'contemporary': {
+    // Cool cyan atmosphere; drone-and-fibre digital-age feel sits a half
+    // shade brighter than cold-war so the era jump reads on the timeline.
+    atmosphere: '#67e8f9',
+    vignette: 'rgba(8, 18, 24, 0.6)',
+    accent: '#06b6d4',
+    titleFont: SANS,
+    mood: 'Contemporary',
+    era: 'contemporary',
+  },
+  // Legacy alias for stale 'modern' era keys (pre-split battles in the
+  // DB, in-flight payloads, etc.). Reads as the contemporary theme so any
+  // path that still hands us 'modern' continues to render sanely.
+  'modern': {
+    atmosphere: '#67e8f9',
+    vignette: 'rgba(8, 18, 24, 0.6)',
+    accent: '#06b6d4',
+    titleFont: SANS,
+    mood: 'Contemporary',
+    era: 'contemporary',
   },
 };
 
@@ -143,7 +173,7 @@ export function eraForYear(year: number): string {
   for (const [name, lo, hi] of ERA_RANGES) {
     if (year >= lo && year < hi) return name;
   }
-  return 'modern';
+  return 'contemporary';
 }
 
 // themeForYear is sugar over eraForYear → themeForEra, the most common call

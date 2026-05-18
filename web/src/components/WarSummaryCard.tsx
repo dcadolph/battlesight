@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { themeForYear } from '../theme/era';
-import { formatYear as fmtYear, formatCountCompact } from '../lib/format';
+import { formatYear as fmtYear, formatCountCompact, cleanProseText } from '../lib/format';
 
 interface WarBattleRef {
   id: string;
@@ -136,7 +136,7 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
           className="text-[14px] text-slate-100/95 leading-snug"
           style={{ fontFamily: theme.titleFont }}
         >
-          {summary.outcome ? summary.outcome : finalVictor ? `${finalVictor} won.` : 'Outcome unrecorded.'}
+          {cleanProseText(summary.outcome) || (finalVictor ? `${finalVictor} won.` : 'Outcome unrecorded.')}
         </p>
       </button>
 
@@ -158,13 +158,13 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
 
       {expanded && (
         <div className="px-4 pb-4 pt-4 space-y-5">
-          {summary.aftermath && (
+          {cleanProseText(summary.aftermath) && (
             <Section theme={theme} label="Aftermath">
               <p
                 className="text-[13.5px] leading-[1.65] text-slate-200/90"
                 style={{ fontFamily: theme.titleFont }}
               >
-                {summary.aftermath}
+                {cleanProseText(summary.aftermath)}
               </p>
             </Section>
           )}

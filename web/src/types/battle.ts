@@ -72,7 +72,20 @@ export const ERA_COLORS: Record<string, string> = {
   // render as bright white pillars.
   'interwar': '#a16207',
   'world-war-2': '#f43f5e',
-  'modern': '#10b981',
+  // Cold-war = desaturated jade (tactical-map / satellite-imagery feel).
+  // Contemporary = cooler cyan (drone-and-cyber digital age). The two
+  // colours sit close enough on the wheel that the era boundary at 1991
+  // reads as a half-step shift rather than a hard cut, but distinct enough
+  // that Vietnam (cold-war) and Russia-Ukraine (contemporary) never share
+  // a globe colour.
+  'cold-war': '#34d399',
+  'contemporary': '#06b6d4',
+  // Legacy alias. The era taxonomy split 'modern' into 'cold-war' +
+  // 'contemporary'; the JSON files and the SQLite DB have been migrated,
+  // but a stale row or in-flight payload can still carry the old key.
+  // Mapping it to the contemporary colour keeps the marker from rendering
+  // as the white fallback and prevents undefined-color crashes downstream.
+  'modern': '#06b6d4',
 };
 
 export const ERA_LABELS: Record<string, string> = {
@@ -93,7 +106,16 @@ export const ERA_LABELS: Record<string, string> = {
   'world-war-1': 'World War I',
   'interwar': 'Interwar',
   'world-war-2': 'World War II',
-  'modern': 'Modern',
+  // "Modern" used to span 1946 → today, which lumped Korea, Vietnam, Iraq,
+  // and Russia-Ukraine into a single bucket and read as a junk drawer.
+  // Split at 1991: cold war ends with the Soviet collapse, contemporary
+  // takes over with the post-Soviet, post-Gulf-War conflicts.
+  'cold-war': 'Cold War',
+  'contemporary': 'Contemporary',
+  // Legacy alias for any stale 'modern' row that slipped through the DB
+  // migration. Reads as the contemporary label so the dossier still has a
+  // sensible title.
+  'modern': 'Contemporary',
 };
 
 // regionalEraContext returns a finer-grained historical context label for a
@@ -144,6 +166,24 @@ export function regionalEraContext(era: string, lat: number, lng: number): strin
     if (lng >= 30 && lng <= 60 && lat >= 22 && lat <= 45) return 'Near East · Persia';
     if (lng >= 100 && lng <= 130 && lat >= 18 && lat <= 45) return 'Imperial China';
     if (lng >= 60 && lng <= 100 && lat >= 5 && lat <= 40) return 'Indian Antiquity';
+    return '';
+  }
+  if (era === 'cold-war') {
+    if (lng >= 60 && lng <= 130 && lat >= 5 && lat <= 30) return 'Indochina · Korea';
+    if (lng >= -130 && lng <= -65 && lat >= 7 && lat <= 30) return 'Latin American Cold War';
+    if (lng >= -10 && lng <= 50 && lat >= 35 && lat <= 60) return 'Iron Curtain';
+    if (lng >= 60 && lng <= 95 && lat >= 28 && lat <= 42) return 'Soviet-Afghan War';
+    if (lng >= 25 && lng <= 60 && lat >= 12 && lat <= 36) return 'Arab–Israeli wars';
+    if (lng >= -20 && lng <= 55 && lat >= -35 && lat <= 25) return 'Decolonisation · Proxy wars';
+    return '';
+  }
+  if (era === 'contemporary') {
+    if (lng >= 25 && lng <= 45 && lat >= 44 && lat <= 56) return 'Russia–Ukraine War';
+    if (lng >= 30 && lng <= 50 && lat >= 12 && lat <= 40) return 'War on Terror · Syrian Civil War';
+    if (lng >= 60 && lng <= 80 && lat >= 28 && lat <= 40) return 'Afghanistan · GWOT';
+    if (lng >= 12 && lng <= 30 && lat >= 40 && lat <= 48) return 'Yugoslav Wars';
+    if (lng >= -20 && lng <= 55 && lat >= -35 && lat <= 20) return 'African insurgencies';
+    if (lng >= 100 && lng <= 130 && lat >= 5 && lat <= 30) return 'South China Sea era';
     return '';
   }
   return '';

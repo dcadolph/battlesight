@@ -1,0 +1,29 @@
+{
+  "id": "leipzig-1813",
+  "name": "Battle of Leipzig",
+  "year": 1813,
+  "date": "16 to 19 October 1813",
+  "lat": 51.3397,
+  "lng": 12.3731,
+  "era": "napoleonic",
+  "war": "Napoleonic Wars",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Sixth Coalition (Russia, Prussia, Austria, Sweden)",
+      "commander": "Karl Philipp Schwarzenberg, Mikhail Barclay de Tolly, Gebhard von Blücher, Crown Prince Bernadotte",
+      "strength": "Around 380,000 men with 1,500 guns",
+      "casualties": "About 54,000 killed and wounded"
+    },
+    {
+      "name": "First French Empire and allies (Saxony, Italy, Naples, Poland)",
+      "commander": "Napoleon Bonaparte, Joachim Murat, Józef Poniatowski",
+      "strength": "Around 225,000 men with 700 guns",
+      "casualties": "About 38,000 killed and wounded, 30,000 prisoners; Poniatowski drowned in the Elster crossing the retreat"
+    }
+  ],
+  "victor": "Sixth Coalition (Russia, Prussia, Austria, Sweden)",
+  "summary": "The largest land battle in Europe before the First World War. Four allied armies converged on Leipzig from north, east, and south. Three days of frontal assault failed to crack Napoleon's defensive arc, but the Saxons defected to the Coalition during the second day's fighting and the noose tightened. A premature demolition of the Elster bridge during the French retreat on the fourth day trapped tens of thousands inside the city. Poniatowski, newly minted a Marshal of France, drowned trying to swim across.",
+  "significance": "Leipzig ended Napoleon's grip on Germany. Within six months he would abdicate at Fontainebleau and depart for Elba. The Confederation of the Rhine collapsed, the German princes rallied to the Coalition, and the political map that produced the German Confederation and eventually a unified Germany under Prussia began to take shape. The scale of the engagement, more than 600,000 men with two thousand guns over three days, established the template for industrial-age battle that the First World War would inherit and surpass.",
+  "wikipediaTitle": "Battle of Leipzig"
+}

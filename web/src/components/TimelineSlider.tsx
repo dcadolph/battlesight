@@ -25,7 +25,8 @@ const ERA_RANGES: Record<string, [number, number]> = {
   'world-war-1': [1914, 1918],
   'interwar': [1919, 1938],
   'world-war-2': [1939, 1945],
-  'modern': [1945, 2025],
+  'cold-war': [1946, 1991],
+  'contemporary': [1991, 2030],
 };
 
 // Shorter pill labels. The track itself carries the era color slivers, so
@@ -39,7 +40,8 @@ const PILL_LABEL: Record<string, string> = {
   'world-war-1': 'WWI',
   'interwar': 'Interwar',
   'world-war-2': 'WWII',
-  'modern': 'Modern',
+  'cold-war': 'Cold War',
+  'contemporary': 'Now',
 };
 
 const SERIF_DISPLAY = "'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif";

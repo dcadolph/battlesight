@@ -82,7 +82,11 @@ var validErasSet = map[string]struct{}{
 	"world-war-1":  {},
 	"interwar":     {},
 	"world-war-2":  {},
-	"modern":       {},
+	// "modern" used to cover 1946 → today. Split at 1991 (USSR collapse)
+	// so the cold-war proxies and the post-Soviet contemporary wars sit in
+	// their own buckets. Front-end ERA_RANGES and theme map mirror this.
+	"cold-war":     {},
+	"contemporary": {},
 }
 
 // validBattleTypesSet is the closed set of battle types. Used both for
@@ -114,7 +118,8 @@ var eraYearRange = map[string][2]int{
 	"world-war-1":  {1914, 1919},
 	"interwar":     {1919, 1939},
 	"world-war-2":  {1939, 1946},
-	"modern":       {1946, 2100},
+	"cold-war":     {1946, 1991},
+	"contemporary": {1991, 2100},
 }
 
 // eraCasualtyCap bounds the largest plausible single-battle total casualty
@@ -131,7 +136,8 @@ var eraCasualtyCap = map[string]int{
 	"world-war-1":  5_000_000,
 	"interwar":     2_000_000,
 	"world-war-2":  10_000_000,
-	"modern":       5_000_000,
+	"cold-war":     3_000_000,
+	"contemporary": 2_000_000,
 }
 
 // landBattleTypes are the battle types that should sit on dry land. Naval
@@ -321,7 +327,7 @@ func ValidateBattles(bs []battles.Battle) ValidationReport {
 		} else if _, ok := validErasSet[b.Era]; !ok {
 			rep.Errors = append(rep.Errors, ValidationError{
 				ID: b.ID, Field: "era",
-				Message: fmt.Sprintf("unknown era %q; valid: ancient medieval early-modern napoleonic industrial world-war-1 interwar world-war-2 modern", b.Era),
+				Message: fmt.Sprintf("unknown era %q; valid: ancient medieval early-modern napoleonic industrial world-war-1 interwar world-war-2 cold-war contemporary", b.Era),
 			})
 		} else if b.Year != 0 {
 			// Year/era alignment: a battle dated 1500 tagged as "ancient"

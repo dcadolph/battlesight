@@ -5,11 +5,14 @@
   "date": "1 June 2025",
   "lat": 56.4636,
   "lng": 84.9583,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Russo-Ukrainian War",
   "battleType": "air",
   "aliases": [
-    { "name": "Pavutyna", "by": "Ukrainian operational codename (Ukrainian for 'Spider's Web')" }
+    {
+      "name": "Pavutyna",
+      "by": "Ukrainian operational codename (Ukrainian for 'Spider's Web')"
+    }
   ],
   "sides": [
     {

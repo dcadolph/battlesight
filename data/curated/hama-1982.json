@@ -5,11 +5,14 @@
   "date": "2 – 28 February 1982",
   "lat": 35.1318,
   "lng": 36.7578,
-  "era": "modern",
+  "era": "cold-war",
   "war": "Islamist uprising in Syria",
   "battleType": "siege",
   "aliases": [
-    { "name": "Hama Events", "by": "Common Arabic euphemism" }
+    {
+      "name": "Hama Events",
+      "by": "Common Arabic euphemism"
+    }
   ],
   "sides": [
     {

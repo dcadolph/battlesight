@@ -1,0 +1,29 @@
+{
+  "id": "chosin-1950",
+  "name": "Battle of Chosin Reservoir",
+  "year": 1950,
+  "date": "27 November to 13 December 1950",
+  "lat": 40.4661,
+  "lng": 127.3,
+  "era": "cold-war",
+  "war": "Korean War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "United States and allies (United Kingdom, South Korea)",
+      "commander": "Oliver P. Smith, Edward Almond, Douglas MacArthur",
+      "strength": "About 30,000 troops of the 1st Marine Division and elements of X Corps",
+      "casualties": "About 1,000 killed, 4,500 wounded, 7,000 non-battle casualties (almost all frostbite)"
+    },
+    {
+      "name": "People's Republic of China",
+      "commander": "Song Shilun",
+      "strength": "About 120,000 troops of the Chinese 9th Army Group (twelve divisions)",
+      "casualties": "About 25,000 killed and 12,500 wounded in combat, an additional 30,000 frostbite cases that gutted the divisions"
+    }
+  ],
+  "victor": "Chinese tactical victory, American operational extraction",
+  "summary": "Smith's 1st Marine Division and elements of the Army's 7th Infantry Division had pushed north along the eastern side of the reservoir in subzero weather when Song's 9th Army Group sprang the trap, ringing the column at Yudam-ni and Hagaru-ri. \"Retreat, hell, we're attacking in a different direction.\" The Marines broke south through fourteen Chinese divisions over seventy-eight miles of frozen mountain road, fighting at night under temperatures of minus forty, evacuating wounded with engineer-built airstrips at Hagaru-ri and Koto-ri. The bridge at Funchilin gorge had been blown by the Chinese; the air force dropped a prefabricated Treadway span by parachute. The column reached Hungnam and the sea.",
+  "significance": "Chosin halted the American drive to the Yalu River and ended any near-term hope of a unified Korea. China announced itself as a military power on the world stage. The Marine Corps preserved its identity through one of the most disciplined fighting retreats in modern military history. The Hungnam evacuation that followed lifted 100,000 troops and 100,000 Korean civilians off the beach and reset the war on the 38th Parallel for the next two and a half years.",
+  "wikipediaTitle": "Battle of Chosin Reservoir"
+}

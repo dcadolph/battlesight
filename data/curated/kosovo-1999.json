@@ -5,12 +5,18 @@
   "date": "24 March – 11 June 1999",
   "lat": 42.6629,
   "lng": 21.1655,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Yugoslav Wars",
   "battleType": "land",
   "aliases": [
-    { "name": "Operation Allied Force", "by": "NATO operational name for the air campaign" },
-    { "name": "Operation Noble Anvil", "by": "U.S. operational name" }
+    {
+      "name": "Operation Allied Force",
+      "by": "NATO operational name for the air campaign"
+    },
+    {
+      "name": "Operation Noble Anvil",
+      "by": "U.S. operational name"
+    }
   ],
   "sides": [
     {

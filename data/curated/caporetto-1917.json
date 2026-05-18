@@ -1,0 +1,29 @@
+{
+  "id": "caporetto-1917",
+  "name": "Battle of Caporetto",
+  "year": 1917,
+  "date": "24 October to 19 November 1917",
+  "lat": 46.2433,
+  "lng": 13.5828,
+  "era": "world-war-1",
+  "war": "World War I",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Central Powers (Austria-Hungary, Germany)",
+      "commander": "Otto von Below, Svetozar Boroević",
+      "strength": "Around 350,000 troops of the 14th Army, including German Alpenkorps and Württemberg Mountain Battalion",
+      "casualties": "About 70,000 killed and wounded"
+    },
+    {
+      "name": "Kingdom of Italy",
+      "commander": "Luigi Cadorna, Luigi Capello",
+      "strength": "Around 870,000 troops of the 2nd and 3rd Italian Armies along the Isonzo",
+      "casualties": "About 13,000 killed, 30,000 wounded, 280,000 captured, 350,000 deserted; 3,000 artillery pieces lost"
+    }
+  ],
+  "victor": "Central Powers (Austria-Hungary, Germany)",
+  "summary": "A combined Austro-German offensive on the Isonzo front opened with short hurricane bombardment of gas and high explosive followed by stormtrooper infiltration through the fog. Erwin Rommel, then a junior officer in the Württemberg Mountain Battalion, took Monte Matajur and 9,000 prisoners with a force of 200 men in fifty hours. The Italian line collapsed. Cadorna lost the Isonzo, the Tagliamento, and finally fell back to the Piave seventy miles to the west. The Italian Army nearly disintegrated.",
+  "significance": "The most catastrophic single defeat suffered by any Entente army before March 1918. It forced the deployment of British and French divisions to Italy and brought down the Boselli government in Rome. The new tactics of Caporetto, infiltration in depth bypassing strongpoints, would become the template for the German Spring Offensive of 1918 and ultimately for blitzkrieg. The disaster also produced Italy's bitter wartime memory that fuelled the postwar political turmoil out of which fascism rose.",
+  "wikipediaTitle": "Battle of Caporetto"
+}

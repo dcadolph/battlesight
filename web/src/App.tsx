@@ -3,6 +3,7 @@ import BattleGlobe from './components/BattleGlobe';
 import TimelineSlider from './components/TimelineSlider';
 import BattlePanel from './components/BattlePanel';
 import CommanderPanel from './components/CommanderPanel';
+import { canonCountriesForBattle } from './lib/country';
 import CommandBar from './components/CommandBar';
 import EraLegend from './components/EraLegend';
 import WarPlayback from './components/WarPlayback';
@@ -68,6 +69,17 @@ export default function App() {
   // so the user can see at a glance which territories the war involved.
   // Empty when no war is selected or the war has no recognised participants.
   const [warCountries, setWarCountries] = useState<string[]>([]);
+  // warCountryColors holds the time-shifting territory snapshot in effect
+  // for the war currently being watched. Each entry maps a canonical country
+  // name to the accent color of its controller at the playhead's battle
+  // year (e.g. WW2 mid-1941: Germany red across Poland/France/Norway, USSR
+  // blue across Russia). Null whenever no snapshot applies, in which case
+  // BattleGlobe falls back to the flat warCountries shading.
+  const [warCountryColors, setWarCountryColors] = useState<Record<string, string> | null>(null);
+  // territoryLabel is the short caption tied to the active snapshot
+  // ("June 1944: D-Day, Bagration"). Drives a HUD overlay so the user reads
+  // the campaign beat as a labeled stage rather than a silent color change.
+  const [territoryLabel, setTerritoryLabel] = useState<string | null>(null);
   // commanderQuery powers the CommanderPanel attribution view. Set from a
   // click on a commander chip in BattlePanel; cleared on close.
   const [commanderQuery, setCommanderQuery] = useState<string>('');
@@ -76,6 +88,12 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [showPlayback, setShowPlayback] = useState(false);
   const [replayBattle, setReplayBattle] = useState<Battle | null>(null);
+  // replayCinematic is true when the open replay was launched by the war
+  // cinematic auto-step (not by the user clicking "Watch the replay" on a
+  // dossier). Suppresses the per-battle interactive outro so the war
+  // timer can drive forward motion without the user feeling stuck on the
+  // verdict card.
+  const [replayCinematic, setReplayCinematic] = useState(false);
   const [replayPhase, setReplayPhase] = useState(0);
   const [introVisible, setIntroVisible] = useState(false);
   const [featured, setFeatured] = useState<Battle | null>(null);
@@ -227,6 +245,8 @@ export default function App() {
           setReplayBattle(null);
           setReplayPhase(0);
           setYearRange([MIN_YEAR, MAX_YEAR]);
+          setWarCountryColors(null);
+          setTerritoryLabel(null);
           return;
         }
         setSelectedBattle(null);
@@ -262,12 +282,15 @@ export default function App() {
     setReplayBattle(null);
     setReplayPhase(0);
     setYearRange([MIN_YEAR, MAX_YEAR]);
+    setWarCountryColors(null);
+    setTerritoryLabel(null);
   }, []);
 
   const handleWatchReplay = useCallback(() => {
     if (!selectedBattle) return;
     setReplayBattle(selectedBattle);
     setReplayPhase(0);
+    setReplayCinematic(false);
   }, [selectedBattle]);
 
   const handleCloseReplay = useCallback(() => {
@@ -283,10 +306,12 @@ export default function App() {
   const handleWarOpenReplay = useCallback((b: Battle) => {
     setReplayBattle(b);
     setReplayPhase(0);
+    setReplayCinematic(true);
   }, []);
   const handleWarCloseReplay = useCallback(() => {
     setReplayBattle(null);
     setReplayPhase(0);
+    setReplayCinematic(false);
   }, []);
   const handleWarSelected = useCallback((name: string) => {
     if (name) {
@@ -294,6 +319,17 @@ export default function App() {
       setIsolatedBattle(null);
     }
   }, []);
+  // handleWarTerritory takes the resolved snapshot for the playhead's
+  // current battle year from WarPlayback and threads it into BattleGlobe.
+  // Stable identity keeps WarPlayback's effect dependency list from
+  // tearing down and re-arming on every App render.
+  const handleWarTerritory = useCallback(
+    (colors: Record<string, string> | null, label: string | null) => {
+      setWarCountryColors(colors);
+      setTerritoryLabel(label);
+    },
+    [],
+  );
 
   const handleShareSelected = useCallback(async () => {
     if (!selectedBattle) return;
@@ -450,6 +486,8 @@ export default function App() {
     firedBeatsRef.current.clear();
     setYearRange([MIN_YEAR, MAX_YEAR]);
     setFilters({ era: '', war: '', battleType: '', quality: '' });
+    setWarCountryColors(null);
+    setTerritoryLabel(null);
   }, []);
 
   // handleHistoryScrub moves the playhead to an explicit year and rewrites
@@ -706,8 +744,14 @@ export default function App() {
         selectedBattle={selectedBattle}
         dramatic={showPillars}
         atmosphereColor={activeTheme.atmosphere}
-        warCountries={warCountries}
+        warCountries={
+          warCountries.length > 0
+            ? warCountries
+            : (selectedBattle ? canonCountriesForBattle(selectedBattle.sides) : [])
+        }
         warAccent={activeTheme.accent}
+        warCountryColors={warCountryColors ?? undefined}
+        territoryLabel={territoryLabel ?? undefined}
       />
 
       {/* Era legend chip. Visible while the user is browsing the globe.
@@ -776,6 +820,45 @@ export default function App() {
         />
       )}
 
+      {/* Territory snapshot HUD. Drops a small caption at the top-centre of
+          the viewport during war cinematic playback, naming the campaign
+          beat the current battle year lands on ("June 1944: D-Day,
+          Bagration"). Re-keyed on label so each new beat remounts and
+          re-plays the fade-in, reading as a stage card rather than a
+          silent shade change. */}
+      {showPlayback && territoryLabel && (
+        <div
+          key={`terr-${territoryLabel}`}
+          className="pointer-events-none fixed left-1/2 z-30 -translate-x-1/2"
+          style={{
+            top: 88,
+            animation: 'territory-cap 4200ms ease-out forwards',
+          }}
+        >
+          <div
+            className="rounded-full border px-4 py-1.5 text-[10.5px] font-semibold uppercase backdrop-blur-md"
+            style={{
+              letterSpacing: '0.34em',
+              color: activeTheme.accent,
+              borderColor: `${activeTheme.accent}66`,
+              background: 'rgba(10,12,18,0.6)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.55)',
+              textShadow: '0 1px 8px rgba(0,0,0,0.7)',
+            }}
+          >
+            {territoryLabel}
+          </div>
+        </div>
+      )}
+      <style>{`
+        @keyframes territory-cap {
+          0%   { opacity: 0; transform: translate(-50%, -8px); }
+          12%  { opacity: 1; transform: translate(-50%, 0); }
+          82%  { opacity: 1; transform: translate(-50%, 0); }
+          100% { opacity: 0; transform: translate(-50%, 0); }
+        }
+      `}</style>
+
       {showPlayback && (
         <WarPlayback
           onBattleFocus={handleBattleClick}
@@ -785,6 +868,7 @@ export default function App() {
           onWarCountries={setWarCountries}
           onPlayReplay={handleWarOpenReplay}
           onCloseReplay={handleWarCloseReplay}
+          onWarTerritory={handleWarTerritory}
           initialWar={initialWar}
         />
       )}
@@ -795,6 +879,7 @@ export default function App() {
           initialPhase={replayPhase}
           onPhaseChange={setReplayPhase}
           onClose={handleCloseReplay}
+          cinematicMode={replayCinematic}
         />
       )}
 

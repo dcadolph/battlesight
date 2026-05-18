@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { themeForYear } from '../theme/era';
-import { formatYear, formatCasualtyEstimate } from '../lib/format';
+import { ERA_LABELS } from '../types/battle';
+import { formatYear, formatCasualtyEstimate, formatCountCompact, cleanProseText } from '../lib/format';
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import CloseButton from './CloseButton';
 
 interface WarSummaryShape {
@@ -12,6 +15,48 @@ interface WarSummaryShape {
   battleCount: number;
   totalCasualties: number;
   finalVictor?: string;
+}
+
+// StatCell renders one figure inside the cinematic's stat strip. Tight
+// monospace number, era-accent eyebrow, and a thin baseline rule so the
+// row reads as an editorial fact strip rather than a dashboard. Reveal
+// timing is driven by the parent via animationDelay.
+function StatCell({
+  value,
+  label,
+  accent,
+  delayMs,
+  reducedMotion,
+}: {
+  value: React.ReactNode;
+  label: string;
+  accent: string;
+  delayMs: number;
+  reducedMotion: boolean;
+}) {
+  return (
+    <div
+      className="flex flex-col items-center gap-1.5 min-w-[88px]"
+      style={{
+        animation: reducedMotion
+          ? 'none'
+          : `wc-rise 700ms ${delayMs}ms cubic-bezier(.2,.7,.25,1) both`,
+      }}
+    >
+      <div
+        className="text-[9.5px] font-semibold uppercase tracking-[0.32em]"
+        style={{ color: accent }}
+      >
+        {label}
+      </div>
+      <div
+        className="text-[22px] font-semibold tabular-nums text-white leading-none"
+        style={{ textShadow: '0 2px 12px rgba(0,0,0,0.65)' }}
+      >
+        {value}
+      </div>
+    </div>
+  );
 }
 
 interface WarCinematicOverlayProps {
@@ -30,6 +75,11 @@ interface WarCinematicOverlayProps {
   // sides are the deduplicated belligerent labels shown on the opening
   // card. Pulled from the war's battles by the parent.
   sides: string[];
+  // sidesTotal is the actual count of distinct belligerents across every
+  // battle in the war (before the top-5 chip-strip cap). Drives the
+  // Belligerents stat cell so a 40-nation coalition war doesn't read as
+  // "5" just because the chip strip is capped.
+  sidesTotal?: number;
   // onDismiss exits the cinematic stage. Bound to Esc, the Continue
   // button on the overture, and the Done button on the aftermath.
   onDismiss: () => void;
@@ -60,12 +110,14 @@ export default function WarCinematicOverlay({
   warName,
   summary,
   sides,
+  sidesTotal,
   onDismiss,
   onBegin,
 }: WarCinematicOverlayProps) {
   const [autoBegun, setAutoBegun] = useState(false);
   const midYear = summary ? (summary.yearStart + summary.yearEnd) / 2 : 1500;
   const theme = themeForYear(midYear);
+  const reducedMotion = usePrefersReducedMotion();
 
   // Esc dismisses at any stage. Enter advances the overture; on the
   // aftermath it also dismisses, so the user can chain through with
@@ -95,7 +147,13 @@ export default function WarCinematicOverlay({
 
   if (stage === 'none') return null;
 
-  return (
+  // Mount via portal to document.body so the overlay always covers the full
+  // viewport. Without the portal it sits inside WarPlayback, whose pane has
+  // a `backdrop-blur` filter that creates a containing block for fixed-
+  // positioned descendants. The result was the cinematic card and its veil
+  // getting clipped to the 420px right pane width, leaving the globe
+  // visibly cut off on the left edge of the overlay.
+  const node = (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center px-6 pointer-events-auto"
       role="dialog"
@@ -131,7 +189,9 @@ export default function WarCinematicOverlay({
         }}
       />
 
-      <div className="relative w-full max-w-[820px] text-center">
+      <div className="relative w-full max-w-[860px] max-h-[92vh] overflow-y-auto text-center px-1 py-4">
+        {/* Top hairline. Era accent gradient with a soft glow; reads as the
+            opening of a film frame. */}
         <div
           className="mx-auto mb-7"
           style={{
@@ -139,19 +199,29 @@ export default function WarCinematicOverlay({
             height: 1,
             background: `linear-gradient(90deg, transparent, ${theme.accent}, transparent)`,
             boxShadow: `0 0 12px ${theme.accent}aa`,
-            animation: 'wc-line 800ms 100ms ease-out both',
+            animation: reducedMotion ? 'none' : 'wc-line 800ms 100ms ease-out both',
           }}
         />
 
+        {/* Single eyebrow line. Just the era stamp — the war name and the
+            stat strip together tell the reader this is the opening of the
+            war; an extra "A war begins" string was redundant with the
+            title and crowded the layout. */}
         <div
-          className="text-[10.5px] font-semibold uppercase tracking-[0.5em] mb-5"
-          style={{
-            color: theme.accent,
-            textShadow: '0 2px 12px rgba(0,0,0,0.65)',
-            animation: 'wc-rise 750ms 220ms cubic-bezier(.2,.7,.25,1) both',
-          }}
+          className="flex items-center justify-center mb-4"
+          style={{ animation: reducedMotion ? 'none' : 'wc-rise 750ms 200ms cubic-bezier(.2,.7,.25,1) both' }}
         >
-          {stage === 'overture' ? 'A war begins' : 'The war ends'}
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.42em] px-3 py-1 rounded-full"
+            style={{
+              color: theme.accent,
+              background: `${theme.accent}1f`,
+              border: `1px solid ${theme.accent}44`,
+              textShadow: '0 2px 12px rgba(0,0,0,0.6)',
+            }}
+          >
+            {ERA_LABELS[theme.era] || theme.mood}
+          </span>
         </div>
 
         <h2
@@ -159,100 +229,195 @@ export default function WarCinematicOverlay({
           style={{
             fontFamily: theme.titleFont,
             fontWeight: 600,
-            fontSize: 'clamp(36px, 5.4vw, 72px)',
+            fontSize: 'clamp(34px, 4.8vw, 64px)',
             letterSpacing: '-0.015em',
             color: '#ffffff',
             textShadow: '0 8px 36px rgba(0,0,0,0.8)',
             maxWidth: '24ch',
-            animation: 'wc-rise 800ms 360ms cubic-bezier(.2,.7,.25,1) both',
+            animation: reducedMotion ? 'none' : 'wc-rise 800ms 360ms cubic-bezier(.2,.7,.25,1) both',
           }}
         >
           {warName}
         </h2>
 
-        {summary && (
-          <div
-            className="mt-4 text-[12px] tracking-[0.32em] uppercase text-slate-300/90"
-            style={{ animation: 'wc-rise 800ms 540ms cubic-bezier(.2,.7,.25,1) both' }}
-          >
-            {formatYear(summary.yearStart)} <span style={{ color: theme.accent }}>·</span> {formatYear(summary.yearEnd)}
-            <span className="text-slate-500 ml-3">·</span>
-            <span className="ml-3 tabular-nums">{summary.battleCount} battles</span>
+        {/* Hero stat strip. Three (overture) or four (aftermath) editorial
+            cells: span / battles / belligerents on opening; years / battles
+            / lives / victor on closing. The cells reveal as a wave, each
+            one ~80ms after the previous, so the eye reads them as a single
+            rhythmic beat. */}
+        {summary && stage === 'overture' && (
+          <div className="mt-5 flex items-center justify-center gap-7 flex-wrap">
+            <StatCell
+              accent={theme.accent}
+              reducedMotion={reducedMotion}
+              delayMs={540}
+              label="Span"
+              value={`${formatYear(summary.yearStart)}–${formatYear(summary.yearEnd)}`}
+            />
+            <span className="w-px h-7 bg-slate-700/60" />
+            <StatCell
+              accent={theme.accent}
+              reducedMotion={reducedMotion}
+              delayMs={620}
+              label="Battles"
+              value={summary.battleCount.toLocaleString('en-US')}
+            />
+            {(sidesTotal ?? sides.length) > 0 && (
+              <>
+                <span className="w-px h-7 bg-slate-700/60" />
+                <StatCell
+                  accent={theme.accent}
+                  reducedMotion={reducedMotion}
+                  delayMs={700}
+                  label="Belligerents"
+                  value={(sidesTotal ?? sides.length).toLocaleString('en-US')}
+                />
+              </>
+            )}
+          </div>
+        )}
+
+        {summary && stage === 'aftermath' && (
+          <div className="mt-5 flex items-center justify-center gap-7 flex-wrap">
+            <StatCell
+              accent={theme.accent}
+              reducedMotion={reducedMotion}
+              delayMs={540}
+              label="Years"
+              value={Math.max(1, summary.yearEnd - summary.yearStart + 1)}
+            />
+            <span className="w-px h-7 bg-slate-700/60" />
+            <StatCell
+              accent={theme.accent}
+              reducedMotion={reducedMotion}
+              delayMs={620}
+              label="Battles"
+              value={summary.battleCount.toLocaleString('en-US')}
+            />
+            {summary.totalCasualties > 0 && (
+              <>
+                <span className="w-px h-7 bg-slate-700/60" />
+                <StatCell
+                  accent={theme.accent}
+                  reducedMotion={reducedMotion}
+                  delayMs={700}
+                  label="Lives lost"
+                  value={formatCountCompact(summary.totalCasualties)}
+                />
+              </>
+            )}
           </div>
         )}
 
         {stage === 'overture' && sides.length > 0 && (
           <div
-            className="mt-7 mx-auto max-w-[60ch] text-left"
-            style={{ animation: 'wc-rise 850ms 760ms cubic-bezier(.2,.7,.25,1) both' }}
+            className="mt-6 mx-auto max-w-[64ch]"
+            style={{ animation: reducedMotion ? 'none' : 'wc-rise 850ms 820ms cubic-bezier(.2,.7,.25,1) both' }}
           >
-            <div className="text-[10px] uppercase tracking-[0.36em] text-slate-500 mb-2">
-              The belligerents
+            <div className="flex items-center justify-center gap-x-2.5 gap-y-1.5 flex-wrap">
+              {sides.slice(0, 6).map((s, i) => (
+                <span key={`${i}-${s}`} className="inline-flex items-center gap-2">
+                  {i > 0 && <span className="text-slate-700">·</span>}
+                  <span
+                    className="text-[14.5px] tracking-tight"
+                    style={{
+                      fontFamily: theme.titleFont,
+                      fontStyle: 'italic',
+                      color: 'rgba(241,245,249,0.96)',
+                      textShadow: '0 2px 12px rgba(0,0,0,0.7)',
+                    }}
+                  >
+                    {s}
+                  </span>
+                </span>
+              ))}
             </div>
-            <p
-              className="text-[15px] leading-[1.65] text-slate-100/95"
-              style={{ fontFamily: theme.titleFont, fontStyle: 'italic' }}
-            >
-              {sides.slice(0, 5).join(' · ')}
-            </p>
           </div>
         )}
 
-        {stage === 'aftermath' && summary?.outcome && (
+        {stage === 'aftermath' && cleanProseText(summary?.outcome) && (
           <p
-            className="mt-7 mx-auto max-w-[64ch] text-[15.5px] leading-[1.65] text-slate-100/95 text-left"
+            className="mt-9 mx-auto max-w-[64ch] text-[16px] leading-[1.6] text-slate-100/95 text-left"
             style={{
               fontFamily: theme.titleFont,
-              animation: 'wc-rise 850ms 720ms cubic-bezier(.2,.7,.25,1) both',
+              animation: reducedMotion ? 'none' : 'wc-rise 850ms 860ms cubic-bezier(.2,.7,.25,1) both',
             }}
           >
-            {summary.outcome}
+            {cleanProseText(summary?.outcome)}
           </p>
         )}
 
-        {stage === 'aftermath' && summary?.aftermath && (
+        {stage === 'aftermath' && cleanProseText(summary?.aftermath) && (
           <p
             className="mt-4 mx-auto max-w-[64ch] text-[13.5px] leading-[1.7] text-slate-300/85 italic text-left"
             style={{
               fontFamily: theme.titleFont,
-              animation: 'wc-rise 900ms 980ms cubic-bezier(.2,.7,.25,1) both',
+              animation: reducedMotion ? 'none' : 'wc-rise 900ms 1080ms cubic-bezier(.2,.7,.25,1) both',
             }}
           >
-            {summary.aftermath}
+            {cleanProseText(summary?.aftermath)}
           </p>
         )}
 
-        {stage === 'aftermath' && summary && summary.totalCasualties > 0 && (
+        {stage === 'aftermath' && summary?.notable && summary.notable.length > 0 && (
+          <div
+            className="mt-7 mx-auto max-w-[64ch] text-left"
+            style={{ animation: reducedMotion ? 'none' : 'wc-rise 900ms 1240ms cubic-bezier(.2,.7,.25,1) both' }}
+          >
+            <div className="text-[10px] uppercase tracking-[0.36em] text-slate-500 mb-2">
+              Notable
+            </div>
+            <ul className="space-y-1.5">
+              {summary.notable.slice(0, 5).map((n, i) => (
+                <li
+                  key={`${i}-${n}`}
+                  className="text-[13px] leading-[1.6] text-slate-200/90 flex items-start gap-2"
+                  style={{ fontFamily: theme.titleFont }}
+                >
+                  <span
+                    className="mt-[7px] flex-shrink-0 rounded-full"
+                    style={{ width: 3, height: 3, background: theme.accent }}
+                  />
+                  <span>{cleanProseText(n)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {stage === 'aftermath' && summary && summary.totalCasualties > 0 && !summary.aftermath && (
           <p
             className="mt-4 text-[12px] tracking-[0.18em] text-slate-400/90"
-            style={{ animation: 'wc-rise 800ms 1180ms cubic-bezier(.2,.7,.25,1) both' }}
+            style={{ animation: reducedMotion ? 'none' : 'wc-rise 800ms 1320ms cubic-bezier(.2,.7,.25,1) both' }}
           >
             {formatCasualtyLine(summary.totalCasualties)}
           </p>
         )}
 
         <div
-          className="mt-9 flex items-center justify-center gap-3"
-          style={{ animation: 'wc-rise 800ms 1320ms cubic-bezier(.2,.7,.25,1) both' }}
+          className="mt-8 flex items-center justify-center gap-3 flex-wrap"
+          style={{ animation: reducedMotion ? 'none' : 'wc-rise 800ms 1320ms cubic-bezier(.2,.7,.25,1) both' }}
         >
           {stage === 'overture' && onBegin && (
             <button
               type="button"
               onClick={onBegin}
               autoFocus
-              className="inline-flex items-center gap-2 h-11 px-6 rounded-full text-[13px] font-semibold tracking-wide bg-white text-slate-900 hover:bg-slate-100 transition-all shadow-[0_8px_24px_-8px_rgba(255,255,255,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02]"
+              className="inline-flex items-center justify-center gap-3 h-12 px-8 rounded-full text-[13.5px] font-semibold tracking-[0.04em] bg-white text-slate-900 hover:bg-slate-100 transition-all shadow-[0_10px_28px_-10px_rgba(255,255,255,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02]"
+              style={{ fontFamily: theme.titleFont }}
             >
-              Begin the campaign
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 1.5 L8.5 6 L4 10.5" />
+              <span>Play the war</span>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 2 L10 7 L5 12" />
               </svg>
             </button>
           )}
           <button
             type="button"
             onClick={onDismiss}
-            className="inline-flex items-center gap-2 h-11 px-6 rounded-full text-[13px] font-semibold tracking-wide border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02]"
+            className="inline-flex items-center justify-center h-12 px-8 rounded-full text-[13.5px] font-semibold tracking-[0.04em] border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02]"
             style={{
+              fontFamily: theme.titleFont,
               color: stage === 'aftermath' ? '#fff' : theme.accent,
               borderColor: `${theme.accent}80`,
               background: stage === 'aftermath' ? `${theme.accent}26` : `${theme.accent}14`,
@@ -299,4 +464,5 @@ export default function WarCinematicOverlay({
       `}</style>
     </div>
   );
+  return typeof document === 'undefined' ? node : createPortal(node, document.body);
 }

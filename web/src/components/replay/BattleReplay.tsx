@@ -8,7 +8,8 @@ import GlobeReplay from './GlobeReplay';
 import { themeForEra } from '../../theme/era';
 import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
 import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
-import { cleanCasualtyText } from '../../lib/format';
+import { cleanCasualtyText, cleanProseText } from '../../lib/format';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import CloseButton from '../CloseButton';
 
 interface BattleReplayProps {
@@ -16,9 +17,16 @@ interface BattleReplayProps {
   initialPhase?: number;
   onClose: () => void;
   onPhaseChange?: (phaseIndex: number) => void;
+  // cinematicMode is true when BattleReplay is mounted inside a war
+  // cinematic playback. In that mode the per-battle outro no longer shows
+  // its interactive "Replay / Back" buttons (the war timer is in charge
+  // of advancement); instead it surfaces a compact "Next battle in a
+  // moment" indicator and leaves the final tactical frame visible until
+  // the parent advances.
+  cinematicMode?: boolean;
 }
 
-export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange }: BattleReplayProps) {
+export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange, cinematicMode = false }: BattleReplayProps) {
   const [replay, setReplay] = useState<Replay | null>(null);
   const [phaseIdx, setPhaseIdx] = useState(initialPhase);
   // Auto-play on open. Opening "Watch the battle" implies "play it". Making
@@ -32,6 +40,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   // on the final tactical state. Cleared whenever the user scrubs back.
   const [ended, setEnded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // Honour the OS-level "Reduce motion" preference: phase timer collapses
+  // to the next phase with no dwell so the user steps through frames
+  // rather than waiting on animated transitions. Decorative pulse keyframes
+  // and arrow marching animations are expected to be no-ops under this
+  // mode (handled in CSS @media blocks).
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     fetch(`/api/battles/${battle.id}/replay`)
@@ -49,7 +63,10 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   useEffect(() => {
     if (!playing || !replay) return;
     const current = replay.phases[phaseIdx];
-    const dur = (current.durationMs ?? 5500) / speed;
+    // Reduced-motion path: skip the dwell entirely. The user can still
+    // step through with the scrubber if they want to read each phase.
+    const baseDur = current.durationMs ?? 5500;
+    const dur = prefersReducedMotion ? 0 : baseDur / speed;
     timerRef.current = setTimeout(() => {
       if (phaseIdx >= replay.phases.length - 1) {
         // Last phase finished its dwell. Trigger the outro card so the
@@ -62,7 +79,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
       setPhaseIdx((i) => i + 1);
     }, dur);
     return () => clearTimeout(timerRef.current);
-  }, [playing, phaseIdx, replay, speed]);
+  }, [playing, phaseIdx, replay, speed, prefersReducedMotion]);
 
   useEffect(() => {
     onPhaseChange?.(phaseIdx);
@@ -231,6 +248,14 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           12% { opacity: 0.95; }
           100% { opacity: 0; transform: scale(4.5); }
         }
+        /* impact-spark: sparks of light fly out from the impact centre,
+           giving the hit a starburst of debris. --sx / --sy are set per
+           element to direct each spark to its own offset. */
+        @keyframes impact-spark {
+          0%  { opacity: 0; transform: translate(0, 0) scale(1); }
+          15% { opacity: 1; transform: translate(calc(var(--sx) * 0.18), calc(var(--sy) * 0.18)) scale(1.3); }
+          100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(0.4); }
+        }
         /* Arrow label pop-in. The label pill ramps in just before the
            trace completes so the story arrives with the force, not after. */
         @keyframes arrow-label-in {
@@ -363,6 +388,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 theme={theme}
                 onRestart={restartReplay}
                 onBackToStory={onClose}
+                cinematicMode={cinematicMode}
               />
             )}
 
@@ -565,18 +591,14 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         </button>
 
         <div className="flex-1 px-3">
-          <input
-            type="range"
-            min={0}
-            max={replay.phases.length - 1}
-            value={phaseIdx}
-            onChange={(e) => goto(parseInt(e.target.value))}
-            className="w-full h-1 rounded-full appearance-none cursor-pointer"
-            style={{
-              background: `linear-gradient(to right, ${theme.accent} 0%, ${theme.accent} ${(phaseIdx / Math.max(1, replay.phases.length - 1)) * 100}%, rgba(30,33,46,0.85) ${(phaseIdx / Math.max(1, replay.phases.length - 1)) * 100}%, rgba(30,33,46,0.85) 100%)`,
-              accentColor: theme.accent,
-            }}
-            aria-label="Phase position"
+          <TransportScrubber
+            phases={replay.phases}
+            phaseIdx={phaseIdx}
+            playing={playing}
+            speed={speed}
+            accent={theme.accent}
+            onSeek={goto}
+            reducedMotion={prefersReducedMotion}
           />
         </div>
 
@@ -602,6 +624,221 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   );
 }
 
+// TransportScrubber is the YouTube-style transport bar for BattleReplay.
+// Behaviour mirrors the cinematic-style guide in the user's aboutme.md §5:
+// thin baseline track grows on hover, a fill gradient in the era accent
+// runs from the start to the playhead, the head is a soft glow dot, scene
+// boundaries get tick markers along the track, and a tooltip floats above
+// the mouse x (not the playhead) showing the scene about to be jumped to.
+// Drag binds to `document` on mousedown so the gesture survives leaving
+// the track without dropping the scrub. Within-phase fractional progress
+// is interpolated from the wall clock so the fill creeps during playback
+// instead of jumping at each phase advance.
+interface TransportScrubberProps {
+  phases: Replay['phases'];
+  phaseIdx: number;
+  playing: boolean;
+  speed: number;
+  accent: string;
+  onSeek: (i: number) => void;
+  reducedMotion: boolean;
+}
+
+function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, reducedMotion }: TransportScrubberProps) {
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [hovering, setHovering] = useState(false);
+  const [hoverX, setHoverX] = useState<number | null>(null);
+  const [dragging, setDragging] = useState(false);
+  // intraProgress is the [0,1] fraction of the current phase that has
+  // elapsed during playback, so the fill creeps within a phase instead of
+  // sitting at the phase-start mark until the next advance. Resets to 0
+  // on phase change. Under reduced motion the fill snaps to the phase
+  // boundary (no animated creep).
+  const [intraProgress, setIntraProgress] = useState(0);
+
+  // RAF loop for intra-phase progress. Only runs while playing and not
+  // dragging; otherwise the fill stays put.
+  useEffect(() => {
+    if (!playing || dragging || reducedMotion) {
+      setIntraProgress(0);
+      return;
+    }
+    const dur = (phases[phaseIdx]?.durationMs ?? 5500) / Math.max(0.1, speed);
+    if (dur <= 0) return;
+    const start = performance.now();
+    let raf: number;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / dur);
+      setIntraProgress(p);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [playing, phaseIdx, speed, phases, dragging, reducedMotion]);
+
+  // Resolve clientX to a phase index using the track's bounding rect.
+  const clientXToPhase = useCallback((clientX: number): number => {
+    const el = trackRef.current;
+    if (!el || phases.length === 0) return 0;
+    const rect = el.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    return Math.round(pct * (phases.length - 1));
+  }, [phases.length]);
+
+  // Hover tooltip x → previewed phase index. We do NOT round to the
+  // nearest phase for the tooltip position itself; the tooltip follows the
+  // raw mouse x so the user sees a continuous slider feel. Only the seek
+  // target snaps to a phase.
+  const hoverPhase = (hoverX !== null && trackRef.current)
+    ? (() => {
+        const rect = trackRef.current.getBoundingClientRect();
+        const pct = Math.max(0, Math.min(1, hoverX / rect.width));
+        return Math.round(pct * (phases.length - 1));
+      })()
+    : null;
+
+  const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    setDragging(true);
+    onSeek(clientXToPhase(e.clientX));
+  }, [clientXToPhase, onSeek]);
+
+  // Drag binds to `document` so the gesture survives leaving the track,
+  // matching YouTube's behaviour. Without this the user would drop the
+  // scrub the moment their mouse exits the bar's vertical band.
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e: MouseEvent) => onSeek(clientXToPhase(e.clientX));
+    const onUp = () => setDragging(false);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+  }, [dragging, clientXToPhase, onSeek]);
+
+  const onTrackMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setHoverX(e.clientX - rect.left);
+  }, []);
+
+  const totalSteps = Math.max(1, phases.length - 1);
+  // Fill goes through the end of the current phase plus its intra-phase
+  // fraction so the fill creeps live during playback.
+  const fillPct = totalSteps === 0
+    ? 0
+    : ((phaseIdx + (playing && !dragging ? intraProgress : 0)) / totalSteps) * 100;
+  const tall = hovering || dragging;
+
+  return (
+    <div className="relative w-full select-none" style={{ height: 22, cursor: 'pointer' }}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => { setHovering(false); setHoverX(null); }}
+      onMouseMove={onTrackMove}
+    >
+      {/* Tooltip. Floats above the raw mouse x (not the playhead), shows
+          the previewed phase number, title, and time marker if known. */}
+      {hoverPhase !== null && hoverX !== null && (
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            left: hoverX,
+            bottom: 26,
+            transform: 'translateX(-50%)',
+            background: 'rgba(8,10,18,0.95)',
+            border: `1px solid ${accent}55`,
+            borderRadius: 6,
+            padding: '6px 9px',
+            fontSize: 11,
+            color: '#e2e8f0',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 8px 24px -10px rgba(0,0,0,0.7)',
+            zIndex: 5,
+            maxWidth: 280,
+          }}
+        >
+          <div style={{ color: accent, fontWeight: 600, letterSpacing: '0.16em', fontSize: 9.5, textTransform: 'uppercase', marginBottom: 2 }}>
+            Phase {String(hoverPhase + 1).padStart(2, '0')} {phases[hoverPhase]?.timeMarker ? `· ${phases[hoverPhase].timeMarker}` : ''}
+          </div>
+          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 260, whiteSpace: 'nowrap' }}>
+            {phases[hoverPhase]?.title || 'Phase'}
+          </div>
+        </div>
+      )}
+
+      {/* Track. Hover-grows from 3 → 6px so the bar feels alive without
+          dominating the chrome. */}
+      <div
+        ref={trackRef}
+        onMouseDown={onMouseDown}
+        className="absolute left-0 right-0"
+        style={{
+          top: '50%',
+          transform: 'translateY(-50%)',
+          height: tall ? 6 : 3,
+          borderRadius: 999,
+          background: 'rgba(30,33,46,0.85)',
+          transition: reducedMotion ? 'none' : 'height 140ms ease-out',
+          overflow: 'visible',
+        }}
+      >
+        {/* Fill */}
+        <div
+          className="absolute left-0 top-0 bottom-0 rounded-full pointer-events-none"
+          style={{
+            width: `${fillPct}%`,
+            background: `linear-gradient(90deg, ${accent}cc 0%, ${accent} 100%)`,
+            boxShadow: `0 0 6px ${accent}66`,
+            transition: dragging || reducedMotion ? 'none' : 'width 80ms linear',
+          }}
+        />
+
+        {/* Scene boundary ticks. Vertical lines at each phase boundary so
+            the user sees the cinematic's structure at a glance. The phase
+            currently being played, and ones already played, get a stronger
+            tick in the accent colour. */}
+        {phases.map((_, i) => {
+          if (i === 0 || i === phases.length - 1) return null;
+          const left = (i / totalSteps) * 100;
+          const past = i <= phaseIdx;
+          return (
+            <div
+              key={i}
+              className="absolute top-0 bottom-0 pointer-events-none"
+              style={{
+                left: `${left}%`,
+                width: 1.5,
+                background: past ? `${accent}cc` : 'rgba(148,163,184,0.5)',
+                transform: 'translateX(-50%)',
+                boxShadow: past ? `0 0 4px ${accent}88` : 'none',
+              }}
+            />
+          );
+        })}
+
+        {/* Head dot. Sits at the current fill edge; grows + glows on
+            hover/drag. */}
+        <div
+          className="absolute pointer-events-none rounded-full"
+          style={{
+            left: `${fillPct}%`,
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: tall ? 14 : 10,
+            height: tall ? 14 : 10,
+            background: '#fff',
+            border: `2px solid ${accent}`,
+            boxShadow: tall ? `0 0 14px ${accent}, 0 0 4px rgba(0,0,0,0.6)` : `0 0 6px ${accent}88`,
+            transition: reducedMotion ? 'none' : 'width 140ms ease-out, height 140ms ease-out, box-shadow 140ms ease-out',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 // BattleOutro is the composed end card that replaces the chapter flash on
 // the final phase. The replay used to just freeze on the last tactical
 // state; now it lands on a curated summary: victor, casualty roll, what it
@@ -615,9 +852,15 @@ interface BattleOutroProps {
   theme: { accent: string; titleFont: string; mood: string };
   onRestart: () => void;
   onBackToStory: () => void;
+  // cinematicMode hides the interactive "Replay / Back" action row at the
+  // bottom of the outro and replaces it with a quiet "Next battle" cue,
+  // because in war cinematic playback the parent timer drives forward
+  // motion. The user is not deciding what to do; they're reading the
+  // verdict while the campaign rolls on.
+  cinematicMode?: boolean;
 }
 
-function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: BattleOutroProps) {
+function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinematicMode = false }: BattleOutroProps) {
   void replay;
   const victor = (battle.victor || '').trim();
   const sides = battle.sides || [];
@@ -940,28 +1183,32 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
           </div>
         )}
 
-        {battle.significance && (
-          <div
-            className="mx-auto mt-8 w-full max-w-[760px]"
-            style={{ animation: 'outro-text-rise 800ms 1240ms cubic-bezier(.2,.7,.25,1) both' }}
-          >
+        {(() => {
+          const sig = cleanProseText(battle.significance);
+          if (!sig) return null;
+          return (
             <div
-              className="text-[10px] uppercase tracking-[0.4em] font-semibold mb-2"
-              style={{ color: theme.accent }}
+              className="mx-auto mt-8 w-full max-w-[760px]"
+              style={{ animation: 'outro-text-rise 800ms 1240ms cubic-bezier(.2,.7,.25,1) both' }}
             >
-              Why&nbsp;it&nbsp;mattered
+              <div
+                className="text-[10px] uppercase tracking-[0.4em] font-semibold mb-2"
+                style={{ color: theme.accent }}
+              >
+                Why&nbsp;it&nbsp;mattered
+              </div>
+              <p
+                className="text-[14.5px] leading-[1.65] text-slate-200/95 text-left"
+                style={{
+                  fontFamily: theme.titleFont,
+                  textShadow: '0 2px 14px rgba(0,0,0,0.55)',
+                }}
+              >
+                {sig}
+              </p>
             </div>
-            <p
-              className="text-[14.5px] leading-[1.65] text-slate-200/95 text-left"
-              style={{
-                fontFamily: theme.titleFont,
-                textShadow: '0 2px 14px rgba(0,0,0,0.55)',
-              }}
-            >
-              {battle.significance}
-            </p>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Further reading. Curated references with URLs render as inline
             links so the reader can jump straight to a primary or scholarly
@@ -1016,38 +1263,78 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
           </div>
         )}
 
-        <div
-          className="mt-10 mb-2 flex items-center justify-center gap-3"
-          style={{ animation: 'outro-text-rise 700ms 1560ms cubic-bezier(.2,.7,.25,1) both' }}
-        >
-          <button
-            type="button"
-            onClick={onRestart}
-            className="inline-flex items-center gap-2 h-11 px-6 rounded-full text-[13px] font-semibold tracking-wide border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02]"
-            style={{
-              color: theme.accent,
-              borderColor: `${theme.accent}66`,
-              background: `${theme.accent}14`,
-            }}
+        {/* Outro CTAs. Two clearly distinct affordances, sized to read at
+            poster scale rather than as toolbar chips. Primary is the white
+            pill the eye lands on; secondary is the era-accent ghost button.
+            In war cinematic playback the parent timer drives forward
+            motion; we hide the interactive buttons and surface a quiet
+            "Next battle" cue with a thin progress sliver, so the campaign
+            never feels stuck on a single outro card.
+            Wide horizontal padding and a roomy fixed height stop the labels
+            from looking cramped, and the serif font matches the rest of the
+            outro typography. */}
+        {cinematicMode ? (
+          <div
+            className="mt-10 mb-2 flex flex-col items-center justify-center gap-3"
+            style={{ animation: 'outro-text-rise 700ms 1560ms cubic-bezier(.2,.7,.25,1) both' }}
           >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M1.5 6 A4.5 4.5 0 1 1 6 10.5" />
-              <path d="M1.5 3 L1.5 6 L4.5 6" />
-            </svg>
-            Replay from start
-          </button>
-          <button
-            type="button"
-            onClick={onBackToStory}
-            autoFocus
-            className="inline-flex items-center gap-2 h-11 px-6 rounded-full text-[13px] font-semibold tracking-wide bg-white text-slate-900 hover:bg-slate-100 transition-all shadow-[0_8px_24px_-8px_rgba(255,255,255,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02]"
+            <div
+              className="text-[10.5px] font-semibold uppercase tracking-[0.42em]"
+              style={{ color: theme.accent, textShadow: '0 2px 12px rgba(0,0,0,0.65)' }}
+            >
+              Next battle in a moment
+            </div>
+            <div
+              className="h-[2px] w-[220px] rounded-full overflow-hidden"
+              style={{ background: 'rgba(148,163,184,0.18)' }}
+            >
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: '100%',
+                  background: `linear-gradient(90deg, transparent 0%, ${theme.accent} 50%, transparent 100%)`,
+                  boxShadow: `0 0 14px ${theme.accent}66`,
+                  animation: 'outro-cinematic-sweep 4500ms ease-in-out infinite',
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div
+            className="mt-12 mb-2 flex items-center justify-center gap-4 flex-wrap"
+            style={{ animation: 'outro-text-rise 700ms 1560ms cubic-bezier(.2,.7,.25,1) both' }}
           >
-            Back to the story
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 1.5 L8.5 6 L4 10.5" />
-            </svg>
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={onRestart}
+              className="inline-flex items-center justify-center gap-2.5 h-12 min-w-[180px] px-7 rounded-full text-[13.5px] font-semibold tracking-[0.04em] border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02] whitespace-nowrap"
+              style={{
+                fontFamily: theme.titleFont,
+                color: theme.accent,
+                borderColor: `${theme.accent}80`,
+                background: `${theme.accent}1a`,
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 7 A5 5 0 1 1 7 12" />
+                <path d="M2 3.5 L2 7 L5.5 7" />
+              </svg>
+              <span>Replay from start</span>
+            </button>
+            <button
+              type="button"
+              onClick={onBackToStory}
+              autoFocus
+              className="inline-flex items-center justify-center gap-2.5 h-12 min-w-[180px] px-7 rounded-full text-[13.5px] font-semibold tracking-[0.04em] bg-white text-slate-900 hover:bg-slate-100 transition-all shadow-[0_10px_28px_-10px_rgba(255,255,255,0.55)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02] whitespace-nowrap"
+              style={{ fontFamily: theme.titleFont }}
+            >
+              <span>Back to the story</span>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 2 L10 7 L5 12" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       <style>{`
@@ -1066,6 +1353,10 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
         @keyframes outro-text-rise {
           from { opacity: 0; transform: translateY(14px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes outro-cinematic-sweep {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
         }
         @keyframes outro-bar-grow {
           from { width: 0%; }

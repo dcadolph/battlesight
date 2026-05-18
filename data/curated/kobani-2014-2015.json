@@ -5,11 +5,14 @@
   "date": "13 September 2014 – 27 January 2015",
   "lat": 36.8861,
   "lng": 38.3522,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Syrian Civil War",
   "battleType": "siege",
   "aliases": [
-    { "name": "Battle of Ain al-Arab", "by": "Syrian government and Arabic press" }
+    {
+      "name": "Battle of Ain al-Arab",
+      "by": "Syrian government and Arabic press"
+    }
   ],
   "sides": [
     {

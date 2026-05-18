@@ -1,0 +1,29 @@
+{
+  "id": "sedan-1870",
+  "name": "Battle of Sedan",
+  "year": 1870,
+  "date": "1 to 2 September 1870",
+  "lat": 49.7,
+  "lng": 4.9433,
+  "era": "industrial",
+  "war": "Franco-Prussian War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "North German Confederation (Prussia and German allies)",
+      "commander": "Helmuth von Moltke the Elder, Kaiser Wilhelm I",
+      "strength": "Around 200,000 troops with 774 guns",
+      "casualties": "About 9,000 killed and wounded"
+    },
+    {
+      "name": "Second French Empire",
+      "commander": "Napoleon III, Patrice de MacMahon, Auguste-Alexandre Ducrot",
+      "strength": "Around 120,000 troops with 564 guns, the Army of Châlons",
+      "casualties": "About 17,000 killed and wounded, 21,000 captured during the battle, and a further 83,000 surrendered with the emperor the next day"
+    }
+  ],
+  "victor": "North German Confederation (Prussia and German allies)",
+  "summary": "Moltke's German armies pinned the Army of Châlons against the Meuse at Sedan and closed an iron ring of Krupp breech-loading artillery on the surrounding heights. MacMahon was wounded in the opening hours and command passed through three generals by noon. French cavalry charges at Floing rode into massed shrapnel and broke. By late afternoon the army was packed into the small fortified town under continuous shellfire with no possibility of retreat. Napoleon III rode out under a white flag the following morning and offered his personal sword and his army.",
+  "significance": "The capture of a French emperor on the battlefield by a German army ended the Second Empire within days and unified the German states under Prussian leadership. Wilhelm I was proclaimed German Emperor in the Hall of Mirrors at Versailles in January. The Treaty of Frankfurt that followed took Alsace-Lorraine and seeded the bitter revanchism that drove French strategy for the next forty-four years, all the way to the Marne in 1914.",
+  "wikipediaTitle": "Battle of Sedan"
+}

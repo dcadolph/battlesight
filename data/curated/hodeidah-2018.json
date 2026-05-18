@@ -3,13 +3,16 @@
   "name": "Battle of Hodeidah",
   "year": 2018,
   "date": "13 June – 13 December 2018",
-  "lat": 14.7950,
+  "lat": 14.795,
   "lng": 42.9544,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Yemeni Civil War",
   "battleType": "siege",
   "aliases": [
-    { "name": "Operation Golden Victory", "by": "Saudi-led coalition operational name" }
+    {
+      "name": "Operation Golden Victory",
+      "by": "Saudi-led coalition operational name"
+    }
   ],
   "sides": [
     {

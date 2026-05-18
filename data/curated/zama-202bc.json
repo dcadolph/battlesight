@@ -1,0 +1,29 @@
+{
+  "id": "zama-202bc",
+  "name": "Battle of Zama",
+  "year": -202,
+  "date": "19 October 202 BC",
+  "lat": 36.2917,
+  "lng": 9.6361,
+  "era": "ancient",
+  "war": "Second Punic War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Roman Republic and Numidia",
+      "commander": "Scipio Africanus, Masinissa",
+      "strength": "About 34,000 Roman and Italian infantry, 6,100 Numidian and Roman cavalry",
+      "casualties": "Around 1,500 killed, 4,000 wounded"
+    },
+    {
+      "name": "Carthage",
+      "commander": "Hannibal Barca",
+      "strength": "About 40,000 infantry including Ligurian and Gallic mercenaries, 4,000 cavalry, 80 war elephants",
+      "casualties": "Around 20,000 killed, 20,000 captured; Hannibal escaped to Hadrumetum"
+    }
+  ],
+  "victor": "Roman Republic and Numidia",
+  "summary": "The first time Hannibal and Scipio met on a battlefield, fifteen years and a thousand miles after Cannae. Scipio opened lanes through his maniples so Hannibal's elephant charge passed harmlessly through to the rear. Masinissa's Numidian cavalry, the same arm that had won the Italian campaigns for Carthage, now fought for Rome and swept the Carthaginian horse from the field. Hannibal's three infantry lines fought through Scipio's hastati and principes, but the returning Numidian cavalry crashed into his rear as the Roman triarii pressed the front. Hannibal cut his way out.",
+  "significance": "Ended the Second Punic War and ended Carthage as an independent power. Rome dictated terms: Carthage lost its fleet, paid an indemnity for fifty years, and could not make war outside Africa without Roman permission. The Mediterranean world had a single dominant power for the first time. Hannibal lived another twenty years in exile from city to city, finally taking poison in Bithynia rather than be handed over to Rome.",
+  "wikipediaTitle": "Battle of Zama"
+}

@@ -86,3 +86,24 @@ html, body, #root {
   70%  { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
   100% { opacity: 0; transform: translateY(0) scale(1.02); filter: blur(0); }
 }
+
+/* Reduced-motion path. The OS-level "Reduce motion" accessibility
+ * preference disables decorative animation and transitions across the
+ * cinematic. The component-level timer hook (usePrefersReducedMotion)
+ * collapses phase dwell to zero so the playhead steps through without
+ * waiting on motion; this CSS block stops the rest of the decoration
+ * (chapter veils, narration reveals, splash blooms, arrow marching) from
+ * fighting that decision. Anything that would mask important state under
+ * a transition is exempted (cursor focus rings, fill width on the
+ * scrubber so the head still moves with the playhead) by being applied
+ * via inline style rather than animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

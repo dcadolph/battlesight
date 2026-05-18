@@ -5,11 +5,14 @@
   "date": "26 May 2014 – 21 January 2015",
   "lat": 48.0167,
   "lng": 37.7397,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Russo-Ukrainian War",
   "battleType": "siege",
   "aliases": [
-    { "name": "Cyborgs of Donetsk Airport", "by": "Ukrainian popular and media designation for the defenders" }
+    {
+      "name": "Cyborgs of Donetsk Airport",
+      "by": "Ukrainian popular and media designation for the defenders"
+    }
   ],
   "sides": [
     {

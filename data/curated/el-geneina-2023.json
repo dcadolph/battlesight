@@ -5,11 +5,14 @@
   "date": "24 April – 14 November 2023",
   "lat": 13.4525,
   "lng": 22.4453,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Sudanese Civil War (2023–present)",
   "battleType": "siege",
   "aliases": [
-    { "name": "El Geneina Massacre", "by": "Human-rights organisations and U.S. State Department genocide determination" }
+    {
+      "name": "El Geneina Massacre",
+      "by": "Human-rights organisations and U.S. State Department genocide determination"
+    }
   ],
   "sides": [
     {

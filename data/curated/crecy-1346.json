@@ -1,0 +1,29 @@
+{
+  "id": "crecy-1346",
+  "name": "Battle of Crécy",
+  "year": 1346,
+  "date": "26 August 1346",
+  "lat": 50.2536,
+  "lng": 1.8856,
+  "era": "medieval",
+  "war": "Hundred Years' War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Kingdom of England",
+      "commander": "Edward III, Edward the Black Prince",
+      "strength": "Roughly 14,000 including about 7,000 longbowmen, 2,500 men-at-arms, and Welsh and Cornish infantry",
+      "casualties": "A few hundred"
+    },
+    {
+      "name": "Kingdom of France",
+      "commander": "Philip VI",
+      "strength": "Around 30,000 including 12,000 men-at-arms and 6,000 Genoese crossbowmen",
+      "casualties": "Around 4,000 men-at-arms killed including the Count of Alençon, the King of Bohemia, and several thousand foot"
+    }
+  ],
+  "victor": "Kingdom of England",
+  "summary": "Edward III drew up on a sloping field at Crécy after a long retreat across northern France, placing his dismounted men-at-arms in three divisions and his longbowmen on the wings. The French vanguard arrived disorganised at the end of a long march. A rain shower softened the bowstrings of the Genoese crossbowmen, who advanced anyway and were shot down. The French knights then charged through their own retreating crossbows into a storm of arrows. Fifteen separate charges came in across the late afternoon and into the night. None reached the English line intact.",
+  "significance": "The English longbow announced itself as the dominant battlefield weapon of the age, and the social order of mounted chivalry began its century-long decline. Crécy made the reputation of the Black Prince, who reportedly received his \"spurs\" on the field as a sixteen-year-old. It opened the way to Calais and a foothold the English would hold for two hundred years. Together with Poitiers and Agincourt it became the foundational legend of English military exceptionalism.",
+  "wikipediaTitle": "Battle of Crécy"
+}

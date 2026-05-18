@@ -80,6 +80,13 @@ export function formatCasualtyEstimate(n: number): string {
 //   * Strip a leading "None killed" / "Negligible" clause when a real
 //     count follows it, so "None killed; one man killed and three
 //     wounded" reads as "One man killed and three wounded".
+//   * Strip the "for {side name}" trailer that infobox-derived casualty
+//     prose sometimes carries ("9 killed for Syrian opposition") since the
+//     side label is already rendered in the row header — the duplication
+//     reads as garbage.
+//   * Strip immediately-repeated identical tokens ("Syrian opposition
+//     Syrian Opposition" → "Syrian opposition") that come from infobox
+//     parsers that emitted both the flag-template name and the wiki link.
 //   * Normalise spaces around commas and periods.
 //   * Collapse bare "None" or "Nil" sentinels into "None reported".
 // Idempotent. Empty input returns empty.
@@ -87,6 +94,9 @@ export function cleanCasualtyText(s: string | undefined | null): string {
   if (!s) return '';
   let out = String(s).trim();
   if (!out) return '';
+  // Strip the parenthetical "for {side}" trailer ("9 killed for Syrian
+  // opposition"). The side name is shown in the row header already.
+  out = out.replace(/\s+for\s+[A-Z][^.;]*$/i, '');
   // Strip leading "None ..." preamble when a useful clause follows.
   out = out.replace(
     /^(?:none|nil|no)\s+(?:killed|dead|fatalities|casualties)(?:\s+(?:in|during|at)[^,;.]*)?\s*[;,.]\s+/i,
@@ -97,6 +107,11 @@ export function cleanCasualtyText(s: string | undefined | null): string {
   out = out.replace(/\s*;\s*/g, '. ');
   // Fix em-dashes used as separators.
   out = out.replace(/\s*—\s*/g, ', ');
+  // Collapse case-insensitive immediately-repeated word runs
+  // ("Syrian opposition Syrian Opposition" → "Syrian opposition") that come
+  // from Wikipedia infobox parsers emitting both the flag template label
+  // and the wiki link.
+  out = out.replace(/\b([\w']+(?:\s+[\w']+){0,3})\s+\1\b/gi, '$1');
   // Fix double spaces and stray space-before-comma.
   out = out.replace(/\s+,/g, ',').replace(/\s+/g, ' ');
   // If after cleaning we only have a "none" sentinel, return a tidy label.
@@ -107,5 +122,63 @@ export function cleanCasualtyText(s: string | undefined | null): string {
   if (out.length > 0) {
     out = out[0].toUpperCase() + out.slice(1);
   }
+  return out;
+}
+
+// cleanProseText scrubs Wikipedia/wikitext markup that leaks into long-form
+// prose fields (summary, significance, war outcome, war aftermath) when the
+// importer couldn't fully clean the source article. Goals:
+//   * Drop image captions entirely: "thumb|300px|Foo.jpg|caption" is junk
+//     in a prose body, so any leading "thumb|..." (and similar File:/Image:
+//     prefixes) gets removed.
+//   * Strip wikitext heading bars: "===Military===" → "Military".
+//   * Resolve wiki links: "[[Page|Display]]" → "Display"; "[[Page]]" →
+//     "Page"; "[[:Commons:Category:Foo|Caption]]" → "Caption".
+//   * Strip bold/italic apostrophe runs ("'''bold'''" → "bold").
+//   * Drop residual "{{template|args}}" and HTML comments.
+//   * Normalise the "See Aftermath" outcome trailer that wars.json
+//     inherited from the infobox result field, leaving a clean clause.
+//   * Replace remaining semicolons with periods (project-wide rule).
+// Idempotent. Empty input returns empty string.
+export function cleanProseText(s: string | undefined | null): string {
+  if (!s) return '';
+  let out = String(s);
+  // Drop HTML comments.
+  out = out.replace(/<!--[\s\S]*?-->/g, '');
+  // Drop residual templates {{...}}.
+  out = out.replace(/\{\{[^{}]*\}\}/g, '');
+  // Drop file/image embeds entirely: "[[File:foo.jpg|thumb|caption]]" or
+  // any bracket block that starts with File:/Image:/Media:.
+  out = out.replace(/\[\[(?:File|Image|Media):[^\[\]]*\]\]/gi, '');
+  // Resolve wiki links: prefer the display label after the pipe.
+  out = out.replace(/\[\[([^\[\]|]*\|)?([^\[\]]+)\]\]/g, (_, _pre, label) => label);
+  // Strip the "thumb|" / "left|" / "right|" / "300px|" caption prefix
+  // chain that occasionally survives when an image caption sentence
+  // was lifted out of its surrounding [[File:...]] block. Handles a
+  // trailing chain like "thumb|300px|left|Caption goes here".
+  out = out.replace(
+    /(^|\s)(?:thumb|left|right|center|none|frame|frameless|upright)\|(?:\s*\d+px\s*\|)?(?:\s*(?:left|right|center|none)\s*\|)?/gi,
+    '$1',
+  );
+  // Drop any remaining "Npx|" image size prefix.
+  out = out.replace(/(^|\s)\d+px\|/gi, '$1');
+  // Strip wikitext heading bars "=== Foo ===" → "Foo".
+  out = out.replace(/^={2,6}\s*([^=\n]+?)\s*={2,6}\s*$/gm, '$1');
+  // Strip bold/italic apostrophes.
+  out = out.replace(/'''+/g, '').replace(/''+/g, '');
+  // Drop "See Aftermath" / "See below" trailer from outcome fields.
+  out = out.replace(/[;,]\s*See\s+(?:Aftermath|below|article|main\s+article)\s*\.?$/i, '');
+  // Collapse "X;," → "X," and trailing ;, → period.
+  out = out.replace(/;\s*,/g, ',');
+  // Replace remaining semicolons with periods (project-wide rule).
+  out = out.replace(/\s*;\s*/g, '. ');
+  // Em-dash to comma (no sentence-breaking hyphens in prose).
+  out = out.replace(/\s*—\s*/g, ', ');
+  // Collapse whitespace runs, drop stray spaces before punctuation, and
+  // tidy any double periods left behind by deletions.
+  out = out.replace(/[ \t]+/g, ' ');
+  out = out.replace(/\s+([,.!?])/g, '$1');
+  out = out.replace(/\.\s*\./g, '.');
+  out = out.replace(/\n{3,}/g, '\n\n').trim();
   return out;
 }

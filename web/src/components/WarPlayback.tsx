@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS } from '../types/battle';
 import { themeForYear } from '../theme/era';
+import { canonBelligerentKey, canonBelligerentLabel } from '../lib/country';
+import { findSnapshot, buildCountryColorMap } from '../data/territory-snapshots';
 import WarSummaryCard from './WarSummaryCard';
 import WarCinematicOverlay from './WarCinematicOverlay';
 import CloseButton from './CloseButton';
@@ -28,6 +30,11 @@ interface WarPlaybackProps {
   // when ready to advance to the next battle.
   onPlayReplay?: (battle: Battle) => void;
   onCloseReplay?: () => void;
+  // onWarTerritory emits the per-country control map for the year of the
+  // currently-focused battle. App threads it into BattleGlobe so the
+  // globe re-shades as the war playhead crosses a snapshot boundary
+  // (Axis red advances across Europe in 1940-42, recedes in 1943-45).
+  onWarTerritory?: (colors: Record<string, string> | null, label: string | null) => void;
   // initialWar optionally pre-selects a war on mount so an external action
   // (search-bar war click, deep link, etc.) can open WarPlayback already
   // pointing at the war the user named.
@@ -70,17 +77,30 @@ function groupConcurrentBattles(battles: Battle[]): BattleGroup[] {
   return groups;
 }
 
-export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, initialWar }: WarPlaybackProps) {
+export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, onWarTerritory, initialWar }: WarPlaybackProps) {
   const [wars, setWars] = useState<WarCount[]>([]);
   const [warSearch, setWarSearch] = useState('');
   const [warSort, setWarSort] = useState<WarSort>('casualties');
   const [selectedWar, setSelectedWar] = useState(initialWar || '');
   const [battles, setBattles] = useState<Battle[]>([]);
-  const [groups, setGroups] = useState<BattleGroup[]>([]);
   const [groupIndex, setGroupIndex] = useState(0);
   const [subIndex, setSubIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [cinematic, setCinematic] = useState(false);
+  // groups is derived from (battles, cinematic). In cinematic mode we
+  // narrow to "cinematic-grade" entries (curated/verified or reconstructed)
+  // so the campaign sweep does not open on a POW-camp riot or a Polish
+  // micro-skirmish ahead of Westerplatte. Step-through (cinematic off)
+  // still surfaces the full chronological list. Falls back to the full
+  // list when the filter would leave fewer than 5 entries, so smaller wars
+  // without a deep curation pass still have a watchable cinematic.
+  const groups = useMemo<BattleGroup[]>(() => {
+    if (battles.length === 0) return [];
+    if (!cinematic) return groupConcurrentBattles(battles);
+    const cinematicGrade = battles.filter((b) => b.verified || b.hasReplay);
+    const usable = cinematicGrade.length >= 5 ? cinematicGrade : battles;
+    return groupConcurrentBattles(usable);
+  }, [battles, cinematic]);
   const [speed, setSpeed] = useState(4000);
   const [detail, setDetail] = useState<Battle | null>(null);
   // cinematicStage drives the full-screen war overlay: an opening title
@@ -125,7 +145,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         onWarCountries(matchedWar?.countries?.length ? matchedWar.countries : (inherited ?? []));
       }
     }
-    if (!selectedWar) { setBattles([]); setGroups([]); onBattlesLoaded(null); return; }
+    if (!selectedWar) { setBattles([]); onBattlesLoaded(null); return; }
     fetch(`/api/battles?war=${encodeURIComponent(selectedWar)}&limit=2000`)
       .then((r) => r.json())
       .then((d) => {
@@ -134,7 +154,6 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         // re-sort here.
         const b: Battle[] = d.battles || [];
         setBattles(b);
-        setGroups(groupConcurrentBattles(b));
         setGroupIndex(0);
         setSubIndex(0);
         setPlaying(false);
@@ -143,6 +162,16 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       })
       .catch(() => {});
   }, [selectedWar, onBattlesLoaded, onWarSelected, onWarCountries, wars]);
+
+  // Toggling cinematic on/off re-shapes the playable groups (different set
+  // of battles), so anchor the playhead back to the first entry. Otherwise
+  // a user halfway through a 600-battle step-through who switches to
+  // cinematic mode would jump to whatever index the original list had at
+  // that position, which is meaningless in the narrower 22-battle subset.
+  useEffect(() => {
+    setGroupIndex(0);
+    setSubIndex(0);
+  }, [cinematic]);
 
   // Stop the war auto-step when the tab is hidden or the window blurs. Same
   // motivation as the replay version: nobody wants to come back and find
@@ -165,21 +194,200 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // Deduplicated belligerent labels surfaced on the cinematic opening
   // card. Pulled from each battle's sides[].name set rather than from
   // war metadata because the war record does not carry sides.
+  //
+  // We also filter junk-looking labels and collapse semantic duplicates
+  // before display. Wikipedia-infobox parsing occasionally produces
+  // acronym artefacts like "UKGBI" or partial fragments like
+  // "France + Britain" alongside their proper long forms, which then
+  // appear on the cinematic overture next to the real names and read as
+  // sloppy. The cleaner: skip uppercase-only tokens shorter than 6 chars,
+  // skip labels containing "+" mid-string (those are infobox shorthand),
+  // and drop a label whose first canonical country is already represented
+  // by a previously kept label.
+  //
+  // For the American Civil War we used to see "United States · Virginia ·
+  // (Union) · Union · Confederate" because the infobox sometimes lists the
+  // sub-national contributor and a parenthetical shorthand alongside the
+  // canonical label. The pre-pass normalises each label by stripping its
+  // outer parentheses, collapsing "Confederate" → "Confederate States",
+  // and dropping labels whose comparison key is the parens-stripped form
+  // of a kept label. A short list of US sub-national state fragments is
+  // also rejected when at least one national-level belligerent is already
+  // kept; the cinematic overture is for nations and coalitions, not for
+  // every state that contributed troops.
   const cinematicSides = useMemo(() => {
     const seen = new Set<string>();
     const out: string[] = [];
+    // Lone US state names that crop up in the Civil War infobox combatant
+    // field. None of these belong on the overture line.
+    const SUBNATIONAL = new Set<string>([
+      'virginia', 'tennessee', 'texas', 'georgia', 'alabama',
+      'south carolina', 'north carolina', 'mississippi', 'louisiana',
+      'arkansas', 'florida', 'missouri', 'kentucky', 'maryland',
+      'kansas', 'iowa',
+    ]);
+    // displayLabel cleans a side name for the overture: strip a bare
+    // outer parenthesis pair ("(Union)" → "Union"), promote "Confederate"
+    // to "Confederate States" so it reads as a proper belligerent, strip
+    // a trailing nationality suffix from a sub-unit ("RAF Fighter
+    // Command (UK)" → "RAF Fighter Command"), and trim whitespace. Trailing
+    // wikitext template residue ("Foo {{plainlist") gets cut off here.
+    const displayLabel = (raw: string): string => {
+      let t = raw.trim();
+      // Cut off any wikitext template suffix.
+      t = t.replace(/\s*\{\{.*$/, '').trim();
+      // Strip leading "the ".
+      t = t.replace(/^the\s+/i, '');
+      const wrap = t.match(/^\(\s*(.*)\s*\)$/);
+      if (wrap) t = wrap[1].trim();
+      if (/^confederate$/i.test(t)) t = 'Confederate States';
+      return t;
+    };
+    // isSubUnit detects RAF Fighter Command / Eighth Army / 4th Panzer
+    // Division / 101st Airborne — formation-level fragments that the
+    // overture should never display alongside actual nations. The list of
+    // tokens is short; a side name that ends with one of them and has no
+    // additional country word other than a parenthetical nationality is
+    // treated as a sub-unit and dropped if a national entry already exists.
+    const SUBUNIT_TOKENS = /\b(Command|Corps|Division|Army Group|Brigade|Regiment|Battalion|Fleet|Squadron|Wing|Group|Airborne|Panzer|Marines)\b/i;
+    // normKey is the comparison key for de-dup. Strips inline parens,
+    // articles, common kingdom/empire/republic prefixes, and trailing
+    // "states" so "Confederate States" and "Confederate" collapse to one.
+    const normKey = (raw: string): string => {
+      let t = raw.toLowerCase().trim();
+      t = t.replace(/\([^()]*\)/g, '').trim();
+      t = t.replace(/^the\s+/, '');
+      t = t.replace(/\b(?:kingdom|empire|republic|federation|union)\s+of\s+/g, '');
+      t = t.replace(/\s+states?$/g, '');
+      t = t.replace(/\s+/g, ' ').trim();
+      return t;
+    };
+    const isJunk = (s: string): boolean => {
+      const t = s.trim();
+      if (!t) return true;
+      // Pure parens or punctuation: "()" or "( )".
+      if (/^[\s()\-—.,]*$/.test(t)) return true;
+      // Wikitext residue: "{{plainlist", "}}", "|}", "{|", "* [[".
+      if (/\{\{|\}\}|\|\}|\{\|/.test(t)) return true;
+      // Any unmatched curly is also wikitext leakage.
+      if (/[{}]/.test(t)) return true;
+      // All-caps acronym below 6 chars: "UKGBI", "ANZAC" is OK at 5 but
+      // typically appears as "ANZACs" or "British Empire" elsewhere.
+      if (/^[A-Z0-9.]{2,6}$/.test(t) && t.length < 6) return true;
+      // Side names with a bare "+" are infobox shorthand for a coalition
+      // (e.g. "France + Britain") that we already render via the proper
+      // belligerent labels.
+      if (/\s\+\s/.test(t)) return true;
+      // Lone country codes glued together with no separator.
+      if (/^[A-Z]{4,}[A-Z0-9]{0,}$/.test(t)) return true;
+      return false;
+    };
+    // First pass: walk every battle, collect (key, label, count) buckets.
+    // Counting matters for big multi-front wars: WW2 picked up in battle
+    // order shows Spanish Civil War belligerents first ("Nazi Germany,
+    // Second Polish Republic, Spanish Republic, Nationalist Spain,
+    // Second Czechoslovak Republic") and never gets to USA / USSR /
+    // UK / Japan, because the cap is 5. Counting + sorting fixes it: the
+    // belligerents that actually fought the most battles in the war win
+    // the slots regardless of where their first battle falls in time.
+    interface Bucket { key: string; label: string; count: number; firstSeen: number; }
+    const buckets: Map<string, Bucket> = new Map();
+    let order = 0;
+    for (const b of battles) {
+      // Per-battle dedupe: a battle with two sides both keyed to "us"
+      // shouldn't double-count. Reset per battle.
+      const seenInBattle = new Set<string>();
+      for (const s of b.sides || []) {
+        const name = (s.name || '').trim();
+        if (!name) continue;
+        if (isJunk(name)) continue;
+        const label = displayLabel(name);
+        if (!label || isJunk(label)) continue;
+        // Drop US sub-national state fragments and formation sub-units
+        // (RAF Fighter Command etc.) before they get a slot. We still
+        // count canon-keyed entries for those sides, but the *display
+        // label* must be a national level entity. Pick the cleanest
+        // label seen so far for this key.
+        const key = canonBelligerentKey(label) || normKey(label);
+        if (!key) continue;
+        if (seenInBattle.has(key)) continue;
+        seenInBattle.add(key);
+        const subnational = SUBNATIONAL.has(normKey(label));
+        const subUnit = SUBUNIT_TOKENS.test(label) && !canonBelligerentKey(label);
+        // Skip fragments outright. They never display, and they don't
+        // count toward the frequency rank.
+        if (subnational || subUnit) continue;
+        // Prefer the canonical publication-grade label when the key has
+        // one registered (e.g. canon key "us" → "United States" instead of
+        // the raw side string "United States and allies (Australia, New
+        // Zealand)"). Falls back to the cleaned display label for keys we
+        // haven't canonicalised.
+        const canonLabel = canonBelligerentLabel(key);
+        const finalLabel = canonLabel || label;
+        const existing = buckets.get(key);
+        if (existing) {
+          existing.count += 1;
+          // If a canonical label is now available, lock to it.
+          if (canonLabel) existing.label = canonLabel;
+        } else {
+          buckets.set(key, { key, label: finalLabel, count: 1, firstSeen: order++ });
+        }
+      }
+    }
+    // Sort by count descending; firstSeen ascending breaks ties so the
+    // historically earlier participant wins when two belligerents appear
+    // in the same number of battles. Cap at 5 — the overture is a chip
+    // strip, not a table.
+    const ranked = [...buckets.values()].sort((a, b) => {
+      if (a.count !== b.count) return b.count - a.count;
+      return a.firstSeen - b.firstSeen;
+    });
+    for (const b of ranked) {
+      if (seen.has(b.key)) continue;
+      seen.add(b.key);
+      out.push(b.label);
+      if (out.length >= 5) break;
+    }
+    return out;
+  }, [battles]);
+
+  // cinematicSidesTotal is the actual distinct belligerent count across
+  // the war's battles, before the top-5 cap. Used for the "Belligerents"
+  // stat cell on the overture so a war that pulled in 40 nations doesn't
+  // read as "5" just because the chip strip only shows the top five.
+  const cinematicSidesTotal = useMemo(() => {
+    const keys = new Set<string>();
+    const SUBNATIONAL = new Set<string>([
+      'virginia', 'tennessee', 'texas', 'georgia', 'alabama',
+      'south carolina', 'north carolina', 'mississippi', 'louisiana',
+      'arkansas', 'florida', 'missouri', 'kentucky', 'maryland',
+      'kansas', 'iowa',
+    ]);
+    const SUBUNIT = /\b(Command|Corps|Division|Army Group|Brigade|Regiment|Battalion|Fleet|Squadron|Wing|Group|Airborne|Panzer|Marines)\b/i;
+    const norm = (raw: string): string => {
+      let t = raw.toLowerCase().trim();
+      t = t.replace(/\([^()]*\)/g, '').trim();
+      t = t.replace(/^the\s+/, '');
+      t = t.replace(/\b(?:kingdom|empire|republic|federation|union)\s+of\s+/g, '');
+      t = t.replace(/\s+states?$/g, '');
+      t = t.replace(/\s+/g, ' ').trim();
+      return t;
+    };
     for (const b of battles) {
       for (const s of b.sides || []) {
         const name = (s.name || '').trim();
         if (!name) continue;
-        const key = name.toLowerCase();
-        if (seen.has(key)) continue;
-        seen.add(key);
-        out.push(name);
-        if (out.length >= 6) return out;
+        if (/^[\s()\-—.,]*$/.test(name)) continue;
+        if (/\{\{|\}\}|\|\}|\{\||[{}]/.test(name)) continue;
+        const n = norm(name);
+        if (SUBNATIONAL.has(n)) continue;
+        const key = canonBelligerentKey(name) || n;
+        if (!key) continue;
+        if (SUBUNIT.test(name) && !canonBelligerentKey(name)) continue;
+        keys.add(key);
       }
     }
-    return out;
+    return keys.size;
   }, [battles]);
 
   const focusBattle = useCallback((battle: Battle) => {
@@ -227,14 +435,24 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     if (isCinematic && onPlayReplay) {
       onPlayReplay(battle);
     }
-    // ~7s per phase is what BattleReplay plays at the default speed.
-    // Approximate replay length without round-tripping for the phases JSON:
-    // most replays we hand-craft run 4-5 phases, so ~30s gives a full pass.
-    const dwellMs = isCinematic
-      ? 32000
-      : group.concurrent && subIndex < group.battles.length - 1
-      ? Math.max(speed / 2, 1500)
-      : speed;
+    // Dwell budgets. Hand-crafted replays run 4-5 phases at ~5.5s each
+    // (24-28s), schematic auto-replays run 3 phases (~17s). After phases
+    // finish, BattleReplay's outro card holds the screen. Without a budget
+    // tuned to actual replay length, a 32s blanket dwell parked the war
+    // on the outro of battle #1 for ~10 silent seconds before advancing,
+    // which read as "it stopped". The new budgets give a ~3-4s outro
+    // beat (long enough to read the verdict) and then move to the next
+    // battle.
+    let dwellMs: number;
+    if (isCinematic) {
+      if (battle?.hasReplay) dwellMs = 28000;
+      else if (battle?.hasSchematic) dwellMs = 20000;
+      else dwellMs = 14000;
+    } else if (group.concurrent && subIndex < group.battles.length - 1) {
+      dwellMs = Math.max(speed / 2, 1500);
+    } else {
+      dwellMs = speed;
+    }
 
     timerRef.current = setTimeout(() => {
       if (isCinematic && onCloseReplay) onCloseReplay();
@@ -403,6 +621,27 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   const currentGroup = groups[groupIndex];
   const currentBattle = currentGroup?.battles[subIndex];
   const totalIdx = groups.slice(0, groupIndex).reduce((s, g) => s + g.battles.length, 0) + subIndex;
+
+  // Time-shifting territory: when the playhead moves to a new battle,
+  // resolve the snapshot for the current war + battle year and emit it
+  // upward so BattleGlobe re-paints. Cleared when no war is selected so
+  // the globe falls back to its idle state.
+  useEffect(() => {
+    if (!onWarTerritory) return;
+    if (!selectedWar || !currentBattle) {
+      onWarTerritory(null, null);
+      return;
+    }
+    // Decimal year: prefer the precise battle year (already an integer);
+    // a future enrichment can use the parsed month/day to pick a sub-
+    // snapshot when multiple snapshots share a year.
+    const snap = findSnapshot(selectedWar, currentBattle.year);
+    if (!snap) {
+      onWarTerritory(null, null);
+      return;
+    }
+    onWarTerritory(buildCountryColorMap(snap), snap.label);
+  }, [selectedWar, currentBattle, onWarTerritory]);
 
   // Two distinct shells: a centered modal while the user is browsing the war
   // list (the globe doesn't help here, the list is what matters), and a slim
@@ -699,6 +938,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         warName={selectedWar}
         summary={warSummary}
         sides={cinematicSides}
+        sidesTotal={cinematicSidesTotal}
         onDismiss={() => {
           // Overture dismiss is a "skip the title card and start watching"
           // gesture, not an exit. Aftermath dismiss is an "I'm done with

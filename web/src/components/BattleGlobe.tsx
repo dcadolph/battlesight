@@ -26,6 +26,17 @@ interface BattleGlobeProps {
   // warAccent is the era-themed accent color used to shade the warCountries
   // polygons. Falls back to a generic blue when not supplied.
   warAccent?: string;
+  // warCountryColors is the time-shifting territory snapshot in effect for
+  // the war currently being watched (e.g. WW2 mid-1941: Germany red over
+  // Poland/France/Norway/etc., USSR blue over Russia, UK blue over its
+  // empire). When set it overrides the flat warAccent shading so each
+  // country gets its controller's accent. Keyed by canonical country
+  // name; the COUNTRY_NAME_ALIASES table handles atlas mismatches.
+  warCountryColors?: Record<string, string>;
+  // territoryLabel is the short caption shown briefly when a new snapshot
+  // takes effect ("June 1944: D-Day, Bagration"). Drives a HUD overlay so
+  // the user reads the campaign beat as a labeled stage.
+  territoryLabel?: string;
 }
 
 // COUNTRY_NAME_ALIASES maps our canonical country labels to the names used
@@ -176,7 +187,7 @@ function battleMagnitude(b: Battle): number {
   return Math.max(0, Math.min(1, (v - 2) / 4));
 }
 
-export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent }: BattleGlobeProps) {
+export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, territoryLabel }: BattleGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>([]);
@@ -280,38 +291,70 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       .catch(() => {});
   }, []);
 
-  const highlightedCountry = useMemo(() => {
-    if (countries.length === 0) return [];
+  // featureColors maps each polygon feature shown on the globe to the
+  // colour it should render in. Populated from warCountryColors when the
+  // war cinematic has a time-shifting territory snapshot active; falls
+  // back to the flat warAccent for everything else. Keyed by the
+  // feature's atlas name (lower-cased) so multiple features sharing a
+  // name resolve to the same colour.
+  const { highlightedCountry, featureColors } = useMemo(() => {
+    if (countries.length === 0) {
+      return { highlightedCountry: [] as Feature<Geometry>[], featureColors: new Map<string, string>() };
+    }
     const out: Feature<Geometry>[] = [];
+    const colors = new Map<string, string>();
     if (selectedBattle) {
       const match = findCountry(selectedBattle.lat, selectedBattle.lng, countries);
       if (match) out.push(match);
     }
+    // wanted is the union of (warCountries entries) and (warCountryColors
+    // keys), each expanded via COUNTRY_NAME_ALIASES so the world-atlas
+    // long-form names match.
+    const wanted = new Map<string, string | null>(); // atlas-name → colour or null for default
     if (warCountries && warCountries.length > 0) {
-      const wanted = new Set<string>();
       for (const c of warCountries) {
-        wanted.add(c.toLowerCase());
+        wanted.set(c.toLowerCase(), null);
         const aliases = COUNTRY_NAME_ALIASES[c];
-        if (aliases) for (const a of aliases) wanted.add(a.toLowerCase());
+        if (aliases) for (const a of aliases) wanted.set(a.toLowerCase(), null);
       }
+    }
+    if (warCountryColors) {
+      for (const [country, color] of Object.entries(warCountryColors)) {
+        wanted.set(country.toLowerCase(), color);
+        const aliases = COUNTRY_NAME_ALIASES[country];
+        if (aliases) for (const a of aliases) wanted.set(a.toLowerCase(), color);
+      }
+    }
+    if (wanted.size > 0) {
       const seen = new Set(out.map((f) => f));
       for (const f of countries) {
         const name = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
         if (!name) continue;
         if (wanted.has(name) && !seen.has(f)) {
           out.push(f);
+          const c = wanted.get(name);
+          if (c) colors.set(name, c);
         }
       }
     }
-    return out;
-  }, [selectedBattle, countries, warCountries]);
+    return { highlightedCountry: out, featureColors: colors };
+  }, [selectedBattle, countries, warCountries, warCountryColors]);
 
   // hasWarShading determines whether the polygon overlay should render in the
   // multi-country war palette (accented, brighter borders) or in the single-
   // country battle-context palette (faint blue). We pick by checking whether
   // a war is currently active.
-  const hasWarShading = !!(warCountries && warCountries.length > 0);
+  const hasWarShading = !!(warCountries && warCountries.length > 0) || !!(warCountryColors && Object.keys(warCountryColors).length > 0);
   const warShadeColor = warAccent || '#3b82f6';
+
+  // colorFor resolves a feature to its per-country colour from
+  // featureColors, or falls back to warShadeColor. Used by the polygon
+  // callbacks so each owner's territory paints in their accent.
+  const colorFor = useCallback((feat: object): string => {
+    const f = feat as Feature<Geometry>;
+    const name = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
+    return featureColors.get(name) || warShadeColor;
+  }, [featureColors, warShadeColor]);
 
   useEffect(() => {
     const handleResize = () => setDimensions({ width: window.innerWidth, height: window.innerHeight });
@@ -327,6 +370,14 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
   useEffect(() => {
     const globe = globeRef.current;
     if (!globe) return;
+
+    // Runtime texture tuning (setPixelRatio, anisotropy, needsUpdate flags)
+    // was removed here. On some GPU/driver combinations it forced a WebGL
+    // context-loss/restore cycle, and three.js's onContextRestore crashes
+    // with "TypeError: undefined is not an object (evaluating
+    // 'info.autoReset')" inside three.module.js. The next sharpness pass
+    // should ship a higher-resolution Earth texture file rather than poke
+    // the renderer's pipeline at mount time.
 
     const controls = globe.controls();
     controls.autoRotate = true;
@@ -636,9 +687,9 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       ringRepeatPeriod={2200}
       ringAltitude={0.005}
       polygonsData={highlightedCountry}
-      polygonCapColor={() => hasWarShading ? hexToRgba(warShadeColor, 0.14) : 'rgba(59,130,246,0.08)'}
-      polygonSideColor={() => hasWarShading ? hexToRgba(warShadeColor, 0.22) : 'rgba(59,130,246,0.15)'}
-      polygonStrokeColor={() => hasWarShading ? hexToRgba(warShadeColor, 0.55) : 'rgba(59,130,246,0.4)'}
+      polygonCapColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.22) : 'rgba(59,130,246,0.08)'}
+      polygonSideColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.32) : 'rgba(59,130,246,0.15)'}
+      polygonStrokeColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.6) : 'rgba(59,130,246,0.4)'}
       polygonAltitude={0.005}
       polygonLabel={polygonLabel}
     />

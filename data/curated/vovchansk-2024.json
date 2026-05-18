@@ -5,11 +5,14 @@
   "date": "10 May 2024 – ongoing",
   "lat": 50.2922,
   "lng": 36.9425,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Russo-Ukrainian War",
   "battleType": "siege",
   "aliases": [
-    { "name": "Kharkiv Oblast offensive", "by": "Common Western press designation for the broader May 2024 push" }
+    {
+      "name": "Kharkiv Oblast offensive",
+      "by": "Common Western press designation for the broader May 2024 push"
+    }
   ],
   "sides": [
     {

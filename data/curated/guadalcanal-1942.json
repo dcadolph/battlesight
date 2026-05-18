@@ -1,0 +1,29 @@
+{
+  "id": "guadalcanal-1942",
+  "name": "Guadalcanal Campaign",
+  "year": 1942,
+  "date": "7 August 1942 to 9 February 1943",
+  "lat": -9.5,
+  "lng": 160.0,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "amphibious",
+  "sides": [
+    {
+      "name": "United States and allies (Australia, New Zealand)",
+      "commander": "Alexander Vandegrift, William Halsey, Richmond K. Turner",
+      "strength": "Around 60,000 ground troops at peak, two carrier groups, repeated surface task forces",
+      "casualties": "About 7,100 killed and missing, 29 ships lost including the carriers Wasp and Hornet"
+    },
+    {
+      "name": "Empire of Japan",
+      "commander": "Harukichi Hyakutake, Isoroku Yamamoto, Tameichi Hara",
+      "strength": "Around 36,000 ground troops in successive landings, the Combined Fleet committed to night actions",
+      "casualties": "About 25,000 killed (most from disease and starvation), 38 ships lost including the battleships Hiei and Kirishima"
+    }
+  ],
+  "victor": "United States and allies (Australia, New Zealand)",
+  "summary": "The first American counter-offensive of the Pacific war. Marines stormed Lunga Point on the seventh of August and seized the unfinished Japanese airstrip, renaming it Henderson Field. For six months a brutal triangular fight ground on between the perimeter around the airfield, the jungle ridges and rivers around it, and the dark waters of Ironbottom Sound, where the Tokyo Express of nightly destroyer runs landed reinforcements and dueled the surface action groups Halsey threw against them. Disease killed more men on both sides than bullets.",
+  "significance": "Guadalcanal turned the tide of the Pacific war. The Imperial Japanese Navy lost the experienced carrier pilots, destroyer captains, and surface gunnery officers it would never replace. The Marine Corps proved it could conduct sustained amphibious operations against a peer enemy. After Henderson Field held, Japan was on the strategic defensive for the duration; the long arc from Tarawa to Tokyo Bay began with Vandegrift's perimeter in the jungle.",
+  "wikipediaTitle": "Guadalcanal campaign"
+}

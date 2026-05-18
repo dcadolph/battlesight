@@ -1,0 +1,29 @@
+{
+  "id": "manzikert-1071",
+  "name": "Battle of Manzikert",
+  "year": 1071,
+  "date": "26 August 1071",
+  "lat": 39.144,
+  "lng": 42.546,
+  "era": "medieval",
+  "war": "Byzantine-Seljuk Wars",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Seljuk Empire",
+      "commander": "Alp Arslan",
+      "strength": "About 30,000 cavalry, mostly Turkmen horse archers",
+      "casualties": "Unknown but heavy"
+    },
+    {
+      "name": "Byzantine Empire",
+      "commander": "Romanos IV Diogenes",
+      "strength": "Around 40,000 mixed Byzantine, Norman, Frankish, Armenian, and Turkic mercenary contingents",
+      "casualties": "Catastrophic; the emperor captured and the field army of Anatolia destroyed"
+    }
+  ],
+  "victor": "Seljuk Empire",
+  "summary": "Romanos brought the largest field army Byzantium had assembled in a century to the eastern frontier to crush the Seljuk raids once and for all. Alp Arslan refused a pitched fight on Byzantine terms. The Seljuks shadowed and harassed the column with feigned retreats. When Romanos finally committed to a general advance late in the day, the line fragmented as his second wave under Andronikos Doukas refused to engage and abandoned the field. Encircled by Turkmen horse, Romanos was wounded, captured, and brought before Alp Arslan, who reportedly placed a boot on his neck and then sent him home alive.",
+  "significance": "Manzikert opened Anatolia. Within a generation Turkic warbands ranged from Cilicia to the Aegean; the Byzantine theme system that had held the plateau for four centuries collapsed. The Komnenian dynasty would salvage what it could on the coasts, but the demographic and political shift that became modern Turkey began on this field. Anna Komnene's father would seek Western aid less than thirty years later, beginning the chain of events that produced the First Crusade.",
+  "wikipediaTitle": "Battle of Manzikert"
+}

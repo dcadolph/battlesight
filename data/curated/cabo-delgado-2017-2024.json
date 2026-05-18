@@ -5,11 +5,14 @@
   "date": "5 October 2017 – ongoing (curated through 2024)",
   "lat": -11.4083,
   "lng": 40.5234,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Insurgency in Cabo Delgado",
   "battleType": "land",
   "aliases": [
-    { "name": "Mozambique jihad", "by": "Local and regional press" }
+    {
+      "name": "Mozambique jihad",
+      "by": "Local and regional press"
+    }
   ],
   "sides": [
     {

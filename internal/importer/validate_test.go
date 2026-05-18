@@ -60,9 +60,12 @@ func TestEraYearAlignment(t *testing.T) {
 		{Name: "ancient_too_late", Era: "ancient", Year: 1500, WantError: true},
 		// Test 3: WW2 era with a WW1 year errors.
 		{Name: "ww2_in_ww1", Era: "world-war-2", Year: 1916, WantError: true},
-		// Test 4: Modern era with 1945 boundary year passes the modern
-		// bracket (1946-2100), so it should error.
-		{Name: "modern_too_early", Era: "modern", Year: 1944, WantError: true},
+		// Test 4: Cold War era (1946-1991) with a 1944 year sits in WW2,
+		// so the year-era alignment check should fire.
+		{Name: "cold_war_too_early", Era: "cold-war", Year: 1944, WantError: true},
+		// Test 4b: Contemporary era (1991+) with a 1989 year sits in the
+		// cold-war bracket, so the alignment check should fire.
+		{Name: "contemporary_too_early", Era: "contemporary", Year: 1989, WantError: true},
 		// Test 5: Ancient era with -500 (the lower era boundary) passes.
 		{Name: "ancient_low_boundary", Era: "ancient", Year: -500, WantError: false},
 	}

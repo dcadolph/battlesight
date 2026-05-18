@@ -5,11 +5,14 @@
   "date": "11 – 22 July 1995",
   "lat": 44.105,
   "lng": 19.296,
-  "era": "modern",
+  "era": "contemporary",
   "war": "Bosnian War",
   "battleType": "siege",
   "aliases": [
-    { "name": "Srebrenica Genocide", "by": "ICTY and ICJ legal designation" }
+    {
+      "name": "Srebrenica Genocide",
+      "by": "ICTY and ICJ legal designation"
+    }
   ],
   "sides": [
     {

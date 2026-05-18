@@ -19,7 +19,8 @@ const ERA_ORDER = [
   'industrial',
   'world-war-1',
   'world-war-2',
-  'modern',
+  'cold-war',
+  'contemporary',
 ];
 
 // EraLegend is the globe's chromatic key. Eight era chips stacked at the

@@ -1,0 +1,29 @@
+{
+  "id": "jutland-1916",
+  "name": "Battle of Jutland",
+  "year": 1916,
+  "date": "31 May to 1 June 1916",
+  "lat": 56.6,
+  "lng": 6.0,
+  "era": "world-war-1",
+  "war": "World War I",
+  "battleType": "naval",
+  "sides": [
+    {
+      "name": "British Empire (Grand Fleet)",
+      "commander": "John Jellicoe, David Beatty",
+      "strength": "151 ships including 28 dreadnoughts and 9 battlecruisers",
+      "casualties": "14 ships sunk (3 battlecruisers, 3 armoured cruisers, 8 destroyers), 6,094 killed including Beatty's flagship losses at Indefatigable and Queen Mary"
+    },
+    {
+      "name": "German Empire (High Seas Fleet)",
+      "commander": "Reinhard Scheer, Franz Hipper",
+      "strength": "99 ships including 16 dreadnoughts and 5 battlecruisers",
+      "casualties": "11 ships sunk (1 battlecruiser, 1 pre-dreadnought, 4 light cruisers, 5 destroyers), 2,551 killed including the battlecruiser Lützow"
+    }
+  ],
+  "victor": "Strategically British, tactically inconclusive",
+  "summary": "Scheer sortied to ambush Beatty's battlecruiser force and was led instead into the path of Jellicoe's full Grand Fleet. The British battlecruiser action of the afternoon saw Indefatigable and Queen Mary blow up under German plunging fire (\"there seems to be something wrong with our bloody ships today\"). Jellicoe twice crossed Scheer's T at long range in the smoke and gloom; Scheer twice executed the famous Gefechtskehrtwendung battle-turnaway and escaped behind a destroyer torpedo attack. Night actions tore through the German line as it raced home in the dark.",
+  "significance": "The largest fleet action of the dreadnought era and the only major surface engagement of the war. Tactically the Germans inflicted heavier losses; strategically Jutland confirmed the British distant blockade. The High Seas Fleet never seriously challenged British command of the North Sea again, retreating to Wilhelmshaven for the rest of the war and refusing to sortie in October 1918, the mutiny that helped end the German war effort. Jellicoe was \"the only man on either side who could have lost the war in an afternoon\" and did not.",
+  "wikipediaTitle": "Battle of Jutland"
+}

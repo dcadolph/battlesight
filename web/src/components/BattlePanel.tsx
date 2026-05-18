@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Battle, Reference } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS, TIER_LABELS, TIER_DESCRIPTIONS, regionalEraContext } from '../types/battle';
 import { themeForEra } from '../theme/era';
-import { formatYear, formatBattleDate, cleanCasualtyText } from '../lib/format';
+import { formatYear, formatBattleDate, cleanCasualtyText, cleanProseText } from '../lib/format';
 import CloseButton from './CloseButton';
 
 interface BattlePanelProps {
@@ -509,7 +509,7 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
               className="text-[15px] leading-[1.65] text-slate-200/90"
               style={{ fontFamily: theme.titleFont }}
             >
-              {detail.summary}
+              {cleanProseText(detail.summary)}
             </p>
           </div>
         )}
@@ -521,7 +521,7 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
               className="text-[15px] leading-[1.65] text-slate-200/90"
               style={{ fontFamily: theme.titleFont }}
             >
-              {detail.significance}
+              {cleanProseText(detail.significance)}
             </p>
           </div>
         )}

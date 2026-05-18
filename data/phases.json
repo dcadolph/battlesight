@@ -11337,7 +11337,7 @@
             "w": 18,
             "h": 12,
             "strength": 1,
-            "status": "encircled"
+            "status": "surrendered"
           },
           {
             "label": "German victory",
@@ -11359,12 +11359,39 @@
         ],
         "movements": [
           {
-            "label": "Russian remnants retreat east",
+            "label": "Pocket closes from the east",
+            "faction": "a",
+            "fromX": 78,
+            "fromY": 70,
+            "toX": 64,
+            "toY": 70,
+            "kind": "flank"
+          },
+          {
+            "label": "Pocket closes from the west",
+            "faction": "a",
+            "fromX": 38,
+            "fromY": 78,
+            "toX": 54,
+            "toY": 74,
+            "kind": "flank"
+          },
+          {
+            "label": "Russian breakout attempt (failed)",
             "faction": "b",
             "fromX": 58,
             "fromY": 72,
-            "toX": 86,
-            "toY": 60,
+            "toX": 66,
+            "toY": 66,
+            "kind": "charge"
+          },
+          {
+            "label": "Russian columns surrender",
+            "faction": "b",
+            "fromX": 58,
+            "fromY": 76,
+            "toX": 56,
+            "toY": 74,
             "kind": "rout"
           }
         ]

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import BattleGlobe from './components/BattleGlobe';
 import TimelineSlider from './components/TimelineSlider';
 import BattlePanel from './components/BattlePanel';
+import CommanderPanel from './components/CommanderPanel';
 import CommandBar from './components/CommandBar';
 import EraLegend from './components/EraLegend';
 import WarPlayback from './components/WarPlayback';
@@ -62,6 +63,14 @@ export default function App() {
   const [selectedBattle, setSelectedBattle] = useState<Battle | null>(null);
   const [isolatedBattle, setIsolatedBattle] = useState<Battle | null>(null);
   const [playbackBattles, setPlaybackBattles] = useState<Battle[] | null>(null);
+  // warCountries is the top-N participating countries for the currently
+  // selected war on WarPlayback. Used to shade those countries on the globe
+  // so the user can see at a glance which territories the war involved.
+  // Empty when no war is selected or the war has no recognised participants.
+  const [warCountries, setWarCountries] = useState<string[]>([]);
+  // commanderQuery powers the CommanderPanel attribution view. Set from a
+  // click on a commander chip in BattlePanel; cleared on close.
+  const [commanderQuery, setCommanderQuery] = useState<string>('');
   const [filters, setFilters] = useState<Filters>({ era: '', war: '', battleType: '', quality: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -687,6 +696,7 @@ export default function App() {
         onToggleSound={handleToggleSound}
         onResetView={handleResetView}
         onWarSelect={handleSearchWarSelect}
+        onCommanderSelect={setCommanderQuery}
       />
 
       <BattleGlobe
@@ -696,6 +706,8 @@ export default function App() {
         selectedBattle={selectedBattle}
         dramatic={showPillars}
         atmosphereColor={activeTheme.atmosphere}
+        warCountries={warCountries}
+        warAccent={activeTheme.accent}
       />
 
       {/* Era legend chip. Visible while the user is browsing the globe.
@@ -749,6 +761,18 @@ export default function App() {
           onClose={handleClosePanel}
           onWatchReplay={handleWatchReplay}
           onShare={handleShareSelected}
+          onCommanderClick={setCommanderQuery}
+        />
+      )}
+
+      {commanderQuery && (
+        <CommanderPanel
+          name={commanderQuery}
+          onClose={() => setCommanderQuery('')}
+          onBattleClick={(b) => {
+            setCommanderQuery('');
+            setSelectedBattle(b);
+          }}
         />
       )}
 
@@ -758,6 +782,7 @@ export default function App() {
           onBattlesLoaded={setPlaybackBattles}
           onClose={() => { setInitialWar(''); handlePlaybackClose(); }}
           onWarSelected={handleWarSelected}
+          onWarCountries={setWarCountries}
           onPlayReplay={handleWarOpenReplay}
           onCloseReplay={handleWarCloseReplay}
           initialWar={initialWar}

@@ -1,0 +1,29 @@
+{
+  "id": "toretsk-2024-2025",
+  "name": "Battle of Toretsk",
+  "year": 2024,
+  "date": "18 June 2024 – ongoing through 2025",
+  "lat": 48.3997,
+  "lng": 37.8478,
+  "era": "modern",
+  "war": "Russo-Ukrainian War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Oleksandr Syrskyi (commander-in-chief), commanders of the 12th Special Forces Brigade Azov, 32nd Mechanised Brigade, 41st Mechanised Brigade, 100th Mechanised Brigade",
+      "strength": "Roughly five brigades rotating through the salient at any time",
+      "casualties": "Thousands killed and wounded over the prolonged urban siege"
+    },
+    {
+      "name": "Russian Federation",
+      "commander": "Andrey Mordvichev (Centre Group of Forces), commanders of the 3rd Combined Arms Army, 51st Combined Arms Army, and 9th Motor Rifle Brigade",
+      "strength": "Tens of thousands of Russian troops in the broader Centre Group offensive that ground through Toretsk and toward Kostyantynivka",
+      "casualties": "Tens of thousands killed and wounded across the long advance, with very high losses recorded in the Russian Storm-Z and Storm-V penal units"
+    }
+  ],
+  "victor": "Russian Federation (city centre captured by early 2025)",
+  "summary": "Russian forces opened the renewed offensive on Toretsk in mid-June 2024 after the fall of Avdiivka unhinged the Donetsk front. The city, a coal-mining centre with extensive underground tunnels left from Soviet-era mines, became one of the most attritional urban battles of the second half of the war. Russian Storm-Z penal units led repeated dismounted assaults under saturation drone and glide-bomb fire. Ukrainian brigades held the centre into the autumn with rotating tunnel-system positions. The central districts fell in February 2025. Fighting continued in the western suburbs through the spring of 2025 as Russian forces pressed toward Kostyantynivka on the Bakhmut-Pokrovsk axis.",
+  "significance": "Toretsk is the southern hinge of the Russian Centre Group's drive toward Kostyantynivka and Kramatorsk, the last major Ukrainian-held urban anchors in eastern Donetsk Oblast. The pace of the advance, several hundred metres per week at peak intensity, became the benchmark Western analysts use for the cost-per-kilometre of late-2024 and 2025 Russian operations. The use of the mine tunnels by Ukrainian defenders inspired Ukrainian Special Operations Forces doctrine for urban defence elsewhere on the front and was widely reported as an analogue to Iwo Jima cave fighting.",
+  "wikipediaTitle": "Battle of Toretsk"
+}

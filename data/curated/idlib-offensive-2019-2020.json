@@ -1,0 +1,32 @@
+{
+  "id": "idlib-offensive-2019-2020",
+  "name": "Northwestern Syria Offensive",
+  "year": 2019,
+  "date": "30 April 2019 – 6 March 2020",
+  "lat": 35.93,
+  "lng": 36.6333,
+  "era": "modern",
+  "war": "Syrian Civil War",
+  "battleType": "land",
+  "aliases": [
+    { "name": "Idlib Offensive", "by": "Common Western press usage" }
+  ],
+  "sides": [
+    {
+      "name": "Syrian Arab Republic, Russia, Iran, and Iranian-aligned militias",
+      "commander": "Suheil al-Hassan (Tiger Forces, later 25th Special Mission Forces Division), Russian Aerospace Forces command, IRGC ground advisers",
+      "strength": "About 25,000 Syrian ground troops at peak, supported by sustained Russian airpower and Iranian-aligned militia detachments",
+      "casualties": "Thousands killed and wounded"
+    },
+    {
+      "name": "Hayat Tahrir al-Sham, the Syrian National Army, and Turkish Armed Forces",
+      "commander": "Abu Mohammad al-Julani (HTS), Salim Idris (SNA), Turkish Land Forces Command (Operation Spring Shield February 2020)",
+      "strength": "About 20,000 HTS and allied fighters, around 10,000 SNA, plus Turkish armoured task forces during Operation Spring Shield",
+      "casualties": "Thousands killed and wounded across HTS, SNA, and Turkish forces. Over 60 Turkish troops killed in a single Russian airstrike at Balyun on 27 February 2020"
+    }
+  ],
+  "victor": "Syrian Arab Republic, Russia, and Iran (territorial gain). Stalemate after Turkish intervention and the March 2020 cease-fire",
+  "summary": "Syrian government forces and Russian airpower opened a coordinated offensive against the rebel-held Idlib pocket on the thirtieth of April 2019, the last major redoubt of the opposition after the recapture of Aleppo, Homs, and the Damascus suburbs. The offensive paused for an August cease-fire then resumed in December. Government forces retook Khan Sheikhoun, Maarat al-Numan, and the strategic M5 motorway connecting Damascus and Aleppo in late January 2020. Around a million civilians fled north toward the Turkish border. Turkey deployed armoured units in early February. Russian aircraft killed at least 33 Turkish soldiers in a single airstrike at Balyun on the twenty-seventh of February. Turkey launched Operation Spring Shield in retaliation. The Putin-Erdogan agreement of the fifth of March froze the front along the M4 motorway.",
+  "significance": "The Idlib offensive of 2019-2020 was the largest single displacement event of the Syrian war, with around a million people pushed against the closed Turkish border in winter. The Balyun strike and the Turkish drone counter-campaign that followed marked the first sustained direct confrontation between a NATO army and Russian air assets since the Cold War. The March 2020 cease-fire froze the contact line that endured almost untouched through November 2024, when HTS-led forces broke out south to take Aleppo and then Damascus in a campaign that ended the Assad regime.",
+  "wikipediaTitle": "Northwestern Syria offensive (2019–2020)"
+}

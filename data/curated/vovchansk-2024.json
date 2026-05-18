@@ -1,0 +1,32 @@
+{
+  "id": "vovchansk-2024",
+  "name": "Battle of Vovchansk",
+  "year": 2024,
+  "date": "10 May 2024 – ongoing",
+  "lat": 50.2922,
+  "lng": 36.9425,
+  "era": "modern",
+  "war": "Russo-Ukrainian War",
+  "battleType": "siege",
+  "aliases": [
+    { "name": "Kharkiv Oblast offensive", "by": "Common Western press designation for the broader May 2024 push" }
+  ],
+  "sides": [
+    {
+      "name": "Ukraine",
+      "commander": "Oleksandr Syrskyi (commander-in-chief), Yurii Halushkin (Kharkiv operational tactical grouping, dismissed June 2024), Mykhailo Drapatyi (replacement), Andriy Hnatov",
+      "strength": "Several brigades on the Kharkiv Oblast border, supplemented by the new 19 May reinforcement",
+      "casualties": "Several hundred killed and wounded across the prolonged urban defence"
+    },
+    {
+      "name": "Russian Federation",
+      "commander": "Andrey Mordvichev (Northern Group of Forces from May 2024), commanders of the 11th Army Corps and the 18th Motor Rifle Division",
+      "strength": "About 30,000 Russian troops in the renewed Kharkiv offensive on the north-eastern border",
+      "casualties": "Several thousand killed and wounded across the cross-border assault"
+    }
+  ],
+  "victor": "Inconclusive (Russian forces hold parts of the city)",
+  "summary": "Russian forces crossed the international border into northern Kharkiv Oblast on the tenth of May 2024 in a renewed cross-border offensive intended to draw Ukrainian reserves north and create a buffer zone south of Belgorod. The town of Vovchansk, ten kilometres from the border, became the principal urban objective. Russian assaults pushed through the northern half of the town and turned it into a contested ruin. Ukrainian reinforcements pushed back into the centre by July. The lines stabilised across the town through autumn 2024. Fighting continued into 2025 with the centre and southern districts remaining under Ukrainian control while the north was fortified by Russia.",
+  "significance": "The Vovchansk offensive opened the second cross-border front of the war and forced Ukraine to redeploy units from Donbas during the critical summer of 2024. President Zelensky publicly dismissed Yurii Halushkin in June. The offensive eventually stalled short of its strategic objectives but consumed Ukrainian combat power that might otherwise have stiffened the Donbas defence around Avdiivka and Pokrovsk. The episode also produced Ukrainian permission from the Biden administration in May to use ATACMS and Storm Shadow against military targets inside Russian territory near the border, a policy shift that propagated into the Kursk Oblast incursion three months later.",
+  "wikipediaTitle": "Northern Kharkiv offensive"
+}

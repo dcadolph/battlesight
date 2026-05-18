@@ -1,0 +1,33 @@
+{
+  "id": "market-garden-1944",
+  "name": "Operation Market Garden",
+  "year": 1944,
+  "date": "17 – 25 September 1944",
+  "lat": 51.9851,
+  "lng": 5.8987,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "amphibious",
+  "aliases": [
+    { "name": "Battle of Arnhem", "by": "British popular name after the operation's farthest objective" },
+    { "name": "A Bridge Too Far", "by": "Title of Cornelius Ryan's 1974 history and the 1977 film" }
+  ],
+  "sides": [
+    {
+      "name": "United Kingdom, United States, Poland, Netherlands resistance, and Canada",
+      "commander": "Bernard Montgomery (21st Army Group), Lewis Brereton (First Allied Airborne Army), Frederick Browning (I Airborne Corps), Brian Horrocks (XXX Corps), Robert Urquhart (1st Airborne Division), James Gavin (82nd Airborne), Maxwell Taylor (101st Airborne), Stanisław Sosabowski (1st Polish Independent Parachute Brigade)",
+      "strength": "About 41,000 airborne troops in three divisions plus the Polish brigade, 50,000 XXX Corps ground troops, around 1,500 aircraft, 478 gliders",
+      "casualties": "About 17,200 killed, wounded, and captured across the airborne and ground forces; British 1st Airborne effectively destroyed (around 7,800 of 10,000 lost)"
+    },
+    {
+      "name": "Nazi Germany",
+      "commander": "Walter Model (Army Group B), Wilhelm Bittrich (II SS Panzer Corps), Heinz Harmel (10th SS Panzer Division Frundsberg), Walter Harzer (9th SS Panzer Division Hohenstaufen), Kurt Student (First Parachute Army)",
+      "strength": "About 30,000 troops drawn from II SS Panzer Corps refitting in the area, Luftwaffe ground units, training divisions, and First Parachute Army elements",
+      "casualties": "About 8,000 to 13,000 killed, wounded, and captured"
+    }
+  ],
+  "victor": "Nazi Germany",
+  "summary": "Montgomery proposed a single deep airborne thrust to lay an airborne carpet of bridges over the Maas, the Waal, and the lower Rhine so XXX Corps could drive armoured into the north German plain and end the war by Christmas. American airborne secured Eindhoven, Nijmegen, and the southern bridges. The British 1st Airborne dropped eight miles from the road bridge at Arnhem and encountered SS panzer reserves the Allies had not expected at the drop zone. John Frost's 2nd Parachute Battalion held the northern end of the road bridge for three days. The remainder of 1st Airborne was driven into the Oosterbeek perimeter and evacuated south across the Rhine on the night of the twenty-fifth. The plan reached the wrong side of the wrong bridge.",
+  "significance": "Market Garden was the largest airborne operation in history and the high-water mark of Allied ambition in 1944. Its failure closed the door on a quick end to the war in Europe, set up the winter campaign that ran through the Bulge and into the Reichswald, and left the Netherlands above the Maas under German occupation through the brutal Hongerwinter of 1944-1945. The Polish 1st Independent Parachute Brigade entered Polish national memory for its sacrifice at the Oosterbeek perimeter. The film made Browning's reported pre-operation warning, that the operation might be a bridge too far, into one of the most-quoted lines in twentieth-century military history.",
+  "wikipediaTitle": "Operation Market Garden"
+}

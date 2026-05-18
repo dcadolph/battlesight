@@ -1,0 +1,32 @@
+{
+  "id": "el-geneina-2023",
+  "name": "Battle of El Geneina",
+  "year": 2023,
+  "date": "24 April – 14 November 2023",
+  "lat": 13.4525,
+  "lng": 22.4453,
+  "era": "modern",
+  "war": "Sudanese Civil War (2023–present)",
+  "battleType": "siege",
+  "aliases": [
+    { "name": "El Geneina Massacre", "by": "Human-rights organisations and U.S. State Department genocide determination" }
+  ],
+  "sides": [
+    {
+      "name": "Masalit community self-defence units and Sudanese Armed Forces 15th Infantry Division",
+      "commander": "Khamis Abakar (governor of West Darfur, killed 14 June), local Masalit community leaders",
+      "strength": "Roughly several thousand armed Masalit and a thinly held SAF garrison",
+      "casualties": "Estimates ranging from 10,000 to 15,000 Masalit civilians killed across the city and the surrounding villages"
+    },
+    {
+      "name": "Rapid Support Forces and aligned Arab militias",
+      "commander": "Abdul Rahim Dagalo (RSF deputy commander), local RSF West Darfur commanders",
+      "strength": "Thousands of RSF fighters reinforced by Arab tribal militias drawn from the wider region",
+      "casualties": "Limited combat casualties relative to civilian death toll"
+    }
+  ],
+  "victor": "Rapid Support Forces and aligned Arab militias",
+  "summary": "Fighting broke out in El Geneina, capital of West Darfur and historic seat of the Masalit Sultanate, in the opening days of the Sudanese civil war in April 2023. Rapid Support Forces fighters and aligned Arab militias attacked Masalit neighborhoods over six months in coordinated waves that displaced the population to the Chad border. Khamis Abakar, the elected governor, was abducted from an SAF base and killed on the fourteenth of June after publicly accusing the RSF of genocide on satellite television. The city fell on the fourteenth of November when the RSF stormed the SAF's 15th Infantry Division headquarters, the last defended position. Around 500,000 people fled across the border into Chad.",
+  "significance": "El Geneina is the central episode of what the United States State Department in January 2025 formally determined to be a genocide against the Masalit and other non-Arab communities of Darfur. The patterns are continuous with the violence of 2003-2005 in the same region, prosecuted by many of the same Janjaweed lineage now operating as the RSF. The investigation by the International Criminal Court and the United Nations Fact-Finding Mission for Sudan has produced one of the largest contemporary evidentiary records of mass atrocity. The displaced population in Chad has overwhelmed humanitarian capacity and produced one of the major drivers of the wider Sahelian refugee and political crisis.",
+  "wikipediaTitle": "Battle of El Geneina"
+}

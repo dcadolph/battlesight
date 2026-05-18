@@ -9330,6 +9330,17 @@
             "h": 12,
             "strength": 4
           }
+        ],
+        "movements": [
+          {
+            "label": "Byzantine sortie from the walls",
+            "faction": "b",
+            "fromX": 43,
+            "fromY": 50,
+            "toX": 53,
+            "toY": 54,
+            "kind": "flank"
+          }
         ]
       },
       {
@@ -9368,6 +9379,15 @@
             "fromY": 50,
             "toX": 44,
             "toY": 50,
+            "kind": "charge"
+          },
+          {
+            "label": "Defenders rush a breach",
+            "faction": "b",
+            "fromX": 43,
+            "fromY": 50,
+            "toX": 35,
+            "toY": 46,
             "kind": "charge"
           }
         ]
@@ -9453,6 +9473,15 @@
             "toX": 56,
             "toY": 14,
             "kind": "flank"
+          },
+          {
+            "label": "Defenders rush a breach",
+            "faction": "b",
+            "fromX": 58,
+            "fromY": 16,
+            "toX": 68,
+            "toY": 20,
+            "kind": "charge"
           }
         ]
       },
@@ -10116,6 +10145,15 @@
             "toX": 16,
             "toY": 52,
             "kind": "advance"
+          },
+          {
+            "label": "Hessians form and counter",
+            "faction": "b",
+            "fromX": 60,
+            "fromY": 50,
+            "toX": 50,
+            "toY": 54,
+            "kind": "advance"
           }
         ]
       },
@@ -10203,6 +10241,15 @@
             "toX": 54,
             "toY": 60,
             "kind": "flank"
+          },
+          {
+            "label": "Hessians form and counter",
+            "faction": "b",
+            "fromX": 64,
+            "fromY": 36,
+            "toX": 54,
+            "toY": 40,
+            "kind": "charge"
           }
         ]
       },
@@ -10260,6 +10307,15 @@
             "fromX": 58,
             "fromY": 56,
             "toX": 66,
+            "toY": 40,
+            "kind": "advance"
+          },
+          {
+            "label": "Hessians form and counter",
+            "faction": "b",
+            "fromX": 64,
+            "fromY": 36,
+            "toX": 54,
             "toY": 40,
             "kind": "advance"
           }
@@ -10411,6 +10467,43 @@
             "toY": 40,
             "kind": "advance"
           }
+        ],
+        "controlRegions": [
+          {
+            "id": "german-salient-aug",
+            "controller": "b",
+            "label": "German advance",
+            "ring": [
+              [
+                1.4,
+                51.0
+              ],
+              [
+                6.2,
+                50.6
+              ],
+              [
+                5.8,
+                49.6
+              ],
+              [
+                4.6,
+                48.9
+              ],
+              [
+                2.8,
+                48.85
+              ],
+              [
+                1.5,
+                48.95
+              ],
+              [
+                1.4,
+                51.0
+              ]
+            ]
+          }
         ]
       },
       {
@@ -10460,6 +10553,70 @@
             "toX": 44,
             "toY": 42,
             "kind": "flank"
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "german-west-wedge",
+            "controller": "b",
+            "label": "Kluck (1st Army)",
+            "ring": [
+              [
+                1.4,
+                51.0
+              ],
+              [
+                3.2,
+                50.8
+              ],
+              [
+                3.0,
+                49.4
+              ],
+              [
+                2.4,
+                48.95
+              ],
+              [
+                1.5,
+                48.95
+              ],
+              [
+                1.4,
+                51.0
+              ]
+            ]
+          },
+          {
+            "id": "german-east-wedge",
+            "controller": "b",
+            "label": "Bülow (2nd Army)",
+            "ring": [
+              [
+                3.9,
+                50.8
+              ],
+              [
+                6.2,
+                50.6
+              ],
+              [
+                5.8,
+                49.4
+              ],
+              [
+                4.4,
+                48.9
+              ],
+              [
+                3.7,
+                48.9
+              ],
+              [
+                3.9,
+                50.8
+              ]
+            ]
           }
         ]
       },
@@ -10534,6 +10691,97 @@
             "toY": 42,
             "kind": "flank"
           }
+        ],
+        "controlRegions": [
+          {
+            "id": "german-west-wedge-2",
+            "controller": "b",
+            "label": "Kluck (1st Army)",
+            "ring": [
+              [
+                1.4,
+                51.0
+              ],
+              [
+                3.0,
+                50.8
+              ],
+              [
+                2.7,
+                49.2
+              ],
+              [
+                2.2,
+                48.95
+              ],
+              [
+                1.5,
+                48.95
+              ],
+              [
+                1.4,
+                51.0
+              ]
+            ]
+          },
+          {
+            "id": "german-east-wedge-2",
+            "controller": "b",
+            "label": "Bülow (2nd Army)",
+            "ring": [
+              [
+                4.0,
+                50.8
+              ],
+              [
+                6.2,
+                50.6
+              ],
+              [
+                5.7,
+                49.2
+              ],
+              [
+                4.4,
+                48.9
+              ],
+              [
+                3.8,
+                48.9
+              ],
+              [
+                4.0,
+                50.8
+              ]
+            ]
+          },
+          {
+            "id": "french-paris-push",
+            "controller": "a",
+            "label": "Paris garrison + taxis",
+            "ring": [
+              [
+                1.9,
+                49.2
+              ],
+              [
+                2.7,
+                49.2
+              ],
+              [
+                2.5,
+                48.9
+              ],
+              [
+                2.0,
+                48.85
+              ],
+              [
+                1.9,
+                49.2
+              ]
+            ]
+          }
         ]
       },
       {
@@ -10604,6 +10852,97 @@
             "toY": 48,
             "kind": "advance"
           }
+        ],
+        "controlRegions": [
+          {
+            "id": "german-west-wedge-3",
+            "controller": "b",
+            "label": "Kluck withdrawing",
+            "ring": [
+              [
+                1.4,
+                51.0
+              ],
+              [
+                2.9,
+                50.6
+              ],
+              [
+                2.6,
+                49.5
+              ],
+              [
+                2.1,
+                49.0
+              ],
+              [
+                1.5,
+                49.0
+              ],
+              [
+                1.4,
+                51.0
+              ]
+            ]
+          },
+          {
+            "id": "german-east-wedge-3",
+            "controller": "b",
+            "label": "Bülow holding",
+            "ring": [
+              [
+                4.2,
+                50.8
+              ],
+              [
+                6.2,
+                50.6
+              ],
+              [
+                5.6,
+                49.4
+              ],
+              [
+                4.4,
+                49.1
+              ],
+              [
+                4.0,
+                49.1
+              ],
+              [
+                4.2,
+                50.8
+              ]
+            ]
+          },
+          {
+            "id": "allied-thrust",
+            "controller": "a",
+            "label": "BEF and Franchet d'Espèrey",
+            "ring": [
+              [
+                2.7,
+                49.4
+              ],
+              [
+                4.0,
+                49.3
+              ],
+              [
+                4.0,
+                48.95
+              ],
+              [
+                2.7,
+                48.95
+              ],
+              [
+                2.7,
+                49.4
+              ]
+            ]
+          }
         ]
       },
       {
@@ -10650,6 +10989,70 @@
             "text": "Both sides dig in. The trench warfare of the Western Front begins and will not end until November 1918.",
             "x": 50,
             "y": 96
+          }
+        ],
+        "controlRegions": [
+          {
+            "id": "german-fallback-aisne",
+            "controller": "b",
+            "label": "Fallback to the Aisne",
+            "ring": [
+              [
+                1.6,
+                51.0
+              ],
+              [
+                6.2,
+                50.8
+              ],
+              [
+                5.8,
+                49.6
+              ],
+              [
+                4.2,
+                49.4
+              ],
+              [
+                2.6,
+                49.6
+              ],
+              [
+                1.6,
+                50.0
+              ],
+              [
+                1.6,
+                51.0
+              ]
+            ]
+          },
+          {
+            "id": "allied-recovered",
+            "controller": "a",
+            "label": "Allied lines",
+            "ring": [
+              [
+                1.6,
+                49.4
+              ],
+              [
+                6.0,
+                49.3
+              ],
+              [
+                6.0,
+                48.7
+              ],
+              [
+                1.5,
+                48.7
+              ],
+              [
+                1.6,
+                49.4
+              ]
+            ]
           }
         ]
       }
@@ -10722,6 +11125,26 @@
             "h": 12,
             "strength": 3
           }
+        ],
+        "movements": [
+          {
+            "label": "Rennenkampf 1st Army into East Prussia",
+            "faction": "b",
+            "fromX": 92,
+            "fromY": 18,
+            "toX": 78,
+            "toY": 22,
+            "kind": "advance"
+          },
+          {
+            "label": "Samsonov 2nd Army crosses south frontier",
+            "faction": "b",
+            "fromX": 70,
+            "fromY": 96,
+            "toX": 60,
+            "toY": 84,
+            "kind": "advance"
+          }
         ]
       },
       {
@@ -10750,6 +11173,26 @@
             "w": 14,
             "h": 10,
             "strength": 3
+          }
+        ],
+        "movements": [
+          {
+            "label": "Rennenkampf pushes Gumbinnen",
+            "faction": "b",
+            "fromX": 80,
+            "fromY": 22,
+            "toX": 64,
+            "toY": 28,
+            "kind": "advance"
+          },
+          {
+            "label": "Prittwitz pulls back",
+            "faction": "a",
+            "fromX": 50,
+            "fromY": 40,
+            "toX": 30,
+            "toY": 50,
+            "kind": "retreat"
           }
         ]
       },
@@ -10789,6 +11232,15 @@
             "toX": 56,
             "toY": 76,
             "kind": "flank"
+          },
+          {
+            "label": "Samsonov pushes deeper, north-west",
+            "faction": "b",
+            "fromX": 60,
+            "fromY": 84,
+            "toX": 56,
+            "toY": 76,
+            "kind": "advance"
           }
         ]
       },
@@ -10858,6 +11310,15 @@
             "toX": 58,
             "toY": 74,
             "kind": "flank"
+          },
+          {
+            "label": "Russian 2nd Army pushes into trap",
+            "faction": "b",
+            "fromX": 58,
+            "fromY": 78,
+            "toX": 56,
+            "toY": 70,
+            "kind": "advance"
           }
         ]
       },
@@ -10894,6 +11355,17 @@
             "text": "Tsar Nicholas II receives news of Samsonov's death without comment. Hindenburg becomes the icon of German wartime stoicism. The Hindenburg-Ludendorff partnership effectively rules Germany by 1916.",
             "x": 50,
             "y": 96
+          }
+        ],
+        "movements": [
+          {
+            "label": "Russian remnants retreat east",
+            "faction": "b",
+            "fromX": 58,
+            "fromY": 72,
+            "toX": 86,
+            "toY": 60,
+            "kind": "rout"
           }
         ]
       }
@@ -10999,6 +11471,15 @@
             "toX": 50,
             "toY": 72,
             "kind": "charge"
+          },
+          {
+            "label": "P-40s scramble from Wheeler",
+            "faction": "b",
+            "fromX": 38,
+            "fromY": 58,
+            "toX": 50,
+            "toY": 30,
+            "kind": "advance"
           }
         ]
       },
@@ -11072,6 +11553,17 @@
             "w": 14,
             "h": 8,
             "strength": 4
+          }
+        ],
+        "movements": [
+          {
+            "label": "USS Nevada makes for the channel",
+            "faction": "b",
+            "fromX": 56,
+            "fromY": 50,
+            "toX": 80,
+            "toY": 60,
+            "kind": "retreat"
           }
         ]
       },
@@ -14208,6 +14700,15 @@
             "toX": 60,
             "toY": 42,
             "kind": "charge"
+          },
+          {
+            "label": "KPA defenders pull back inland",
+            "faction": "b",
+            "fromX": 64,
+            "fromY": 42,
+            "toX": 76,
+            "toY": 36,
+            "kind": "retreat"
           }
         ]
       },
@@ -14317,6 +14818,15 @@
             "toX": 78,
             "toY": 54,
             "kind": "charge"
+          },
+          {
+            "label": "KPA defenders pull back inland",
+            "faction": "b",
+            "fromX": 84,
+            "fromY": 40,
+            "toX": 96,
+            "toY": 34,
+            "kind": "retreat"
           }
         ]
       },
@@ -14442,6 +14952,15 @@
             "toX": 64,
             "toY": 36,
             "kind": "advance"
+          },
+          {
+            "label": "KPA defenders pull back inland",
+            "faction": "b",
+            "fromX": 60,
+            "fromY": 38,
+            "toX": 72,
+            "toY": 32,
+            "kind": "retreat"
           }
         ]
       },
@@ -14680,6 +15199,15 @@
             "toX": 44,
             "toY": 70,
             "kind": "advance"
+          },
+          {
+            "label": "SNA militia converges",
+            "faction": "b",
+            "fromX": 36,
+            "fromY": 70,
+            "toX": 16,
+            "toY": 60,
+            "kind": "charge"
           }
         ]
       },
@@ -14812,6 +15340,15 @@
             "toX": 34,
             "toY": 80,
             "kind": "rout"
+          },
+          {
+            "label": "SNA militia converges",
+            "faction": "b",
+            "fromX": 80,
+            "fromY": 42,
+            "toX": 60,
+            "toY": 32,
+            "kind": "charge"
           }
         ],
         "annotations": [
@@ -14900,6 +15437,15 @@
             "toX": 60,
             "toY": 36,
             "kind": "advance"
+          },
+          {
+            "label": "SNA militia converges",
+            "faction": "b",
+            "fromX": 60,
+            "fromY": 46,
+            "toX": 40,
+            "toY": 36,
+            "kind": "charge"
           }
         ]
       },
@@ -14991,6 +15537,15 @@
             "toX": 38,
             "toY": 64,
             "kind": "withdrawal"
+          },
+          {
+            "label": "SNA militia converges",
+            "faction": "b",
+            "fromX": 64,
+            "fromY": 54,
+            "toX": 44,
+            "toY": 44,
+            "kind": "charge"
           }
         ],
         "annotations": [
@@ -25061,7 +25616,6 @@
       }
     ]
   },
-
   "sekigahara-1600": {
     "title": "Sekigahara: The Defection at Noon",
     "intro": "Twenty-first of October, 1600. Tokugawa Ieyasu marches the Eastern Army into a narrow pass in Mino province where Ishida Mitsunari's Western Army has held the heights since before dawn. Eighty thousand men on each side. Fog so thick on the floor of the pass that the lines cannot see each other at first light. The Western Army holds the better ground. The Eastern Army holds something more useful. A letter, signed weeks earlier, from one of the Western generals.",
@@ -25079,14 +25633,88 @@
         "durationMs": 6500,
         "cameraAltitude": 0.2,
         "units": [
-          { "label": "Ishida Mitsunari, Western centre", "faction": "b", "unitType": "infantry", "x": 30, "y": 28, "w": 8, "h": 6, "strength": 3, "status": "pressing" },
-          { "label": "Ukita Hideie, Western left-centre", "faction": "b", "unitType": "infantry", "x": 44, "y": 32, "w": 8, "h": 6, "strength": 3 },
-          { "label": "Ōtani Yoshitsugu at Matsuo's foot", "faction": "b", "unitType": "infantry", "x": 64, "y": 42, "w": 6, "h": 6, "strength": 2 },
-          { "label": "Kobayakawa Hideaki on Mount Matsuo", "faction": "b", "unitType": "command", "x": 80, "y": 30, "w": 8, "h": 8, "strength": 3 },
-          { "label": "Shimazu Yoshihiro on the Western left", "faction": "b", "unitType": "cavalry", "x": 22, "y": 38, "w": 6, "h": 6, "strength": 2 },
-          { "label": "Ii Naomasa, Eastern vanguard", "faction": "a", "unitType": "cavalry", "x": 36, "y": 70, "w": 7, "h": 6, "strength": 3, "status": "pressing" },
-          { "label": "Tokugawa Ieyasu, Eastern centre", "faction": "a", "unitType": "command", "x": 50, "y": 80, "w": 9, "h": 7, "strength": 4 },
-          { "label": "Honda Tadakatsu, Eastern right", "faction": "a", "unitType": "cavalry", "x": 64, "y": 70, "w": 7, "h": 6, "strength": 3 }
+          {
+            "label": "Ishida Mitsunari, Western centre",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 30,
+            "y": 28,
+            "w": 8,
+            "h": 6,
+            "strength": 3,
+            "status": "pressing"
+          },
+          {
+            "label": "Ukita Hideie, Western left-centre",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 44,
+            "y": 32,
+            "w": 8,
+            "h": 6,
+            "strength": 3
+          },
+          {
+            "label": "Ōtani Yoshitsugu at Matsuo's foot",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 64,
+            "y": 42,
+            "w": 6,
+            "h": 6,
+            "strength": 2
+          },
+          {
+            "label": "Kobayakawa Hideaki on Mount Matsuo",
+            "faction": "b",
+            "unitType": "command",
+            "x": 80,
+            "y": 30,
+            "w": 8,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "Shimazu Yoshihiro on the Western left",
+            "faction": "b",
+            "unitType": "cavalry",
+            "x": 22,
+            "y": 38,
+            "w": 6,
+            "h": 6,
+            "strength": 2
+          },
+          {
+            "label": "Ii Naomasa, Eastern vanguard",
+            "faction": "a",
+            "unitType": "cavalry",
+            "x": 36,
+            "y": 70,
+            "w": 7,
+            "h": 6,
+            "strength": 3,
+            "status": "pressing"
+          },
+          {
+            "label": "Tokugawa Ieyasu, Eastern centre",
+            "faction": "a",
+            "unitType": "command",
+            "x": 50,
+            "y": 80,
+            "w": 9,
+            "h": 7,
+            "strength": 4
+          },
+          {
+            "label": "Honda Tadakatsu, Eastern right",
+            "faction": "a",
+            "unitType": "cavalry",
+            "x": 64,
+            "y": 70,
+            "w": 7,
+            "h": 6,
+            "strength": 3
+          }
         ],
         "movements": []
       },
@@ -25097,13 +25725,58 @@
         "durationMs": 6500,
         "cameraAltitude": 0.18,
         "units": [
-          { "label": "Eastern infantry advancing", "faction": "a", "unitType": "infantry", "x": 40, "y": 60, "w": 18, "h": 6, "strength": 3, "status": "pressing" },
-          { "label": "Western centre, descending", "faction": "b", "unitType": "infantry", "x": 40, "y": 42, "w": 18, "h": 6, "strength": 3, "status": "pressing" },
-          { "label": "Kobayakawa, holding on Matsuo", "faction": "b", "unitType": "command", "x": 80, "y": 30, "w": 8, "h": 8, "strength": 3 }
+          {
+            "label": "Eastern infantry advancing",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 40,
+            "y": 60,
+            "w": 18,
+            "h": 6,
+            "strength": 3,
+            "status": "pressing"
+          },
+          {
+            "label": "Western centre, descending",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 40,
+            "y": 42,
+            "w": 18,
+            "h": 6,
+            "strength": 3,
+            "status": "pressing"
+          },
+          {
+            "label": "Kobayakawa, holding on Matsuo",
+            "faction": "b",
+            "unitType": "command",
+            "x": 80,
+            "y": 30,
+            "w": 8,
+            "h": 8,
+            "strength": 3
+          }
         ],
         "movements": [
-          { "faction": "a", "fromX": 36, "fromY": 70, "toX": 40, "toY": 55, "kind": "charge", "label": "Ii Naomasa fires the first shot" },
-          { "faction": "b", "fromX": 30, "fromY": 28, "toX": 38, "toY": 50, "kind": "charge", "label": "Ukita charges down the slope" }
+          {
+            "faction": "a",
+            "fromX": 36,
+            "fromY": 70,
+            "toX": 40,
+            "toY": 55,
+            "kind": "charge",
+            "label": "Ii Naomasa fires the first shot"
+          },
+          {
+            "faction": "b",
+            "fromX": 30,
+            "fromY": 28,
+            "toX": 38,
+            "toY": 50,
+            "kind": "charge",
+            "label": "Ukita charges down the slope"
+          }
         ]
       },
       {
@@ -25113,13 +25786,59 @@
         "durationMs": 6500,
         "cameraAltitude": 0.18,
         "units": [
-          { "label": "Shimazu, refusing the order", "faction": "b", "unitType": "cavalry", "x": 18, "y": 38, "w": 6, "h": 6, "strength": 2 },
-          { "label": "Mōri Hidemoto, neutralised in the rear", "faction": "b", "unitType": "infantry", "x": 88, "y": 20, "w": 6, "h": 6, "strength": 2, "status": "broken" },
-          { "label": "Kobayakawa, still watching", "faction": "b", "unitType": "command", "x": 80, "y": 30, "w": 8, "h": 8, "strength": 3 },
-          { "label": "Tokugawa's volley signal", "faction": "a", "unitType": "infantry", "x": 60, "y": 75, "w": 6, "h": 6, "strength": 3, "status": "pressing" }
+          {
+            "label": "Shimazu, refusing the order",
+            "faction": "b",
+            "unitType": "cavalry",
+            "x": 18,
+            "y": 38,
+            "w": 6,
+            "h": 6,
+            "strength": 2
+          },
+          {
+            "label": "Mōri Hidemoto, neutralised in the rear",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 88,
+            "y": 20,
+            "w": 6,
+            "h": 6,
+            "strength": 2,
+            "status": "broken"
+          },
+          {
+            "label": "Kobayakawa, still watching",
+            "faction": "b",
+            "unitType": "command",
+            "x": 80,
+            "y": 30,
+            "w": 8,
+            "h": 8,
+            "strength": 3
+          },
+          {
+            "label": "Tokugawa's volley signal",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 60,
+            "y": 75,
+            "w": 6,
+            "h": 6,
+            "strength": 3,
+            "status": "pressing"
+          }
         ],
         "movements": [
-          { "faction": "a", "fromX": 60, "fromY": 75, "toX": 76, "toY": 34, "kind": "charge", "label": "Volley fired up Mount Matsuo to force the issue" }
+          {
+            "faction": "a",
+            "fromX": 60,
+            "fromY": 75,
+            "toX": 76,
+            "toY": 34,
+            "kind": "charge",
+            "label": "Volley fired up Mount Matsuo to force the issue"
+          }
         ]
       },
       {
@@ -25129,11 +25848,39 @@
         "durationMs": 7000,
         "cameraAltitude": 0.16,
         "units": [
-          { "label": "Ōtani, betrayed at the foot of Matsuo", "faction": "b", "unitType": "infantry", "x": 64, "y": 42, "w": 6, "h": 6, "strength": 1, "status": "broken" },
-          { "label": "Kobayakawa, switching sides", "faction": "a", "unitType": "cavalry", "x": 72, "y": 36, "w": 8, "h": 8, "strength": 4, "status": "pressing" }
+          {
+            "label": "Ōtani, betrayed at the foot of Matsuo",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 64,
+            "y": 42,
+            "w": 6,
+            "h": 6,
+            "strength": 1,
+            "status": "broken"
+          },
+          {
+            "label": "Kobayakawa, switching sides",
+            "faction": "a",
+            "unitType": "cavalry",
+            "x": 72,
+            "y": 36,
+            "w": 8,
+            "h": 8,
+            "strength": 4,
+            "status": "pressing"
+          }
         ],
         "movements": [
-          { "faction": "a", "fromX": 80, "fromY": 30, "toX": 66, "toY": 42, "kind": "charge", "label": "Kobayakawa charges Ōtani's flank" }
+          {
+            "faction": "a",
+            "fromX": 80,
+            "fromY": 30,
+            "toX": 66,
+            "toY": 42,
+            "kind": "charge",
+            "label": "Kobayakawa charges Ōtani's flank"
+          }
         ]
       },
       {
@@ -25143,17 +25890,52 @@
         "durationMs": 7000,
         "cameraAltitude": 0.2,
         "units": [
-          { "label": "Eastern Army holds the field", "faction": "a", "unitType": "infantry", "x": 50, "y": 50, "w": 30, "h": 12, "strength": 4, "status": "pressing" },
-          { "label": "Western remnants", "faction": "b", "unitType": "infantry", "x": 16, "y": 36, "w": 8, "h": 6, "strength": 1, "status": "broken" }
+          {
+            "label": "Eastern Army holds the field",
+            "faction": "a",
+            "unitType": "infantry",
+            "x": 50,
+            "y": 50,
+            "w": 30,
+            "h": 12,
+            "strength": 4,
+            "status": "pressing"
+          },
+          {
+            "label": "Western remnants",
+            "faction": "b",
+            "unitType": "infantry",
+            "x": 16,
+            "y": 36,
+            "w": 8,
+            "h": 6,
+            "strength": 1,
+            "status": "broken"
+          }
         ],
         "movements": [
-          { "faction": "b", "fromX": 30, "fromY": 30, "toX": 4, "toY": 30, "kind": "rout", "label": "Western collapse westward down the pass" },
-          { "faction": "b", "fromX": 22, "fromY": 38, "toX": 96, "toY": 86, "kind": "retreat", "label": "Shimazu rides through the Eastern lines" }
+          {
+            "faction": "b",
+            "fromX": 30,
+            "fromY": 30,
+            "toX": 4,
+            "toY": 30,
+            "kind": "rout",
+            "label": "Western collapse westward down the pass"
+          },
+          {
+            "faction": "b",
+            "fromX": 22,
+            "fromY": 38,
+            "toX": 96,
+            "toY": 86,
+            "kind": "retreat",
+            "label": "Shimazu rides through the Eastern lines"
+          }
         ]
       }
     ]
   },
-
   "mariupol-2022": {
     "title": "Mariupol: Eighty-Two Days",
     "intro": "Late February 2022. Russian and DPR columns converge on the port city from Donetsk to the east and Crimea to the west. The ring closes by the first of March. Eighty-two days later the last defenders walk out of an underground steel plant on the eastern edge of the city. By then the city is a ruin.",

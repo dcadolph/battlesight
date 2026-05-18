@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { Battle, Reference } from '../types/battle';
-import { ERA_COLORS, ERA_LABELS, TIER_LABELS, TIER_DESCRIPTIONS } from '../types/battle';
+import { ERA_COLORS, ERA_LABELS, TIER_LABELS, TIER_DESCRIPTIONS, regionalEraContext } from '../types/battle';
 import { themeForEra } from '../theme/era';
-import { formatYear, formatBattleDate } from '../lib/format';
+import { formatYear, formatBattleDate, cleanCasualtyText } from '../lib/format';
 import CloseButton from './CloseButton';
 
 interface BattlePanelProps {
@@ -10,6 +10,10 @@ interface BattlePanelProps {
   onClose: () => void;
   onWatchReplay: () => void;
   onShare?: () => void;
+  // onCommanderClick lifts a commander name out of the dossier and into
+  // App-level state so the user can pivot to "all battles by this person"
+  // from a single click on the name in the order-of-battle.
+  onCommanderClick?: (name: string) => void;
 }
 
 const REF_TYPE_LABELS: Record<string, string> = {
@@ -28,6 +32,21 @@ function groupRefs(refs: Reference[]): Map<string, Reference[]> {
     if (items.length > 0) groups.set(type, items);
   }
   return groups;
+}
+
+// parseLargestNumber pulls the biggest comma-separated integer from a
+// freeform casualty string. Caps at 10M to skip page numbers and stray
+// reference markers. Returns 0 when nothing parses cleanly.
+function parseLargestNumber(s: string | undefined): number {
+  if (!s) return 0;
+  const matches = s.replace(/,/g, '').match(/\d+/g);
+  if (!matches) return 0;
+  let best = 0;
+  for (const m of matches) {
+    const n = parseInt(m, 10);
+    if (n > best && n <= 10_000_000) best = n;
+  }
+  return best;
 }
 
 // firstSentence pulls the first complete sentence out of a longer prose block.
@@ -86,7 +105,21 @@ function SectionHeading({ theme, children }: { theme: { accent: string }; childr
   );
 }
 
-export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }: BattlePanelProps) {
+// splitTopCommander extracts the senior commander from a freeform commander
+// string. Curators write these as comma-separated, top-billed first, with
+// parenthetical role notes attached to the name (e.g.
+// "Mikhail Kutuzov (commander-in-chief), Pyotr Bagration (2nd Army)").
+// We strip the parenthetical and return just the top-billed name.
+function splitTopCommander(s: string | undefined): string {
+  if (!s) return '';
+  const trimmed = s.trim();
+  if (!trimmed) return '';
+  const head = trimmed.split(',')[0].trim();
+  const paren = head.indexOf('(');
+  return (paren > 0 ? head.slice(0, paren).trim() : head);
+}
+
+export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, onCommanderClick }: BattlePanelProps) {
   const color = ERA_COLORS[battle.era] || '#ffffff';
   const theme = themeForEra(battle.era);
   const [detail, setDetail] = useState<Battle>(battle);
@@ -218,9 +251,20 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
             tier === 'reconstructed' ? '#60a5fa' : tier === 'documented' ? '#34d399' : '#fbbf24';
           const rows: Array<[string, React.ReactNode]> = [
             ['Date', yearKnown ? dateDisplay : '—'],
-            ['Era', (
-              <span style={{ color }}>{ERA_LABELS[battle.era] || battle.era || '—'}</span>
-            )],
+            ['Era', (() => {
+              const eraLabel = ERA_LABELS[battle.era] || battle.era || '—';
+              const local = regionalEraContext(battle.era, battle.lat, battle.lng);
+              return (
+                <span style={{ color }}>
+                  {eraLabel}
+                  {local && (
+                    <span className="text-slate-500 ml-1.5 text-[11.5px] not-italic font-normal">
+                      · {local}
+                    </span>
+                  )}
+                </span>
+              );
+            })()],
             ['War', battle.war || '—'],
             ['Type', battle.battleType
               ? battle.battleType.charAt(0).toUpperCase() + battle.battleType.slice(1)
@@ -345,53 +389,122 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
         {/* Order of battle. Side cards keep sans-serif for data density
             (tabular numbers, commander names, casualty figures) but the
             headline is reset as serif so the section opens cinematically
-            and the cards land underneath as a clean ledger. */}
+            and the cards land underneath as a clean ledger. A thin
+            casualty bar runs along the bottom of each card, scaled against
+            the bloodiest side, so the relative human cost is visible at
+            a glance without re-reading the prose. */}
         <SectionHeading theme={theme}>Order of battle</SectionHeading>
-        <div className="space-y-2.5 mb-7">
-          {(detail.sides || []).map((side, i) => {
-            const isVictor = side.name === detail.victor;
-            return (
-              <div
-                key={i}
-                className="rounded-lg p-4"
-                style={{
-                  backgroundColor: isVictor ? `${color}10` : 'rgba(30,32,44,0.8)',
-                  border: isVictor ? `1px solid ${color}3a` : '1px solid rgba(51,55,76,0.5)',
-                }}
-              >
-                <div className="flex items-center justify-between mb-2.5">
-                  <span className="font-semibold text-white text-[14px]">{side.name}</span>
-                  {isVictor && (
-                    <span
-                      className="text-[9px] uppercase tracking-[0.18em] px-2 py-0.5 rounded-full font-semibold"
-                      style={{ backgroundColor: `${color}26`, color }}
-                    >
-                      Victor
-                    </span>
-                  )}
-                </div>
-                <dl className="grid grid-cols-3 gap-3 text-[11.5px]">
-                  <div>
-                    <dt className="text-slate-500 mb-0.5 text-[10px] uppercase tracking-[0.14em]">Commander</dt>
-                    <dd className="text-slate-200 leading-snug">{side.commander || 'Unknown'}</dd>
+        {(() => {
+          const sides = detail.sides || [];
+          const maxCas = sides.reduce(
+            (m, s) => Math.max(m, parseLargestNumber(s.casualties)),
+            0,
+          );
+          return (
+            <div className="space-y-2.5 mb-7">
+              {sides.map((side, i) => {
+                const isVictor = side.name === detail.victor;
+                const cas = parseLargestNumber(side.casualties);
+                const pct = maxCas > 0 && cas > 0
+                  ? Math.max(6, Math.min(100, (cas / maxCas) * 100))
+                  : 0;
+                return (
+                  <div
+                    key={i}
+                    className="rounded-lg p-4"
+                    style={{
+                      backgroundColor: isVictor ? `${color}10` : 'rgba(30,32,44,0.8)',
+                      border: isVictor ? `1px solid ${color}3a` : '1px solid rgba(51,55,76,0.5)',
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-2.5 gap-2">
+                      <span className="font-semibold text-white text-[14px] min-w-0">{side.name}</span>
+                      {isVictor && (
+                        <span
+                          className="text-[9px] uppercase tracking-[0.18em] px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
+                          style={{ backgroundColor: `${color}26`, color }}
+                        >
+                          Victor
+                        </span>
+                      )}
+                    </div>
+                    <dl className="grid grid-cols-3 gap-3 text-[11.5px]">
+                      <div>
+                        <dt className="text-slate-500 mb-0.5 text-[10px] uppercase tracking-[0.14em]">Commander</dt>
+                        <dd className="text-slate-200 leading-snug">
+                          {(() => {
+                            const top = splitTopCommander(side.commander);
+                            if (!side.commander) return 'Unknown';
+                            const rest = side.commander.replace(top, '').replace(/^\s*,\s*/, '');
+                            return (
+                              <>
+                                {top && onCommanderClick ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => onCommanderClick(top)}
+                                    className="text-left hover:underline transition-colors"
+                                    style={{ color: '#e2e8f0' }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.color = color)}
+                                    onMouseLeave={(e) => (e.currentTarget.style.color = '#e2e8f0')}
+                                    title={`See every battle attributed to ${top}`}
+                                  >
+                                    {top}
+                                  </button>
+                                ) : (
+                                  <span>{top || side.commander}</span>
+                                )}
+                                {rest && (
+                                  <span className="text-slate-400">
+                                    {top ? ', ' : ''}
+                                    {rest}
+                                  </span>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-500 mb-0.5 text-[10px] uppercase tracking-[0.14em]">Strength</dt>
+                        <dd className="text-slate-200 leading-snug tabular-nums">{side.strength || 'Unknown'}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-500 mb-0.5 text-[10px] uppercase tracking-[0.14em]">Casualties</dt>
+                        <dd
+                          className="leading-snug tabular-nums"
+                          style={{ color: isVictor ? color : '#cbd5e1' }}
+                        >
+                          {cleanCasualtyText(side.casualties) || 'Unknown'}
+                        </dd>
+                      </div>
+                    </dl>
+                    {pct > 0 && (
+                      <div
+                        className="mt-3 h-[3px] rounded-full overflow-hidden"
+                        style={{ background: 'rgba(148,163,184,0.12)' }}
+                      >
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{
+                            width: `${pct}%`,
+                            background: isVictor
+                              ? `linear-gradient(90deg, ${color}66, ${color})`
+                              : 'linear-gradient(90deg, rgba(148,163,184,0.4), rgba(148,163,184,0.85))',
+                            boxShadow: isVictor ? `0 0 10px ${color}66` : 'none',
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <dt className="text-slate-500 mb-0.5 text-[10px] uppercase tracking-[0.14em]">Strength</dt>
-                    <dd className="text-slate-200 leading-snug tabular-nums">{side.strength || 'Unknown'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-slate-500 mb-0.5 text-[10px] uppercase tracking-[0.14em]">Casualties</dt>
-                    <dd className="text-slate-200 leading-snug tabular-nums">{side.casualties || 'Unknown'}</dd>
-                  </div>
-                </dl>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {detail.summary && !stakeReusesSummary && (
           <div className="mb-7">
-            <SectionHeading theme={theme}>Summary</SectionHeading>
+            <SectionHeading theme={theme}>What happened</SectionHeading>
             <p
               className="text-[15px] leading-[1.65] text-slate-200/90"
               style={{ fontFamily: theme.titleFont }}
@@ -403,7 +516,7 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
 
         {detail.significance && (
           <div className="mb-7">
-            <SectionHeading theme={theme}>Significance</SectionHeading>
+            <SectionHeading theme={theme}>Why it mattered</SectionHeading>
             <p
               className="text-[15px] leading-[1.65] text-slate-200/90"
               style={{ fontFamily: theme.titleFont }}
@@ -426,7 +539,7 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare }:
 
         {groupedRefs.size > 0 && (
           <div className="border-t border-slate-800/80 pt-6">
-            <SectionHeading theme={theme}>References</SectionHeading>
+            <SectionHeading theme={theme}>Further reading</SectionHeading>
             {Array.from(groupedRefs.entries()).map(([type, items]) => (
               <div key={type} className="mb-4">
                 <h4 className="text-[10px] text-slate-500 font-semibold uppercase tracking-[0.18em] mb-2">

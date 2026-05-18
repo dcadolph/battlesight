@@ -1,0 +1,29 @@
+{
+  "id": "marawi-2017",
+  "name": "Battle of Marawi",
+  "year": 2017,
+  "date": "23 May – 23 October 2017",
+  "lat": 8.0,
+  "lng": 124.2833,
+  "era": "modern",
+  "war": "Moro conflict",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Republic of the Philippines (with U.S., Australian, and other coalition support)",
+      "commander": "Rodrigo Duterte (president), Eduardo Año (chief of staff, AFP), Carlito Galvez (Western Mindanao Command), Danilo Pamonag (Joint Task Force Marawi)",
+      "strength": "About 12,000 troops at peak across the AFP, the PNP Special Action Force, and supporting marines and special operations units",
+      "casualties": "About 168 troops and 47 police killed; 1,400 wounded; civilians around 87 killed, around 400,000 displaced from Lanao del Sur"
+    },
+    {
+      "name": "Maute Group and Abu Sayyaf, pledging allegiance to the Islamic State",
+      "commander": "Isnilon Hapilon (Abu Sayyaf, designated IS emir of Southeast Asia, killed 16 October), Omar and Abdullah Maute (Maute Group, both killed)",
+      "strength": "About 800 fighters at the start including local recruits, Indonesian and Malaysian volunteers, and a small number of Chechen and Arab returnees",
+      "casualties": "About 920 fighters killed including Hapilon and the Maute brothers"
+    }
+  ],
+  "victor": "Republic of the Philippines (and the coalition)",
+  "summary": "On the afternoon of the twenty-third of May 2017 the AFP launched an arrest operation against Isnilon Hapilon at his hideout in Marawi City. The Maute Group ambushed the patrol, occupied the city, raised black banners, and announced the establishment of an Islamic State emirate in Southeast Asia. The Philippine Air Force began airstrikes on commercial buildings the next day. Five months of urban combat reduced the city centre to ruins. U.S. P-3 Orion aircraft, Australian electronic-warfare flights, and Special Operations Forces advisers supported the AFP through the campaign. Hapilon was killed in a building-clearing operation on the sixteenth of October. Duterte declared the city liberated a week later.",
+  "significance": "Marawi was the longest urban battle in modern Philippine history and the first attempt by the Islamic State to declare a wilayat outside the Middle East with the seizure of a major city. The siege punctured the assumption that the Mindanao peace process under the Bangsamoro Organic Law would proceed without further mass violence and produced the most extensive U.S. military re-engagement with the AFP since the Visiting Forces Agreement was implemented. The reconstruction of the city centre, the Most Affected Area, remained partial through 2024 and is an active grievance in the southern Philippine political economy.",
+  "wikipediaTitle": "Battle of Marawi"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "kabul-2021",
+  "name": "Fall of Kabul",
+  "year": 2021,
+  "date": "15 August 2021",
+  "lat": 34.5553,
+  "lng": 69.2075,
+  "era": "modern",
+  "war": "War in Afghanistan (2001–2021)",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Islamic Republic of Afghanistan and U.S. evacuation forces",
+      "commander": "Ashraf Ghani (president, fled the country on the day of the fall), Bismillah Khan Mohammadi (acting defence minister), Frank McKenzie (U.S. Central Command)",
+      "strength": "Around 300,000 nominal Afghan National Army and Police on the books at the start of 2021; effective combat strength in Kabul at most a few thousand. About 6,000 U.S. troops deployed for the airport evacuation",
+      "casualties": "Limited combat casualties on the day of the fall. 13 U.S. service members and at least 170 Afghans killed in the 26 August airport bombing during the subsequent evacuation"
+    },
+    {
+      "name": "Islamic Emirate of Afghanistan (Taliban)",
+      "commander": "Haibatullah Akhundzada (supreme leader), Mohammad Yaqoob (acting defence minister), Sirajuddin Haqqani (interior, Haqqani Network), Abdul Ghani Baradar (political)",
+      "strength": "Around 80,000 fighters across the country; several thousand entered Kabul on the fifteenth",
+      "casualties": "Light"
+    }
+  ],
+  "victor": "Islamic Emirate of Afghanistan (Taliban)",
+  "summary": "Taliban offensives that had been gathering since the May withdrawal of U.S. forces accelerated through July and August 2021, taking provincial capitals at a pace that surprised every Western intelligence service. Herat, Kandahar, and Mazar-i-Sharif fell in the first half of August. Taliban units reached the outskirts of Kabul on the fifteenth. President Ashraf Ghani left the country by helicopter that morning. Taliban political leadership announced that fighters would enter the capital to maintain order. The Afghan National Army did not contest the city. The American-led evacuation through Hamid Karzai International Airport over the following sixteen days flew out around 124,000 people. An Islamic State Khorasan suicide bomber killed thirteen U.S. service members and at least 170 Afghan civilians at the Abbey Gate on the twenty-sixth of August.",
+  "significance": "The fall of Kabul ended the longest war in American history and the twenty-year project of building a republican Afghanistan. Within days the Taliban dissolved the Afghan National Security Forces, the Ministry of Women's Affairs, the human rights commission, and the elected parliament. The image of Taliban fighters posing in the presidential palace and U.S. military equipment being flown south as souvenirs reshaped American foreign-policy debate through the 2024 election. The collapse re-organised the politics of Pakistan and Iran and accelerated the regional rapprochement that brought China, India, and the Gulf states into closer dialogue with the de facto Taliban government.",
+  "wikipediaTitle": "Fall of Kabul (2021)"
+}

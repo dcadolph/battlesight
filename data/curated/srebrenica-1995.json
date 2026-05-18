@@ -1,0 +1,32 @@
+{
+  "id": "srebrenica-1995",
+  "name": "Srebrenica Massacre",
+  "year": 1995,
+  "date": "11 – 22 July 1995",
+  "lat": 44.105,
+  "lng": 19.296,
+  "era": "modern",
+  "war": "Bosnian War",
+  "battleType": "siege",
+  "aliases": [
+    { "name": "Srebrenica Genocide", "by": "ICTY and ICJ legal designation" }
+  ],
+  "sides": [
+    {
+      "name": "Republic of Bosnia and Herzegovina (and the Dutch UNPROFOR battalion at the safe area)",
+      "commander": "Naser Orić (28th Mountain Division of the ARBiH, absent during the assault), Thom Karremans (Dutchbat III commander)",
+      "strength": "About 5,500 ARBiH troops in the enclave, lightly armed under UN safe-area arms restrictions. About 370 Dutchbat peacekeepers",
+      "casualties": "Around 8,372 Bosniak men and boys killed in the genocide of July. Dutchbat suffered limited casualties during the seizure of the enclave"
+    },
+    {
+      "name": "Republika Srpska Army and the Scorpions paramilitary",
+      "commander": "Ratko Mladić (overall), Radislav Krstić (Drina Corps), Vinko Pandurević (Zvornik Brigade), Vidoje Blagojević (Bratunac Brigade)",
+      "strength": "Around 1,500 troops in the immediate assault, drawn from the Drina Corps and the Scorpions paramilitary",
+      "casualties": "Light combat casualties"
+    }
+  ],
+  "victor": "Republika Srpska Army (military seizure of the enclave)",
+  "summary": "The United Nations had declared Srebrenica a safe area in April 1993 and placed it under the protection of a Dutch peacekeeping battalion. Three years later the Republika Srpska Army began the final assault on the eleventh of July 1995. The Dutch battalion called for NATO close air support that was refused at the higher command level. Bosniak men and adolescent boys were separated from the women and children at the UN compound at Potočari and bussed to fields and warehouses around the enclave to be killed in mass executions over the next seven days. Around 8,372 men and boys were murdered. Their bodies were buried in primary graves and then exhumed and reburied in scattered secondary graves through the late summer to conceal the killings.",
+  "significance": "Srebrenica is the only event since the Second World War that the International Court of Justice and the International Criminal Tribunal for the former Yugoslavia have formally classified as a genocide. The legal record produced over twenty-five years of trials produced convictions for command responsibility against Mladić, Karadžić, and Krstić among many others. The failure of the UN safe-area mandate at Srebrenica precipitated the NATO air campaign of August and September 1995 that broke Republika Srpska's military position and produced the Dayton Accords. The Dutch government resigned in 2002 over the conduct of Dutchbat. The annual commemoration at Potočari and the work of the International Commission on Missing Persons have continued to identify and rebury victims into the 2020s.",
+  "wikipediaTitle": "Srebrenica massacre"
+}

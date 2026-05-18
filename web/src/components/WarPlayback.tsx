@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS } from '../types/battle';
+import { themeForYear } from '../theme/era';
 import WarSummaryCard from './WarSummaryCard';
 import WarCinematicOverlay from './WarCinematicOverlay';
 import CloseButton from './CloseButton';
@@ -16,6 +17,11 @@ interface WarPlaybackProps {
   // isolation so the user can take in every battle of the chosen war on the
   // globe at once before clicking into one.
   onWarSelected?: (warName: string) => void;
+  // onWarCountries fires alongside onWarSelected when the selected war's
+  // top participating countries are known. App pipes the list into BattleGlobe
+  // so it can shade those countries on the map and give the user a sense of
+  // where the war was actually fought, beyond the pillar markers.
+  onWarCountries?: (countries: string[]) => void;
   // onPlayReplay is fired in cinematic mode when the auto-step lands on a
   // battle that has a hand-crafted phase replay. App opens the replay
   // overlay. WarPlayback continues its own timer and fires onCloseReplay
@@ -64,7 +70,7 @@ function groupConcurrentBattles(battles: Battle[]): BattleGroup[] {
   return groups;
 }
 
-export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onPlayReplay, onCloseReplay, initialWar }: WarPlaybackProps) {
+export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, initialWar }: WarPlaybackProps) {
   const [wars, setWars] = useState<WarCount[]>([]);
   const [warSearch, setWarSearch] = useState('');
   const [warSort, setWarSort] = useState<WarSort>('casualties');
@@ -105,6 +111,20 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
 
   useEffect(() => {
     onWarSelected?.(selectedWar);
+    // Surface the selected war's top participating countries so App can pipe
+    // them into BattleGlobe for territory shading. Falls through to an empty
+    // list when nothing is selected, which clears the shading.
+    if (onWarCountries) {
+      if (!selectedWar) {
+        onWarCountries([]);
+      } else {
+        const matchedWar = wars.find((w) => w.name === selectedWar);
+        const inherited = matchedWar?.parent
+          ? wars.find((w) => w.name === matchedWar.parent)?.countries
+          : undefined;
+        onWarCountries(matchedWar?.countries?.length ? matchedWar.countries : (inherited ?? []));
+      }
+    }
     if (!selectedWar) { setBattles([]); setGroups([]); onBattlesLoaded(null); return; }
     fetch(`/api/battles?war=${encodeURIComponent(selectedWar)}&limit=2000`)
       .then((r) => r.json())
@@ -122,7 +142,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         onBattlesLoaded(b);
       })
       .catch(() => {});
-  }, [selectedWar, onBattlesLoaded, onWarSelected]);
+  }, [selectedWar, onBattlesLoaded, onWarSelected, onWarCountries, wars]);
 
   // Stop the war auto-step when the tab is hidden or the window blurs. Same
   // motivation as the replay version: nobody wants to come back and find
@@ -450,35 +470,83 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                     : warSort === 'country'
                     ? (w.rolledCasualties || w.casualties)
                     : (w.depth === 0 ? w.rolledCount : w.count);
+                const eraTheme = themeForYear(w.minYear || 1900);
+                const stripeColor = eraTheme.accent;
+                // Country chips: surface up to two top participants on each
+                // war row so the reader can place the war geographically
+                // without opening it. Suppressed on the "By Country" view to
+                // avoid redundancy with the country header above.
+                const chipCountries =
+                  warSort === 'country' || !w.countries ? [] : w.countries.slice(0, 2);
                 return (
                   <button
                     key={`war:${w.name}:${w.depth}`}
                     onClick={() => setSelectedWar(w.name)}
-                    className={`w-full text-left rounded-lg text-[13px] hover:bg-slate-800/50 hover:text-white transition-colors flex justify-between items-center ${
+                    className={`relative w-full text-left rounded-lg text-[13px] hover:bg-slate-800/50 hover:text-white transition-colors overflow-hidden ${
                       warSort === 'country'
-                        ? 'px-3 py-1.5 text-slate-300'
+                        ? 'pl-3 pr-3 py-1.5 text-slate-300'
                         : w.depth === 0
-                        ? 'px-3 py-2 text-slate-300 font-medium'
+                        ? 'pl-3 pr-3 py-2 text-slate-300 font-medium'
                         : 'pl-7 pr-3 py-1.5 text-slate-400 text-[12px]'
                     }`}
                   >
-                    <span className="truncate pr-2">
-                      {warSort !== 'country' && w.depth > 0 && (
-                        <span className="text-slate-700 mr-1" aria-hidden="true">└</span>
-                      )}
-                      {w.name}
-                    </span>
-                    <span className="text-[10px] text-slate-600 flex-shrink-0 tabular-nums">
-                      {warSort === 'casualties' && showVal > 0
-                        ? `${(showVal / 1000).toFixed(0)}k`
-                        : warSort === 'chrono'
-                        ? formatYear(showVal)
-                        : warSort === 'country' && showVal > 0
-                        ? `${(showVal / 1000).toFixed(0)}k`
-                        : warSort === 'country'
-                        ? `${w.rolledCount || w.count}`
-                        : `${showVal}`}
-                    </span>
+                    {/* Era stripe on the leading edge gives each row a
+                        quick chromatic signal of when in history it sits. */}
+                    {warSort !== 'country' && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r"
+                        style={{
+                          background: `linear-gradient(180deg, ${stripeColor}cc 0%, ${stripeColor}55 100%)`,
+                        }}
+                      />
+                    )}
+                    <div className="flex justify-between items-center gap-3">
+                      <span className="truncate min-w-0">
+                        {warSort !== 'country' && w.depth > 0 && (
+                          <span className="text-slate-700 mr-1" aria-hidden="true">└</span>
+                        )}
+                        {w.name}
+                      </span>
+                      <span className="text-[10px] text-slate-600 flex-shrink-0 tabular-nums">
+                        {warSort === 'casualties' && showVal > 0
+                          ? `${(showVal / 1000).toFixed(0)}k`
+                          : warSort === 'chrono'
+                          ? formatYear(showVal)
+                          : warSort === 'country' && showVal > 0
+                          ? `${(showVal / 1000).toFixed(0)}k`
+                          : warSort === 'country'
+                          ? `${w.rolledCount || w.count}`
+                          : `${showVal}`}
+                      </span>
+                    </div>
+                    {chipCountries.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1 items-center">
+                        {chipCountries.map((c) => (
+                          <span
+                            key={c}
+                            className="text-[9.5px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-full font-medium"
+                            style={{
+                              background: `${stripeColor}1a`,
+                              color: `${stripeColor}`,
+                              border: `1px solid ${stripeColor}33`,
+                            }}
+                          >
+                            {c}
+                          </span>
+                        ))}
+                        {w.countries && w.countries.length > 2 && (
+                          <span className="text-[9.5px] text-slate-600 tracking-wide">
+                            +{w.countries.length - 2}
+                          </span>
+                        )}
+                        {w.minYear !== 0 && (
+                          <span className="ml-auto text-[9.5px] text-slate-600 tabular-nums">
+                            from {formatYear(w.minYear)}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </button>
                 );
               })}
@@ -544,12 +612,14 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           </div>
         )}
 
-        {/* The "Trace this war" button is the cinematic entry point. Lifts
-            the user out of the per-battle stepper into a full-screen
-            overtüre, then plays the campaign end-to-end and lands on an
-            aftermath card. Reserved for wars with at least two battles
-            so it does not pretend a single-battle war has a campaign
-            arc to it. */}
+        {/* Single primary entry into the cinematic. Used to be split between
+            "Trace the campaign" up here and a small Cinematic toggle in the
+            controls row, which meant a user could click Play, then notice
+            Cinematic, and feel like the second click yanked them into a
+            different mode. One button now: the big one starts the full
+            overture → cinematic playback → aftermath flow. The Play button
+            in the row below is for stepping the right pane through battles
+            without opening a per-battle replay. */}
         {battles.length >= 2 && (
           <button
             onClick={() => {
@@ -560,9 +630,9 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
               setPlaying(false);
             }}
             className="w-full mb-3 group relative overflow-hidden rounded-lg border border-blue-500/40 bg-gradient-to-r from-blue-500/15 to-blue-500/5 hover:from-blue-500/25 hover:to-blue-500/10 transition-colors px-3 py-2.5 text-left"
-            title="Begin a cinematic trace of the whole war: opening title, every battle in sequence, closing aftermath."
+            title="Watch the campaign as a cinematic: opening title, every battle in sequence, closing aftermath."
           >
-            <div className="text-[10px] uppercase tracking-[0.22em] text-blue-300/90">Trace the campaign</div>
+            <div className="text-[10px] uppercase tracking-[0.22em] text-blue-300/90">Watch the campaign</div>
             <div className="text-[12.5px] text-white mt-0.5">
               ▶ Cinematic, end to end
               <span className="text-slate-400/80 ml-2 text-[11px]">{battles.length} battles</span>
@@ -573,42 +643,22 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1.5">
             <button onClick={() => goTo(groupIndex - 1)} disabled={groupIndex === 0}
-              className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all text-xs">&larr;</button>
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all text-xs"
+              title="Previous battle">&larr;</button>
             <button onClick={() => setPlaying(!playing)}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-all">
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-all"
+              title={playing ? 'Pause auto-advance' : 'Auto-advance through battles (no cinematic replays)'}>
               {playing ? '⏸' : '▶'}
             </button>
             <button onClick={() => goTo(groupIndex + 1)} disabled={groupIndex >= groups.length - 1}
-              className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all text-xs">&rarr;</button>
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all text-xs"
+              title="Next battle">&rarr;</button>
+            <span className="ml-1 text-[9.5px] uppercase tracking-[0.18em] text-slate-500">Step</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => {
-                const next = !cinematic;
-                setCinematic(next);
-                // Toggling cinematic ON should do something visible right now,
-                // not on the next dwell. Fire the replay for the currently
-                // focused battle immediately when it has one. Also enables
-                // auto-play so the rest of the war keeps going.
-                if (next && currentBattle && onPlayReplay &&
-                    (currentBattle.hasReplay || currentBattle.hasSchematic)) {
-                  onPlayReplay(currentBattle);
-                  setPlaying(true);
-                }
-                // Toggling OFF: close any open replay so the panel state matches.
-                if (!next && onCloseReplay) {
-                  onCloseReplay();
-                }
-              }}
-              title="Cinematic mode: opens the replay for each battle and plays through before advancing."
-              className={`h-7 px-2.5 rounded text-[10px] font-medium tracking-wide transition-colors ${
-                cinematic
-                  ? 'bg-blue-500/25 text-blue-200 border border-blue-500/40'
-                  : 'bg-[#1e2030] text-slate-400 border border-slate-700/30 hover:text-slate-300'
-              }`}
-            >Cinematic</button>
             <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}
-              className="bg-[#1e2030] border border-slate-700/30 rounded px-2 py-1 text-[10px] text-slate-400">
+              className="bg-[#1e2030] border border-slate-700/30 rounded px-2 py-1 text-[10px] text-slate-400"
+              title="Auto-advance speed">
               <option value={6000}>Slow</option>
               <option value={4000}>Normal</option>
               <option value={2500}>Fast</option>
@@ -668,6 +718,83 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           setPlaying(true);
         }}
       />
+
+      {/* Cinematic HUD. Floats at the bottom-centre of the screen whenever a
+          war cinematic is in the playing stage, so the user has an always-
+          visible Pause / Resume / Stop pair instead of hunting for the tiny
+          controls inside the right pane. Without this, pausing mid-flow felt
+          like the app had stalled and there was no obvious resume path. */}
+      {cinematicStage === 'playing' && (
+        <div
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 pointer-events-auto"
+          style={{ animation: 'cinhud-rise 280ms ease-out both' }}
+        >
+          <div
+            className="flex items-center gap-3 px-3 py-2 rounded-full backdrop-blur-md border shadow-2xl"
+            style={{
+              background: 'rgba(8,10,18,0.78)',
+              borderColor: 'rgba(96,165,250,0.45)',
+              boxShadow: '0 12px 40px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(96,165,250,0.1) inset',
+            }}
+          >
+            <div className="flex items-center gap-2 pl-1">
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{
+                  background: playing ? '#60a5fa' : '#fbbf24',
+                  boxShadow: playing
+                    ? '0 0 10px rgba(96,165,250,0.8)'
+                    : '0 0 10px rgba(251,191,36,0.8)',
+                  animation: playing ? 'cinhud-pulse 1400ms ease-in-out infinite' : 'none',
+                }}
+              />
+              <span className="text-[10px] uppercase tracking-[0.32em] font-semibold text-slate-200">
+                {playing ? 'Cinematic playing' : 'Cinematic paused'}
+              </span>
+              {currentBattle && (
+                <span className="text-[10px] text-slate-500 ml-1 hidden sm:inline">
+                  · {currentBattle.name}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setPlaying(!playing)}
+              aria-label={playing ? 'Pause cinematic' : 'Resume cinematic'}
+              title={playing ? 'Pause cinematic' : 'Resume cinematic'}
+              className="w-9 h-9 inline-flex items-center justify-center rounded-full bg-white text-slate-900 hover:scale-[1.05] transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+            >
+              {playing ? (
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="3" y="2" width="3" height="10" rx="1" /><rect x="8" y="2" width="3" height="10" rx="1" /></svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5 L12 7 L3 12.5 Z" /></svg>
+              )}
+            </button>
+            <button
+              onClick={() => {
+                setCinematic(false);
+                setCinematicStage('none');
+                setPlaying(false);
+                if (onCloseReplay) onCloseReplay();
+              }}
+              aria-label="Stop cinematic"
+              title="Stop the cinematic and return to the war detail pane"
+              className="w-8 h-8 inline-flex items-center justify-center rounded-full bg-slate-800/80 text-slate-200 hover:bg-slate-700 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300/70"
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="1.5" y="1.5" width="7" height="7" rx="1" /></svg>
+            </button>
+          </div>
+          <style>{`
+            @keyframes cinhud-rise {
+              from { opacity: 0; transform: translate(-50%, 8px); }
+              to   { opacity: 1; transform: translate(-50%, 0); }
+            }
+            @keyframes cinhud-pulse {
+              0%, 100% { transform: scale(1); opacity: 1; }
+              50% { transform: scale(1.4); opacity: 0.7; }
+            }
+          `}</style>
+        </div>
+      )}
     </div>
   );
 }

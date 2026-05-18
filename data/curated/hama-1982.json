@@ -1,0 +1,32 @@
+{
+  "id": "hama-1982",
+  "name": "Hama Massacre",
+  "year": 1982,
+  "date": "2 – 28 February 1982",
+  "lat": 35.1318,
+  "lng": 36.7578,
+  "era": "modern",
+  "war": "Islamist uprising in Syria",
+  "battleType": "siege",
+  "aliases": [
+    { "name": "Hama Events", "by": "Common Arabic euphemism" }
+  ],
+  "sides": [
+    {
+      "name": "Syrian Arab Republic",
+      "commander": "Hafez al-Assad (president), Rifaat al-Assad (Defense Companies), Ali Haydar (Special Forces), Naji Jamil (Air Force intelligence)",
+      "strength": "About 12,000 troops from the Defence Companies, Special Forces, and Saraya al-Difaa supported by tanks, artillery, and helicopters",
+      "casualties": "Around 1,000 troops killed and wounded"
+    },
+    {
+      "name": "Syrian Muslim Brotherhood and the Fighting Vanguard (al-Tali'a al-Muqatila)",
+      "commander": "Adnan Uqlah (Fighting Vanguard, defected from Muslim Brotherhood in 1980), Said Hawwa, Marwan Hadid (already killed in 1976)",
+      "strength": "About 1,000 to 2,000 armed fighters in the old city",
+      "casualties": "Almost all combatants killed; civilian death toll estimated between 10,000 and 40,000"
+    }
+  ],
+  "victor": "Syrian Arab Republic",
+  "summary": "The Syrian Muslim Brotherhood and the splinter Fighting Vanguard had waged an insurgency against the Alawite-dominated Ba'athist regime since 1976, including an assassination attempt against Hafez al-Assad in June 1980. The uprising peaked at Hama, the Brotherhood's stronghold in central Syria. On the night of the second of February 1982, Brotherhood fighters attacked Ba'ath party offices, killed local officials, and declared a general uprising. Rifaat al-Assad's Defence Companies and Special Forces surrounded the old city, cut off water, and shelled the medieval quarters for three weeks. Tanks and bulldozers entered when the artillery preparation ended. Most of the old city of Hama was levelled. International press access was blocked for years.",
+  "significance": "Hama was the deadliest single act of state violence by an Arab government against its own population in the twentieth century and a foundational episode in the political memory of contemporary Syria. The massacre established the credible threat of regime annihilation that anchored the long stability of the Assad system and shaped the Syrian government's response when protests broke out in Deraa and across the country in March 2011. The phrase \"Hama rules\" entered the lexicon of Middle East analysts, including Thomas Friedman's 1989 book on Beirut, to describe the proposition that an autocrat will survive by being willing to inflict whatever level of mass killing is required.",
+  "wikipediaTitle": "1982 Hama massacre"
+}

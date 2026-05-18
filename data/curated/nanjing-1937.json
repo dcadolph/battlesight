@@ -1,0 +1,32 @@
+{
+  "id": "nanjing-1937",
+  "name": "Battle of Nanjing",
+  "year": 1937,
+  "date": "1 – 13 December 1937",
+  "lat": 32.0603,
+  "lng": 118.7969,
+  "era": "interwar",
+  "war": "Second Sino-Japanese War",
+  "battleType": "siege",
+  "aliases": [
+    { "name": "Fall of Nanking", "by": "Anglophone press contemporaneous spelling" }
+  ],
+  "sides": [
+    {
+      "name": "Republic of China",
+      "commander": "Tang Sheng-chih (Nanjing Garrison commander), Chiang Kai-shek (Generalissimo, withdrew to Wuhan before the assault)",
+      "strength": "About 100,000 troops, mostly exhausted Battle of Shanghai survivors plus newly conscripted local units",
+      "casualties": "About 70,000 to 90,000 troops killed in the battle and the subsequent massacre; civilian deaths estimated at 200,000 to 300,000 (Nanjing Massacre)"
+    },
+    {
+      "name": "Empire of Japan",
+      "commander": "Iwane Matsui (Central China Area Army), Prince Yasuhiko Asaka (Shanghai Expeditionary Army), Heisuke Yanagawa (10th Army)",
+      "strength": "About 200,000 troops in six divisions of the Central China Area Army",
+      "casualties": "About 6,000 killed and wounded across the city assault"
+    }
+  ],
+  "victor": "Empire of Japan",
+  "summary": "Japan's Central China Area Army advanced 320 kilometres up the Yangtze valley from Shanghai through November 1937 against limited Chinese resistance. Chiang Kai-shek's decision to defend the capital was politically driven and tactically incoherent. Tang Sheng-chih ordered no retreat under his command, then fled the city alone on the night of the twelfth, leaving his troops without orders. Japanese forces breached the city walls the next day. Over the following six weeks the occupying forces carried out the systematic mass killing, rape, and looting that has come to be called the Nanjing Massacre. The International Military Tribunal for the Far East later judged the death toll at over 200,000.",
+  "significance": "Nanjing was the capital of the Republic of China at the time and its fall was the first capture of a major Allied capital by an Axis power in the long Second World War. The atrocities turned international opinion against Japan and produced the first sustained American press attention to East Asian affairs since the Manchurian crisis. The Safety Zone organised by John Rabe of Siemens and a small group of Western residents saved tens of thousands of civilians and produced the documentary record that survived to ground the postwar tribunal. The historical denial of the massacre by parts of the Japanese political establishment has remained a primary source of friction in Sino-Japanese and Korean-Japanese relations into the twenty-first century.",
+  "wikipediaTitle": "Battle of Nanking"
+}

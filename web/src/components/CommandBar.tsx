@@ -37,6 +37,11 @@ interface CommandBarProps {
   // war. Used when a search match resolves to a war rather than to a
   // single battle, so the user lands inside the right curated context.
   onWarSelect: (warName: string) => void;
+  // onCommanderSelect opens the CommanderPanel for the given name. Used
+  // when the user types a person's name in the search bar and accepts the
+  // "Battles attributed to X" suggestion that appears above the battle
+  // results.
+  onCommanderSelect?: (name: string) => void;
 }
 
 export default function CommandBar({
@@ -53,10 +58,12 @@ export default function CommandBar({
   onToggleSound,
   onResetView,
   onWarSelect,
+  onCommanderSelect,
 }: CommandBarProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Battle[]>([]);
   const [warResults, setWarResults] = useState<NameCount[]>([]);
+  const [commanderCount, setCommanderCount] = useState<number>(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [panel, setPanel] = useState<'none' | 'filters'>('none');
@@ -72,6 +79,7 @@ export default function CommandBar({
     if (q.length < 2) {
       setResults([]);
       setWarResults([]);
+      setCommanderCount(0);
       setSearchOpen(false);
       return;
     }
@@ -93,7 +101,19 @@ export default function CommandBar({
     } else {
       setWarResults([]);
     }
-  }, [stats]);
+    // Commander probe. Hits the people endpoint with limit=1 to get a
+    // total count without paying for the full result set; the user sees a
+    // single "X battles attributed to <q>" row when at least one match
+    // exists, and clicking it opens the CommanderPanel.
+    if (q.length >= 3 && onCommanderSelect) {
+      fetch(`/api/people/battles?name=${encodeURIComponent(q)}&limit=1`)
+        .then((r) => r.json())
+        .then((d) => setCommanderCount(typeof d?.total === 'number' ? d.total : 0))
+        .catch(() => setCommanderCount(0));
+    } else {
+      setCommanderCount(0);
+    }
+  }, [stats, onCommanderSelect]);
 
   const handleChange = (v: string) => {
     setQuery(v);
@@ -212,8 +232,28 @@ export default function CommandBar({
             named war is usually the bigger umbrella the user is hunting
             for; battles follow underneath. Either section is suppressed
             when it has no matches. */}
-        {searchOpen && (warResults.length > 0 || results.length > 0) && (
+        {searchOpen && (warResults.length > 0 || results.length > 0 || commanderCount > 0) && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-[#16171f] border border-slate-700/60 rounded-lg overflow-hidden shadow-xl z-[100]">
+            {commanderCount > 0 && onCommanderSelect && (
+              <button
+                onMouseDown={() => {
+                  onCommanderSelect(query);
+                  setSearchOpen(false);
+                }}
+                className="w-full text-left px-3 py-2 text-[12px] transition-colors hover:bg-slate-800/60 bg-amber-500/[0.06] border-b border-amber-500/10"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-amber-300" />
+                  <span className="text-amber-200 truncate flex-1">
+                    Battles attributed to{' '}
+                    <span className="font-semibold">{query}</span>
+                  </span>
+                  <span className="text-[10px] text-amber-400/80 flex-shrink-0 tabular-nums">
+                    {commanderCount} {commanderCount === 1 ? 'battle' : 'battles'}
+                  </span>
+                </div>
+              </button>
+            )}
             {warResults.length > 0 && (
               <div>
                 <div className="px-3 pt-2 pb-1 text-[9px] uppercase tracking-[0.22em] text-slate-500 bg-slate-900/40">
@@ -266,7 +306,7 @@ export default function CommandBar({
           </div>
         )}
 
-        {searchOpen && query.length >= 2 && results.length === 0 && warResults.length === 0 && (
+        {searchOpen && query.length >= 2 && results.length === 0 && warResults.length === 0 && commanderCount === 0 && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-[#16171f] border border-slate-700/60 rounded-lg p-3 text-center text-[12px] text-slate-600 shadow-xl z-[100]">
             No results
           </div>

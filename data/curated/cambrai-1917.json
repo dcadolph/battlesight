@@ -1,0 +1,29 @@
+{
+  "id": "cambrai-1917",
+  "name": "Battle of Cambrai",
+  "year": 1917,
+  "date": "20 November – 7 December 1917",
+  "lat": 50.1764,
+  "lng": 3.2350,
+  "era": "world-war-1",
+  "war": "World War I",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "British Empire",
+      "commander": "Douglas Haig (BEF), Julian Byng (Third Army), Hugh Elles (Tank Corps), Henry Tudor (artillery innovation)",
+      "strength": "About 19 divisions, 476 Mark IV tanks, 1,003 artillery pieces, 289 aircraft",
+      "casualties": "About 44,000 killed, wounded, and missing"
+    },
+    {
+      "name": "German Empire",
+      "commander": "Crown Prince Rupprecht (Army Group), Georg von der Marwitz (2nd Army), Otto von Moser (XIV Reserve Corps)",
+      "strength": "About 8 divisions at the start, reinforced to about 20 during the German counter-offensive",
+      "casualties": "About 45,000 killed, wounded, and missing"
+    }
+  ],
+  "victor": "Tactical British gain at the opening then German counter-stroke recovers most of the ground; operational stalemate",
+  "summary": "Cambrai opened on the twentieth of November with 476 tanks, the largest concentration of armour the world had ever seen, advancing without the usual seven-day artillery preparation. The bombardment was registered using new sound-ranging and flash-spotting techniques and dropped on the German front line at zero hour. The Hindenburg Line broke and British armour advanced six miles in a few hours, more ground than any previous Western Front offensive had taken in months. Church bells rang in London. Without infantry reserves to exploit the breach, the line stalled at Bourlon Wood. The German counter-attack on the thirtieth of November used new infiltration tactics and rolled the British back. The lines on the seventh of December stood roughly where they had on the twentieth of November.",
+  "significance": "Cambrai is the foundational engagement of modern combined-arms doctrine. The Tank Corps had proved at scale that armour could break a fortified line if supported by surprise, predicted artillery, and tactical air. The German counter-attack proved that the new Stormtrooper infiltration tactics could recover the ground without massed artillery preparation. Both lessons fed directly into the 1918 spring offensives and the Hundred Days that ended the war. The first official use of armour in the role that has defined every land army since runs from the morning of 20 November 1917.",
+  "wikipediaTitle": "Battle of Cambrai (1917)"
+}

@@ -220,6 +220,123 @@ func (s *Store) Search(ctx context.Context, query string, limit, offset int) ([]
 	return battles, total, nil
 }
 
+// BattlesByCommander returns battles where the named person appears in any
+// side's commander field. Each row carries an inferred role tag: "led"
+// means the person is the top-billed commander on at least one side (the
+// first comma-separated entry), "participated" means they are listed but
+// not first. Used by the people-search panel so users can pull up every
+// engagement attributed to a single general or leader.
+//
+// Matching is case-insensitive substring against commander text. The result
+// is intentionally permissive about variants (e.g. "Napoleon" matches both
+// "Napoleon I" and "Napoleon Bonaparte"); the caller can refine if needed.
+func (s *Store) BattlesByCommander(ctx context.Context, name string, limit, offset int) ([]Battle, []string, int, error) {
+	if name == "" {
+		return nil, nil, 0, fmt.Errorf("commander name required")
+	}
+	if limit <= 0 {
+		limit = 100
+	}
+	needle := "%" + strings.ToLower(name) + "%"
+
+	bTrusted := trustedWarSQL("b.war")
+	countSQL := `SELECT COUNT(DISTINCT b.id) FROM battles b
+		JOIN battle_sides s ON s.battle_id = b.id
+		WHERE LOWER(s.commander) LIKE ?
+		  AND (b.lat != 0 OR b.lng != 0)
+		  AND ` + bTrusted
+	var total int
+	if err := s.db.QueryRowContext(ctx, countSQL, needle).Scan(&total); err != nil {
+		return nil, nil, 0, fmt.Errorf("count commander matches: %w", err)
+	}
+	if total == 0 {
+		return []Battle{}, nil, 0, nil
+	}
+
+	listSQL := `SELECT DISTINCT b.id FROM battles b
+		JOIN battle_sides s ON s.battle_id = b.id
+		WHERE LOWER(s.commander) LIKE ?
+		  AND (b.lat != 0 OR b.lng != 0)
+		  AND ` + bTrusted + `
+		ORDER BY b.year, b.date_start
+		LIMIT ? OFFSET ?`
+	idRows, err := s.db.QueryContext(ctx, listSQL, needle, limit, offset)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("query commander matches: %w", err)
+	}
+	defer idRows.Close()
+	var ids []string
+	for idRows.Next() {
+		var id string
+		if err := idRows.Scan(&id); err != nil {
+			return nil, nil, 0, fmt.Errorf("scan commander id: %w", err)
+		}
+		ids = append(ids, id)
+	}
+	if len(ids) == 0 {
+		return []Battle{}, nil, 0, nil
+	}
+
+	placeholders := strings.Repeat("?,", len(ids))
+	placeholders = placeholders[:len(placeholders)-1]
+	args := make([]any, 0, len(ids))
+	for _, id := range ids {
+		args = append(args, id)
+	}
+
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT `+prefixCols("b", battleColumns)+` FROM battles b WHERE b.id IN (`+placeholders+`)`,
+		args...)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("load commander battles: %w", err)
+	}
+	defer rows.Close()
+	battles, err := scanBattles(rows)
+	if err != nil {
+		return nil, nil, 0, err
+	}
+	if err := s.loadSides(ctx, battles); err != nil {
+		return nil, nil, 0, err
+	}
+
+	// Re-order to match the chronological order from listSQL.
+	byID := make(map[string]Battle, len(battles))
+	for _, b := range battles {
+		byID[b.ID] = b
+	}
+	ordered := make([]Battle, 0, len(ids))
+	roles := make([]string, 0, len(ids))
+	needleLower := strings.ToLower(name)
+	for _, id := range ids {
+		b, ok := byID[id]
+		if !ok {
+			continue
+		}
+		ordered = append(ordered, b)
+		role := "participated"
+		for _, side := range b.Sides {
+			cmd := strings.ToLower(side.Commander)
+			if !strings.Contains(cmd, needleLower) {
+				continue
+			}
+			// Top-billed means the name appears within the first comma-
+			// separated commander entry (which by curator convention is
+			// the senior commander on that side).
+			first := cmd
+			if i := strings.Index(cmd, ","); i >= 0 {
+				first = cmd[:i]
+			}
+			if strings.Contains(first, needleLower) {
+				role = "led"
+				break
+			}
+		}
+		roles = append(roles, role)
+	}
+
+	return ordered, roles, total, nil
+}
+
 // coordQueryRe matches a "lat, lng" or "lat lng" search query. Accepts
 // optional minus signs, integer or decimal forms, a comma or whitespace
 // separator, and surrounding whitespace. The latitude range [-90, 90]

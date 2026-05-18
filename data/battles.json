@@ -905,35 +905,6 @@
     "significance": "Tactical German victory by casualties, but strategically the High Seas Fleet never sortied again. Britain keeps command of the North Sea for the rest of the war."
   },
   {
-    "id": "cambrai-1917",
-    "name": "Battle of Cambrai (1917)",
-    "year": 1917,
-    "date": "20 November - 7 December 1917",
-    "lat": 50.1764,
-    "lng": 3.2356,
-    "era": "world-war-1",
-    "war": "World War I",
-    "battleType": "land",
-    "wikipediaTitle": "Battle of Cambrai (1917)",
-    "sides": [
-      {
-        "name": "British Empire",
-        "commander": "Julian Byng",
-        "strength": "~324 tanks + infantry",
-        "casualties": "~44,000"
-      },
-      {
-        "name": "German Empire",
-        "commander": "Georg von der Marwitz",
-        "strength": "Defending Hindenburg Line",
-        "casualties": "~45,000"
-      }
-    ],
-    "victor": "Indecisive",
-    "summary": "First mass use of tanks in concentrated combined-arms attack. 324 Mark IV tanks lead infantry through the Hindenburg Line without preliminary artillery bombardment. The initial advance is the war's largest, but the German counter-attack recovers most of the ground within ten days.",
-    "significance": "Demonstrates the operational potential of armor in mass. Shapes inter-war thinking from Liddell Hart and Fuller to Guderian and Patton."
-  },
-  {
     "id": "chosin-reservoir-1950",
     "name": "Battle of Chosin Reservoir",
     "year": 1950,

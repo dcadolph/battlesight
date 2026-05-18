@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { Battle } from '../../types/battle';
+import { regionalEraContext } from '../../types/battle';
 import type { Replay } from '../../types/replay';
 import { factionColorFor } from '../../types/replay';
 import TacticalMap from './TacticalMap';
@@ -7,6 +8,7 @@ import GlobeReplay from './GlobeReplay';
 import { themeForEra } from '../../theme/era';
 import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
 import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
+import { cleanCasualtyText } from '../../lib/format';
 import CloseButton from '../CloseButton';
 
 interface BattleReplayProps {
@@ -170,7 +172,29 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         }
         /* Glow underlay fades in alongside the trace and stays. */
         @keyframes arrow-glow-in {
-          to { stroke-opacity: 0.4; }
+          to { stroke-opacity: 0.55; }
+        }
+        /* Wider outer halo: lower opacity, fatter blur, gives the line
+           cinematic volume. */
+        @keyframes arrow-halo-in {
+          to { stroke-opacity: 0.32; }
+        }
+        /* Comet head: a short bright window slides along the path during the
+           trace. strokeDasharray='0.06 1' means a 6% visible segment on a
+           pathLength=1 stroke; setting strokeDashoffset from 1 to 0.06 slides
+           that window from the start of the path to the end. */
+        @keyframes arrow-comet {
+          from { stroke-dashoffset: 1; }
+          to   { stroke-dashoffset: 0.06; }
+        }
+        /* Fade the comet in fast so it appears at the same moment as the
+           trace, then fade out at the end so it doesn't sit at the arrowhead
+           after impact. */
+        @keyframes arrow-comet-fade {
+          to { opacity: 1; }
+        }
+        @keyframes arrow-comet-out {
+          to { opacity: 0; }
         }
         /* Marching-dash animation for the globe replay's SVG arrows. The
            --march custom property carries each arrow's dash+gap period so the
@@ -603,12 +627,13 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
   // comparator gives the eye a single visual signal of the cost on each
   // side instead of a wall of commas.
   const sideStats = sides.slice(0, 4).map((s) => {
+    const cleaned = cleanCasualtyText(s.casualties);
     const n = parseLargestNumber(s.casualties);
     return {
       name: s.name,
       commander: s.commander || '',
       strength: s.strength || '',
-      casualties: s.casualties,
+      casualties: cleaned,
       count: n,
     };
   });
@@ -722,7 +747,9 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
 
         {/* Date and war strip immediately below the title so the basic
             framing reads without scrolling. Dot separator and a thin
-            accent line keep the row light. */}
+            accent line keep the row light. A regional era line follows
+            so an 1815 battle on the Indus reads as "Age of Revolutions
+            · Late Mughal" instead of only the global era. */}
         {(battle.date || battle.war) && (
           <div
             className="mt-3 flex items-center justify-center gap-3 text-[10.5px] tracking-[0.32em] uppercase text-slate-400/85 text-center"
@@ -735,6 +762,18 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory }: Battle
             {battle.war && <span className="text-slate-300">{battle.war}</span>}
           </div>
         )}
+        {(() => {
+          const local = regionalEraContext(battle.era, battle.lat, battle.lng);
+          if (!local) return null;
+          return (
+            <div
+              className="mt-2 text-center text-[10px] tracking-[0.34em] uppercase text-slate-500"
+              style={{ animation: 'outro-text-rise 700ms 520ms cubic-bezier(.2,.7,.25,1) both' }}
+            >
+              {local}
+            </div>
+          );
+        })()}
 
         {/* Verdict ribbon. A poster-style chip that names the victor clearly
             and is hard to confuse with the rest of the typography. Renders as

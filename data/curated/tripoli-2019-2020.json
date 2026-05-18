@@ -1,0 +1,29 @@
+{
+  "id": "tripoli-2019-2020",
+  "name": "Battle of Tripoli",
+  "year": 2019,
+  "date": "4 April 2019 – 4 June 2020",
+  "lat": 32.8872,
+  "lng": 13.1913,
+  "era": "modern",
+  "war": "Second Libyan Civil War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Government of National Accord (with Turkish support from 2019)",
+      "commander": "Fayez al-Sarraj (chairman), Salaheddine al-Namroush (defence minister), Osama Juwaili (western military region), Hulusi Akar (Turkish defence minister, supporting role)",
+      "strength": "About 25,000 to 30,000 combatants drawn from the Tripoli-based militias, the Misrata Brigades, plus a Turkish expeditionary force from late 2019",
+      "casualties": "About 1,500 killed"
+    },
+    {
+      "name": "Libyan National Army (with Russian Wagner Group, Egyptian, Emirati, and Sudanese RSF support)",
+      "commander": "Khalifa Haftar (LNA commander), Saddam Haftar (operational), Russian Wagner Group commanders",
+      "strength": "About 25,000 LNA troops plus around 1,200 Wagner contractors, Sudanese Rapid Support Forces detachments, and around 4,000 Syrian National Army mercenaries recruited via Turkey on the GNA side later in the war",
+      "casualties": "About 1,500 to 2,000 killed including significant Wagner casualties"
+    }
+  ],
+  "victor": "Government of National Accord (with Turkish support)",
+  "summary": "Khalifa Haftar launched the LNA offensive on Tripoli on the fourth of April 2019, projecting his eastern Libyan power across the country in defiance of the United Nations-backed Government of National Accord. The LNA reached the southern suburbs of Tripoli within days and dug in for a year-long urban siege. Turkish drone and naval support, the Bayraktar TB2 in particular, began to break LNA armoured concentrations through the spring of 2020. The Battle of al-Watiya airbase on the eighteenth of May 2020 broke the LNA's air-defence umbrella west of Tripoli. A coordinated GNA offensive cleared the LNA from western Libya by the fourth of June. Cease-fire talks in Geneva in October produced the political framework that elected the interim Government of National Unity in February 2021.",
+  "significance": "Tripoli was the first systematic battlefield use of armed drones against a conventional armoured force and the first Turkish expeditionary operation in North Africa since the Italo-Turkish War of 1911-1912. The defeat of the LNA broke the Russian Wagner project to establish a Mediterranean foothold and shifted the gravitational centre of Libyan politics back toward the United Nations-recognised Tripoli government. The campaign reshaped Turkey's regional posture, ended the political assumption of an LNA reunification of the country by force, and produced the operational template for Bayraktar deployment that ran through the Second Karabakh War and into Ukraine in 2022.",
+  "wikipediaTitle": "Tripoli campaign (2019–2020)"
+}

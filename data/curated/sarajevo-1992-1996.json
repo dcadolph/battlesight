@@ -1,0 +1,29 @@
+{
+  "id": "sarajevo-1992-1996",
+  "name": "Siege of Sarajevo",
+  "year": 1992,
+  "date": "5 April 1992 – 29 February 1996",
+  "lat": 43.8563,
+  "lng": 18.4131,
+  "era": "modern",
+  "war": "Bosnian War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Republic of Bosnia and Herzegovina (with NATO air support from 1995)",
+      "commander": "Alija Izetbegović (president), Sefer Halilović (Army of the Republic of Bosnia and Herzegovina, until 1993), Rasim Delić (from 1993), Jovan Divjak (Sarajevo defence), Leighton W. Smith Jr. (NATO Allied Forces Southern Europe, 1995)",
+      "strength": "Around 70,000 ARBiH troops in the Sarajevo region",
+      "casualties": "Around 6,137 ARBiH and police killed. About 5,434 civilians killed including 1,601 children. Around 13,952 wounded"
+    },
+    {
+      "name": "Republika Srpska and the Yugoslav People's Army (until May 1992)",
+      "commander": "Radovan Karadžić (Republika Srpska president), Ratko Mladić (Republika Srpska Army), Stanislav Galić (Sarajevo-Romanija Corps, until August 1994), Dragomir Milošević (Sarajevo-Romanija Corps from August 1994)",
+      "strength": "Around 18,000 troops of the Sarajevo-Romanija Corps holding the hills around the city",
+      "casualties": "Around 2,241 killed; both Sarajevo-Romanija Corps commanders later convicted by the International Criminal Tribunal for the former Yugoslavia"
+    }
+  ],
+  "victor": "Republic of Bosnia and Herzegovina (Dayton Accords)",
+  "summary": "The longest siege of a capital city in modern history began on the fifth of April 1992 when Yugoslav People's Army and Bosnian Serb forces took up positions on the hills ringing Sarajevo and began shelling the city. The siege ran for 1,425 days. Civilians lived in cellars, walked between sniper alleys, and queued for water under mortar fire. The city's only outside access ran through the Sarajevo Tunnel under the airport runway. Around 11,541 people died, 1,601 of them children. NATO Operation Deliberate Force in August and September 1995, triggered by the second Markale market massacre, finally broke the Bosnian Serb military position. The Dayton Accords signed on the fourteenth of December 1995 set terms for the lifting of the siege, which was formally ended on the twenty-ninth of February 1996.",
+  "significance": "Sarajevo defined the 1990s for the European public the way Bosnia defined American foreign policy debate of the period. The siege killed over 11,500 people in a city of 400,000, including the systematic use of sniper fire and indirect-fire weapons against marketplaces, queues, and public transport. The legal record built by the International Criminal Tribunal for the former Yugoslavia produced the first sustained international court convictions for command responsibility since Nuremberg. The doctrine of humanitarian intervention developed in the 1990s, the formation of the European Common Foreign and Security Policy, and the political case for NATO expansion into central Europe all date their decisive moments to Sarajevo. The Markale massacres, the marketplace shelling, and the bread-queue killings have entered visual memory as the canonical images of late-twentieth-century European war.",
+  "wikipediaTitle": "Siege of Sarajevo"
+}

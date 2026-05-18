@@ -45,6 +45,47 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/battles/{id}", h.getBattle)
 	mux.HandleFunc("GET /api/battles", h.listBattles)
 	mux.HandleFunc("GET /api/wars/summary", h.warSummary)
+	mux.HandleFunc("GET /api/people/battles", h.battlesByCommander)
+}
+
+// battlesByCommander returns every battle attributed to a named commander
+// in chronological order, tagged with whether they led a side or merely
+// participated. Powers the "all battles by Napoleon" / "all battles by
+// Patton" discovery flow.
+func (h *Handler) battlesByCommander(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
+	if name == "" {
+		writeError(w, http.StatusBadRequest, "name parameter required")
+		return
+	}
+	limit := queryInt(r.URL.Query(), "limit")
+	offset := queryInt(r.URL.Query(), "offset")
+	battles, roles, total, err := h.store.BattlesByCommander(r.Context(), name, limit, offset)
+	if err != nil {
+		log.Printf("commander search failed for %q: %v", name, err)
+		writeError(w, http.StatusInternalServerError, "commander search failed")
+		return
+	}
+	h.markTier(battles)
+	roleFilter := r.URL.Query().Get("role")
+	out := make([]CommanderBattle, 0, len(battles))
+	for i, b := range battles {
+		role := "participated"
+		if i < len(roles) {
+			role = roles[i]
+		}
+		if roleFilter != "" && roleFilter != role {
+			continue
+		}
+		out = append(out, CommanderBattle{Battle: b, Role: role})
+	}
+	writeJSON(w, http.StatusOK, CommanderResponse{
+		Name:    name,
+		Battles: out,
+		Total:   total,
+		Limit:   limit,
+		Offset:  offset,
+	})
 }
 
 // warSummary returns aggregate stats and optional curated narrative for the

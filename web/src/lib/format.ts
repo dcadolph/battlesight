@@ -73,3 +73,39 @@ export function formatCasualtyEstimate(n: number): string {
   }
   return `About ${formatNumberWithCommas(n)} casualties`;
 }
+
+// cleanCasualtyText scrubs the worst patterns out of freeform casualty
+// strings before they render on screen. Goals:
+//   * No semicolons in user-facing prose (project-wide rule).
+//   * Strip a leading "None killed" / "Negligible" clause when a real
+//     count follows it, so "None killed; one man killed and three
+//     wounded" reads as "One man killed and three wounded".
+//   * Normalise spaces around commas and periods.
+//   * Collapse bare "None" or "Nil" sentinels into "None reported".
+// Idempotent. Empty input returns empty.
+export function cleanCasualtyText(s: string | undefined | null): string {
+  if (!s) return '';
+  let out = String(s).trim();
+  if (!out) return '';
+  // Strip leading "None ..." preamble when a useful clause follows.
+  out = out.replace(
+    /^(?:none|nil|no)\s+(?:killed|dead|fatalities|casualties)(?:\s+(?:in|during|at)[^,;.]*)?\s*[;,.]\s+/i,
+    '',
+  );
+  // Replace remaining semicolons with periods so we never render a
+  // semicolon on screen.
+  out = out.replace(/\s*;\s*/g, '. ');
+  // Fix em-dashes used as separators.
+  out = out.replace(/\s*—\s*/g, ', ');
+  // Fix double spaces and stray space-before-comma.
+  out = out.replace(/\s+,/g, ',').replace(/\s+/g, ' ');
+  // If after cleaning we only have a "none" sentinel, return a tidy label.
+  if (/^(?:none|nil|no(?:ne)?\s+reported)\.?$/i.test(out)) {
+    return 'None reported';
+  }
+  // Capitalise the first character so the line reads as a sentence.
+  if (out.length > 0) {
+    out = out[0].toUpperCase() + out.slice(1);
+  }
+  return out;
+}

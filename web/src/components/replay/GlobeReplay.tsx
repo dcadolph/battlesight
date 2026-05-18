@@ -637,17 +637,17 @@ function ArrowVector({ phaseIdx, arrow, aggressor }: ArrowVectorProps) {
   const cpX = midX + perpX;
   const cpY = midY + perpY;
 
-  let stroke = 2.8;
-  if (kind === 'charge') stroke = 4.4;
-  else if (kind === 'flank') stroke = 3.4;
-  else if (kind === 'rout' || kind === 'retreat' || kind === 'withdrawal') stroke = 2.0;
+  let stroke = 4.5;
+  if (kind === 'charge') stroke = 6.5;
+  else if (kind === 'flank') stroke = 5.5;
+  else if (kind === 'rout' || kind === 'retreat' || kind === 'withdrawal') stroke = 3.5;
 
   const color = factionColorFor(faction, aggressor);
   const markerId = `gr-arrow-${phaseIdx}-${faction}`;
   const path = `M ${x1} ${y1} Q ${cpX} ${cpY} ${x2} ${y2}`;
 
-  const dashLen = Math.max(10, stroke * 5);
-  const gapLen = Math.max(6, stroke * 3);
+  const dashLen = Math.max(14, stroke * 4.5);
+  const gapLen = Math.max(8, stroke * 2.8);
   const period = dashLen + gapLen;
   const { appearDelay, traceMs, marchSpeed } = arrowTiming(kind, index);
   // Marching dashes appear right as the trace completes (10% overlap for a
@@ -655,19 +655,36 @@ function ArrowVector({ phaseIdx, arrow, aggressor }: ArrowVectorProps) {
   // up at the same time the dashes do, which is right when the trace lands.
   const marchDelay = appearDelay + traceMs - 100;
 
+  // Path length for the comet head animation. SVG getTotalLength would be
+  // ideal but we want this server-renderable, so the visual hack uses a
+  // pathLength=1 dash with a tiny visible window that slides from 0 to 1.
   return (
     <g>
-      {/* Glow underlay. Fades in alongside the trace so the destination
-          doesn't suddenly brighten when the marching dashes appear. */}
+      {/* Outer halo. Wide, soft, lower opacity. Gives the line the volume
+          that reads as cinematic rather than diagrammatic. */}
       <path
         d={path}
         stroke={color}
         strokeOpacity={0}
-        strokeWidth={stroke + 5}
+        strokeWidth={stroke + 14}
         fill="none"
         strokeLinecap="round"
         style={{
-          filter: 'blur(4px)',
+          filter: 'blur(8px)',
+          animation: `arrow-halo-in 800ms ${appearDelay}ms ease-out forwards`,
+        }}
+      />
+      {/* Inner glow underlay. Tighter and brighter so the line itself reads
+          as glowing rather than only the halo. */}
+      <path
+        d={path}
+        stroke={color}
+        strokeOpacity={0}
+        strokeWidth={stroke + 6}
+        fill="none"
+        strokeLinecap="round"
+        style={{
+          filter: 'blur(3px)',
           animation: `arrow-glow-in 700ms ${appearDelay}ms ease-out forwards`,
         }}
       />
@@ -685,6 +702,25 @@ function ArrowVector({ phaseIdx, arrow, aggressor }: ArrowVectorProps) {
           strokeDasharray: '1 1',
           strokeDashoffset: 1,
           animation: `arrow-trace ${traceMs}ms ${appearDelay}ms cubic-bezier(.25,.65,.25,1) forwards, arrow-trace-fade 240ms ${marchDelay + 100}ms ease-out forwards`,
+        }}
+      />
+      {/* Comet head: a bright short stroke window that slides along the path
+          during the trace. Reads as a moving spearpoint of light. The window
+          is 6% of the path length so it sits visibly on the leading edge of
+          the trace without overrunning it. */}
+      <path
+        d={path}
+        stroke="#ffffff"
+        strokeWidth={stroke + 1.5}
+        fill="none"
+        strokeLinecap="round"
+        pathLength={1}
+        style={{
+          filter: 'blur(0.5px)',
+          opacity: 0,
+          strokeDasharray: '0.06 1',
+          strokeDashoffset: 1,
+          animation: `arrow-comet-fade 220ms ${appearDelay}ms ease-out forwards, arrow-comet ${traceMs}ms ${appearDelay}ms cubic-bezier(.25,.65,.25,1) forwards, arrow-comet-out 320ms ${appearDelay + traceMs - 240}ms ease-out forwards`,
         }}
       />
       {/* Marching layer. Hidden until the trace finishes, then loops forever.

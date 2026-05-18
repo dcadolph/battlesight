@@ -1,0 +1,29 @@
+{
+  "id": "manbij-2016",
+  "name": "Battle of Manbij",
+  "year": 2016,
+  "date": "31 May – 12 August 2016",
+  "lat": 36.5286,
+  "lng": 37.9544,
+  "era": "modern",
+  "war": "Syrian Civil War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Syrian Democratic Forces and the U.S.-led coalition",
+      "commander": "Adnan Abu Amjad (Manbij Military Council, killed 1 August), Mahmoud Berkhdan (SDF Manbij commander), Stephen J. Townsend (CJTF-OIR)",
+      "strength": "About 6,000 SDF fighters supported by U.S. special operations forces and continuous coalition air support",
+      "casualties": "About 500 SDF killed including Abu Amjad"
+    },
+    {
+      "name": "Islamic State of Iraq and the Levant",
+      "commander": "Local IS commanders rotating through the siege",
+      "strength": "About 1,500 fighters dug into the urban core",
+      "casualties": "Most defenders killed or captured. Around 100 fighters and their families negotiated a convoy out on 12 August"
+    }
+  ],
+  "victor": "Syrian Democratic Forces and the U.S.-led coalition",
+  "summary": "The Syrian Democratic Forces opened the assault on Manbij on the thirty-first of May 2016 to cut the principal Islamic State logistical corridor from the Turkish border to Raqqa and Mosul. The siege ran for seventy-three days through summer heat and urban combat. Coalition airstrikes supported the SDF's advance through the orchards and outlying villages, then through the urban core. The Manbij Military Council took the city on the twelfth of August. A convoy of around 100 IS fighters and their families was allowed to leave under negotiated terms, a practice that recurred at Raqqa the following year.",
+  "significance": "Manbij severed the foreign-fighter pipeline that had run from the Turkish border across northern Syria into the Islamic State's interior, cutting recruitment flows and arms shipments that had sustained the group through 2014 and 2015. The success of the Manbij campaign extended the SDF model that had been proved at Kobani into Arab-majority territory and built the operational template for Raqqa the next year. The continued SDF presence at Manbij became a long source of Turkish-American friction and one of the principal points of negotiation between Washington, Ankara, and Damascus through the rest of the war.",
+  "wikipediaTitle": "Battle of Manbij"
+}

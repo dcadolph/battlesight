@@ -1,0 +1,33 @@
+{
+  "id": "kosovo-1999",
+  "name": "Kosovo War",
+  "year": 1999,
+  "date": "24 March – 11 June 1999",
+  "lat": 42.6629,
+  "lng": 21.1655,
+  "era": "modern",
+  "war": "Yugoslav Wars",
+  "battleType": "land",
+  "aliases": [
+    { "name": "Operation Allied Force", "by": "NATO operational name for the air campaign" },
+    { "name": "Operation Noble Anvil", "by": "U.S. operational name" }
+  ],
+  "sides": [
+    {
+      "name": "NATO, Albania, and the Kosovo Liberation Army",
+      "commander": "Javier Solana (Secretary General), Wesley Clark (SACEUR), Michael Short (Allied Air Forces Southern Europe), Hashim Thaçi (KLA political), Agim Çeku (KLA chief of staff)",
+      "strength": "About 1,031 aircraft of the NATO coalition, NATO ground forces of around 50,000 prepositioned, KLA at about 17,000",
+      "casualties": "Two NATO aircraft lost, two crew killed during operations. KLA casualties around 1,500"
+    },
+    {
+      "name": "Federal Republic of Yugoslavia",
+      "commander": "Slobodan Milošević (president), Dragoljub Ojdanić (chief of the general staff), Nebojša Pavković (3rd Army), Vlastimir Đorđević (Public Security)",
+      "strength": "About 100,000 troops and police across the Yugoslav 3rd Army and Interior Ministry forces in Kosovo",
+      "casualties": "Around 1,000 to 2,000 troops and police killed. Around 7,000 to 8,000 Albanian Kosovars killed; about 850,000 displaced into Albania, North Macedonia, and Montenegro"
+    }
+  ],
+  "victor": "NATO, Albania, and the Kosovo Liberation Army",
+  "summary": "NATO began Operation Allied Force on the twenty-fourth of March 1999 in response to the Račak massacre and the broader Yugoslav campaign against the Albanian population of Kosovo. The seventy-eight-day air campaign was the first sustained combat operation in NATO history. Yugoslav forces accelerated the deportation of the Albanian population during the bombing, driving around 850,000 across the borders into Albania, North Macedonia, and Montenegro in six weeks. The campaign struck industrial, command, and transportation targets across Serbia, including the controversial bombing of the Chinese embassy in Belgrade on the seventh of May. Milošević accepted the Kumanovo Agreement on the ninth of June. Yugoslav forces withdrew from Kosovo. NATO's Kosovo Force entered the province on the twelfth of June.",
+  "significance": "The Kosovo War was the first NATO combat operation in the alliance's fifty-year history and the high-water mark of the late-1990s humanitarian intervention doctrine. The campaign produced the doctrine that became Responsibility to Protect, formally adopted at the United Nations World Summit in 2005. The legal authorisation of the campaign, conducted without an explicit Security Council mandate, has shaped every subsequent debate about NATO and UN authority. Kosovo declared independence in 2008. The unresolved international recognition of Kosovo, which Russia and several others still oppose, remains a primary friction point in European security politics and one of the precedents Moscow cited in its invasions of Ukraine.",
+  "wikipediaTitle": "Kosovo War"
+}

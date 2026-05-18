@@ -18,7 +18,28 @@ interface BattleGlobeProps {
   // atmosphereColor lets the parent shift the globe's atmosphere hue to match
   // the active era. Falls back to the default cyan when unset.
   atmosphereColor?: string;
+  // warCountries lists the top participating countries of the currently
+  // selected war (e.g. ["United States", "Germany", "Russia"]). When set,
+  // those countries are shaded on the globe so the user can see which
+  // territories the war touched at a glance.
+  warCountries?: string[];
+  // warAccent is the era-themed accent color used to shade the warCountries
+  // polygons. Falls back to a generic blue when not supplied.
+  warAccent?: string;
 }
+
+// COUNTRY_NAME_ALIASES maps our canonical country labels to the names used
+// by the world-atlas topology. The atlas is the Natural Earth dataset which
+// uses long-form English names ("United States of America") while our
+// canonisation produces short forms ("United States"). Korea is split into
+// two atlas features but our normaliser collapses them, so we list both.
+const COUNTRY_NAME_ALIASES: Record<string, string[]> = {
+  'United States': ['United States of America'],
+  'United Kingdom': ['United Kingdom'],
+  Korea: ['South Korea', 'North Korea'],
+  Rome: ['Italy'],
+  Palestine: ['Palestine'],
+};
 
 const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
@@ -155,7 +176,7 @@ function battleMagnitude(b: Battle): number {
   return Math.max(0, Math.min(1, (v - 2) / 4));
 }
 
-export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor }: BattleGlobeProps) {
+export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent }: BattleGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>([]);
@@ -260,10 +281,37 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
   }, []);
 
   const highlightedCountry = useMemo(() => {
-    if (!selectedBattle || countries.length === 0) return [];
-    const match = findCountry(selectedBattle.lat, selectedBattle.lng, countries);
-    return match ? [match] : [];
-  }, [selectedBattle, countries]);
+    if (countries.length === 0) return [];
+    const out: Feature<Geometry>[] = [];
+    if (selectedBattle) {
+      const match = findCountry(selectedBattle.lat, selectedBattle.lng, countries);
+      if (match) out.push(match);
+    }
+    if (warCountries && warCountries.length > 0) {
+      const wanted = new Set<string>();
+      for (const c of warCountries) {
+        wanted.add(c.toLowerCase());
+        const aliases = COUNTRY_NAME_ALIASES[c];
+        if (aliases) for (const a of aliases) wanted.add(a.toLowerCase());
+      }
+      const seen = new Set(out.map((f) => f));
+      for (const f of countries) {
+        const name = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
+        if (!name) continue;
+        if (wanted.has(name) && !seen.has(f)) {
+          out.push(f);
+        }
+      }
+    }
+    return out;
+  }, [selectedBattle, countries, warCountries]);
+
+  // hasWarShading determines whether the polygon overlay should render in the
+  // multi-country war palette (accented, brighter borders) or in the single-
+  // country battle-context palette (faint blue). We pick by checking whether
+  // a war is currently active.
+  const hasWarShading = !!(warCountries && warCountries.length > 0);
+  const warShadeColor = warAccent || '#3b82f6';
 
   useEffect(() => {
     const handleResize = () => setDimensions({ width: window.innerWidth, height: window.innerHeight });
@@ -540,7 +588,12 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     ">${escapeHTML(name)}</div>`;
   }, []);
 
+  // The bottom-edge TimelineSlider visually weights the lower portion of
+  // the viewport, so the geometric centre of the screen reads as too low.
+  // Nudge the globe up by ~36px (roughly half the timeline strip) so the
+  // sphere lands where the eye expects "centre" to be.
   return (
+    <div style={{ transform: 'translateY(-36px)' }}>
     <Globe
       ref={globeRef as React.MutableRefObject<GlobeMethods | undefined>}
       width={dimensions.width}
@@ -583,11 +636,12 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       ringRepeatPeriod={2200}
       ringAltitude={0.005}
       polygonsData={highlightedCountry}
-      polygonCapColor={() => 'rgba(59,130,246,0.08)'}
-      polygonSideColor={() => 'rgba(59,130,246,0.15)'}
-      polygonStrokeColor={() => 'rgba(59,130,246,0.4)'}
+      polygonCapColor={() => hasWarShading ? hexToRgba(warShadeColor, 0.14) : 'rgba(59,130,246,0.08)'}
+      polygonSideColor={() => hasWarShading ? hexToRgba(warShadeColor, 0.22) : 'rgba(59,130,246,0.15)'}
+      polygonStrokeColor={() => hasWarShading ? hexToRgba(warShadeColor, 0.55) : 'rgba(59,130,246,0.4)'}
       polygonAltitude={0.005}
       polygonLabel={polygonLabel}
     />
+    </div>
   );
 }

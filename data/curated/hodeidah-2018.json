@@ -1,0 +1,32 @@
+{
+  "id": "hodeidah-2018",
+  "name": "Battle of Hodeidah",
+  "year": 2018,
+  "date": "13 June – 13 December 2018",
+  "lat": 14.7950,
+  "lng": 42.9544,
+  "era": "modern",
+  "war": "Yemeni Civil War",
+  "battleType": "siege",
+  "aliases": [
+    { "name": "Operation Golden Victory", "by": "Saudi-led coalition operational name" }
+  ],
+  "sides": [
+    {
+      "name": "Yemeni government, the Saudi-led coalition, and the Tariq Saleh forces",
+      "commander": "Tariq Saleh (National Resistance Forces), Abdul Rab Mansour Hadi (Yemeni president), Saudi and Emirati coalition commanders",
+      "strength": "About 21,000 troops in the assault from the south, supported by Emirati airpower and naval blockade",
+      "casualties": "Around 1,800 killed"
+    },
+    {
+      "name": "Houthi movement (Ansar Allah)",
+      "commander": "Abdul-Malik al-Houthi (overall), Mohammed Ali al-Houthi (Supreme Revolutionary Committee)",
+      "strength": "Several thousand fighters defending a city of 600,000",
+      "casualties": "Around 2,000 killed"
+    }
+  ],
+  "victor": "Inconclusive (Stockholm Agreement froze the front)",
+  "summary": "The Saudi-led coalition's southern axis advanced up the Red Sea coast toward Hodeidah, the principal port through which roughly two thirds of all Yemeni food and medical imports passed. Coalition leadership argued the port was a Houthi weapons-import node. Humanitarian agencies warned that an assault on the city of 600,000 risked the largest famine in modern history. Six months of fighting reached the outskirts of the city and the port itself. United Nations envoy Martin Griffiths brought both sides to Stockholm in December 2018 for a redeployment agreement that froze the front line on the outskirts, kept the port open under UN-supervised inspection, and avoided the urban assault.",
+  "significance": "Hodeidah was the largest single humanitarian test of the Yemeni war. The Stockholm Agreement was the first negotiated outcome of any front of the war and the political precedent for the broader UN-mediated truce process that produced the April 2022 nationwide cease-fire. The port remained open through the famine years of 2018-2020 and the agreement is widely credited with averting a much larger death toll. The military stalemate at Hodeidah contributed to the Emirati decision to scale back the southern ground commitment in 2019 and produced the split inside the Yemeni anti-Houthi coalition that became the Southern Transitional Council confrontation with the Hadi government.",
+  "wikipediaTitle": "Battle of Hodeidah"
+}

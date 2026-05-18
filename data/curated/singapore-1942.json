@@ -1,0 +1,33 @@
+{
+  "id": "singapore-1942",
+  "name": "Battle of Singapore",
+  "year": 1942,
+  "date": "8 – 15 February 1942",
+  "lat": 1.3521,
+  "lng": 103.8198,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "siege",
+  "aliases": [
+    { "name": "Fall of Singapore", "by": "Allied historiography after the surrender" },
+    { "name": "Shōnan", "by": "Japanese administrative name during the occupation, 1942-1945" }
+  ],
+  "sides": [
+    {
+      "name": "British Empire (United Kingdom, Australia, India, Malayan and Straits Settlements forces)",
+      "commander": "Arthur Percival (Malaya Command), Lewis Heath (III Indian Corps), Gordon Bennett (Australian 8th Division), Merton Beckwith-Smith (British 18th Division)",
+      "strength": "About 85,000 troops, mostly Indian and Australian; 158 aircraft initially, of which most lost in the Malayan phase",
+      "casualties": "About 5,000 killed and wounded; around 80,000 captured, the largest single surrender of British and Commonwealth personnel in history"
+    },
+    {
+      "name": "Empire of Japan",
+      "commander": "Tomoyuki Yamashita (25th Army), Takuro Matsui (5th Division), Renya Mutaguchi (18th Division), Takuma Nishimura (Imperial Guards)",
+      "strength": "About 36,000 troops in three divisions plus tank, artillery, and air units; total 25th Army campaign strength around 70,000",
+      "casualties": "About 9,000 killed and wounded across the Malayan campaign and the Singapore assault"
+    }
+  ],
+  "victor": "Empire of Japan",
+  "summary": "Yamashita's 25th Army landed in southern Thailand and northern Malaya on the eighth of December 1941 and drove down the peninsula on bicycles and light tanks, outflanking British defensive positions through the jungle that the British had judged impassable. The British retreat ended on Singapore Island at the end of January. Yamashita crossed the Johor Strait on the night of the eighth of February, drove south through the Tengah and Mandai sectors, and by the thirteenth had reached the Bukit Timah water reservoirs. Percival surrendered at the Ford Motor Factory in Bukit Timah on the evening of the fifteenth despite a roughly two-to-one Allied numerical advantage in the city perimeter. Yamashita had been bluffing on his ammunition supply.",
+  "significance": "Churchill called the fall of Singapore the worst disaster and largest capitulation in British history. The defeat broke the imperial myth of the European garrison in Asia. The Sook Ching massacres in the following weeks killed an estimated 25,000 to 50,000 ethnic Chinese in Singapore and Malaya. The eighty thousand prisoners of war were dispersed across the Japanese empire and many died on the Burma Railway and in mines and harbours from Manchuria to Borneo. The political legitimacy of the British in Asia did not survive the war. The independence movements of India, Burma, Malaya, and Indonesia all date their decisive moment to the loss of Singapore.",
+  "wikipediaTitle": "Battle of Singapore"
+}

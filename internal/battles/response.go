@@ -12,6 +12,32 @@ type ListResponse struct {
 	Offset int `json:"offset"`
 }
 
+// CommanderBattle wraps a battle with the role inferred for the queried
+// commander (led: top-billed on at least one side; participated: listed
+// but not first). Used by the people-search panel.
+type CommanderBattle struct {
+	// Battle is the engagement record.
+	Battle Battle `json:"battle"`
+	// Role is "led" when the queried commander appears first in any side's
+	// commander field, otherwise "participated".
+	Role string `json:"role"`
+}
+
+// CommanderResponse wraps a paginated list of battles attributed to a
+// named commander.
+type CommanderResponse struct {
+	// Name is the queried commander string.
+	Name string `json:"name"`
+	// Battles is the chronological result set.
+	Battles []CommanderBattle `json:"battles"`
+	// Total is the total count matching this commander.
+	Total int `json:"total"`
+	// Limit is the page size used.
+	Limit int `json:"limit"`
+	// Offset is the starting position.
+	Offset int `json:"offset"`
+}
+
 // StatsResponse holds aggregate counts for populating filter UI.
 type StatsResponse struct {
 	// TotalBattles is the count of all battles in the database.

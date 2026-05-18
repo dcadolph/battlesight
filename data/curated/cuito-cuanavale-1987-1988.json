@@ -1,0 +1,29 @@
+{
+  "id": "cuito-cuanavale-1987-1988",
+  "name": "Battle of Cuito Cuanavale",
+  "year": 1987,
+  "date": "14 August 1987 – 23 March 1988",
+  "lat": -15.1667,
+  "lng": 19.1667,
+  "era": "modern",
+  "war": "South African Border War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "Angola (FAPLA), Cuba, and SWAPO",
+      "commander": "Fidel Castro (Cuban supreme commander, strategic), Arnaldo Ochoa (Cuban Southern Front), António dos Santos França \"Ndalu\" (FAPLA chief of staff)",
+      "strength": "About 40,000 Cuban troops at peak (Operation 31st Anniversary), some 40,000 FAPLA, SWAPO, and ANC fighters, with Soviet-supplied tanks, MiG-23 fighters, and air-defence systems",
+      "casualties": "Around 4,000 FAPLA and Cuban combined killed and wounded, including small Cuban combat losses given the scale"
+    },
+    {
+      "name": "South Africa and UNITA",
+      "commander": "Magnus Malan (South African defence minister), Jannie Geldenhuys (SADF chief), Jan Hougaard (SADF 20 Brigade), Jonas Savimbi (UNITA)",
+      "strength": "About 4,000 SADF troops at peak, around 8,000 UNITA, supported by Olifant tanks, G5 howitzers, and Mirage F1 strike aircraft",
+      "casualties": "Around 86 SADF killed, around 4,000 UNITA killed and wounded"
+    }
+  ],
+  "victor": "Operational stalemate; strategic Cuban and Angolan victory in the New York Accords that followed",
+  "summary": "FAPLA launched Operation Saluting October in August 1987 to drive UNITA out of south-east Angola. South African Defence Force armoured battalions intervened to rescue UNITA, destroying the FAPLA 47 Brigade at the Lomba River. The SADF and UNITA besieged the FAPLA garrison at Cuito Cuanavale from October. Castro responded by deploying Cuban reinforcements south of the fifteenth parallel for the first time in the war and pushing Cuban armoured columns toward the Namibian border in a strategic feint that threatened to outflank the South African position. Cuban MiG-23s contested South African air superiority for the first time. The Cubans rebuilt FAPLA's southern position. South Africa accepted the New York Accords on the twenty-second of December 1988.",
+  "significance": "Cuito Cuanavale is one of the largest conventional battles fought in Africa since the Second World War and one of the foundational episodes of the end of apartheid. The strategic stalemate forced South Africa to negotiate the New York Accords, which traded Cuban withdrawal from Angola for South African withdrawal from Namibia and the legal end of South West Africa's status as a South African mandate. Namibia became independent in 1990. The South African National Party, denied military victory in the bush war, opened the political talks with the ANC that produced the unbanning of the ANC and the release of Nelson Mandela in 1990. Castro and the African National Congress have both cited the battle as a turning point in southern African liberation.",
+  "wikipediaTitle": "Battle of Cuito Cuanavale"
+}

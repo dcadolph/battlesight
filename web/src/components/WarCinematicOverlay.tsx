@@ -86,22 +86,12 @@ export default function WarCinematicOverlay({
     return () => window.removeEventListener('keydown', onKey);
   }, [stage, onDismiss, onBegin]);
 
-  // Auto-advance the overture after a generous read so a viewer who
-  // does not engage the controls still flows into the playback. Set
-  // long enough to read the title and the sides but short enough not
-  // to feel like the app stalled.
-  useEffect(() => {
-    if (stage !== 'overture' || !onBegin || autoBegun) return;
-    setAutoBegun(true);
-    const t = setTimeout(() => onBegin(), 5200);
-    return () => clearTimeout(t);
-  }, [stage, onBegin, autoBegun]);
-
-  // Reset the auto-begun flag whenever we exit the overture so a
-  // re-entry plays the overture again.
-  useEffect(() => {
-    if (stage !== 'overture') setAutoBegun(false);
-  }, [stage]);
+  // The overture used to auto-advance after ~5 seconds. That felt rushed:
+  // a viewer reading the title and the belligerents would be ambushed by
+  // the playback starting before they were ready. The card now waits on
+  // the explicit Begin click (or Enter/Space) so the user owns the start.
+  void autoBegun;
+  void setAutoBegun;
 
   if (stage === 'none') return null;
 
@@ -268,7 +258,7 @@ export default function WarCinematicOverlay({
               background: stage === 'aftermath' ? `${theme.accent}26` : `${theme.accent}14`,
             }}
           >
-            {stage === 'aftermath' ? 'Back to the wars list' : 'Skip'}
+            {stage === 'aftermath' ? 'Back to the globe' : 'Skip the overture'}
           </button>
         </div>
 

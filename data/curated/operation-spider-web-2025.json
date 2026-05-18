@@ -1,0 +1,32 @@
+{
+  "id": "operation-spider-web-2025",
+  "name": "Operation Spider's Web",
+  "year": 2025,
+  "date": "1 June 2025",
+  "lat": 56.4636,
+  "lng": 84.9583,
+  "era": "modern",
+  "war": "Russo-Ukrainian War",
+  "battleType": "air",
+  "aliases": [
+    { "name": "Pavutyna", "by": "Ukrainian operational codename (Ukrainian for 'Spider's Web')" }
+  ],
+  "sides": [
+    {
+      "name": "Ukraine (Security Service of Ukraine, SBU)",
+      "commander": "Vasyl Maliuk (SBU chief), Volodymyr Zelensky (planning authorisation, publicly disclosed)",
+      "strength": "117 small first-person-view drones smuggled into Russian territory inside modified shipping containers and launched from the back of civilian trucks parked near the target airbases",
+      "casualties": "None"
+    },
+    {
+      "name": "Russian Federation (Long Range Aviation, Russian Aerospace Forces)",
+      "commander": "Sergey Kobylash (Long Range Aviation commander)",
+      "strength": "Russian strategic bomber fleet at Olenya (Murmansk Oblast), Belaya (Irkutsk Oblast), Dyagilevo (Ryazan), Ivanovo, and Ukrainka airbases",
+      "casualties": "Estimated 11 to 13 Russian strategic bombers destroyed, including Tu-95MS and Tu-22M3 aircraft and at least one A-50 airborne early-warning aircraft, with further damage to additional airframes. Pentagon initial assessments put the value of destroyed and damaged aircraft at around 7 billion dollars"
+    }
+  ],
+  "victor": "Ukraine",
+  "summary": "The Security Service of Ukraine spent eighteen months pre-positioning 117 first-person-view drones inside Russian territory in modified wooden cabins carried on the back of articulated trucks. On the first of June 2025, drivers carrying the containers, recruited under false civilian-haulage cover, parked near Russian strategic bomber bases as far east as Belaya in Irkutsk Oblast, 4,300 kilometres from Ukraine. Drone operators activated the swarm remotely. The drones lifted from the truck-mounted launch pads, identified the parked bombers via on-board imagery, and dived into the airframes. Russia lost a substantial fraction of its strategic aviation force in a single coordinated operation across five airbases. Ukrainian officials released video of the strikes within hours.",
+  "significance": "Spider's Web was the deepest precision strike in the history of Ukrainian operations and the most successful aviation raid against a nuclear-armed power by a non-nuclear power. The operation damaged the air leg of the Russian nuclear triad's conventional standoff capability, the same Tu-95MS and Tu-22M3 fleets that had been carrying cruise-missile salvos against Ukrainian cities. The episode shifted the strategic calculus of the war by demonstrating that Russian rear-area infrastructure was reachable at intercontinental range using commercially available technology. The Trump administration's negotiating posture, which had been pushing Ukraine toward concessions through the spring of 2025, shifted measurably in the days afterward.",
+  "wikipediaTitle": "Operation Spider's Web"
+}

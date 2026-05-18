@@ -1,0 +1,29 @@
+{
+  "id": "grozny-1999-2000",
+  "name": "Battle of Grozny",
+  "year": 1999,
+  "date": "25 December 1999 – 6 February 2000",
+  "lat": 43.3168,
+  "lng": 45.6986,
+  "era": "modern",
+  "war": "Second Chechen War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Russian Federation",
+      "commander": "Vladimir Putin (acting president from 31 December), Anatoly Kvashnin (general staff), Viktor Kazantsev (North Caucasus Military District), Vladimir Shamanov (58th Army), Vladimir Bulgakov (Mountain Group)",
+      "strength": "About 50,000 Russian regular and Interior Ministry troops in the Grozny operation",
+      "casualties": "Officially around 1,000 killed; independent estimates higher"
+    },
+    {
+      "name": "Chechen Republic of Ichkeria",
+      "commander": "Aslan Maskhadov (president), Shamil Basayev, Khattab (Saudi-born foreign-fighter commander)",
+      "strength": "About 3,000 to 6,000 fighters defending the city",
+      "casualties": "Several thousand fighters killed across the siege and the corridor breakout. Civilian death toll estimated at over 20,000 across the bombardment phase"
+    }
+  ],
+  "victor": "Russian Federation",
+  "summary": "Russian forces opened the second campaign to retake Grozny on the twenty-fifth of December 1999 with prolonged artillery and air bombardment, after the experience of street fighting in 1994-1995 had taught the Russian military to avoid mounted entry into the city. Civilians were trapped under thermobaric and cluster munitions for six weeks. Chechen defenders organised a breakout through the south on the night of the first of February 2000 across a minefield in which Khattab's deputies suffered heavy losses. Field commander Shamil Basayev lost a foot to a mine that night. Russian forces declared the city captured on the sixth of February. The United Nations later described the resulting destruction of Grozny as making it the most destroyed city on earth.",
+  "significance": "The Second Battle of Grozny was the founding episode of Vladimir Putin's presidency, conducted in the weeks immediately before and after his ascension to acting president, and the basis for the security-state public image that has defined his rule. The total destruction of an interior capital of the Russian Federation set the precedent for Russian conduct in Aleppo (with Syrian government forces), in Mariupol, and elsewhere through the 2010s and 2020s. The Khattab-Basayev breakout produced an insurgent leadership that ran the long jihadist phase of the North Caucasus conflict and inspired the doctrine of foreign-fighter mobilisation later used to recruit for the Caucasus Emirate and, indirectly, for the Islamic State.",
+  "wikipediaTitle": "Battle of Grozny (1999–2000)"
+}

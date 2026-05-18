@@ -1,0 +1,29 @@
+{
+  "id": "tabqa-2017",
+  "name": "Battle of Tabqa",
+  "year": 2017,
+  "date": "22 March – 13 May 2017",
+  "lat": 35.8367,
+  "lng": 38.5325,
+  "era": "modern",
+  "war": "Syrian Civil War",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Syrian Democratic Forces and the U.S.-led coalition",
+      "commander": "Rojda Felat (SDF operational commander), Stephen J. Townsend (CJTF-OIR), Marine Air-Ground Task Force commanders",
+      "strength": "About 5,000 SDF fighters supported by U.S. Marines artillery, U.S. Army Rangers, and continuous coalition airstrikes",
+      "casualties": "Around 200 SDF killed"
+    },
+    {
+      "name": "Islamic State of Iraq and the Levant",
+      "commander": "Local IS commanders at the Tabqa Dam and airbase",
+      "strength": "About 1,000 fighters",
+      "casualties": "Around 400 killed"
+    }
+  ],
+  "victor": "Syrian Democratic Forces and the U.S.-led coalition",
+  "summary": "The SDF launched the assault on Tabqa with a U.S. Marine helicopter airlift across Lake Assad on the twenty-second of March, the first contested airmobile operation by American forces since the Iraq War. SDF fighters landed behind Islamic State lines and pushed inland to seize the Tabqa airfield, then turned south on the Tabqa Dam, which Islamic State had threatened to destroy. The dam was preserved through careful close air support by U.S. and coalition aircraft that avoided structural targets. The city of Tabqa fell on the tenth of May after a sustained urban clearance. The dam was formally handed back to Syrian civilian authorities on the thirteenth.",
+  "significance": "Tabqa was the operational hinge that opened the road to Raqqa for the SDF and demonstrated that the U.S. military and SDF together could conduct combined airmobile and ground operations on a scale not seen in the campaign before. The careful preservation of the dam, which holds back Lake Assad and supplies water and electricity to large portions of northern Syria, became a precedent for restrained urban operations and a contrast with later destruction at Raqqa itself. The campaign cemented the SDF as a coalition-grade ground partner and reset the diplomatic calculation of the Trump administration's first months toward the YPG-led structure that has anchored U.S. policy in north-east Syria since.",
+  "wikipediaTitle": "Battle of Tabqa (2017)"
+}

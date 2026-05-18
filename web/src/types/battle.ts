@@ -79,10 +79,72 @@ export const ERA_LABELS: Record<string, string> = {
   'ancient': 'Ancient',
   'medieval': 'Medieval',
   'early-modern': 'Early Modern',
-  'napoleonic': 'Napoleonic',
+  // "Napoleonic" was the historical short-hand for this era key, but it is a
+  // Western European lens that reads as strange when applied to a battle in
+  // Qing China or Mughal India during the same window. "Age of Revolutions"
+  // is the academic shorthand that covers the same 1700-1820 period in a
+  // globally-applicable way (American, French, Haitian, Latin American
+  // revolutions, plus the Napoleonic Wars themselves). Per-battle context
+  // (e.g. "Napoleonic Wars", "Qing Dynasty", "Late Mughal") surfaces from
+  // regionalEraContext below so the era label reads relevant in every
+  // hemisphere.
+  'napoleonic': 'Age of Revolutions',
   'industrial': 'Industrial Age',
   'world-war-1': 'World War I',
   'interwar': 'Interwar',
   'world-war-2': 'World War II',
   'modern': 'Modern',
 };
+
+// regionalEraContext returns a finer-grained historical context label for a
+// battle by combining the era key with the battle's geographic region. Used
+// alongside ERA_LABELS in the dossier and outro so an 1815 battle on the
+// Indus reads as "Age of Revolutions · Late Mughal" rather than only "Age
+// of Revolutions". Returns an empty string when no specific local context
+// fits, in which case the caller renders the era alone.
+export function regionalEraContext(era: string, lat: number, lng: number): string {
+  if (era === 'napoleonic') {
+    if (lng >= -10 && lng <= 40 && lat >= 35 && lat <= 72) return 'Napoleonic Wars';
+    if (lng >= -130 && lng <= -50 && lat >= 20 && lat <= 60) return 'Revolutionary America';
+    if (lng >= -90 && lng <= -30 && lat >= -56 && lat <= 25) return 'Latin American Independence';
+    if (lng >= 60 && lng <= 100 && lat >= 5 && lat <= 40) return 'Late Mughal · East India Company';
+    if (lng >= 100 && lng <= 145 && lat >= 18 && lat <= 55) return 'Qing Dynasty';
+    if (lng >= 128 && lng <= 146 && lat >= 30 && lat <= 46) return 'Edo Period';
+    if (lng >= 24 && lng <= 65 && lat >= 12 && lat <= 42) return 'Ottoman Empire';
+    return '';
+  }
+  if (era === 'industrial') {
+    if (lng >= -10 && lng <= 40 && lat >= 35 && lat <= 72) return 'European Industrial Powers';
+    if (lng >= -130 && lng <= -65 && lat >= 24 && lat <= 60) return 'American Expansion · Civil War';
+    if (lng >= 60 && lng <= 100 && lat >= 5 && lat <= 40) return 'British Raj';
+    if (lng >= 100 && lng <= 145 && lat >= 18 && lat <= 55) return 'Late Qing · Meiji';
+    if (lng >= 128 && lng <= 146 && lat >= 30 && lat <= 46) return 'Meiji Restoration';
+    if (lng >= 24 && lng <= 65 && lat >= 12 && lat <= 42) return 'Ottoman Decline';
+    if (lng >= -20 && lng <= 55 && lat >= -35 && lat <= 35) return 'Scramble for Africa';
+    return '';
+  }
+  if (era === 'early-modern') {
+    if (lng >= -10 && lng <= 40 && lat >= 35 && lat <= 72) return 'Wars of Religion · Early Empire';
+    if (lng >= 100 && lng <= 145 && lat >= 18 && lat <= 55) return 'Ming · Qing transition';
+    if (lng >= 128 && lng <= 146 && lat >= 30 && lat <= 46) return 'Sengoku · Tokugawa';
+    if (lng >= 60 && lng <= 100 && lat >= 5 && lat <= 40) return 'Mughal Empire';
+    if (lng >= 24 && lng <= 65 && lat >= 12 && lat <= 42) return 'Ottoman Empire at zenith';
+    return '';
+  }
+  if (era === 'medieval') {
+    if (lng >= -10 && lng <= 40 && lat >= 35 && lat <= 72) return 'European Middle Ages';
+    if (lng >= 100 && lng <= 145 && lat >= 18 && lat <= 55) return 'Tang · Song · Yuan · Ming';
+    if (lng >= 128 && lng <= 146 && lat >= 30 && lat <= 46) return 'Heian · Kamakura · Muromachi';
+    if (lng >= 24 && lng <= 65 && lat >= 12 && lat <= 42) return 'Caliphates · Crusader states';
+    if (lng >= 60 && lng <= 100 && lat >= 5 && lat <= 40) return 'Delhi Sultanate · Vijayanagara';
+    return '';
+  }
+  if (era === 'ancient') {
+    if (lng >= -10 && lng <= 40 && lat >= 35 && lat <= 50) return 'Mediterranean Antiquity';
+    if (lng >= 30 && lng <= 60 && lat >= 22 && lat <= 45) return 'Near East · Persia';
+    if (lng >= 100 && lng <= 130 && lat >= 18 && lat <= 45) return 'Imperial China';
+    if (lng >= 60 && lng <= 100 && lat >= 5 && lat <= 40) return 'Indian Antiquity';
+    return '';
+  }
+  return '';
+}

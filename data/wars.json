@@ -7,7 +7,11 @@
   "1948 Arab–Israeli War": {
     "outcome": "* Israeli victory",
     "aftermath": "",
-    "keyTerms": "Conflict dates: 15 May 1948 – 10 March 1949, ()"
+    "keyTerms": "Conflict dates: 15 May 1948 – 10 March 1949, ()",
+    "humanDeaths": 20000,
+    "startYear": 1948,
+    "endYear": 1949,
+    "parent": ""
   },
   "2001 insurgency in Macedonia": {
     "outcome": "See aftermath",
@@ -105,7 +109,11 @@
     "keyTerms": "Conflict dates: 1849–1924"
   },
   "Arab–Byzantine wars": {
-    "keyTerms": "Conflict dates: 629–1050s"
+    "keyTerms": "Conflict dates: 629–1050s",
+    "humanDeaths": 800000,
+    "startYear": 629,
+    "endYear": 1050,
+    "parent": ""
   },
   "Arauco War": {
     "keyTerms": "Conflict dates: Historiographic divergence:"
@@ -156,7 +164,11 @@
     "keyTerms": "Conflict dates: 27 January 1868 – 27 June 1869, ()"
   },
   "Bosnian War": {
-    "keyTerms": "Conflict dates: 6 April 1992 – 21 November 1995, ()"
+    "keyTerms": "Conflict dates: 6 April 1992 – 21 November 1995, ()",
+    "humanDeaths": 100000,
+    "startYear": 1992,
+    "endYear": 1995,
+    "parent": "Yugoslav Wars"
   },
   "Boxer Rebellion": {
     "aftermath": "Allied occupation and atrocities\nThe Russian Empire occupied Manchuria while the Eight Nation Alliance jointly occupied Zhili province. The rest of China outside of Manchuria and Zhili were unaffected due to the governor generals who participated in the Mutual Protection of Southeast China in 1900.\nThe Eight Nation Alliance occupied Zhili province while Russia occupied Manchuria, but the rest of China was not occupied due to the actions of several Han governors who formed the Mutual Protection of Southeast China that refused to obey the declaration of war and kept their armies and provinces out of the war."
@@ -178,7 +190,11 @@
     "keyTerms": "Conflict dates: 1474–1477"
   },
   "Byzantine–Bulgarian wars": {
-    "keyTerms": "Conflict dates: 680–1355 (675 years)"
+    "keyTerms": "Conflict dates: 680–1355 (675 years)",
+    "humanDeaths": 200000,
+    "startYear": 680,
+    "endYear": 1018,
+    "parent": ""
   },
   "Byzantine–Ottoman wars": {
     "outcome": "Ottoman victory",
@@ -227,7 +243,11 @@
     "parent": ""
   },
   "Cisplatine War": {
-    "aftermath": "In Brazil, the loss of Cisplatina added to growing discontent with Emperor Pedro I. The liberals became stronger in parliament and managed to downsize a seditious army and strengthen their local militias. Although it was far from the main reason, it was a factor that led to a rebellion which took place in Rio de Janeiro on 13 March 1831. These tensions led to the abdication of the Emperor."
+    "aftermath": "In Brazil, the loss of Cisplatina added to growing discontent with Emperor Pedro I. The liberals became stronger in parliament and managed to downsize a seditious army and strengthen their local militias. Although it was far from the main reason, it was a factor that led to a rebellion which took place in Rio de Janeiro on 13 March 1831. These tensions led to the abdication of the Emperor.",
+    "humanDeaths": 6000,
+    "startYear": 1825,
+    "endYear": 1828,
+    "parent": ""
   },
   "Civil war era in Norway": {
     "outcome": "*King Haakon IV's men killed, self-declared king Duke Skule.",
@@ -280,7 +300,11 @@
     "keyTerms": "Conflict dates: 1441–1774 (333 years)"
   },
   "Crisis of the Third Century": {
-    "keyTerms": "Conflict dates: 235–284 AD ()"
+    "keyTerms": "Conflict dates: 235–284 AD ()",
+    "humanDeaths": 200000,
+    "startYear": 235,
+    "endYear": 285,
+    "parent": ""
   },
   "Crusades": {
     "aftermath": "The fall of the Frankish East caused dismay rather than shock in the West and Western Christians mostly blamed the Franks' alleged immorality. Pope Nicholas IV appealed to EdwardI of England to lead a new crusade and imposed a tax to fund it, but the Gascon War with Philip IV of France ended English plans in 1294. Schemes to recover the Holy Land inspired treatises: Fidentius of Padua and Charles II of Naples urged a blockade of Egypt. James of Molay, Templar Grand Master, called for a large crusade. and the Armenian prince-turned-monk Hayton of Corycus proposed a two-stage expedition.",
@@ -415,7 +439,11 @@
     "keyTerms": "Conflict dates: {{plainlist|"
   },
   "Finnish War": {
-    "aftermath": "According to two 2015 studies by political scientists Jan Teorell and Bo Rothstein, Sweden's loss in the Finnish War led to reforms of the Swedish bureaucracy. Prior to 1809, Sweden had a reputation as one of Europe's most corrupt countries, but the loss in the war created the perception of an existential threat in the east for Sweden and motivated Swedish elites to reform its bureaucracy. The motivation behind the reforms were to make the Swedish state more effective and functional, and thus protect against the existential threat in the East."
+    "aftermath": "According to two 2015 studies by political scientists Jan Teorell and Bo Rothstein, Sweden's loss in the Finnish War led to reforms of the Swedish bureaucracy. Prior to 1809, Sweden had a reputation as one of Europe's most corrupt countries, but the loss in the war created the perception of an existential threat in the east for Sweden and motivated Swedish elites to reform its bureaucracy. The motivation behind the reforms were to make the Swedish state more effective and functional, and thus protect against the existential threat in the East.",
+    "humanDeaths": 25000,
+    "startYear": 1808,
+    "endYear": 1809,
+    "parent": ""
   },
   "First Anglo-Dutch War": {
     "outcome": "Treaty of Westminster (1654)",
@@ -451,7 +479,11 @@
   "First Chechen War": {
     "outcome": "Chechen victory",
     "aftermath": "The war concluded with the complete withdrawal of Russian troops and the preservation of Chechnya's de facto independence. Military analysts and historians characterize the outcome as a Chechen victory and a Russian defeat. The Foreign Military Studies Office (FMSO) case study notes that the conflict \"resulted in Russian defeat\" as federal forces failed to eradicate the rebellion or reintegrate the republic. while other international studies have described the result as a \"Pyrrhic victory\" for Chechnya. Following the peace treaty, Maskhadov was elected president of the Chechen Republic of Ichkeria in January 1997.",
-    "keyTerms": "Conflict dates: 11 December 1994 – 31 August 1996 ()"
+    "keyTerms": "Conflict dates: 11 December 1994 – 31 August 1996 ()",
+    "humanDeaths": 80000,
+    "startYear": 1994,
+    "endYear": 1996,
+    "parent": ""
   },
   "First English Civil War": {
     "aftermath": "In 1642, many Parliamentarians assumed military defeat would force Charles to negotiate terms, which proved a fundamental misunderstanding of his character. When Prince Rupert told him in August 1645 that the war could no longer be won, Charles responded that while this may have been an accurate assessment of the military situation, 'God will not suffer rebels and traitors to prosper'. This deeply-held conviction meant he refused to agree to any substantial concessions, frustrating both allies and opponents.",
@@ -466,7 +498,11 @@
   },
   "First Italian War of Independence": {
     "outcome": "Austrian victory",
-    "keyTerms": "Conflict dates: 23 March 1848 – 22 August 1849, ()"
+    "keyTerms": "Conflict dates: 23 March 1848 – 22 August 1849, ()",
+    "humanDeaths": 6000,
+    "startYear": 1848,
+    "endYear": 1849,
+    "parent": ""
   },
   "First Mithridatic War": {
     "outcome": "Roman victory",
@@ -485,7 +521,11 @@
   "First Opium War": {
     "outcome": "British victory",
     "aftermath": "The war ended in the signing of China's first unequal treaty, the Treaty of Nanking.",
-    "keyTerms": "Conflict dates: 4 September 1839 – 29 August 1842 )}}"
+    "keyTerms": "Conflict dates: 4 September 1839 – 29 August 1842 )}}",
+    "humanDeaths": 21000,
+    "startYear": 1839,
+    "endYear": 1842,
+    "parent": ""
   },
   "First Peloponnesian War": {
     "outcome": "Thirty Years' Peace",
@@ -568,7 +608,11 @@
   "French and Indian War": {
     "outcome": "British victory",
     "aftermath": "upright=1.5|The resulting peace dramatically changed the political landscape of North America, with New France ceded to the British and the Spanish.\nThe war changed economic, political, governmental, and social relations among the three European powers, their colonies, and the people who inhabited those territories. France and Britain both suffered financially because of the war, with significant long-term consequences.",
-    "keyTerms": "Conflict dates: )}}"
+    "keyTerms": "Conflict dates: )}}",
+    "humanDeaths": 25000,
+    "startYear": 1754,
+    "endYear": 1763,
+    "parent": "Seven Years' War"
   },
   "French conquest of Algeria": {
     "keyTerms": "Conflict dates: 1830–1847"
@@ -707,7 +751,11 @@
   },
   "Hussite Wars": {
     "aftermath": "At the end of the Hussite Wars in 1431, the lands of Bohemia had been totally ravaged. According to some estimates, the population of the Czech lands, estimated at 2.80–3.37 million around 1400, fell to 1.50–1.85 million by 1526. The adjacent Bishopric of Würzburg in Germany was left in such bad shape after the Hussite Wars that the impoverishment of the people was still evident in 1476. The poor conditions contributed directly to the peasant conspiracy that broke out that same year in Würzburg.",
-    "keyTerms": "Conflict dates: 30 July 1419 – 30 May 1434"
+    "keyTerms": "Conflict dates: 30 July 1419 – 30 May 1434",
+    "humanDeaths": 350000,
+    "startYear": 1419,
+    "endYear": 1434,
+    "parent": ""
   },
   "Iberian War": {
     "keyTerms": "Conflict dates: 526–532 AD"
@@ -796,7 +844,11 @@
   },
   "January Uprising": {
     "aftermath": "Wounded insurgent, by Stanisław Witkiewicz, 1881\nThese measures of cultural eradication proved to be only partially effective. In 1905, 41 years after Russia crushed the uprising, the next generation of Poles rose once again in the Łódź insurrection, which too failed.",
-    "keyTerms": "Conflict dates: 22 January 1863 – 18 June 1864, () (though the last insurgent, Stanisław Brzóska, fought into 1865)"
+    "keyTerms": "Conflict dates: 22 January 1863 – 18 June 1864, () (though the last insurgent, Stanisław Brzóska, fought into 1865)",
+    "humanDeaths": 100000,
+    "startYear": 1863,
+    "endYear": 1864,
+    "parent": ""
   },
   "Java War": {
     "aftermath": "Grave of Diponegoro and his wife in Makassar\nDiponegoro was exiled to Manado with a number of followers, as colonial authorities saw that keeping him in Java posed an unacceptable risk. He was moved to the more fortified Makassar in 1833 due to concerns of a British attack on Manado in the event of a European conflict – the Dutch feared that Diponegoro with British support might lead another revolt in Java. Diponegoro would be restricted to Fort Rotterdam starting in 1849, and he died on 8 January 1855. Sentot was given command of a Javanese unit and took part in the Padri War, but was then exiled to Bengkulu in 1833."
@@ -808,7 +860,11 @@
   "Khmelnytsky Uprising": {
     "outcome": "{{ublist|Cossack victory",
     "aftermath": "The uprising is generally considered to have resulted in success or Cossack victory, as it achieved its main goals of ending Polish–Lithuanian rule over much of the Ukrainian lands and establishing the Cossack Hetmanate. However, the Cossacks' struggle to consolidate their victory, increasing external pressures, and internal divisions after Khmelnytsky's death led to instability and decline for his state during the post-uprising period. This period in Ukrainian history is known as the Ruin.",
-    "keyTerms": "Conflict dates: 25 January 1648 – 6 August 1657, {{Collapsible list|bullets=yes|title=. list of phases"
+    "keyTerms": "Conflict dates: 25 January 1648 – 6 August 1657, {{Collapsible list|bullets=yes|title=. list of phases",
+    "humanDeaths": 200000,
+    "startYear": 1648,
+    "endYear": 1657,
+    "parent": ""
   },
   "King George's War": {
     "outcome": "Treaty of Aix-la-Chapelle, Status quo ante bellum",
@@ -841,12 +897,20 @@
     "parent": ""
   },
   "Kosovo War": {
-    "keyTerms": "Conflict dates: 28 February 1998 – 11 June 1999, ()"
+    "keyTerms": "Conflict dates: 28 February 1998 – 11 June 1999, ()",
+    "humanDeaths": 13000,
+    "startYear": 1998,
+    "endYear": 1999,
+    "parent": "Yugoslav Wars"
   },
   "Kościuszko Uprising": {
     "outcome": "Russo-Prussian victory",
     "aftermath": "The uprising was bloodily suppressed, the Polish rebels lost 27,000 men and the Russians 4,080.\nAfter the failure of the Kościuszko Uprising, Poland ceased to exist for 123 years, and all of its institutions were gradually banned by the partitioning powers. However, the uprising also marked the start of modern political thought in Poland and Central Europe. Kościuszko's Proclamation of Połaniec and the radical leftist Jacobins started the Polish leftist movement. Many prominent Polish politicians who were active during the uprising became the backbone of Polish politics, both at home and abroad, in the 19th century.",
-    "keyTerms": "Conflict dates: 12 March – December 1794"
+    "keyTerms": "Conflict dates: 12 March – December 1794",
+    "humanDeaths": 20000,
+    "startYear": 1794,
+    "endYear": 1794,
+    "parent": ""
   },
   "Kumul Rebellion": {
     "outcome": "Stalemate",
@@ -913,7 +977,11 @@
     "parent": ""
   },
   "Mali War": {
-    "keyTerms": "Conflict dates: 16 January 2012 – present, ()"
+    "keyTerms": "Conflict dates: 16 January 2012 – present, ()",
+    "humanDeaths": 25000,
+    "startYear": 2012,
+    "endYear": 0,
+    "parent": ""
   },
   "Mauritius campaign of 1809–1811": {
     "outcome": "British victory",
@@ -1094,7 +1162,11 @@
   "Peloponnesian War": {
     "outcome": "Spartan victory",
     "aftermath": "The overall effect of the war in Greece proper was to replace the Athenian Empire with a Spartan empire. After the battle of Aegospotami, Sparta took over the Athenian empire and kept all its tribute revenues for itself, starting its own hegemony. Sparta's allies, who had made greater sacrifices in the war than had Sparta, got nothing.",
-    "keyTerms": "Conflict dates: 4 April 431 – 25 April 404 BC"
+    "keyTerms": "Conflict dates: 4 April 431 – 25 April 404 BC",
+    "humanDeaths": 110000,
+    "startYear": -431,
+    "endYear": -404,
+    "parent": ""
   },
   "Peninsular War": {
     "aftermath": "upright=0.9|alt=Napoleon on the island of Elba.|Horace Vernet: Napoleon on the Island of Elba Awaiting the brig Inconstant. (1863)",
@@ -1346,7 +1418,11 @@
   },
   "Second Italian War of Independence": {
     "outcome": "Franco-Sardinian victory",
-    "keyTerms": "Conflict dates: 26 April – 12 July 1859, ()"
+    "keyTerms": "Conflict dates: 26 April – 12 July 1859, ()",
+    "humanDeaths": 30000,
+    "startYear": 1859,
+    "endYear": 1859,
+    "parent": ""
   },
   "Second Nagorno-Karabakh War": {
     "aftermath": "Armenia\nProtests in Yerevan against the terms of a cease-fire agreement on 18 November 2020.",
@@ -1409,7 +1485,11 @@
   "Soviet–Afghan War": {
     "outcome": "Afghan Mujahideen victory",
     "aftermath": "Sources consistently characterize the Soviet–Afghan War as a political defeat for the Soviet Union, with some sources also defining the war as a military defeat for the Soviets. Modern literature is divided, with other sources also calling the war a political defeat for the Soviets, but a military draw.",
-    "keyTerms": "Conflict dates: 25 December 1979 – 15 February 1989, ()"
+    "keyTerms": "Conflict dates: 25 December 1979 – 15 February 1989, ()",
+    "humanDeaths": 1500000,
+    "startYear": 1979,
+    "endYear": 1989,
+    "parent": ""
   },
   "Soviet–Japanese border conflicts": {
     "outcome": "Soviet–Mongolian victory",
@@ -1494,7 +1574,11 @@
   "Third Italian War of Independence": {
     "outcome": "Italian victory",
     "aftermath": "Victor Emmanuel II in Venice\nIn late July 1866, after the Prussian victory over Austria, the Armistice of Nikolsburg ended the hostilities between the two countries, provided that Italy obtained Venetia. The Italian army had advanced to the Isonzo River, the Austrians withdrew and left Venice to Italian hands. Following the Austro-Prussian armistice, France and Prussia pressured Italy to conclude an armistice on its own with Austria. The Italian Prime Minister Bettino Ricasoli initially refused the call and insisted to obtain \"natural\" frontiers for Italy, including the cession of Venetia and South Tyrol and that Italian interests in Istria were respected.",
-    "keyTerms": "Conflict dates: 20 June – 12 August 1866, ()"
+    "keyTerms": "Conflict dates: 20 June – 12 August 1866, ()",
+    "humanDeaths": 10000,
+    "startYear": 1866,
+    "endYear": 1866,
+    "parent": ""
   },
   "Third Mithridatic War": {
     "outcome": "Roman victory",
@@ -1599,7 +1683,11 @@
   },
   "War in the Vendée": {
     "outcome": "French Republican victory",
-    "keyTerms": "Conflict dates: 1793 1796"
+    "keyTerms": "Conflict dates: 1793 1796",
+    "humanDeaths": 170000,
+    "startYear": 1793,
+    "endYear": 1796,
+    "parent": ""
   },
   "War of 1812": {
     "outcome": "Treaty of Ghent (24 December 1814) restored the pre-war borders. The war ended in a stalemate, though both sides claimed victory.",
@@ -1626,7 +1714,11 @@
   },
   "War of the Austrian Succession": {
     "outcome": "Treaty of Aix-la-Chapelle (1748)",
-    "keyTerms": "Conflict dates: 16 December 174018 October 1748, ()"
+    "keyTerms": "Conflict dates: 16 December 174018 October 1748, ()",
+    "humanDeaths": 450000,
+    "startYear": 1740,
+    "endYear": 1748,
+    "parent": ""
   },
   "War of the Breton Succession": {
     "outcome": "Treaty of Guérande",
@@ -1667,7 +1759,11 @@
     "keyTerms": "Conflict dates: 1580–1583"
   },
   "War of the Pyrenees": {
-    "keyTerms": "Conflict dates: 7 March 1793 – 22 July 1795, ()"
+    "keyTerms": "Conflict dates: 7 March 1793 – 22 July 1795, ()",
+    "humanDeaths": 30000,
+    "startYear": 1793,
+    "endYear": 1795,
+    "parent": "French Revolutionary Wars"
   },
   "War of the Quadruple Alliance": {
     "outcome": "Treaty of The Hague (1720)",
@@ -1692,7 +1788,11 @@
   "War of the Spanish Succession": {
     "outcome": "Treaties of Utrecht, Rastatt, and Baden",
     "aftermath": "upright=1.3|The Royal Navy destroys a Spanish fleet off Sicily, Cape Passaro, August 1718",
-    "keyTerms": "Conflict dates: March 1701 – September 7, 1714 (13 years)"
+    "keyTerms": "Conflict dates: March 1701 – September 7, 1714 (13 years)",
+    "humanDeaths": 1250000,
+    "startYear": 1701,
+    "endYear": 1714,
+    "parent": ""
   },
   "War of the Third Coalition": {
     "outcome": "French victory",
@@ -1759,7 +1859,11 @@
   },
   "Yom Kippur War": {
     "aftermath": "Analyses differ on the military outcome of the war. as an Israeli victory by some military historians,}} an Egyptian victory by other historians, and by others, as a military stalemate.",
-    "keyTerms": "Conflict dates: 6–25 October 1973, ()"
+    "keyTerms": "Conflict dates: 6–25 October 1973, ()",
+    "humanDeaths": 20000,
+    "startYear": 1973,
+    "endYear": 1973,
+    "parent": ""
   },
   "northern front of the Russian invasion of Ukraine": {
     "outcome": "Ukrainian victory",
@@ -1972,6 +2076,138 @@
     "humanDeaths": 35000000,
     "startYear": 220,
     "endYear": 280,
+    "parent": ""
+  },
+  "Great Northern War": {
+    "humanDeaths": 350000,
+    "startYear": 1700,
+    "endYear": 1721,
+    "parent": ""
+  },
+  "Mexican-American War": {
+    "humanDeaths": 25000,
+    "startYear": 1846,
+    "endYear": 1848,
+    "parent": ""
+  },
+  "Viking invasions of England": {
+    "humanDeaths": 100000,
+    "startYear": 793,
+    "endYear": 1066,
+    "parent": ""
+  },
+  "Third Silesian War (Seven Years' War)": {
+    "humanDeaths": 180000,
+    "startYear": 1756,
+    "endYear": 1763,
+    "parent": "Seven Years' War"
+  },
+  "Wars of Scottish Independence": {
+    "humanDeaths": 30000,
+    "startYear": 1296,
+    "endYear": 1357,
+    "parent": ""
+  },
+  "Nine Years' War": {
+    "humanDeaths": 680000,
+    "startYear": 1688,
+    "endYear": 1697,
+    "parent": ""
+  },
+  "Campaign of France of the Sixth Coalition": {
+    "humanDeaths": 100000,
+    "startYear": 1814,
+    "endYear": 1814,
+    "parent": "Napoleonic Wars"
+  },
+  "Croatian War of Independence": {
+    "humanDeaths": 22000,
+    "startYear": 1991,
+    "endYear": 1995,
+    "parent": ""
+  },
+  "Anglo–Spanish War": {
+    "humanDeaths": 50000,
+    "startYear": 1585,
+    "endYear": 1604,
+    "parent": ""
+  },
+  "Franco-Dutch War": {
+    "humanDeaths": 220000,
+    "startYear": 1672,
+    "endYear": 1678,
+    "parent": ""
+  },
+  "Northern Mali conflict": {
+    "humanDeaths": 15000,
+    "startYear": 2012,
+    "endYear": 0,
+    "parent": ""
+  },
+  "German campaign of the Sixth Coalition": {
+    "humanDeaths": 750000,
+    "startYear": 1813,
+    "endYear": 1814,
+    "parent": "Napoleonic Wars"
+  },
+  "Irish Rebellion": {
+    "humanDeaths": 25000,
+    "startYear": 1641,
+    "endYear": 1653,
+    "parent": ""
+  },
+  "Six-Day War": {
+    "humanDeaths": 20000,
+    "startYear": 1967,
+    "endYear": 1967,
+    "parent": ""
+  },
+  "Indo-Pakistani War of 1947": {
+    "humanDeaths": 7000,
+    "startYear": 1947,
+    "endYear": 1948,
+    "parent": ""
+  },
+  "Indo-Pakistani War of 1965": {
+    "humanDeaths": 7000,
+    "startYear": 1965,
+    "endYear": 1965,
+    "parent": ""
+  },
+  "Indo-Pakistani War of 1971": {
+    "humanDeaths": 11000,
+    "startYear": 1971,
+    "endYear": 1971,
+    "parent": ""
+  },
+  "Bangladesh Liberation War": {
+    "humanDeaths": 3000000,
+    "startYear": 1971,
+    "endYear": 1971,
+    "parent": ""
+  },
+  "Second Chechen War": {
+    "humanDeaths": 75000,
+    "startYear": 1999,
+    "endYear": 2009,
+    "parent": ""
+  },
+  "Yugoslav Wars": {
+    "humanDeaths": 140000,
+    "startYear": 1991,
+    "endYear": 2001,
+    "parent": ""
+  },
+  "Sino-Indian War": {
+    "humanDeaths": 3000,
+    "startYear": 1962,
+    "endYear": 1962,
+    "parent": ""
+  },
+  "War of the Triple Alliance": {
+    "humanDeaths": 400000,
+    "startYear": 1864,
+    "endYear": 1870,
     "parent": ""
   }
 }

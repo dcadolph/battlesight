@@ -161,16 +161,27 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-      else if (e.key === 'ArrowRight') goto(phaseIdx + 1);
-      else if (e.key === 'ArrowLeft') goto(phaseIdx - 1);
+      else if (e.key === 'ArrowRight') {
+        if (cinematicMode && onAdvanceNext) onAdvanceNext();
+        else goto(phaseIdx + 1);
+      }
+      else if (e.key === 'ArrowLeft') {
+        if (cinematicMode && onAdvancePrev) onAdvancePrev();
+        else goto(phaseIdx - 1);
+      }
       else if (e.key === ' ') {
         e.preventDefault();
-        setPlaying((p) => !p);
+        // SPACE in cinematic mode is a footgun: pausing the inner replay
+        // leaves the outer war timer ticking and the user ends up stuck
+        // on a frozen phase that the cinematic can't recover from
+        // (Stalingrad freeze). Ignore it; the war cinematic's own
+        // play/pause control owns the playing state.
+        if (!cinematicMode) setPlaying((p) => !p);
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose, goto, phaseIdx]);
+  }, [onClose, goto, phaseIdx, cinematicMode, onAdvanceNext, onAdvancePrev]);
 
   if (error) {
     return (
@@ -267,6 +278,13 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
            ghost long after the trace lands. Reads from cinematic distance. */
         @keyframes arrow-vol-in {
           to { stroke-opacity: 0.22; }
+        }
+        /* Solid spine underneath the marching dashes. Always-visible thin
+           line so the arrow path reads as continuous even when the march
+           dashes happen to gap. Lives at lower opacity so the dashed motion
+           still carries the eye. */
+        @keyframes arrow-spine-in {
+          to { opacity: 0.55; }
         }
         /* Comet head: a short bright window slides along the path during the
            trace. strokeDasharray='0.06 1' means a 6% visible segment on a
@@ -368,8 +386,23 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             {replay.schematic ? 'Schematic replay' : 'Tactical reconstruction'}
           </span>
           <h2 className="text-base font-semibold text-white truncate">{replay.title}</h2>
+          {/* Date chip: always visible. Lets the viewer answer "when?" at a
+              glance instead of hunting for the year inside the phase
+              narration. Pulls from the battle's date_start / year combo via
+              the shared formatter. */}
+          <span
+            className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-slate-800/70 border border-slate-700/60 text-[11px] font-semibold tracking-[0.04em] text-slate-200 whitespace-nowrap"
+            title="When this battle was fought"
+          >
+            {formatBattleDate(battle.date, battle.year) || (battle.year ? String(battle.year) : '')}
+          </span>
+          {battle.war && (
+            <span className="hidden md:inline text-[11px] text-slate-500 truncate max-w-[20ch]" title={battle.war}>
+              · {battle.war}
+            </span>
+          )}
           {replay.battlefieldDesc && (
-            <span className="hidden md:block text-xs text-slate-500 truncate max-w-[40ch]">{replay.battlefieldDesc}</span>
+            <span className="hidden lg:block text-xs text-slate-500 truncate max-w-[34ch]">· {replay.battlefieldDesc}</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -418,18 +451,21 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
               </div>
             )}
 
-            {/* Chapter card: flashes the phase title centered over the map at
-                the start of each phase, then fades. Keyed on phaseIdx so it
-                replays on every advance. Suppressed when the outro card is
-                up so the two do not overlap on the final phase. */}
+            {/* Chapter card: drops in from the top edge of the stage at the
+                start of each phase, then fades. Centred horizontally but
+                pinned to the top so the action in the middle of the globe
+                is never obscured by the title text. Keyed on phaseIdx so
+                it replays on every advance. Suppressed when the outro
+                card is up so the two do not overlap on the final phase. */}
             {!ended && (
               <div
                 key={`chapter-${phaseIdx}`}
-                className="chapter-card pointer-events-none absolute inset-0 flex items-center justify-center"
+                className="chapter-card pointer-events-none absolute left-1/2 -translate-x-1/2 z-10"
+                style={{ bottom: '6%' }}
               >
                 <div
-                  className="px-7 py-4 rounded-xl bg-black/55 backdrop-blur-sm border shadow-2xl text-center"
-                  style={{ borderColor: `${theme.accent}40` }}
+                  className="px-6 py-3 rounded-xl bg-black/65 backdrop-blur-sm border shadow-2xl text-center max-w-[68vw]"
+                  style={{ borderColor: `${theme.accent}55` }}
                 >
                   {phase.timeMarker && (
                     <div
@@ -437,10 +473,13 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                       style={{ color: theme.accent }}
                     >
                       {phase.timeMarker}
+                      {battle.year && !/\d{4}/.test(phase.timeMarker) && (
+                        <span className="text-slate-400/80 ml-2">· {battle.year}</span>
+                      )}
                     </div>
                   )}
                   <div
-                    className="text-3xl text-white tracking-tight"
+                    className="text-2xl text-white tracking-tight whitespace-nowrap"
                     style={{ fontFamily: theme.titleFont, fontWeight: 600 }}
                   >
                     {phase.title}

@@ -178,7 +178,7 @@ export default function CommandBar({
           <button
             type="button"
             onClick={onResetView}
-            className="leading-none hover:opacity-95 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 rounded-sm inline-flex items-center gap-2"
+            className="leading-none hover:opacity-95 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 rounded-sm inline-flex items-baseline gap-1.5"
             title="Back to the main globe"
             aria-label="Reset view: back to the main globe"
             style={{
@@ -189,8 +189,8 @@ export default function CommandBar({
               color: '#ffffff',
             }}
           >
+            <EyeLogo size={14} color="#60a5fa" />
             <span>Battle<span style={{ color: '#60a5fa' }}>Sight</span></span>
-            <EyeLogo size={20} color="#60a5fa" />
           </button>
           <button
             onClick={onToggleSound}

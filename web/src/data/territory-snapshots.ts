@@ -43,13 +43,13 @@ export const OWNER_COLORS: Record<string, string> = {
   // the Soviet sphere; Imperial Japan reads as blood crimson; Italy reads
   // as fascist green. Each Axis power has its own distinct silhouette on
   // the European map at peak occupation.
-  // Nazi Germany painted as deep blood crimson rather than pure SS black.
-  // Black on a dark satellite globe disappears; the eye reads "no shading"
-  // even when the territory is supposed to be shaded. The deep crimson is
-  // still distinct from Soviet bright red and Imperial Japan blood red.
-  'nazi-germany': '#7c1d1d',
-  'imperial-germany': '#374151',
-  'germany': '#7c1d1d',
+  // Nazi Germany painted as feldgrau — the Wehrmacht's actual uniform
+  // color. Distinct enough from Soviet bright red that the Eastern Front
+  // reads as two competing forces, not one red blob. Visible on dark
+  // satellite imagery and historically iconic.
+  'nazi-germany': '#6b5d2e',
+  'imperial-germany': '#5c4a2a',
+  'germany': '#6b5d2e',
   'japan': '#9b1c1c',
   'italy': '#16732b',
   'vichy': '#a16207',

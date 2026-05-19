@@ -534,7 +534,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     // get half the manual speed so the cluster pulses rather than crawls.
     let fullDwellMs: number;
     if (isCinematic) {
-      if (battle?.hasReplay) fullDwellMs = 55000;
+      // The dwell is a backstop now — onEnded fires when the inner
+      // BattleReplay actually finishes its phases. Generous so even the
+      // longest hand-crafted replays (Stalingrad: 10 phases, 83s) don't
+      // get cut off when onEnded somehow fails to propagate.
+      if (battle?.hasReplay) fullDwellMs = 120000;
       else if (battle?.hasSchematic) fullDwellMs = 22000;
       else fullDwellMs = 14000;
     } else if (group.concurrent && subIndex < group.battles.length - 1) {
@@ -798,6 +802,14 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   const currentBattle = currentGroup?.battles[subIndex];
   const totalIdx = groups.slice(0, groupIndex).reduce((s, g) => s + g.battles.length, 0) + subIndex;
 
+  // lastSnapshotKeyRef remembers which (war, snapshot.year) tuple is
+  // currently painted. The territory effect re-runs on every phase
+  // advance, but the snapshot itself only changes at a few calendar
+  // boundaries — so the cheap dedupe here stops the polygon transition
+  // from restarting (and visually flickering) every time the playhead
+  // ticks to the next battle inside the same year.
+  const lastSnapshotKeyRef = useRef<string>('');
+
   // Time-shifting territory: when the playhead moves to a new battle,
   // resolve the snapshot for the current war + battle year and emit it
   // upward so BattleGlobe re-paints. Once the campaign reaches its
@@ -808,7 +820,10 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   useEffect(() => {
     if (!onWarTerritory) return;
     if (!selectedWar) {
-      onWarTerritory(null, null, []);
+      if (lastSnapshotKeyRef.current !== '') {
+        lastSnapshotKeyRef.current = '';
+        onWarTerritory(null, null, []);
+      }
       return;
     }
     // Aftermath path: emit the latest snapshot we have for this war,
@@ -817,7 +832,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       const entry = TERRITORY.find((t) => t.war === selectedWar);
       const finalSnap = entry?.snapshots[entry.snapshots.length - 1];
       if (finalSnap) {
-        onWarTerritory(buildCountryColorMap(finalSnap), finalSnap.label, Object.keys(finalSnap.control));
+        const key = `${selectedWar}|aftermath|${finalSnap.year}`;
+        if (lastSnapshotKeyRef.current !== key) {
+          lastSnapshotKeyRef.current = key;
+          onWarTerritory(buildCountryColorMap(finalSnap), finalSnap.label, Object.keys(finalSnap.control));
+        }
         return;
       }
     }
@@ -827,6 +846,9 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       // collapsing to bare.
       const entry = TERRITORY.find((t) => t.war === selectedWar);
       const fallback = entry?.snapshots[entry.snapshots.length - 1];
+      const key = fallback ? `${selectedWar}|fallback|${fallback.year}` : `${selectedWar}|empty`;
+      if (lastSnapshotKeyRef.current === key) return;
+      lastSnapshotKeyRef.current = key;
       if (fallback) {
         onWarTerritory(buildCountryColorMap(fallback), fallback.label, Object.keys(fallback.control));
       } else {
@@ -836,9 +858,18 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     }
     const snap = findSnapshot(selectedWar, currentBattle.year);
     if (!snap) {
+      const key = `${selectedWar}|nosnap`;
+      if (lastSnapshotKeyRef.current === key) return;
+      lastSnapshotKeyRef.current = key;
       onWarTerritory(null, null, []);
       return;
     }
+    // Snapshot dedupe: every advance whose year falls into the same snapshot
+    // window emits nothing new, so the polygon transition doesn't restart
+    // and the territory shading stays put across same-snapshot battles.
+    const key = `${selectedWar}|${snap.year}`;
+    if (lastSnapshotKeyRef.current === key) return;
+    lastSnapshotKeyRef.current = key;
     onWarTerritory(buildCountryColorMap(snap), snap.label, Object.keys(snap.control));
   }, [selectedWar, currentBattle, onWarTerritory, cinematicStage]);
 

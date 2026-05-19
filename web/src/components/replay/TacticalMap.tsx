@@ -65,6 +65,9 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
           </radialGradient>
           {(['a', 'b', 'c'] as Faction[]).map((f) => {
             const c = factionColorFor(f, paletteCtx);
+            // Open chevron arrowhead. Stroked, not filled — reads as a
+            // military front-line indicator rather than a Space-Invaders
+            // triangle. Slight outer glow ties it to the line below.
             return (
               <marker
                 key={f}
@@ -72,14 +75,18 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
                 viewBox="0 0 16 16"
                 refX="13"
                 refY="8"
-                markerWidth="9"
-                markerHeight="9"
+                markerWidth="10"
+                markerHeight="10"
                 orient="auto-start-reverse"
               >
                 <path
-                  d="M 0 1 L 16 8 L 0 15 L 5.5 8 z"
-                  fill={c}
-                  style={{ filter: `drop-shadow(0 0 1.4px ${c})` }}
+                  d="M 1 2 L 14 8 L 1 14"
+                  fill="none"
+                  stroke={c}
+                  strokeWidth="2.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ filter: `drop-shadow(0 0 1.6px ${c}) drop-shadow(0 0 2.8px ${c}aa)` }}
                 />
               </marker>
             );
@@ -1015,25 +1022,38 @@ function MovementArrow({ movement, viewW, index, total, paletteCtx }: MovementPr
         );
       })()}
 
-      {movement.label && (
-        <text
-          x={cx}
-          y={cy - 1.8}
-          fontSize="1.6"
-          fontWeight="600"
-          textAnchor="middle"
-          fill={color}
-          opacity="0.95"
-          style={{
-            paintOrder: 'stroke',
-            stroke: 'rgba(8,11,20,0.92)',
-            strokeWidth: 1.1,
-            letterSpacing: '0.04em',
-          }}
-        >
-          {movement.label}
-        </text>
-      )}
+      {movement.label && (() => {
+        // Push the label perpendicular to the arrow line, on the OUTSIDE
+        // of the curve. The pill should never sit on the stroke. Direction
+        // is the same as the curve offset (signed by index parity) so the
+        // label hugs the outside of the arc.
+        const labelDx = x2 - x1;
+        const labelDy = y2 - y1;
+        const labelLen = Math.sqrt(labelDx * labelDx + labelDy * labelDy) || 1;
+        const labelSign = (offsetMag >= 0) ? 1 : -1;
+        const labelOffset = 6;
+        const labelX = cx + (-labelDy / labelLen) * labelOffset * labelSign;
+        const labelY = cy + (labelDx / labelLen) * labelOffset * labelSign;
+        return (
+          <text
+            x={labelX}
+            y={labelY}
+            fontSize="1.6"
+            fontWeight="600"
+            textAnchor="middle"
+            fill={color}
+            opacity="0.95"
+            style={{
+              paintOrder: 'stroke',
+              stroke: 'rgba(8,11,20,0.92)',
+              strokeWidth: 1.1,
+              letterSpacing: '0.04em',
+            }}
+          >
+            {movement.label}
+          </text>
+        );
+      })()}
     </g>
   );
 }

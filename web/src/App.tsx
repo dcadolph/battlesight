@@ -752,7 +752,11 @@ export default function App() {
 
   return (
     <div className="w-full h-full relative">
-      <CommandBar
+      {/* Command bar — wordmark, search, mode rail. Hidden while a war
+          cinematic battle replay is active so the search box doesn't
+          float over the cinematic action. The user closes the replay
+          (or the war cinematic overlay) to get it back. */}
+      {!(replayBattle && replayCinematic) && <CommandBar
         filters={filters}
         onFiltersChange={setFilters}
         onBattleSelect={handleBattleClick}
@@ -767,7 +771,7 @@ export default function App() {
         onResetView={handleResetView}
         onWarSelect={handleSearchWarSelect}
         onCommanderSelect={setCommanderQuery}
-      />
+      />}
 
       <BattleGlobe
         battles={globeBattles}

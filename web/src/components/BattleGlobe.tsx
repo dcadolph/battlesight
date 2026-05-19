@@ -52,7 +52,7 @@ const COUNTRY_NAME_ALIASES: Record<string, string[]> = {
   Palestine: ['Palestine'],
 };
 
-const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json';
 
 function pointInPolygon(lat: number, lng: number, coords: Position[][]): boolean {
   for (const ring of coords) {
@@ -395,11 +395,12 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
   }, []);
 
   // featureColors maps each polygon feature shown on the globe to the
-  // colour it should render in. Populated from warCountryColors when the
-  // war cinematic has a time-shifting territory snapshot active; falls
-  // back to the flat warAccent for everything else. Keyed by the
-  // feature's atlas name (lower-cased) so multiple features sharing a
-  // name resolve to the same colour.
+  // colour it should render in. When the war cinematic is active we keep
+  // every country mounted in polygonsData so the polygon transition can
+  // tween colour smoothly across snapshot changes. Countries that aren't
+  // a belligerent at the current snapshot get a transparent fill (so they
+  // are still mounted, just invisible) — that stops the pop-in/pop-out
+  // flicker that happens when polygon features unmount.
   const { highlightedCountry, featureColors } = useMemo(() => {
     if (countries.length === 0) {
       return { highlightedCountry: [] as Feature<Geometry>[], featureColors: new Map<string, string>() };
@@ -410,10 +411,7 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       const match = findCountry(selectedBattle.lat, selectedBattle.lng, countries);
       if (match) out.push(match);
     }
-    // wanted is the union of (warCountries entries) and (warCountryColors
-    // keys), each expanded via COUNTRY_NAME_ALIASES so the world-atlas
-    // long-form names match.
-    const wanted = new Map<string, string | null>(); // atlas-name → colour or null for default
+    const wanted = new Map<string, string | null>();
     if (warCountries && warCountries.length > 0) {
       for (const c of warCountries) {
         wanted.set(c.toLowerCase(), null);
@@ -430,14 +428,19 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     }
     if (wanted.size > 0) {
       const seen = new Set(out.map((f) => f));
+      // Include EVERY world-atlas country in the polygon set so react-
+      // globe.gl never has to mount/unmount features as snapshots change.
+      // Belligerent countries get their war color; everyone else gets the
+      // sentinel '__neutral__' which polygonCapColor renders fully
+      // transparent. This makes snapshot transitions a pure colour tween.
       for (const f of countries) {
         const name = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
         if (!name) continue;
-        if (wanted.has(name) && !seen.has(f)) {
-          out.push(f);
-          const c = wanted.get(name);
-          if (c) colors.set(name, c);
-        }
+        if (seen.has(f)) continue;
+        out.push(f);
+        const c = wanted.get(name);
+        if (c) colors.set(name, c);
+        else colors.set(name, '__neutral__');
       }
     }
     return { highlightedCountry: out, featureColors: colors };
@@ -729,18 +732,44 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     const f = feat as Feature<Geometry>;
     const name = (f.properties as Record<string, string>)?.name || '';
     if (!name) return '';
+    // Skip the tooltip for non-belligerent countries during war shading —
+    // we keep them mounted (transparent) to stop polygon flicker, but
+    // tooltipping every other country in the world is confusing.
+    const featColor = featureColors.get(name.toLowerCase());
+    if (featColor === '__neutral__') return '';
+    // Wartime tooltip: country name + owner label if we know it. Owner
+    // pulled by reverse-mapping featureColors → warCountryColors.
+    let ownerHint = '';
+    if (warCountryColors && featColor && featColor !== '__neutral__') {
+      // Find the owner whose color matches; surface a short label.
+      const ownerLabel = (() => {
+        for (const [country, color] of Object.entries(warCountryColors)) {
+          if (color === featColor) {
+            // Map country → owner via OWNER_LABELS would be cleaner; for
+            // now just show the country itself (the snapshot's structure
+            // is owner→countries, so the same color = same owner).
+            return country;
+          }
+        }
+        return '';
+      })();
+      if (ownerLabel && ownerLabel !== name) {
+        ownerHint = `<div style="color:#94a3b8;font-size:10px;margin-top:2px;">${escapeHTML(ownerLabel)} sphere</div>`;
+      }
+    }
     return `<div style="
-      background: rgba(10,10,15,0.85);
-      border: 1px solid rgba(59,130,246,0.5);
+      background: rgba(10,10,15,0.92);
+      border: 1px solid rgba(59,130,246,0.6);
       border-radius: 6px;
-      padding: 4px 10px;
+      padding: 5px 11px;
       font-family: Inter, system-ui, sans-serif;
       font-size: 12px;
-      font-weight: 500;
-      color: #93c5fd;
+      font-weight: 600;
+      color: #f1f5f9;
       pointer-events: none;
-    ">${escapeHTML(name)}</div>`;
-  }, []);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    ">${escapeHTML(name)}${ownerHint}</div>`;
+  }, [featureColors, warCountryColors]);
 
   // The bottom-edge TimelineSlider visually weights the lower portion of
   // the viewport, so the geometric centre of the screen reads as too low.
@@ -802,10 +831,26 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       ringRepeatPeriod={1900}
       ringAltitude={0.005}
       polygonsData={highlightedCountry}
-      polygonCapColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.58) : 'rgba(59,130,246,0.08)'}
-      polygonSideColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.72) : 'rgba(59,130,246,0.15)'}
-      polygonStrokeColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.95) : 'rgba(59,130,246,0.4)'}
-      polygonAltitude={0.012}
+      polygonCapColor={(feat: object) => {
+        if (!hasWarShading) return 'rgba(59,130,246,0.08)';
+        const c = colorFor(feat);
+        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 0.68);
+      }}
+      polygonSideColor={(feat: object) => {
+        if (!hasWarShading) return 'rgba(59,130,246,0.15)';
+        const c = colorFor(feat);
+        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 0.88);
+      }}
+      polygonStrokeColor={(feat: object) => {
+        if (!hasWarShading) return 'rgba(59,130,246,0.4)';
+        const c = colorFor(feat);
+        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 1.0);
+      }}
+      polygonAltitude={(feat: object) => {
+        if (!hasWarShading) return 0.005;
+        const c = colorFor(feat);
+        return c === '__neutral__' ? 0.0005 : 0.022;
+      }}
       polygonsTransitionDuration={1200}
       polygonLabel={polygonLabel}
     />

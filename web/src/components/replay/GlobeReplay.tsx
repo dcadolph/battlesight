@@ -30,7 +30,7 @@ interface GlobeReplayProps {
 // that arrows traverse visible geography.
 const DEFAULT_EXTENT_DEG = 3.0;
 
-const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json';
 
 // COUNTRY_NAME_ALIASES maps territory-snapshot country labels to the long
 // names the world-atlas topology uses. Kept in sync with the equivalent
@@ -431,11 +431,13 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
   // snapshots.
   const polygonData: PolygonDatum[] = useMemo(() => {
     const out: PolygonDatum[] = [];
-    // War-territory country shading. Match each country feature's
-    // properties.name against warCountryColors directly, then against the
-    // alias table for names the world-atlas spells differently. Render
-    // these first so subsequent overlays (host country highlight, phase
-    // control regions) layer cleanly on top.
+    // War-territory country shading. Every country is mounted, even when
+    // it is not in the current snapshot, so the polygon engine never has
+    // to mount/unmount features as the playhead crosses snapshot
+    // boundaries — that mount/unmount was the source of the in-and-out
+    // flicker the user reported. Non-belligerent countries render with
+    // zero alpha so they are invisible but the feature identity stays
+    // stable, which lets the colour transition tween cleanly.
     if (warCountryColors && countries.length > 0) {
       const colorByName: Record<string, string> = {};
       for (const [name, hex] of Object.entries(warCountryColors)) {
@@ -448,14 +450,23 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         const name = props.name;
         if (!name) continue;
         const color = colorByName[name];
-        if (!color) continue;
-        out.push({
-          feature: feat as Feature<Geometry>,
-          capColor: hexWithAlpha(color, 0.58),
-          strokeColor: hexWithAlpha(color, 0.95),
-          sideColor: hexWithAlpha(color, 0.72),
-          altitude: 0.012,
-        });
+        if (color) {
+          out.push({
+            feature: feat as Feature<Geometry>,
+            capColor: hexWithAlpha(color, 0.68),
+            strokeColor: hexWithAlpha(color, 1.0),
+            sideColor: hexWithAlpha(color, 0.88),
+            altitude: 0.022,
+          });
+        } else {
+          out.push({
+            feature: feat as Feature<Geometry>,
+            capColor: 'rgba(64,72,90,0)',
+            strokeColor: 'rgba(64,72,90,0)',
+            sideColor: 'rgba(64,72,90,0)',
+            altitude: 0.0005,
+          });
+        }
       }
     }
     if (highlightedCountry.length) {
@@ -586,20 +597,35 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         viewBox={`0 0 ${dims.width} ${dims.height}`}
       >
         <defs>
-          {(['a', 'b', 'c'] as Faction[]).map((f) => (
-            <marker
-              key={`${phaseIdx}-${f}`}
-              id={`gr-arrow-${phaseIdx}-${f}`}
-              viewBox="0 0 12 12"
-              refX="10"
-              refY="6"
-              markerWidth="6.5"
-              markerHeight="6.5"
-              orient="auto-start-reverse"
-            >
-              <path d="M 0 0 L 12 6 L 0 12 z" fill={factionColorFor(f, replay)} />
-            </marker>
-          ))}
+          {(['a', 'b', 'c'] as Faction[]).map((f) => {
+            const c = factionColorFor(f, replay);
+            // Open chevron arrowhead. Stroke not fill so the eye reads it
+            // as a force vector landing rather than a static triangle pin.
+            // Larger marker box + tighter inner stroke gives weight at the
+            // cinematic globe scale.
+            return (
+              <marker
+                key={`${phaseIdx}-${f}`}
+                id={`gr-arrow-${phaseIdx}-${f}`}
+                viewBox="0 0 14 14"
+                refX="12"
+                refY="7"
+                markerWidth="8"
+                markerHeight="8"
+                orient="auto-start-reverse"
+              >
+                <path
+                  d="M 1 1.5 L 12.5 7 L 1 12.5"
+                  fill="none"
+                  stroke={c}
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ filter: `drop-shadow(0 0 2px ${c}) drop-shadow(0 0 3.5px ${c}aa)` }}
+                />
+              </marker>
+            );
+          })}
         </defs>
         {/* Defender units render under the arrows so an incoming arrow visibly
             terminates at the defender's position rather than vice versa. */}
@@ -791,6 +817,22 @@ function ArrowVector({ phaseIdx, arrow, paletteCtx }: ArrowVectorProps) {
           animation: `arrow-comet-fade 220ms ${appearDelay}ms ease-out forwards, arrow-comet ${traceMs}ms ${appearDelay}ms cubic-bezier(.25,.65,.25,1) forwards, arrow-comet-out 320ms ${appearDelay + traceMs - 240}ms ease-out forwards`,
         }}
       />
+      {/* Persistent solid spine: a thinner, lower-opacity solid line under
+          the marching dashes. Always visible after the trace lands so a
+          long campaign arrow never collapses to a floating chevron just
+          because the dashes happen to gap at the wrong moment. The march
+          dashes ride on top to convey motion. */}
+      <path
+        d={path}
+        stroke={color}
+        strokeWidth={Math.max(1.6, stroke * 0.55)}
+        fill="none"
+        strokeLinecap="round"
+        style={{
+          opacity: 0,
+          animation: `arrow-spine-in 320ms ${marchDelay}ms ease-out forwards`,
+        }}
+      />
       {/* Marching layer. Hidden until the trace finishes, then loops forever.
           The arrowhead is attached here so it appears only after the line
           has actually arrived. */}
@@ -860,16 +902,21 @@ interface ArrowLabelProps {
 function ArrowLabel({ arrow, color, timing }: ArrowLabelProps) {
   const { x1, y1, x2, y2, label } = arrow;
   if (!label) return null;
-  // Place at the geometric midpoint and lift slightly perpendicular to the
-  // arrow line so the pill does not sit on top of the stroke. The lift
-  // direction matches the curve direction in ArrowVector so the label
-  // hugs the outside of the arc and never crosses the line itself.
+  // Place at the geometric midpoint and push perpendicular to the arrow,
+  // far enough that the pill sits OUTSIDE the arrow's halo + glow band.
+  // Charge arrows with stroke ~6.5 and a 22-unit blur halo need a 40-50
+  // unit offset to be visually clear; thinner advances need ~30. Sign
+  // alternates with the arrow index so labels distribute above/below.
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.max(1, Math.sqrt(dx * dx + dy * dy));
   const sign = arrow.index % 2 === 0 ? 1 : -1;
-  const midX = (x1 + x2) / 2 + (-dy / len) * 14 * sign;
-  const midY = (y1 + y2) / 2 + (dx / len) * 14 * sign;
+  // Offset proportional to arrow stroke (charge thicker → push label
+  // further). Min 30, max ~52 so very long arrows don't fling labels
+  // off-screen.
+  const offset = 38;
+  const midX = (x1 + x2) / 2 + (-dy / len) * offset * sign;
+  const midY = (y1 + y2) / 2 + (dx / len) * offset * sign;
   const appearAt = timing.appearDelay + timing.traceMs - 200;
   return (
     <g
@@ -1075,21 +1122,24 @@ function ImpactFlash({ x, y, color, delay }: ImpactFlashProps) {
     const id = setTimeout(() => playImpact(), delay);
     return () => clearTimeout(id);
   }, [delay]);
-  // Eight sparks evenly distributed around the impact point. Each gets its
-  // own CSS custom property for the destination offset so they fly outward
-  // in different directions without needing eight @keyframes definitions.
-  const SPARK_COUNT = 8;
-  const sparks = Array.from({ length: SPARK_COUNT }, (_, i) => {
-    const angle = (Math.PI * 2 * i) / SPARK_COUNT;
+  // Twelve inner sparks tight to the impact point + eight outer sparks
+  // thrown further. Two rings of debris read as a real engagement rather
+  // than a single starburst.
+  const INNER = 12;
+  const innerSparks = Array.from({ length: INNER }, (_, i) => {
+    const angle = (Math.PI * 2 * i) / INNER + 0.18;
     const dist = 22;
-    return {
-      i,
-      dx: Math.cos(angle) * dist,
-      dy: Math.sin(angle) * dist,
-    };
+    return { i, dx: Math.cos(angle) * dist, dy: Math.sin(angle) * dist };
+  });
+  const OUTER = 8;
+  const outerSparks = Array.from({ length: OUTER }, (_, i) => {
+    const angle = (Math.PI * 2 * i) / OUTER;
+    const dist = 38;
+    return { i, dx: Math.cos(angle) * dist, dy: Math.sin(angle) * dist };
   });
   return (
     <g transform={`translate(${x} ${y})`} style={{ pointerEvents: 'none' }}>
+      {/* Bright core flash. */}
       <circle
         r={6}
         fill={color}
@@ -1098,13 +1148,15 @@ function ImpactFlash({ x, y, color, delay }: ImpactFlashProps) {
           transformBox: 'fill-box',
           transformOrigin: 'center',
           animation: `impact-core 900ms ${delay}ms cubic-bezier(.25,.7,.25,1) forwards`,
+          filter: `drop-shadow(0 0 6px ${color}) drop-shadow(0 0 12px ${color}aa)`,
         }}
       />
+      {/* Primary shockwave. */}
       <circle
         r={6}
         fill="none"
         stroke={color}
-        strokeWidth={2.4}
+        strokeWidth={2.6}
         style={{
           opacity: 0,
           transformBox: 'fill-box',
@@ -1112,12 +1164,13 @@ function ImpactFlash({ x, y, color, delay }: ImpactFlashProps) {
           animation: `impact-ring 1100ms ${delay}ms cubic-bezier(.2,.6,.25,1) forwards`,
         }}
       />
+      {/* Secondary shockwave, slightly delayed and softer. */}
       <circle
         r={6}
         fill="none"
         stroke={color}
-        strokeWidth={1.4}
-        strokeOpacity={0.55}
+        strokeWidth={1.6}
+        strokeOpacity={0.65}
         style={{
           opacity: 0,
           transformBox: 'fill-box',
@@ -1125,16 +1178,44 @@ function ImpactFlash({ x, y, color, delay }: ImpactFlashProps) {
           animation: `impact-ring 1500ms ${delay + 200}ms cubic-bezier(.2,.6,.25,1) forwards`,
         }}
       />
-      {sparks.map((s) => (
+      {/* Tertiary atmospheric ring — wider, slower, faintest. Lingers a
+          beat after the flash so the impact has weight. */}
+      <circle
+        r={6}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.0}
+        strokeOpacity={0.4}
+        style={{
+          opacity: 0,
+          transformBox: 'fill-box',
+          transformOrigin: 'center',
+          animation: `impact-ring 2200ms ${delay + 450}ms cubic-bezier(.2,.6,.25,1) forwards`,
+        }}
+      />
+      {innerSparks.map((s) => (
         <circle
-          key={`spark-${s.i}`}
-          r={1.6}
+          key={`spark-i-${s.i}`}
+          r={1.8}
           fill="#ffffff"
           style={{
             opacity: 0,
             ['--sx' as string]: `${s.dx}px`,
             ['--sy' as string]: `${s.dy}px`,
             animation: `impact-spark 800ms ${delay + 40}ms cubic-bezier(.25,.65,.25,1) forwards`,
+          }}
+        />
+      ))}
+      {outerSparks.map((s) => (
+        <circle
+          key={`spark-o-${s.i}`}
+          r={1.2}
+          fill={color}
+          style={{
+            opacity: 0,
+            ['--sx' as string]: `${s.dx}px`,
+            ['--sy' as string]: `${s.dy}px`,
+            animation: `impact-spark 1200ms ${delay + 180}ms cubic-bezier(.25,.65,.25,1) forwards`,
           }}
         />
       ))}

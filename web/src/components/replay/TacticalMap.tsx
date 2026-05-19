@@ -98,6 +98,35 @@ export default function TacticalMap({ phase, aspectRatio, aggressor }: TacticalM
             <UnitBlock key={`unit-${u.label}`} unit={u} viewW={viewW} aggressor={aggressor} />
           ))}
 
+          {/* Engagement pulses: shockwave rings + bright cores fire at the
+              destination of every charge / flank movement (to mark the point
+              of impact) and at the centre of every destroyed unit (to mark
+              the kill). Layered on top of units but below labels so the
+              user sees the punch without losing the unit identity. */}
+          {(phase.movements ?? [])
+            .filter((m) => m.kind === 'charge' || m.kind === 'flank')
+            .map((m, i, all) => (
+              <ImpactPulse
+                key={`impact-mv-${i}-${phase.index}`}
+                x={scaleX(m.toX, viewW)}
+                y={m.toY}
+                color={factionColorFor(m.faction, aggressor)}
+                delayMs={1200 + i * 250}
+              />
+            ))}
+          {phase.units
+            .filter((u) => u.status === 'destroyed')
+            .map((u, i) => (
+              <ImpactPulse
+                key={`impact-u-${u.label}-${phase.index}`}
+                x={scaleX(u.x, viewW)}
+                y={u.y}
+                color={factionColorFor(u.faction, aggressor)}
+                delayMs={600 + i * 220}
+                kill
+              />
+            ))}
+
           {(phase.annotations ?? []).map((a, i) => (
             <AnnotationText key={`ann-${i}`} annotation={a} viewW={viewW} />
           ))}
@@ -769,8 +798,7 @@ function MovementArrow({ movement, viewW, index, total, aggressor }: MovementPro
         }}
       />
 
-      {/* Primary stroke draws in along the path, with a moving dash flow
-          once drawn for the kinetic feel of an advancing column. */}
+      {/* Primary stroke draws in along the path. */}
       <path
         id={flowId}
         d={path}
@@ -787,6 +815,47 @@ function MovementArrow({ movement, viewW, index, total, aggressor }: MovementPro
           animation: `dash-in 1.4s ease-out ${stagger}s forwards`,
         }}
       />
+
+      {/* Flowing march dashes: an overlay stroke that runs continuously
+          along the path after the trace lands, giving the arrow a sense
+          of ongoing motion rather than a frozen line. The dash period is
+          short and the cycle is loose enough to read as flow, not strobe.
+          Skipped for retreat / rout kinds since those should look broken,
+          not aggressive. */}
+      {kind !== 'retreat' && kind !== 'withdrawal' && kind !== 'rout' && (
+        <path
+          d={path}
+          fill="none"
+          stroke={color}
+          strokeWidth={Math.max(1.0, strokeWidth * 0.55)}
+          strokeLinecap="round"
+          strokeDasharray="2.2 5"
+          opacity={0}
+          style={{
+            animation: `arrow-march-in 600ms ease-out ${stagger + 1.4}s forwards, arrow-march-flow 2.2s linear ${stagger + 1.4}s infinite`,
+            mixBlendMode: 'screen',
+          }}
+        />
+      )}
+
+      {/* Arrowhead glow pulse at the destination, fires once the trace
+          lands. Reads as the column hitting the line. Skipped for routs
+          and retreats. */}
+      {kind !== 'retreat' && kind !== 'withdrawal' && kind !== 'rout' && (
+        <circle
+          cx={x2}
+          cy={y2}
+          r={1.6}
+          fill={color}
+          opacity={0}
+          style={{
+            transformBox: 'fill-box',
+            transformOrigin: 'center',
+            animation: `arrowhead-pulse 1100ms ${stagger + 1.45}s cubic-bezier(.25,.7,.25,1) forwards`,
+            filter: `drop-shadow(0 0 1.4px ${color})`,
+          }}
+        />
+      )}
 
       {movement.label && (
         <text
@@ -830,5 +899,95 @@ function AnnotationText({ annotation, viewW }: AnnotationProps) {
     >
       {annotation.text}
     </text>
+  );
+}
+
+interface ImpactPulseProps {
+  x: number;
+  y: number;
+  color: string;
+  delayMs: number;
+  // kill marks the destruction of an existing unit rather than a charge
+  // landing. The pulse runs a touch longer and adds an extra ring so the
+  // "kill" reads as a more decisive event than a contact.
+  kill?: boolean;
+}
+
+// ImpactPulse renders an animated shockwave + bright core + debris sparks
+// at a point in the playfield. Used at charge / flank arrow endpoints and
+// at destroyed unit positions. The visual vocabulary is intentionally the
+// same as the globe-replay impact pulses so the user reads "engagement
+// happened here" consistently across the 2D tactical map and the 3D
+// globe.
+function ImpactPulse({ x, y, color, delayMs, kill = false }: ImpactPulseProps) {
+  // Spark vectors, normalised to a tactical-map unit radius (~3 units).
+  // Eight outgoing motes scattered around a circle, jittered so they do
+  // not look like a perfect star.
+  const sparks = [
+    { dx: 6.0, dy: 0 }, { dx: 4.2, dy: 4.2 },
+    { dx: 0, dy: 6.0 }, { dx: -4.2, dy: 4.2 },
+    { dx: -6.0, dy: 0 }, { dx: -4.2, dy: -4.2 },
+    { dx: 0, dy: -6.0 }, { dx: 4.2, dy: -4.2 },
+  ];
+  return (
+    <g style={{ pointerEvents: 'none' }}>
+      {/* Outward shockwave ring. */}
+      <circle
+        cx={x} cy={y} r={1.4}
+        fill="none"
+        stroke={color}
+        strokeWidth={0.6}
+        style={{
+          opacity: 0,
+          transformBox: 'fill-box',
+          transformOrigin: 'center',
+          animation: `impact-ring 1400ms ${delayMs}ms cubic-bezier(.2,.6,.25,1) forwards`,
+        }}
+      />
+      {/* Wider, slower second ring for kills only — reads as "this was a
+          real kill, not a glancing blow". */}
+      {kill && (
+        <circle
+          cx={x} cy={y} r={1.6}
+          fill="none"
+          stroke={color}
+          strokeWidth={0.45}
+          style={{
+            opacity: 0,
+            transformBox: 'fill-box',
+            transformOrigin: 'center',
+            animation: `impact-ring 1900ms ${delayMs + 220}ms cubic-bezier(.2,.6,.25,1) forwards`,
+          }}
+        />
+      )}
+      {/* Bright core dot. */}
+      <circle
+        cx={x} cy={y} r={1.0}
+        fill={color}
+        style={{
+          opacity: 0,
+          transformBox: 'fill-box',
+          transformOrigin: 'center',
+          animation: `impact-core 900ms ${delayMs}ms cubic-bezier(.25,.7,.25,1) forwards`,
+          filter: `drop-shadow(0 0 1.2px ${color})`,
+        }}
+      />
+      {/* Debris sparks: eight motes flung out from the center. */}
+      {sparks.map((s, i) => (
+        <circle
+          key={`sp-${i}`}
+          cx={x}
+          cy={y}
+          r={0.34}
+          fill={color}
+          style={{
+            opacity: 0,
+            ['--sx' as string]: `${s.dx}px`,
+            ['--sy' as string]: `${s.dy}px`,
+            animation: `impact-spark 950ms ${delayMs + 50 + i * 18}ms cubic-bezier(.25,.65,.25,1) forwards`,
+          }}
+        />
+      ))}
+    </g>
   );
 }

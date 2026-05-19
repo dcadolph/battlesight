@@ -394,36 +394,74 @@ export default function WarCinematicOverlay({
           </p>
         )}
 
+        {/* Primary + secondary action row. The primary is a substantial
+            rectangular button with the play glyph forward-loaded, in the
+            war's accent so it reads as the operative move on this title
+            card. The secondary is a flat text-only action, no border, no
+            background — its purpose is to step out of the cinematic into
+            the manual war pane (and on the aftermath card, back to the
+            globe), and a heavy outlined pill made it compete with the
+            primary visually. Sans-serif body throughout so the buttons
+            stop fighting the editorial serif of the title above. */}
         <div
-          className="mt-8 flex items-center justify-center gap-3 flex-wrap"
-          style={{ animation: reducedMotion ? 'none' : 'wc-rise 800ms 1320ms cubic-bezier(.2,.7,.25,1) both' }}
+          className="mt-8 flex items-center justify-center gap-5 flex-wrap"
+          style={{
+            animation: reducedMotion ? 'none' : 'wc-rise 800ms 1320ms cubic-bezier(.2,.7,.25,1) both',
+            fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+          }}
         >
           {stage === 'overture' && onBegin && (
             <button
               type="button"
               onClick={onBegin}
               autoFocus
-              className="inline-flex items-center justify-center gap-3 h-12 px-8 rounded-full text-[13.5px] font-semibold tracking-[0.04em] bg-white text-slate-900 hover:bg-slate-100 transition-all shadow-[0_10px_28px_-10px_rgba(255,255,255,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02]"
-              style={{ fontFamily: theme.titleFont }}
+              className="group inline-flex items-center gap-3 h-12 pl-3 pr-6 rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:translate-y-[-1px]"
+              style={{
+                background: theme.accent,
+                color: '#0b0d14',
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: '0.01em',
+                boxShadow: `0 12px 32px -10px ${theme.accent}80, 0 0 0 1px ${theme.accent} inset`,
+              }}
             >
+              <span
+                className="flex h-7 w-7 items-center justify-center rounded-md"
+                style={{ background: 'rgba(11,13,20,0.18)' }}
+              >
+                <svg width="11" height="13" viewBox="0 0 11 13" fill="currentColor" className="ml-0.5">
+                  <path d="M0.5 0.93v11.14a.5.5 0 0 0 .77.42l9.07-5.57a.5.5 0 0 0 0-.84L1.27.51A.5.5 0 0 0 .5.93z" />
+                </svg>
+              </span>
               <span>Play the war</span>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 2 L10 7 L5 12" />
-              </svg>
             </button>
           )}
           <button
             type="button"
             onClick={onDismiss}
-            className="inline-flex items-center justify-center h-12 px-8 rounded-full text-[13.5px] font-semibold tracking-[0.04em] border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02]"
+            className="group inline-flex items-center gap-1.5 h-12 px-1 text-slate-300 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm"
             style={{
-              fontFamily: theme.titleFont,
-              color: stage === 'aftermath' ? '#fff' : theme.accent,
-              borderColor: `${theme.accent}80`,
-              background: stage === 'aftermath' ? `${theme.accent}26` : `${theme.accent}14`,
+              fontSize: 12.5,
+              fontWeight: 500,
+              letterSpacing: '0.04em',
             }}
           >
-            {stage === 'aftermath' ? 'Back to the globe' : 'Skip the overture'}
+            <span>
+              {stage === 'aftermath' ? 'Back to the globe' : 'Browse the battles'}
+            </span>
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"
+            >
+              <path d="M4 2 L8 6 L4 10" />
+            </svg>
           </button>
         </div>
 

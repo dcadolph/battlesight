@@ -8,7 +8,7 @@ import GlobeReplay from './GlobeReplay';
 import { themeForEra } from '../../theme/era';
 import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
 import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
-import { cleanCasualtyText, cleanProseText } from '../../lib/format';
+import { cleanCasualtyText, cleanProseText, formatBattleDate } from '../../lib/format';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import CloseButton from '../CloseButton';
 
@@ -185,7 +185,23 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         /* The marching layer carries the arrowhead and fades in only after
            the trace has landed. */
         @keyframes arrow-march-in {
-          to { opacity: 1; }
+          to { opacity: 0.85; }
+        }
+        /* Marching dashes that run continuously along an arrow after the
+           trace lands. Offsets the dash pattern by one period so the eye
+           reads as motion along the line of advance. */
+        @keyframes arrow-march-flow {
+          to { stroke-dashoffset: -7.2; }
+        }
+        /* Arrowhead pulse fires once when the trace lands at a charge or
+           flank arrow's destination. Bright core that grows and fades, so
+           the impact moment has a visible accent without painting the
+           whole field. */
+        @keyframes arrowhead-pulse {
+          0%   { opacity: 0; transform: scale(0.4); }
+          18%  { opacity: 1; transform: scale(1.0); }
+          55%  { opacity: 0.75; transform: scale(1.7); }
+          100% { opacity: 0; transform: scale(2.6); }
         }
         /* Glow underlay fades in alongside the trace and stays. */
         @keyframes arrow-glow-in {
@@ -993,18 +1009,22 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinemati
             accent line keep the row light. A regional era line follows
             so an 1815 battle on the Indus reads as "Age of Revolutions
             · Late Mughal" instead of only the global era. */}
-        {(battle.date || battle.war) && (
-          <div
-            className="mt-3 flex items-center justify-center gap-3 text-[10.5px] tracking-[0.32em] uppercase text-slate-400/85 text-center"
-            style={{ animation: 'outro-text-rise 700ms 480ms cubic-bezier(.2,.7,.25,1) both' }}
-          >
-            {battle.date && <span>{battle.date}</span>}
-            {battle.date && battle.war && (
-              <span style={{ color: theme.accent }}>·</span>
-            )}
-            {battle.war && <span className="text-slate-300">{battle.war}</span>}
-          </div>
-        )}
+        {(() => {
+          const dateLine = formatBattleDate(battle.date, battle.year);
+          if (!dateLine && !battle.war) return null;
+          return (
+            <div
+              className="mt-3 flex items-center justify-center gap-3 text-[10.5px] tracking-[0.32em] uppercase text-slate-400/85 text-center"
+              style={{ animation: 'outro-text-rise 700ms 480ms cubic-bezier(.2,.7,.25,1) both' }}
+            >
+              {dateLine && <span>{dateLine}</span>}
+              {dateLine && battle.war && (
+                <span style={{ color: theme.accent }}>·</span>
+              )}
+              {battle.war && <span className="text-slate-300">{battle.war}</span>}
+            </div>
+          );
+        })()}
         {(() => {
           const local = regionalEraContext(battle.era, battle.lat, battle.lng);
           if (!local) return null;

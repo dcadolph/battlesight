@@ -369,9 +369,13 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl ${
-                hasReplay ? 'bg-blue-500/30 text-blue-200' : 'bg-slate-700 text-slate-300'
-              }`}>▶</div>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                hasReplay ? 'bg-blue-500/30 text-blue-200 ring-1 ring-blue-300/40' : 'bg-slate-700 text-slate-200 ring-1 ring-slate-600/60'
+              }`}>
+                <svg width="13" height="15" viewBox="0 0 13 15" fill="currentColor" className="ml-0.5">
+                  <path d="M0.5 1.07v12.86a.5.5 0 0 0 .77.42l10.5-6.43a.5.5 0 0 0 0-.84L1.27.65A.5.5 0 0 0 .5 1.07z" />
+                </svg>
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold text-white">
                   {hasReplay ? 'Watch the battle' : 'Open schematic replay'}

@@ -168,50 +168,74 @@ export default function CommandBar({
 
   return (
     <>
-      {/* Title block with co-located sound toggle. Previously the sound
-          toggle floated at top-right, which collided with the close buttons
-          on BattlePanel and WarPlayback (both occupy the full-height right
-          column). Living next to the title keeps it out of every right-side
-          panel's chrome lane permanently. */}
-      <div className="fixed top-4 left-5 z-40 select-none">
-        <div className="flex items-center gap-3">
+      {/* Top-left chrome stack: wordmark + stat strip + sound, then search,
+          then the mode rail. Reads as an editorial masthead rather than a
+          dashboard navbar. Tight tracking, hairline dividers, single
+          accent. The vertical rhythm is the same 8px grid throughout. */}
+      <div className="fixed top-5 left-6 z-40 select-none">
+        <div className="flex items-baseline gap-3">
           <button
             type="button"
             onClick={onResetView}
-            className="text-xl font-bold text-white tracking-tight leading-none hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 rounded-sm"
+            className="leading-none hover:opacity-95 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 rounded-sm"
             title="Back to the main globe"
             aria-label="Reset view: back to the main globe"
+            style={{
+              fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif",
+              fontWeight: 600,
+              fontSize: 24,
+              letterSpacing: '-0.025em',
+              color: '#ffffff',
+            }}
           >
-            Battle<span className="text-blue-400">Trace</span>
+            Battle<span style={{ color: '#60a5fa' }}>Trace</span>
           </button>
-          <span className="text-[11px] text-slate-600 tabular-nums leading-none pt-[2px]">
-            {battleCount.toLocaleString()} battles
-            {stats && stats.replayCount > 0 && (
-              <span className="ml-2 text-blue-400/80">· {stats.replayCount} replays</span>
-            )}
-          </span>
           <button
             onClick={onToggleSound}
-            className="ml-1 inline-flex items-center justify-center h-6 w-6 rounded-full text-slate-400 hover:text-white bg-slate-800/60 border border-slate-700/50 hover:bg-slate-700/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50"
+            className="inline-flex items-center justify-center h-6 w-6 rounded-full text-slate-500 hover:text-slate-200 hover:bg-slate-800/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40"
             title={soundOn ? 'Sound on. Click to mute.' : 'Sound off. Click for ambient audio.'}
             aria-label={soundOn ? 'Mute ambient audio' : 'Enable ambient audio'}
             aria-pressed={soundOn}
           >
             {soundOn ? (
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M2 5 L4 5 L7 2 L7 10 L4 7 L2 7 Z"/><path d="M8.5 4 Q10 6 8.5 8" stroke="currentColor" strokeWidth="0.9" fill="none" strokeLinecap="round"/></svg>
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M2 5 L4 5 L7 2 L7 10 L4 7 L2 7 Z"/><path d="M8.5 4 Q10 6 8.5 8" stroke="currentColor" strokeWidth="0.9" fill="none" strokeLinecap="round"/></svg>
             ) : (
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M2 5 L4 5 L7 2 L7 10 L4 7 L2 7 Z"/><path d="M9 4 L11 8 M11 4 L9 8" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/></svg>
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M2 5 L4 5 L7 2 L7 10 L4 7 L2 7 Z"/><path d="M9 4 L11 8 M11 4 L9 8" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/></svg>
             )}
           </button>
         </div>
+        <div
+          className="mt-1.5 text-[9.5px] tabular-nums leading-none"
+          style={{ letterSpacing: '0.32em', textTransform: 'uppercase' }}
+        >
+          <span className="text-slate-500">{battleCount.toLocaleString()}</span>
+          <span className="text-slate-600 ml-1.5">Battles</span>
+          {stats && stats.replayCount > 0 && (
+            <>
+              <span className="text-slate-700 mx-2.5">/</span>
+              <span style={{ color: '#60a5fa' }}>{stats.replayCount}</span>
+              <span className="text-slate-600 ml-1.5">Replays</span>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Search. The container is z-[100] so the dropdown is unambiguously
-          above the mode-tab row below it. Tabs sit at z-30; this gives the
-          dropdown a clear two-rank lead so no future stacking-context tweak
-          can paint tabs back through the search results. */}
-      <div className="fixed top-12 left-5 z-[100] w-64">
+      {/* Search. z-[100] so its dropdown floats above the mode rail (z-30). */}
+      <div className="fixed top-[78px] left-6 z-[100] w-[268px]">
         <div className="relative">
+          <svg
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+            width="13"
+            height="13"
+            viewBox="0 0 13 13"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          >
+            <circle cx="5.5" cy="5.5" r="3.7" />
+            <path d="M8.5 8.5 L11.5 11.5" />
+          </svg>
           <input
             ref={inputRef}
             type="text"
@@ -220,11 +244,20 @@ export default function CommandBar({
             onKeyDown={handleKeyDown}
             onFocus={() => (results.length > 0 || warResults.length > 0) && setSearchOpen(true)}
             onBlur={() => setTimeout(() => setSearchOpen(false), 150)}
-            placeholder="Search battles, wars, places, or paste lat, lng..."
-            className="w-full h-10 px-4 bg-[#1e2030] border border-slate-600/50 rounded-xl text-[13px] text-white placeholder-slate-500 focus:outline-none focus:border-blue-400/70 focus:bg-[#232538] shadow-lg transition-all"
+            placeholder="Search battles, wars, places…"
+            className="w-full h-9 pl-9 pr-9 bg-[#0d0f17]/85 backdrop-blur-md border border-slate-700/45 rounded-md text-[12.5px] text-white placeholder-slate-500 focus:outline-none focus:border-blue-400/60 focus:bg-[#11141e]/90 transition-colors"
+            style={{ letterSpacing: '0.01em' }}
           />
           {query && (
-            <button onClick={handleClear} className="absolute right-3 top-2.5 text-slate-500 hover:text-white text-lg leading-none">&times;</button>
+            <button
+              onClick={handleClear}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-500 hover:text-white hover:bg-slate-700/60 transition-colors"
+              aria-label="Clear search"
+            >
+              <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                <path d="M1.5 1.5 L8.5 8.5 M8.5 1.5 L1.5 8.5" />
+              </svg>
+            </button>
           )}
         </div>
 
@@ -318,8 +351,12 @@ export default function CommandBar({
           fill and a tracked label; inactive modes hover to slate. SVG
           glyphs disambiguate at a glance. The previous border-underline
           treatment was functional but felt like a vanilla nav bar; this
-          reads as crafted chrome. */}
-      <div className="fixed top-[88px] left-5 z-30">
+          reads as crafted chrome.
+          Vertical position is anchored to top-[126px] so it lands cleanly
+          below the search row (search at top-78 + h-9 ends at 114, then
+          a 12px gap). Earlier the rail sat at top-88 which collided with
+          the new search height and hid the rail entirely. */}
+      <div className="fixed top-[126px] left-6 z-30">
         <div
           className="inline-flex items-center gap-1 rounded-full p-1 backdrop-blur-md"
           style={{
@@ -406,7 +443,7 @@ export default function CommandBar({
 
       {/* Filter panel */}
       {!playbackActive && panel === 'filters' && stats && (
-        <div className="fixed top-[130px] left-5 z-30 w-64 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3">
+        <div className="fixed top-[218px] left-6 z-30 w-64 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3">
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-[10px] text-slate-600 uppercase tracking-wider">Tier</label>

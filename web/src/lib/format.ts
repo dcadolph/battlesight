@@ -23,14 +23,22 @@ export function formatYearRange(yearStart: number, yearEnd: number): string {
   return `${formatYear(yearStart)} – ${formatYear(yearEnd)}`;
 }
 
-// formatBattleDate prefers the human date string when present and not the
-// stub "0" sentinel; otherwise falls back to the year label. Used wherever
-// the canonical date should appear (dossier metadata, tooltip subline, beat
-// card date stamp).
+// formatBattleDate prefers the human date string when present and not a
+// placeholder. Recognises three sentinel forms returned by the Wikidata
+// importer as "year-only" and degrades them to the formatted year so the
+// UI does not render ISO bookends ("1939-01-01") for a battle whose
+// actual day-of-month is unknown:
+//   * empty string
+//   * the bare "0"
+//   * any "YYYY-01-01" / "YYYY-12-31" / "YYYY-00-00" pattern with no
+//     other text around it
+// Anything else (a real human range like "September 21–22, 1939" or a
+// month-name string like "June 1944") flows through unchanged.
 export function formatBattleDate(date: string | null | undefined, year: number): string {
   const trimmed = (date ?? '').trim();
-  if (trimmed && trimmed !== '0') return trimmed;
-  return formatYear(year);
+  if (!trimmed || trimmed === '0') return formatYear(year);
+  if (/^-?\d{1,4}-(?:00|01|12)-(?:00|01|31)$/.test(trimmed)) return formatYear(year);
+  return trimmed;
 }
 
 // formatNumberWithCommas writes "117,871" for 117871. Plain integer with
@@ -170,6 +178,13 @@ export function cleanProseText(s: string | undefined | null): string {
   out = out.replace(/[;,]\s*See\s+(?:Aftermath|below|article|main\s+article)\s*\.?$/i, '');
   // Collapse "X;," → "X," and trailing ;, → period.
   out = out.replace(/;\s*,/g, ',');
+  // Semicolons inside (...) — typically the {{convert}} wiki template
+  // expanding as "(560 km; 350 mi)" — should degrade to a comma, not a
+  // period. The blanket semicolon-to-period rule below otherwise leaves
+  // a sentence-ending period in the middle of a parenthetical, which
+  // reads as a mid-line truncation. Run before the blanket sweep so the
+  // inside-parens cases are caught first.
+  out = out.replace(/\(([^()]*?);\s*([^()]*?)\)/g, '($1, $2)');
   // Replace remaining semicolons with periods (project-wide rule).
   out = out.replace(/\s*;\s*/g, '. ');
   // Em-dash to comma (no sentence-breaking hyphens in prose).
@@ -180,5 +195,25 @@ export function cleanProseText(s: string | undefined | null): string {
   out = out.replace(/\s+([,.!?])/g, '$1');
   out = out.replace(/\.\s*\./g, '.');
   out = out.replace(/\n{3,}/g, '\n\n').trim();
+  // Drop a dangling " ..." or "..." truncation suffix: when the source
+  // was a Wikipedia lead that was cut short by a length limiter, the
+  // trailing ellipsis reads as broken text. We snip back to the last
+  // sentence boundary so the visible prose ends on a real sentence.
+  if (/\.{2,}\s*$/.test(out) || /\s\.\s*\.\s*$/.test(out)) {
+    out = out.replace(/[\s.]{2,}$/g, '');
+    const lastTerm = Math.max(out.lastIndexOf('.'), out.lastIndexOf('!'), out.lastIndexOf('?'));
+    if (lastTerm > 20 && lastTerm < out.length - 1) {
+      out = out.slice(0, lastTerm + 1);
+    }
+  }
+  // Guarantee terminal punctuation. If the cleaned text does not end in
+  // a period, exclamation, or question mark, append a period so every
+  // dossier paragraph and outro card reads as a complete sentence. Skips
+  // empty strings and strings ending in a closing quote/bracket where
+  // the punctuation actually lives before the closer.
+  out = out.trim();
+  if (out.length > 0 && !/[.!?][")\]]?$/.test(out)) {
+    out = out + '.';
+  }
   return out;
 }

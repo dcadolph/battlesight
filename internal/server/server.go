@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dcadolph/battletrace/internal/battles"
-	"github.com/dcadolph/battletrace/internal/db"
-	"github.com/dcadolph/battletrace/internal/importer"
+	"github.com/dcadolph/battlesight/internal/battles"
+	"github.com/dcadolph/battlesight/internal/db"
+	"github.com/dcadolph/battlesight/internal/importer"
 )
 
 // Config holds server configuration.
@@ -99,7 +99,7 @@ func Run(cfg Config) error {
 
 	store := battles.NewStore(database)
 
-	stats, err := store.Stats(context.Background())
+	stats, err := store.Stats(context.Background(), wars)
 	if err != nil {
 		return fmt.Errorf("load stats: %w", err)
 	}

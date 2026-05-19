@@ -69,6 +69,37 @@ function pointInPolygon(lat: number, lng: number, coords: Position[][]): boolean
   return false;
 }
 
+// polygonCentroid averages every coordinate of a polygon or multipolygon
+// geometry to produce a rough centroid. Good enough for placing a pulse
+// ring inside the country (we use it only for the territory-flip
+// animation, not for cartographic measurement). Returns [lat, lng] or null
+// when the geometry has no usable coordinates.
+function polygonCentroid(geom: Geometry): [number, number] | null {
+  let sx = 0;
+  let sy = 0;
+  let n = 0;
+  const walk = (rings: Position[][]) => {
+    for (const ring of rings) {
+      for (const [lng, lat] of ring) {
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          sx += lng;
+          sy += lat;
+          n++;
+        }
+      }
+    }
+  };
+  if (geom.type === 'Polygon') {
+    walk(geom.coordinates);
+  } else if (geom.type === 'MultiPolygon') {
+    for (const poly of geom.coordinates) walk(poly);
+  } else {
+    return null;
+  }
+  if (n === 0) return null;
+  return [sy / n, sx / n];
+}
+
 function findCountry(lat: number, lng: number, countries: Feature<Geometry>[]): Feature<Geometry> | null {
   for (const c of countries) {
     const geom = c.geometry;
@@ -279,7 +310,64 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     return () => clearInterval(id);
   }, [ignitionRings.length]);
 
-  const rings = useMemo(() => [...replayRings, ...ignitionRings], [replayRings, ignitionRings]);
+  // Territory-flip pulses: when the war cinematic crosses a snapshot
+  // boundary and a country's owner changes color, emit a brief ring at
+  // that country's centroid so the user catches the flip even when the
+  // smooth color tween is too subtle. Tracks the previous warCountryColors
+  // map by reference so the very first paint of a fresh war doesn't fire
+  // a ring on every country at once.
+  const prevWarColorsRef = useRef<Record<string, string> | undefined>(undefined);
+  const [flipRings, setFlipRings] = useState<Array<{ lat: number; lng: number; id: string; kind: 'flip'; color: string; expires: number }>>([]);
+
+  useEffect(() => {
+    const prev = prevWarColorsRef.current;
+    prevWarColorsRef.current = warCountryColors ?? undefined;
+    if (!warCountryColors || !prev || countries.length === 0) return;
+    const changed: Array<{ name: string; color: string }> = [];
+    for (const [name, color] of Object.entries(warCountryColors)) {
+      if (prev[name] !== color) changed.push({ name, color });
+    }
+    if (changed.length === 0) return;
+    // Resolve each changed country to a centroid by averaging its polygon
+    // coordinates. World-atlas country geometries are stable enough that a
+    // simple coordinate-average lands inside the country for every entry
+    // we shade. A perfect cartographic centroid would be overkill for a
+    // pulse animation.
+    const tNow = performance.now();
+    const fresh: Array<{ lat: number; lng: number; id: string; kind: 'flip'; color: string; expires: number }> = [];
+    for (const { name, color } of changed) {
+      const aliases = COUNTRY_NAME_ALIASES[name] ?? [name];
+      const allNames = [name, ...aliases].map((s) => s.toLowerCase());
+      const feat = countries.find((f) => allNames.includes(((f.properties as Record<string, string>)?.name ?? '').toLowerCase()));
+      if (!feat) continue;
+      const centroid = polygonCentroid(feat.geometry);
+      if (!centroid) continue;
+      fresh.push({
+        lat: centroid[0],
+        lng: centroid[1],
+        id: `flip-${name}-${tNow}`,
+        kind: 'flip',
+        color,
+        expires: tNow + 2400,
+      });
+    }
+    if (fresh.length === 0) return;
+    setFlipRings((prev) => {
+      const alive = prev.filter((r) => r.expires > tNow);
+      return [...alive, ...fresh];
+    });
+  }, [warCountryColors, countries]);
+
+  useEffect(() => {
+    if (flipRings.length === 0) return;
+    const id = setInterval(() => {
+      const tNow = performance.now();
+      setFlipRings((prev) => prev.filter((r) => r.expires > tNow));
+    }, 500);
+    return () => clearInterval(id);
+  }, [flipRings.length]);
+
+  const rings = useMemo(() => [...replayRings, ...ignitionRings, ...flipRings], [replayRings, ignitionRings, flipRings]);
 
   useEffect(() => {
     fetch(COUNTRIES_URL)
@@ -673,12 +761,18 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       ringLat="lat"
       ringLng="lng"
       ringColor={(d: object) => {
-        const r = d as { kind: 'replay' | 'ignition'; color: string };
+        const r = d as { kind: 'replay' | 'ignition' | 'flip'; color: string };
         const base = r.color;
         if (r.kind === 'ignition') {
           // Single bright burst that fades fast: era-colored core dropping
           // from 95% to 0 alpha along the ring's outward propagation.
           return (t: number) => hexToRgba(base, 0.95 * (1 - t));
+        }
+        if (r.kind === 'flip') {
+          // Territory-flip pulse: country flares in the new owner's color
+          // as control changes hands at a snapshot boundary. Brighter than
+          // the replay ring, with a slight inner-glow plateau before fade.
+          return (t: number) => hexToRgba(base, t < 0.18 ? 0.95 : 0.95 * (1 - (t - 0.18) / 0.82));
         }
         return (t: number) => hexToRgba(base, 0.7 * (1 - t));
       }}
@@ -687,10 +781,11 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       ringRepeatPeriod={2200}
       ringAltitude={0.005}
       polygonsData={highlightedCountry}
-      polygonCapColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.22) : 'rgba(59,130,246,0.08)'}
-      polygonSideColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.32) : 'rgba(59,130,246,0.15)'}
-      polygonStrokeColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.6) : 'rgba(59,130,246,0.4)'}
-      polygonAltitude={0.005}
+      polygonCapColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.42) : 'rgba(59,130,246,0.08)'}
+      polygonSideColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.55) : 'rgba(59,130,246,0.15)'}
+      polygonStrokeColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.85) : 'rgba(59,130,246,0.4)'}
+      polygonAltitude={0.008}
+      polygonsTransitionDuration={1400}
       polygonLabel={polygonLabel}
     />
     </div>

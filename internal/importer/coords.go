@@ -247,7 +247,7 @@ func fetchWikidataCoords(ctx context.Context, underscoreTitles []string) (map[st
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/sparql-results+json")
-	req.Header.Set("User-Agent", "BattleTrace/1.0 (https://github.com/dcadolph/battletrace)")
+	req.Header.Set("User-Agent", "BattleSight/1.0 (https://github.com/dcadolph/battlesight)")
 
 	resp, err := wikiHTTPDo(req)
 	if err != nil {
@@ -316,7 +316,7 @@ func fetchCoordinates(ctx context.Context, titles []string) (map[string]coordPai
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "BattleTrace/1.0 (https://github.com/dcadolph/battletrace)")
+	req.Header.Set("User-Agent", "BattleSight/1.0 (https://github.com/dcadolph/battlesight)")
 
 	resp, err := wikiHTTPDo(req)
 	if err != nil {

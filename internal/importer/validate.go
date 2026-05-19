@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/dcadolph/battletrace/internal/battles"
+	"github.com/dcadolph/battlesight/internal/battles"
 )
 
 // ValidationError is one problem found in a single curated battle. Field

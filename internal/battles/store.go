@@ -413,8 +413,12 @@ func (s *Store) searchByCoord(ctx context.Context, lat, lng float64, limit, offs
 	return battles, total, nil
 }
 
-// Stats returns aggregate counts for filter UI population.
-func (s *Store) Stats(ctx context.Context) (StatsResponse, error) {
+// Stats returns aggregate counts for filter UI population. The optional
+// wars registry is folded into the war-count roll-up so curated overrides
+// (HumanDeaths, StartYear, EndYear, Parent) drive the totals the UI
+// displays for major conflicts. Pass nil when no curated data is
+// available — the roll-up falls back to the battle-sum totals.
+func (s *Store) Stats(ctx context.Context, wars *Wars) (StatsResponse, error) {
 	var stats StatsResponse
 
 	err := s.db.QueryRowContext(ctx,
@@ -435,7 +439,7 @@ func (s *Store) Stats(ctx context.Context) (StatsResponse, error) {
 	if queryErr != nil {
 		return stats, queryErr
 	}
-	stats.Wars, queryErr = s.warCounts(ctx)
+	stats.Wars, queryErr = s.warCounts(ctx, wars)
 	if queryErr != nil {
 		return stats, queryErr
 	}
@@ -592,22 +596,51 @@ func warParent(name string) string {
 // rollupWarHierarchy injects synthetic parent rows and populates the rolled
 // totals so the bloodiest-wars sort surfaces canonical conflicts above their
 // theaters even when the parent has few or no direct battles of its own.
-func rollupWarHierarchy(counts []WarCount) []WarCount {
+// The wars registry, when supplied, lets curators override Parent
+// relationships and contribute a curated HumanDeaths total that takes
+// precedence over the battle-sum casualties when rolling children up.
+func rollupWarHierarchy(counts []WarCount, wars *Wars) []WarCount {
 	byName := make(map[string]*WarCount, len(counts))
 	for i := range counts {
-		counts[i].Parent = warParent(counts[i].Name)
+		// Catalog-derived parent wins only when the curated overrides
+		// have not already set one.
+		if counts[i].Parent == "" {
+			counts[i].Parent = warParent(counts[i].Name)
+		}
 		counts[i].RolledCount = counts[i].Count
 		counts[i].RolledCasualties = counts[i].Casualties
+		// Seed the rolled human deaths from curated when present;
+		// otherwise from the battle sum so the rolled total is never
+		// less than what we already counted.
+		if counts[i].HumanDeaths > 0 {
+			counts[i].RolledHumanDeaths = counts[i].HumanDeaths
+		} else {
+			counts[i].RolledHumanDeaths = int64(counts[i].Casualties)
+		}
 		byName[counts[i].Name] = &counts[i]
 	}
 
 	// Ensure every parent referenced from a child exists as its own row.
+	// Inherit the parent's curated narrative metadata when wars knows it
+	// so a synthetic parent row (one that has no battles of its own in the
+	// catalog) still surfaces HumanDeaths and a sensible MinYear.
 	for _, c := range counts {
 		if c.Parent == "" {
 			continue
 		}
 		if _, ok := byName[c.Parent]; !ok {
 			synth := WarCount{Name: c.Parent, MinYear: c.MinYear}
+			if wars != nil {
+				if n, ok := wars.Get(c.Parent); ok {
+					if n.HumanDeaths > 0 {
+						synth.HumanDeaths = n.HumanDeaths
+						synth.RolledHumanDeaths = n.HumanDeaths
+					}
+					if n.StartYear != 0 {
+						synth.MinYear = n.StartYear
+					}
+				}
+			}
 			counts = append(counts, synth)
 			byName[c.Parent] = &counts[len(counts)-1]
 		}
@@ -628,6 +661,21 @@ func rollupWarHierarchy(counts []WarCount) []WarCount {
 		}
 		p.RolledCount += c.Count
 		p.RolledCasualties += c.Casualties
+		// Roll-up rule for HumanDeaths: when the parent has a curated
+		// HumanDeaths number, that total is authoritative and already
+		// includes every child theater / campaign, so we keep it as-is
+		// (set during the seed pass above). Adding a child on top of a
+		// curator's "war total" would double-count: World War II's 75M
+		// already includes the Eastern Front's 30M. Parents without a
+		// curated HumanDeaths still sum children so the rolled total
+		// reflects what was captured.
+		if p.HumanDeaths == 0 {
+			childContrib := c.HumanDeaths
+			if childContrib == 0 {
+				childContrib = int64(c.Casualties)
+			}
+			p.RolledHumanDeaths += childContrib
+		}
 		if c.MinYear != 0 && (p.MinYear == 0 || c.MinYear < p.MinYear) {
 			p.MinYear = c.MinYear
 		}
@@ -674,9 +722,12 @@ func rollupWarHierarchy(counts []WarCount) []WarCount {
 	return counts
 }
 
-// warCounts returns wars with their battle counts, earliest year, and total casualties.
-// Only returns wars that pass the trust filter.
-func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
+// warCounts returns wars with their battle counts, earliest year, and total
+// casualties. Only returns wars that pass the trust filter. When the wars
+// registry has a curated entry for a returned war the entry's HumanDeaths,
+// CuratedStartYear, and Parent fields take precedence over the
+// catalog-derived values so the UI surfaces the curated source of truth.
+func (s *Store) warCounts(ctx context.Context, wars *Wars) ([]WarCount, error) {
 	rows, err := s.db.QueryContext(ctx,
 		`SELECT war, COUNT(*), MIN(year) FROM battles
 		 WHERE war != '' AND `+trustedWarSQL("war")+` AND LENGTH(war) > 3
@@ -764,7 +815,35 @@ func (s *Store) warCounts(ctx context.Context) ([]WarCount, error) {
 		}
 	}
 
-	return rollupWarHierarchy(counts), nil
+	// Inject curated overrides from the wars narrative registry. These
+	// supersede catalog-derived values: HumanDeaths becomes the displayed
+	// total when present, Parent reassigns the row to a different parent,
+	// and CuratedStartYear shifts MinYear so the war card reads from the
+	// curator's calendar start rather than the catalog's earliest battle.
+	if wars != nil {
+		for i := range counts {
+			n, ok := wars.Get(counts[i].Name)
+			if !ok {
+				continue
+			}
+			if n.HumanDeaths > 0 {
+				counts[i].HumanDeaths = n.HumanDeaths
+			}
+			// Curated start year always wins. A stray misclassified battle
+			// in the catalog can drag a war's MinYear into the wrong era
+			// (Korean War year 282 because some ancient skirmish was
+			// tagged with the modern war name). The curator's start year
+			// is the source of truth when present.
+			if n.StartYear != 0 {
+				counts[i].MinYear = n.StartYear
+			}
+			if n.Parent != "" {
+				counts[i].Parent = n.Parent
+			}
+		}
+	}
+
+	return rollupWarHierarchy(counts, wars), nil
 }
 
 // ParseCasualtyNumber extracts a representative casualty number from a freeform

@@ -15,13 +15,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/dcadolph/battletrace/internal/db"
-	"github.com/dcadolph/battletrace/internal/quality"
+	"github.com/dcadolph/battlesight/internal/db"
+	"github.com/dcadolph/battlesight/internal/quality"
 )
 
 func main() {
-	dbPath := flag.String("db", "data/battletrace.db", "path to SQLite database")
-	out := flag.String("out", "", "output markdown path. Defaults to ~/Downloads/battletrace-quality-YYYYMMDD.md")
+	dbPath := flag.String("db", "data/battlesight.db", "path to SQLite database")
+	out := flag.String("out", "", "output markdown path. Defaults to ~/Downloads/battlesight-quality-YYYYMMDD.md")
 	flag.Parse()
 
 	if *out == "" {
@@ -30,7 +30,7 @@ func main() {
 			log.Fatalf("locate home dir: %v", err)
 		}
 		stamp := time.Now().Format("20060102")
-		*out = filepath.Join(home, "Downloads", "battletrace-quality-"+stamp+".md")
+		*out = filepath.Join(home, "Downloads", "battlesight-quality-"+stamp+".md")
 	}
 
 	database, err := db.Open(*dbPath)

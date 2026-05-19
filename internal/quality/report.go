@@ -12,7 +12,7 @@ import (
 // distribution, then the per-axis breakdowns, then the worst-quality
 // verified rows and the top stars as concrete anchors.
 func WriteMarkdown(w io.Writer, rep *Report) error {
-	fmt.Fprintf(w, "# BattleTrace data quality report\n\n")
+	fmt.Fprintf(w, "# BattleSight data quality report\n\n")
 	fmt.Fprintf(w, "Total battles: %d.\n\n", rep.Total)
 	fmt.Fprintf(w, "Average completeness score: %.1f / 100.\n\n", rep.Average)
 

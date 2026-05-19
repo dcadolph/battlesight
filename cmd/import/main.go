@@ -10,13 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/dcadolph/battletrace/internal/battles"
-	"github.com/dcadolph/battletrace/internal/db"
-	"github.com/dcadolph/battletrace/internal/importer"
+	"github.com/dcadolph/battlesight/internal/battles"
+	"github.com/dcadolph/battlesight/internal/db"
+	"github.com/dcadolph/battlesight/internal/importer"
 )
 
 func main() {
-	dbPath := flag.String("db", "data/battletrace.db", "path to SQLite database")
+	dbPath := flag.String("db", "data/battlesight.db", "path to SQLite database")
 	jsonPath := flag.String("json", "", "path to curated battles JSON file")
 	wikidata := flag.Bool("wikidata", false, "import battles from Wikidata SPARQL")
 	enrich := flag.Bool("enrich", false, "fetch Wikipedia summaries for battles missing them")

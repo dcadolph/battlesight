@@ -71,11 +71,19 @@ type WarCount struct {
 	// Count is how many battles belong to this war (own battles only — does not
 	// include nested children counts).
 	Count int `json:"count"`
-	// MinYear is the earliest battle year in this war.
+	// MinYear is the earliest battle year in this war. When a curated
+	// CuratedStartYear exists it overrides this for display so World War II
+	// can read 1931 (Mukden Incident) rather than the catalog's earliest
+	// battle record.
 	MinYear int `json:"minYear"`
-	// Casualties is the estimated total casualties across all battles in this
-	// war (own battles only).
+	// Casualties is the battle-roll-up total across all battles in this war
+	// (own battles only). The UI prefers HumanDeaths when present and tags
+	// this number as battle-only with an asterisk.
 	Casualties int `json:"casualties"`
+	// HumanDeaths is the curated total deaths including civilians, famine,
+	// genocide, and disease, sourced from wars.json. Zero means no curated
+	// override; UI falls back to Casualties for the displayed total.
+	HumanDeaths int64 `json:"humanDeaths,omitempty"`
 	// Parent is the canonical name of the parent war when this row is a
 	// theater or campaign of a larger conflict. Empty for top-level wars.
 	Parent string `json:"parent,omitempty"`
@@ -84,6 +92,11 @@ type WarCount struct {
 	RolledCount int `json:"rolledCount"`
 	// RolledCasualties sums casualties across own row and all descendants.
 	RolledCasualties int `json:"rolledCasualties"`
+	// RolledHumanDeaths sums curated HumanDeaths across own row and all
+	// descendants. Falls back to Casualties for any descendant lacking a
+	// curated number so the rolled total is never less than the rolled
+	// battle sum.
+	RolledHumanDeaths int64 `json:"rolledHumanDeaths,omitempty"`
 	// Countries lists the top present-day countries that fought in this war,
 	// inferred from the sides on each battle and ranked by frequency. Used by
 	// the war-list UI to group wars by belligerent.

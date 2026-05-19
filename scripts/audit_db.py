@@ -21,7 +21,7 @@ import sqlite3
 import sys
 from collections import Counter, defaultdict
 
-DB_PATH = 'data/battletrace.db'
+DB_PATH = 'data/battlesight.db'
 
 # Mirrors importer.yearToEra in internal/importer/wikidata.go.
 def year_to_era(y: int) -> str:
@@ -50,7 +50,8 @@ VALID_ERAS = {
     'world-war-1', 'interwar', 'world-war-2', 'modern',
 }
 
-VALID_BATTLE_TYPES = {'land', 'naval', 'siege', 'aerial', ''}
+VALID_BATTLE_TYPES = {'land', 'naval', 'siege', 'aerial', 'air',
+                      'amphibious', 'urban', ''}
 
 # Year extraction from date string mirrors scripts/audit_data.py behavior.
 YEAR_RE = re.compile(r'\b(\d{3,4})\b')

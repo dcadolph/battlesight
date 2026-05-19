@@ -6,7 +6,7 @@ import type { Topology } from 'topojson-specification';
 import type { Feature, FeatureCollection, Geometry, Position } from 'geojson';
 
 import type { Battle } from '../../types/battle';
-import type { Phase, Replay, Faction, ControlRegion } from '../../types/replay';
+import type { Phase, Replay, Faction, ControlRegion, PaletteContext } from '../../types/replay';
 import { factionColorFor } from '../../types/replay';
 import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../../data/cities';
 import { themeForEra } from '../../theme/era';
@@ -17,6 +17,12 @@ interface GlobeReplayProps {
   replay: Replay;
   phase: Phase;
   phaseIdx: number;
+  // warCountryColors carries the war cinematic's current territory snapshot
+  // down into the battle replay so the country-level shading stays visible
+  // when the user is watching an individual battle inside a war playback.
+  // Without it, opening a replay collapses the globe to just the highlighted
+  // host country and the user loses the "Germany takes Europe" sweep.
+  warCountryColors?: Record<string, string>;
 }
 
 // Default geographic extent in degrees per 100 units of normalized 0-100 phase
@@ -25,6 +31,18 @@ interface GlobeReplayProps {
 const DEFAULT_EXTENT_DEG = 3.0;
 
 const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+
+// COUNTRY_NAME_ALIASES maps territory-snapshot country labels to the long
+// names the world-atlas topology uses. Kept in sync with the equivalent
+// table in BattleGlobe so the same warCountryColors prop produces the same
+// shading on both globes.
+const COUNTRY_NAME_ALIASES: Record<string, string[]> = {
+  'United States': ['United States of America'],
+  'United Kingdom': ['United Kingdom'],
+  Korea: ['South Korea', 'North Korea'],
+  Rome: ['Italy'],
+  Palestine: ['Palestine'],
+};
 
 // projectToLatLng converts a 0-100 (x, y) coordinate from the phase's local
 // frame to (lat, lng) centered at the battle's location. y is inverted (0 is
@@ -221,7 +239,7 @@ function relaxUnitCollisions(units: ProjectedUnit[]): ProjectedUnit[] {
   return out;
 }
 
-export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeReplayProps) {
+export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountryColors }: GlobeReplayProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
@@ -401,23 +419,53 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
     return out;
   }, [phase, battle.lat, battle.lng, extentLatDeg, extentLngDeg, replay.aspectRatio]);
 
-  // Polygons rendered on the globe: the host country (faint outline for
-  // anchoring) plus per-phase control regions (tinted by controlling faction
-  // for the "territory flips" effect). All bundled into one polygonsData
-  // array so the engine renders them in a single pass.
+  // Polygons rendered on the globe: every country shaded by the active
+  // war-territory snapshot (so the sweep stays visible while watching a
+  // single battle inside a war cinematic), the host country highlight, and
+  // per-phase control regions (tinted by the phase-local controlling
+  // faction). All bundled into one polygonsData array so the engine
+  // renders them in a single pass and animates color transitions between
+  // snapshots.
   const polygonData: PolygonDatum[] = useMemo(() => {
     const out: PolygonDatum[] = [];
+    // War-territory country shading. Match each country feature's
+    // properties.name against warCountryColors directly, then against the
+    // alias table for names the world-atlas spells differently. Render
+    // these first so subsequent overlays (host country highlight, phase
+    // control regions) layer cleanly on top.
+    if (warCountryColors && countries.length > 0) {
+      const colorByName: Record<string, string> = {};
+      for (const [name, hex] of Object.entries(warCountryColors)) {
+        colorByName[name] = hex;
+        const aliases = COUNTRY_NAME_ALIASES[name];
+        if (aliases) for (const a of aliases) colorByName[a] = hex;
+      }
+      for (const feat of countries) {
+        const props = (feat.properties ?? {}) as { name?: string };
+        const name = props.name;
+        if (!name) continue;
+        const color = colorByName[name];
+        if (!color) continue;
+        out.push({
+          feature: feat as Feature<Geometry>,
+          capColor: hexWithAlpha(color, 0.42),
+          strokeColor: hexWithAlpha(color, 0.85),
+          sideColor: hexWithAlpha(color, 0.55),
+          altitude: 0.008,
+        });
+      }
+    }
     if (highlightedCountry.length) {
       out.push({
         feature: highlightedCountry[0],
         capColor: 'rgba(59,130,246,0.04)',
         strokeColor: 'rgba(147,197,253,0.55)',
         sideColor: 'rgba(59,130,246,0.08)',
-        altitude: 0.003,
+        altitude: 0.012,
       });
     }
     (phase.controlRegions ?? []).forEach((r: ControlRegion) => {
-      const color = factionColorFor(r.controller, replay.aggressor) ?? '#94a3b8';
+      const color = factionColorFor(r.controller, replay) ?? '#94a3b8';
       const closed = r.ring.length > 0 && (
         r.ring[0][0] !== r.ring[r.ring.length - 1][0] ||
         r.ring[0][1] !== r.ring[r.ring.length - 1][1]
@@ -431,11 +479,11 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
         capColor: hexWithAlpha(color, 0.16),
         strokeColor: hexWithAlpha(color, 0.55),
         sideColor: hexWithAlpha(color, 0.12),
-        altitude: 0.006,
+        altitude: 0.014,
       });
     });
     return out;
-  }, [highlightedCountry, phase.controlRegions]);
+  }, [highlightedCountry, phase.controlRegions, warCountryColors, countries, replay]);
 
   // RAF loop projects all phase geometry onto screen pixels. Updates every
   // frame so the SVG overlay tracks camera fly-ins and any user drag without
@@ -506,9 +554,9 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
           same info but during a fast-paced phase the user is watching the
           arrows, not the sidebar. */}
       <div className="absolute top-3 left-3 z-10 pointer-events-none flex flex-col gap-1.5">
-        <SideTag color={factionColorFor('a', replay.aggressor)} label={replay.factionA} />
-        <SideTag color={factionColorFor('b', replay.aggressor)} label={replay.factionB} />
-        {replay.factionC && <SideTag color={factionColorFor('c', replay.aggressor)} label={replay.factionC} />}
+        <SideTag color={factionColorFor('a', replay)} label={replay.factionA} />
+        <SideTag color={factionColorFor('b', replay)} label={replay.factionB} />
+        {replay.factionC && <SideTag color={factionColorFor('c', replay)} label={replay.factionC} />}
       </div>
 
       <Globe
@@ -546,21 +594,21 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
               markerHeight="6.5"
               orient="auto-start-reverse"
             >
-              <path d="M 0 0 L 12 6 L 0 12 z" fill={factionColorFor(f, replay.aggressor)} />
+              <path d="M 0 0 L 12 6 L 0 12 z" fill={factionColorFor(f, replay)} />
             </marker>
           ))}
         </defs>
         {/* Defender units render under the arrows so an incoming arrow visibly
             terminates at the defender's position rather than vice versa. */}
         {units.filter((u) => u.visible).map((u) => (
-          <UnitMarker key={`unit-${phaseIdx}-${u.index}`} unit={u} phaseIdx={phaseIdx} aggressor={replay.aggressor} />
+          <UnitMarker key={`unit-${phaseIdx}-${u.index}`} unit={u} phaseIdx={phaseIdx} paletteCtx={replay} />
         ))}
         {arrows.filter((a) => a.visible).map((a) => (
           <ArrowVector
             key={`arrow-${phaseIdx}-${a.index}`}
             phaseIdx={phaseIdx}
             arrow={a}
-            aggressor={replay.aggressor}
+            paletteCtx={replay}
           />
         ))}
         {/* Impact flashes timed to each arrow's individual trace duration, so
@@ -572,7 +620,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
             key={`flash-${phaseIdx}-${a.index}`}
             x={a.x2}
             y={a.y2}
-            color={factionColorFor(a.faction, replay.aggressor)}
+            color={factionColorFor(a.faction, replay)}
             delay={arrowTiming(a.kind, a.index).impactDelay}
           />
         ))}
@@ -586,7 +634,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx }: GlobeRe
           <ArrowLabel
             key={`label-${phaseIdx}-${a.index}`}
             arrow={a}
-            color={factionColorFor(a.faction, replay.aggressor)}
+            color={factionColorFor(a.faction, replay)}
             timing={arrowTiming(a.kind, a.index)}
           />
         ))}
@@ -608,7 +656,7 @@ function hexWithAlpha(hex: string, alpha: number): string {
 interface ArrowVectorProps {
   phaseIdx: number;
   arrow: ProjectedArrow;
-  aggressor?: Faction;
+  paletteCtx?: PaletteContext;
 }
 
 // ArrowVector renders one phase movement as a curved SVG path. Three stacked
@@ -622,7 +670,7 @@ interface ArrowVectorProps {
 //      so the arrow keeps reading as a live movement.
 // Charges and flanks trace faster, retreats slower. Curve amount and stroke
 // width are kind-dependent so the type of movement is legible at a glance.
-function ArrowVector({ phaseIdx, arrow, aggressor }: ArrowVectorProps) {
+function ArrowVector({ phaseIdx, arrow, paletteCtx }: ArrowVectorProps) {
   const { x1, y1, x2, y2, faction, kind, index } = arrow;
   const dx = x2 - x1;
   const dy = y2 - y1;
@@ -642,7 +690,7 @@ function ArrowVector({ phaseIdx, arrow, aggressor }: ArrowVectorProps) {
   else if (kind === 'flank') stroke = 5.5;
   else if (kind === 'rout' || kind === 'retreat' || kind === 'withdrawal') stroke = 3.5;
 
-  const color = factionColorFor(faction, aggressor);
+  const color = factionColorFor(faction, paletteCtx);
   const markerId = `gr-arrow-${phaseIdx}-${faction}`;
   const path = `M ${x1} ${y1} Q ${cpX} ${cpY} ${x2} ${y2}`;
 
@@ -851,16 +899,16 @@ function ArrowLabel({ arrow, color, timing }: ArrowLabelProps) {
 interface UnitMarkerProps {
   phaseIdx: number;
   unit: ProjectedUnit;
-  aggressor?: Faction;
+  paletteCtx?: PaletteContext;
 }
 
 // UnitMarker renders a static defender / position marker at a unit's
 // projected screen position. The marker is a faction-colored disk with a
 // pale rim and a unit-type glyph in the center. Pop-in uses a slight
 // overshoot bezier so each unit lands with weight, not a flat fade.
-function UnitMarker({ unit, aggressor }: UnitMarkerProps) {
+function UnitMarker({ unit, paletteCtx }: UnitMarkerProps) {
   const { x, y, faction, radius, unitType, status, index, label } = unit;
-  const color = factionColorFor(faction, aggressor);
+  const color = factionColorFor(faction, paletteCtx);
   const isBroken = status === 'broken' || status === 'routed' || status === 'destroyed';
   const fill = isBroken ? hexWithAlpha(color, 0.35) : hexWithAlpha(color, 0.75);
   const stroke = isBroken ? hexWithAlpha(color, 0.55) : '#f8fafc';

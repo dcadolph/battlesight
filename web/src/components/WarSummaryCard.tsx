@@ -22,6 +22,17 @@ interface WarSummary {
   dateStart?: string;
   dateEnd?: string;
   totalCasualties: number;
+  // humanDeaths is the curated total deaths from wars.json. Includes
+  // civilians, famine, and genocide. Preferred over totalCasualties when
+  // present because the battle-roll-up undercounts wars whose death toll
+  // sits mostly outside the catalog's battle records.
+  humanDeaths?: number;
+  // curatedStartYear / curatedEndYear override the catalog-derived
+  // yearStart / yearEnd for display: e.g. World War II reads 1931 (Mukden
+  // Incident) rather than the earliest catalog battle year.
+  curatedStartYear?: number;
+  curatedEndYear?: number;
+  parent?: string;
   victorTallies?: VictorTally[];
   finalVictor?: string;
   endingBattle?: WarBattleRef;
@@ -89,14 +100,22 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
   // Theme the card by the midpoint year of the war. A Napoleonic-era war
   // gets Napoleonic blue, a WW2 war gets WW2 rose; the card cohres with
   // the rest of the atmosphere on the globe.
-  const midYear = (summary.yearStart + summary.yearEnd) / 2;
+  // Prefer the curated start / end years over the catalog-derived ones so
+  // World War II reads 1931-1945 (Mukden through Tokyo Bay) rather than
+  // the earliest indexed battle range.
+  const displayYearStart = summary.curatedStartYear || summary.yearStart;
+  const displayYearEnd = summary.curatedEndYear || summary.yearEnd;
+  // Prefer the curated humanDeaths total when present so the user sees
+  // ~75M for WW2 rather than the ~20M the battle catalog can sum.
+  const displayCasualties = summary.humanDeaths && summary.humanDeaths > 0 ? summary.humanDeaths : summary.totalCasualties;
+  const midYear = (displayYearStart + displayYearEnd) / 2;
   const theme = themeForYear(midYear);
 
-  const yearLine = summary.yearStart && summary.yearEnd
-    ? `${formatYearLabel(summary.yearStart)} to ${formatYearLabel(summary.yearEnd)}`
+  const yearLine = displayYearStart && displayYearEnd
+    ? `${formatYearLabel(displayYearStart)} to ${formatYearLabel(displayYearEnd)}`
     : '';
 
-  const casualtyLine = formatCasualties(summary.totalCasualties);
+  const casualtyLine = formatCasualties(displayCasualties);
   const finalVictor = summary.finalVictor || summary.victorTallies?.[0]?.name || '';
 
   return (

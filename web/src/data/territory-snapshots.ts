@@ -46,13 +46,15 @@ export const OWNER_COLORS: Record<string, string> = {
   'italy': '#f97316',
   'vichy': '#a16207',
   'ussr': '#0ea5e9',
-  'russia': '#7c3aed',
+  'russia': '#dc2626',
+  'ukraine': '#2563eb',
   'us': '#2563eb',
   'uk': '#1d4ed8',
   'canada': '#3b82f6',
   'australia': '#60a5fa',
   'new-zealand': '#60a5fa',
   'france': '#6366f1',
+  'french-empire': '#1e40af',
   'china-roc': '#0891b2',
   'china-prc': '#dc2626',
   'china': '#0891b2',
@@ -75,6 +77,47 @@ export const OWNER_COLORS: Record<string, string> = {
   'belgium': '#f59e0b',
   'norway': '#f59e0b',
   'denmark': '#f59e0b',
+  'austria-hungary': '#a16207',
+  'serbia': '#0891b2',
+  'north-korea': '#dc2626',
+  'south-korea': '#2563eb',
+  'un-coalition': '#1d4ed8',
+  'prussia': '#1e3a8a',
+  'austria': '#a16207',
+  'spain': '#16a34a',
+  'portugal': '#22c55e',
+  'british-empire': '#dc2626',
+  'continental-army': '#1e40af',
+  'mongol': '#b45309',
+  'crusader': '#eab308',
+  'saracen': '#15803d',
+  'byzantine': '#7c3aed',
+  'fatimid': '#16a34a',
+  'seljuk': '#15803d',
+  'north-vietnam': '#dc2626',
+  'south-vietnam': '#1d4ed8',
+  'viet-cong': '#7f1d1d',
+  'pathet-lao': '#b91c1c',
+  'khmer-rouge': '#7f1d1d',
+  'coalition': '#1d4ed8',
+  'iraq-saddam': '#365314',
+  'iraq-government': '#1d4ed8',
+  'taliban': '#0f1116',
+  'afghan-government': '#1d4ed8',
+  'imperial-japan': '#9b1c1c',
+  'roc-china': '#0891b2',
+  'mexico': '#16a34a',
+  'argentina': '#7c3aed',
+  'dutch-republic': '#ea580c',
+  'habsburg-spain': '#ca8a04',
+  'kingdom-france-bourbon': '#3b82f6',
+  'kingdom-england': '#dc2626',
+  'kingdom-scotland': '#1d4ed8',
+  'denmark-norway': '#f59e0b',
+  'sweden-empire': '#facc15',
+  'rus': '#15532f',
+  'cuba-spain': '#ca8a04',
+  'us-puerto-rico': '#1d4ed8',
 };
 
 export const TERRITORY: WarTerritory[] = [
@@ -179,35 +222,989 @@ export const TERRITORY: WarTerritory[] = [
     snapshots: [
       {
         year: 2014.2,
-        label: 'February 2014: Crimea annexed',
+        label: 'February 2014: Crimea annexed, Donbas insurgency',
         control: {
-          'russia': ['Russia'],
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
         },
       },
       {
         year: 2022.16,
-        label: 'February 24, 2022: Full-scale invasion',
+        label: 'February 24 2022: Full-scale invasion',
         control: {
-          'russia': ['Russia'],
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
         },
       },
       {
         year: 2022.7,
-        label: 'September 2022: Kharkiv counteroffensive',
+        label: 'September 2022: Kharkiv counter-offensive',
         control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+        },
+      },
+      {
+        year: 2023.5,
+        label: 'Summer 2023: Ukrainian counter-offensive grinds south',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+        },
+      },
+      {
+        year: 2024.2,
+        label: 'February 2024: Avdiivka falls, Russia presses west',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'World War I',
+    snapshots: [
+      {
+        year: 1914.6,
+        label: 'August 1914: Schlieffen Plan, Russian mobilization',
+        control: {
+          'imperial-germany': ['Germany', 'Poland'],
+          'austria-hungary': ['Austria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina'],
+          'ottoman': ['Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Yemen'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan'],
+          'france': ['France', 'Belgium', 'Algeria', 'Tunisia', 'Morocco', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia', 'Senegal', 'Mali', 'Niger', 'Chad'],
+          'uk': ['United Kingdom', 'Ireland', 'India', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand'],
+          'serbia': ['Serbia', 'Montenegro'],
+        },
+      },
+      {
+        year: 1915.5,
+        label: 'May 1915: Italy joins Allies, Gallipoli',
+        control: {
+          'imperial-germany': ['Germany', 'Poland'],
+          'austria-hungary': ['Austria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina'],
+          'ottoman': ['Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Yemen'],
+          'bulgaria': ['Bulgaria'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan'],
+          'france': ['France', 'Belgium', 'Algeria', 'Tunisia', 'Morocco', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia', 'Senegal', 'Mali', 'Niger', 'Chad'],
+          'uk': ['United Kingdom', 'Ireland', 'India', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand'],
+          'italy': ['Italy', 'Libya', 'Eritrea', 'Somalia'],
+          'serbia': ['Serbia', 'Montenegro'],
+        },
+      },
+      {
+        year: 1916.6,
+        label: 'Summer 1916: Verdun, Somme, Brusilov',
+        control: {
+          'imperial-germany': ['Germany', 'Poland', 'Belgium', 'Lithuania', 'Latvia', 'Belarus'],
+          'austria-hungary': ['Austria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina', 'Serbia', 'Montenegro'],
+          'ottoman': ['Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Yemen'],
+          'bulgaria': ['Bulgaria'],
+          'russia': ['Russia', 'Ukraine', 'Estonia', 'Finland', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan'],
+          'france': ['France', 'Algeria', 'Tunisia', 'Morocco', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia', 'Senegal', 'Mali', 'Niger', 'Chad'],
+          'uk': ['United Kingdom', 'Ireland', 'India', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand'],
+          'italy': ['Italy', 'Libya', 'Eritrea', 'Somalia'],
+          'romania': ['Romania'],
+          'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea'],
+        },
+      },
+      {
+        year: 1917.4,
+        label: 'April 1917: US enters, Russia in revolution',
+        control: {
+          'imperial-germany': ['Germany', 'Poland', 'Belgium', 'Lithuania', 'Latvia', 'Belarus', 'Romania'],
+          'austria-hungary': ['Austria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina', 'Serbia', 'Montenegro'],
+          'ottoman': ['Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Yemen'],
+          'bulgaria': ['Bulgaria'],
+          'russia': ['Russia', 'Ukraine', 'Estonia', 'Finland', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan'],
+          'france': ['France', 'Algeria', 'Tunisia', 'Morocco', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia', 'Senegal', 'Mali', 'Niger', 'Chad'],
+          'uk': ['United Kingdom', 'Ireland', 'India', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand'],
+          'italy': ['Italy', 'Libya', 'Eritrea', 'Somalia'],
+          'us': ['United States'],
+          'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea'],
+        },
+      },
+      {
+        year: 1918.9,
+        label: 'November 1918: Armistice, Central Powers collapse',
+        control: {
+          'uk': ['United Kingdom', 'Ireland', 'India', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand', 'Iraq', 'Israel', 'Jordan'],
+          'france': ['France', 'Belgium', 'Algeria', 'Tunisia', 'Morocco', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia', 'Senegal', 'Mali', 'Niger', 'Chad', 'Syria', 'Lebanon'],
+          'us': ['United States'],
+          'italy': ['Italy', 'Libya', 'Eritrea', 'Somalia'],
+          'serbia': ['Serbia', 'Montenegro', 'Croatia', 'Slovenia', 'Bosnia and Herzegovina', 'Macedonia'],
+          'poland': ['Poland'],
+          'romania': ['Romania', 'Moldova', 'Hungary'],
+          'germany': ['Germany'],
+          'austria': ['Austria'],
+          'turkey': ['Turkey'],
+          'russia': ['Russia', 'Ukraine', 'Belarus', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Georgia', 'Armenia', 'Azerbaijan'],
+          'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Napoleonic Wars',
+    snapshots: [
+      {
+        year: 1805.9,
+        label: 'December 1805: Austerlitz, end of Third Coalition',
+        control: {
+          'french-empire': ['France', 'Belgium', 'Netherlands', 'Luxembourg', 'Switzerland'],
+          'prussia': ['Germany'],
+          'austria': ['Austria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Italy'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan'],
+          'uk': ['United Kingdom', 'Ireland', 'India', 'Canada', 'Australia'],
+          'spain': ['Spain', 'Mexico', 'Cuba', 'Colombia', 'Peru', 'Argentina', 'Bolivia', 'Chile', 'Venezuela', 'Ecuador', 'Philippines'],
+          'portugal': ['Portugal', 'Brazil', 'Angola', 'Mozambique'],
+          'ottoman': ['Turkey', 'Egypt', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Greece', 'Bulgaria', 'Romania', 'Serbia', 'Bosnia and Herzegovina'],
+          'denmark': ['Denmark', 'Norway'],
+          'finland': ['Finland', 'Sweden'],
+        },
+      },
+      {
+        year: 1810.5,
+        label: '1810: French Empire at its peak',
+        control: {
+          'french-empire': ['France', 'Belgium', 'Netherlands', 'Luxembourg', 'Switzerland', 'Germany', 'Italy', 'Spain', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina'],
+          'austria': ['Austria', 'Hungary', 'Czechia', 'Slovakia'],
+          'prussia': ['Poland'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Finland'],
+          'uk': ['United Kingdom', 'Ireland', 'India', 'Canada', 'Australia'],
+          'portugal': ['Portugal', 'Brazil', 'Angola', 'Mozambique'],
+          'ottoman': ['Turkey', 'Egypt', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Greece', 'Bulgaria', 'Romania', 'Serbia'],
+          'finland': ['Sweden'],
+        },
+      },
+      {
+        year: 1812.5,
+        label: 'Summer 1812: Russian campaign',
+        control: {
+          'french-empire': ['France', 'Belgium', 'Netherlands', 'Luxembourg', 'Switzerland', 'Germany', 'Italy', 'Spain', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina', 'Poland', 'Lithuania', 'Belarus'],
+          'austria': ['Austria', 'Hungary', 'Czechia', 'Slovakia'],
+          'russia': ['Russia', 'Ukraine', 'Estonia', 'Latvia', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Finland'],
+          'uk': ['United Kingdom', 'Ireland', 'India', 'Canada', 'Australia', 'Portugal'],
+          'ottoman': ['Turkey', 'Egypt', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Greece', 'Bulgaria', 'Romania', 'Serbia'],
+          'finland': ['Sweden'],
+        },
+      },
+      {
+        year: 1813.8,
+        label: 'October 1813: Leipzig, the Battle of the Nations',
+        control: {
+          'french-empire': ['France', 'Belgium', 'Netherlands', 'Luxembourg', 'Switzerland', 'Italy'],
+          'prussia': ['Germany', 'Poland'],
+          'austria': ['Austria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Finland'],
+          'uk': ['United Kingdom', 'Ireland', 'India', 'Canada', 'Australia'],
+          'spain': ['Spain', 'Mexico', 'Cuba', 'Colombia', 'Peru', 'Argentina', 'Bolivia', 'Chile', 'Venezuela', 'Ecuador', 'Philippines'],
+          'portugal': ['Portugal', 'Brazil', 'Angola', 'Mozambique'],
+          'ottoman': ['Turkey', 'Egypt', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Greece', 'Bulgaria', 'Romania', 'Serbia'],
+          'finland': ['Sweden'],
+        },
+      },
+      {
+        year: 1815.5,
+        label: 'June 1815: Waterloo, Congress of Vienna',
+        control: {
+          'france': ['France'],
+          'prussia': ['Germany', 'Poland'],
+          'austria': ['Austria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina', 'Italy'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Finland'],
+          'uk': ['United Kingdom', 'Ireland', 'India', 'Canada', 'Australia', 'Belgium', 'Netherlands', 'Luxembourg'],
+          'spain': ['Spain', 'Mexico', 'Cuba', 'Colombia', 'Peru', 'Argentina', 'Bolivia', 'Chile', 'Venezuela', 'Ecuador', 'Philippines'],
+          'portugal': ['Portugal', 'Brazil', 'Angola', 'Mozambique'],
+          'ottoman': ['Turkey', 'Egypt', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Greece', 'Bulgaria', 'Romania', 'Serbia'],
+          'finland': ['Sweden', 'Norway'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Korean War',
+    snapshots: [
+      {
+        year: 1950.5,
+        label: 'June 1950: North Korean invasion',
+        control: {
+          'north-korea': ['North Korea'],
+          'south-korea': ['South Korea'],
+          'china-prc': ['China'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Canada', 'Australia', 'New Zealand'],
+          'ussr': ['Russia'],
+        },
+      },
+      {
+        year: 1950.75,
+        label: 'September 1950: Pusan defense, Inchon landing',
+        control: {
+          'north-korea': ['North Korea'],
+          'south-korea': ['South Korea'],
+          'china-prc': ['China'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Canada', 'Australia', 'New Zealand'],
+          'ussr': ['Russia'],
+        },
+      },
+      {
+        year: 1950.83,
+        label: 'November 1950: UN pushes to the Yalu',
+        control: {
+          'un-coalition': ['North Korea', 'South Korea'],
+          'china-prc': ['China'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Canada', 'Australia', 'New Zealand'],
+          'ussr': ['Russia'],
+        },
+      },
+      {
+        year: 1951.1,
+        label: 'January 1951: Chinese intervention, UN driven back',
+        control: {
+          'north-korea': ['North Korea'],
+          'south-korea': ['South Korea'],
+          'china-prc': ['China'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Canada', 'Australia', 'New Zealand'],
+          'ussr': ['Russia'],
+        },
+      },
+      {
+        year: 1953.6,
+        label: 'July 1953: Armistice at the 38th parallel',
+        control: {
+          'north-korea': ['North Korea'],
+          'south-korea': ['South Korea'],
+          'china-prc': ['China'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Canada', 'Australia', 'New Zealand'],
+          'ussr': ['Russia'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Vietnam War',
+    snapshots: [
+      {
+        year: 1954.7,
+        label: 'July 1954: Geneva partition at the 17th parallel',
+        control: {
+          'north-vietnam': ['Vietnam'],
+          'south-vietnam': ['Cambodia', 'Laos'],
+          'china-prc': ['China'],
+          'us': ['United States', 'Philippines'],
+          'ussr': ['Russia'],
+          'uk': ['United Kingdom'],
+        },
+      },
+      {
+        year: 1965.2,
+        label: 'February 1965: US ground escalation begins',
+        control: {
+          'north-vietnam': ['Vietnam'],
+          'south-vietnam': ['Cambodia', 'Laos'],
+          'china-prc': ['China'],
+          'us': ['United States', 'Philippines', 'Thailand', 'South Korea', 'Australia'],
+          'ussr': ['Russia'],
+        },
+      },
+      {
+        year: 1968.1,
+        label: 'January 1968: Tet Offensive',
+        control: {
+          'north-vietnam': ['Vietnam', 'Laos'],
+          'south-vietnam': ['Cambodia'],
+          'china-prc': ['China'],
+          'us': ['United States', 'Philippines', 'Thailand', 'South Korea', 'Australia'],
+          'ussr': ['Russia'],
+        },
+      },
+      {
+        year: 1973.1,
+        label: 'January 1973: Paris Peace Accords',
+        control: {
+          'north-vietnam': ['Vietnam'],
+          'south-vietnam': ['Cambodia', 'Laos'],
+          'china-prc': ['China'],
+          'us': ['United States', 'Philippines', 'Thailand', 'South Korea', 'Australia'],
+          'ussr': ['Russia'],
+        },
+      },
+      {
+        year: 1975.3,
+        label: 'April 1975: Fall of Saigon',
+        control: {
+          'north-vietnam': ['Vietnam', 'Cambodia', 'Laos'],
+          'china-prc': ['China'],
+          'us': ['United States', 'Philippines'],
+          'ussr': ['Russia'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Iraq War',
+    snapshots: [
+      {
+        year: 2003.2,
+        label: 'March 2003: Coalition invasion',
+        control: {
+          'iraq-saddam': ['Iraq'],
+          'coalition': ['United States', 'United Kingdom', 'Australia', 'Poland'],
+          'syria': ['Syria'],
+          'turkey': ['Turkey'],
+        },
+      },
+      {
+        year: 2003.5,
+        label: 'May 2003: Baghdad falls',
+        control: {
+          'coalition': ['United States', 'United Kingdom', 'Australia', 'Poland', 'Iraq'],
+          'syria': ['Syria'],
+          'turkey': ['Turkey'],
+        },
+      },
+      {
+        year: 2006.8,
+        label: 'Late 2006: Sectarian civil war',
+        control: {
+          'iraq-government': ['Iraq'],
+          'coalition': ['United States', 'United Kingdom', 'Australia'],
+          'syria': ['Syria'],
+          'turkey': ['Turkey'],
+        },
+      },
+      {
+        year: 2011.9,
+        label: 'December 2011: US withdrawal',
+        control: {
+          'iraq-government': ['Iraq'],
+          'us': ['United States'],
+          'syria': ['Syria'],
+          'turkey': ['Turkey'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'War in Afghanistan (2001–2021)',
+    snapshots: [
+      {
+        year: 2001.8,
+        label: 'October 2001: US strikes the Taliban',
+        control: {
+          'taliban': ['Afghanistan'],
+          'coalition': ['United States', 'United Kingdom', 'Canada'],
+          'pakistan': ['Pakistan'],
+        },
+      },
+      {
+        year: 2002.1,
+        label: 'January 2002: Northern Alliance enters Kabul',
+        control: {
+          'afghan-government': ['Afghanistan'],
+          'coalition': ['United States', 'United Kingdom', 'Canada', 'Germany', 'Italy', 'France', 'Australia'],
+        },
+      },
+      {
+        year: 2014.6,
+        label: 'July 2014: NATO combat mission ends',
+        control: {
+          'afghan-government': ['Afghanistan'],
+          'coalition': ['United States', 'United Kingdom'],
+        },
+      },
+      {
+        year: 2021.6,
+        label: 'August 2021: Kabul falls, Taliban return',
+        control: {
+          'taliban': ['Afghanistan'],
+          'us': ['United States'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Spanish–American War',
+    snapshots: [
+      {
+        year: 1898.3,
+        label: 'April 1898: USS Maine, war declared',
+        control: {
+          'spain': ['Spain', 'Cuba', 'Philippines', 'Puerto Rico'],
+          'us': ['United States'],
+        },
+      },
+      {
+        year: 1898.6,
+        label: 'August 1898: Spanish colonies fall',
+        control: {
+          'us': ['United States', 'Cuba', 'Philippines', 'Puerto Rico'],
+          'spain': ['Spain'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Crusades',
+    snapshots: [
+      {
+        year: 1095.0,
+        label: '1095: Council of Clermont, call for crusade',
+        control: {
+          'byzantine': ['Greece', 'Turkey', 'Bulgaria', 'Albania', 'Macedonia', 'Serbia'],
+          'seljuk': ['Iran', 'Iraq', 'Syria', 'Jordan', 'Lebanon', 'Israel'],
+          'fatimid': ['Egypt', 'Libya'],
+        },
+      },
+      {
+        year: 1099.6,
+        label: 'July 1099: Jerusalem taken',
+        control: {
+          'crusader': ['Israel', 'Lebanon', 'Jordan', 'Syria'],
+          'byzantine': ['Greece', 'Turkey', 'Bulgaria', 'Albania', 'Macedonia'],
+          'fatimid': ['Egypt', 'Libya'],
+          'seljuk': ['Iran', 'Iraq'],
+        },
+      },
+      {
+        year: 1144.9,
+        label: '1144: Edessa falls, Second Crusade called',
+        control: {
+          'crusader': ['Israel', 'Lebanon', 'Jordan'],
+          'saracen': ['Syria', 'Iraq', 'Iran'],
+          'byzantine': ['Greece', 'Turkey', 'Bulgaria'],
+          'fatimid': ['Egypt'],
+        },
+      },
+      {
+        year: 1187.7,
+        label: 'July 1187: Hattin, Jerusalem retaken by Saladin',
+        control: {
+          'crusader': ['Lebanon'],
+          'saracen': ['Israel', 'Jordan', 'Syria', 'Iraq', 'Egypt'],
+          'byzantine': ['Greece', 'Turkey', 'Bulgaria'],
+        },
+      },
+      {
+        year: 1291.5,
+        label: 'May 1291: Fall of Acre, end of crusader Levant',
+        control: {
+          'saracen': ['Israel', 'Lebanon', 'Jordan', 'Syria', 'Egypt', 'Iraq'],
+          'byzantine': ['Greece', 'Turkey'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Mongol invasions',
+    snapshots: [
+      {
+        year: 1206.0,
+        label: '1206: Genghis Khan unifies the Mongol tribes',
+        control: {
+          'mongol': ['Mongolia'],
+          'china': ['China'],
           'russia': ['Russia'],
         },
       },
       {
-        year: 2025.5,
-        label: 'Mid-2025: Stalemate along the eastern front',
+        year: 1227.0,
+        label: '1227: Death of Genghis, Mongols hold north China and central Asia',
         control: {
+          'mongol': ['Mongolia', 'Kazakhstan', 'Kyrgyzstan', 'Tajikistan', 'Uzbekistan', 'Turkmenistan'],
+          'china': ['China'],
+        },
+      },
+      {
+        year: 1241.4,
+        label: 'April 1241: Legnica and Mohi, Mongols at the gates of Europe',
+        control: {
+          'mongol': ['Mongolia', 'China', 'Kazakhstan', 'Kyrgyzstan', 'Tajikistan', 'Uzbekistan', 'Turkmenistan', 'Russia', 'Belarus', 'Ukraine', 'Iran', 'Afghanistan', 'Pakistan', 'Poland', 'Hungary', 'Romania', 'Bulgaria'],
+        },
+      },
+      {
+        year: 1260.7,
+        label: 'September 1260: Ain Jalut, Mongol westward advance halted',
+        control: {
+          'mongol': ['Mongolia', 'China', 'Kazakhstan', 'Kyrgyzstan', 'Tajikistan', 'Uzbekistan', 'Turkmenistan', 'Russia', 'Belarus', 'Ukraine', 'Iran', 'Iraq', 'Afghanistan', 'Pakistan'],
+          'saracen': ['Syria', 'Jordan', 'Israel', 'Lebanon', 'Egypt'],
+        },
+      },
+      {
+        year: 1294.0,
+        label: '1294: Kublai Khan dies, Mongol Empire at full extent',
+        control: {
+          'mongol': ['Mongolia', 'China', 'North Korea', 'South Korea', 'Kazakhstan', 'Kyrgyzstan', 'Tajikistan', 'Uzbekistan', 'Turkmenistan', 'Russia', 'Belarus', 'Ukraine', 'Iran', 'Iraq', 'Afghanistan', 'Pakistan', 'Georgia', 'Armenia', 'Azerbaijan'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Second Sino-Japanese War',
+    snapshots: [
+      {
+        year: 1937.6,
+        label: 'July 1937: Marco Polo Bridge incident',
+        control: {
+          'roc-china': ['China'],
+          'imperial-japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea'],
+          'ussr': ['Russia', 'Mongolia'],
+        },
+      },
+      {
+        year: 1940.0,
+        label: '1940: Japanese forces hold Chinese coast and Manchuria',
+        control: {
+          'roc-china': ['China'],
+          'imperial-japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea'],
+          'ussr': ['Russia', 'Mongolia'],
+        },
+      },
+      {
+        year: 1945.7,
+        label: 'September 1945: Japan surrenders',
+        control: {
+          'roc-china': ['China', 'Taiwan'],
+          'us': ['Japan', 'South Korea'],
+          'ussr': ['Russia', 'Mongolia', 'North Korea'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Falklands War',
+    snapshots: [
+      {
+        year: 1982.25,
+        label: 'April 1982: Argentine forces seize the Falklands',
+        control: {
+          'argentina': ['Argentina', 'Chile'],
+          'uk': ['United Kingdom'],
+        },
+      },
+      {
+        year: 1982.5,
+        label: 'June 1982: British task force retakes the islands',
+        control: {
+          'argentina': ['Argentina'],
+          'uk': ['United Kingdom', 'Chile'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'War of 1812',
+    snapshots: [
+      {
+        year: 1812.5,
+        label: 'June 1812: United States declares war',
+        control: {
+          'us': ['United States'],
+          'british-empire': ['United Kingdom', 'Canada'],
+        },
+      },
+      {
+        year: 1814.7,
+        label: 'August 1814: Washington burned',
+        control: {
+          'us': ['United States'],
+          'british-empire': ['United Kingdom', 'Canada'],
+        },
+      },
+      {
+        year: 1815.1,
+        label: 'January 1815: New Orleans, Treaty of Ghent ratified',
+        control: {
+          'us': ['United States'],
+          'british-empire': ['United Kingdom', 'Canada'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Crimean War',
+    snapshots: [
+      {
+        year: 1853.5,
+        label: 'July 1853: Russian troops enter the Danubian Principalities',
+        control: {
+          'russian-green': ['Russia', 'Ukraine', 'Belarus'],
+          'ottoman-burgundy': ['Turkey', 'Bulgaria', 'Romania', 'Greece', 'Serbia', 'Macedonia', 'Albania', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Egypt', 'Libya'],
+          'uk': ['United Kingdom'],
+          'french-empire': ['France'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia'],
+        },
+      },
+      {
+        year: 1854.3,
+        label: 'March 1854: UK and France join the Ottomans',
+        control: {
+          'russian-green': ['Russia', 'Ukraine', 'Belarus'],
+          'ottoman-burgundy': ['Turkey', 'Bulgaria', 'Romania', 'Greece', 'Serbia', 'Macedonia', 'Albania', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Egypt', 'Libya'],
+          'uk': ['United Kingdom'],
+          'french-empire': ['France'],
+        },
+      },
+      {
+        year: 1856.2,
+        label: 'March 1856: Treaty of Paris',
+        control: {
+          'russian-green': ['Russia', 'Ukraine', 'Belarus'],
+          'ottoman-burgundy': ['Turkey', 'Bulgaria', 'Romania', 'Greece', 'Serbia', 'Macedonia', 'Albania', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Egypt', 'Libya'],
+          'uk': ['United Kingdom'],
+          'french-empire': ['France'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Franco-Prussian War',
+    snapshots: [
+      {
+        year: 1870.6,
+        label: 'July 1870: France declares war',
+        control: {
+          'prussian-blue': ['Germany'],
+          'french-empire': ['France', 'Algeria', 'Tunisia', 'Morocco'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary'],
+          'uk': ['United Kingdom'],
+        },
+      },
+      {
+        year: 1870.75,
+        label: 'September 1870: Sedan, Napoleon III captured',
+        control: {
+          'prussian-blue': ['Germany'],
+          'french-empire': ['France', 'Algeria', 'Tunisia', 'Morocco'],
+        },
+      },
+      {
+        year: 1871.4,
+        label: 'May 1871: Treaty of Frankfurt, Alsace-Lorraine ceded',
+        control: {
+          'prussian-blue': ['Germany'],
+          'french-empire': ['France', 'Algeria', 'Tunisia', 'Morocco'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Russo-Japanese War',
+    snapshots: [
+      {
+        year: 1904.1,
+        label: 'February 1904: Japanese strike Port Arthur',
+        control: {
+          'imperial-japan': ['Japan'],
+          'russian-green': ['Russia', 'Belarus', 'Ukraine', 'Kazakhstan', 'Mongolia'],
+          'china': ['China'],
+          'roc-china': ['Taiwan', 'North Korea', 'South Korea'],
+        },
+      },
+      {
+        year: 1905.6,
+        label: 'September 1905: Treaty of Portsmouth',
+        control: {
+          'imperial-japan': ['Japan', 'North Korea', 'South Korea', 'Taiwan'],
+          'russian-green': ['Russia', 'Belarus', 'Ukraine', 'Kazakhstan', 'Mongolia'],
+          'china': ['China'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Greek War of Independence',
+    snapshots: [
+      {
+        year: 1821.2,
+        label: 'March 1821: Uprising in the Peloponnese',
+        control: {
+          'ottoman-burgundy': ['Turkey', 'Greece', 'Bulgaria', 'Albania', 'Macedonia', 'Serbia', 'Romania', 'Egypt', 'Libya', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia'],
+          'russian-green': ['Russia', 'Ukraine', 'Belarus'],
+          'uk': ['United Kingdom'],
+          'french-empire': ['France'],
+        },
+      },
+      {
+        year: 1827.8,
+        label: 'October 1827: Navarino, Ottoman fleet sunk',
+        control: {
+          'ottoman-burgundy': ['Turkey', 'Greece', 'Bulgaria', 'Albania', 'Macedonia', 'Serbia', 'Romania', 'Egypt', 'Libya', 'Syria', 'Lebanon', 'Israel', 'Jordan'],
+          'russian-green': ['Russia', 'Ukraine', 'Belarus'],
+          'uk': ['United Kingdom'],
+          'french-empire': ['France'],
+        },
+      },
+      {
+        year: 1832.4,
+        label: 'May 1832: Treaty of Constantinople, Greek independence',
+        control: {
+          'greek-slate': ['Greece'],
+          'ottoman-burgundy': ['Turkey', 'Bulgaria', 'Albania', 'Macedonia', 'Serbia', 'Romania', 'Egypt', 'Libya', 'Syria', 'Lebanon', 'Israel', 'Jordan'],
+          'russian-green': ['Russia', 'Ukraine', 'Belarus'],
+          'uk': ['United Kingdom'],
+          'french-empire': ['France'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Mexican–American War',
+    snapshots: [
+      {
+        year: 1846.4,
+        label: 'May 1846: United States declares war',
+        control: {
+          'us': ['United States'],
+          'mexico': ['Mexico'],
+          'uk': ['Canada'],
+          'spain': ['Spain', 'Cuba', 'Puerto Rico', 'Philippines'],
+        },
+      },
+      {
+        year: 1847.7,
+        label: 'September 1847: Mexico City falls',
+        control: {
+          'us': ['United States'],
+          'mexico': ['Mexico'],
+        },
+      },
+      {
+        year: 1848.2,
+        label: 'February 1848: Treaty of Guadalupe Hidalgo',
+        control: {
+          'us': ['United States'],
+          'mexico': ['Mexico'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'French Revolutionary Wars',
+    snapshots: [
+      {
+        year: 1792.4,
+        label: 'April 1792: France declares war on Austria',
+        control: {
+          'kingdom-france-bourbon': ['France'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia', 'Belgium', 'Luxembourg'],
+          'prussian-blue': ['Germany', 'Poland'],
+          'russian-green': ['Russia', 'Ukraine', 'Belarus'],
+          'uk': ['United Kingdom', 'Ireland'],
+          'spain': ['Spain', 'Portugal'],
+          'habsburg-spain': ['Italy'],
+        },
+      },
+      {
+        year: 1796.5,
+        label: 'May 1796: Napoleon takes the Army of Italy across the Alps',
+        control: {
+          'kingdom-france-bourbon': ['France', 'Belgium', 'Luxembourg', 'Netherlands'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia', 'Italy'],
+          'prussian-blue': ['Germany', 'Poland'],
+          'russian-green': ['Russia', 'Ukraine', 'Belarus'],
+          'uk': ['United Kingdom', 'Ireland'],
+          'spain': ['Spain', 'Portugal'],
+        },
+      },
+      {
+        year: 1800.6,
+        label: 'June 1800: Marengo, French dominance in Italy restored',
+        control: {
+          'kingdom-france-bourbon': ['France', 'Belgium', 'Luxembourg', 'Netherlands', 'Italy', 'Switzerland'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia'],
+          'prussian-blue': ['Germany', 'Poland'],
+          'russian-green': ['Russia', 'Ukraine', 'Belarus'],
+          'uk': ['United Kingdom', 'Ireland'],
+          'spain': ['Spain', 'Portugal'],
+        },
+      },
+      {
+        year: 1802.2,
+        label: 'March 1802: Treaty of Amiens, brief peace',
+        control: {
+          'kingdom-france-bourbon': ['France', 'Belgium', 'Luxembourg', 'Netherlands', 'Italy', 'Switzerland'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia'],
+          'prussian-blue': ['Germany', 'Poland'],
+          'russian-green': ['Russia', 'Ukraine', 'Belarus'],
+          'uk': ['United Kingdom', 'Ireland'],
+          'spain': ['Spain', 'Portugal'],
+        },
+      },
+    ],
+  },
+  {
+    war: "Hundred Years' War",
+    snapshots: [
+      {
+        year: 1337.3,
+        label: 'May 1337: Edward III claims the French crown',
+        control: {
+          'kingdom-england': ['United Kingdom', 'Ireland'],
+          'kingdom-france-bourbon': ['France'],
+          'habsburg-spain': ['Spain', 'Portugal'],
+          'austria': ['Germany', 'Czechia', 'Austria'],
+        },
+      },
+      {
+        year: 1360.4,
+        label: 'May 1360: Treaty of Brétigny, English holdings at their peak',
+        control: {
+          'kingdom-england': ['United Kingdom', 'Ireland'],
+          'kingdom-france-bourbon': ['France'],
+          'habsburg-spain': ['Spain', 'Portugal'],
+        },
+      },
+      {
+        year: 1429.4,
+        label: 'May 1429: Joan of Arc lifts the siege of Orléans',
+        control: {
+          'kingdom-england': ['United Kingdom', 'Ireland'],
+          'kingdom-france-bourbon': ['France'],
+        },
+      },
+      {
+        year: 1453.6,
+        label: 'July 1453: Castillon, English driven from France',
+        control: {
+          'kingdom-england': ['United Kingdom', 'Ireland'],
+          'kingdom-france-bourbon': ['France'],
+        },
+      },
+    ],
+  },
+  {
+    war: "Seven Years' War",
+    snapshots: [
+      {
+        year: 1756.5,
+        label: '1756: Prussia opens with the invasion of Saxony',
+        control: {
+          'prussia': ['Germany'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia'],
+          'french-empire': ['France'],
+          'british-empire': ['United Kingdom', 'Canada', 'India'],
           'russia': ['Russia'],
+          'spain': ['Spain', 'Mexico'],
+        },
+      },
+      {
+        year: 1759.7,
+        label: '1759: Annus Mirabilis, Britain takes Quebec',
+        control: {
+          'prussia': ['Germany'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia'],
+          'french-empire': ['France'],
+          'british-empire': ['United Kingdom', 'Canada', 'India'],
+          'russia': ['Russia'],
+          'spain': ['Spain', 'Mexico'],
+        },
+      },
+      {
+        year: 1763.2,
+        label: 'February 1763: Treaty of Paris, Britain wins North America',
+        control: {
+          'prussia': ['Germany'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia'],
+          'french-empire': ['France'],
+          'british-empire': ['United Kingdom', 'Canada', 'India'],
+          'russia': ['Russia'],
+          'spain': ['Spain', 'Mexico'],
         },
       },
     ],
   },
 ];
+
+// OWNER_LABELS gives each owner key a short human-readable label for the
+// faction legend during war cinematic playback. The legend reads off the
+// currently active snapshot's control map keys and looks them up here.
+export const OWNER_LABELS: Record<string, string> = {
+  'nazi-germany': 'Nazi Germany',
+  'imperial-germany': 'German Empire',
+  'germany': 'Germany',
+  'japan': 'Japan',
+  'italy': 'Italy',
+  'vichy': 'Vichy France',
+  'ussr': 'Soviet Union',
+  'russia': 'Russia',
+  'ukraine': 'Ukraine',
+  'us': 'United States',
+  'uk': 'United Kingdom',
+  'canada': 'Canada',
+  'australia': 'Australia',
+  'new-zealand': 'New Zealand',
+  'france': 'France',
+  'french-empire': 'French Empire',
+  'china-roc': 'Republic of China',
+  'china-prc': 'PRC',
+  'china': 'China',
+  'poland': 'Poland',
+  'ottoman': 'Ottoman Empire',
+  'turkey': 'Turkey',
+  'syria': 'Syria',
+  'isis': 'Islamic State',
+  'hts': 'HTS',
+  'us-union': 'Union',
+  'us-confederacy': 'Confederacy',
+  'rome': 'Rome',
+  'finland': 'Finland and Sweden',
+  'hungary': 'Hungary',
+  'romania': 'Romania',
+  'bulgaria': 'Bulgaria',
+  'yugoslavia': 'Yugoslavia',
+  'greece': 'Greece',
+  'netherlands': 'Netherlands',
+  'belgium': 'Belgium',
+  'norway': 'Norway',
+  'denmark': 'Denmark',
+  'austria-hungary': 'Austria-Hungary',
+  'serbia': 'Serbia',
+  'north-korea': 'North Korea',
+  'south-korea': 'South Korea',
+  'un-coalition': 'UN coalition',
+  'prussia': 'Prussia',
+  'austria': 'Austria',
+  'spain': 'Spain',
+  'portugal': 'Portugal',
+  'british-empire': 'British Empire',
+  'continental-army': 'Continental Army',
+  'mongol': 'Mongol Empire',
+  'crusader': 'Crusader States',
+  'saracen': 'Saracen forces',
+  'byzantine': 'Byzantine Empire',
+  'fatimid': 'Fatimid Caliphate',
+  'seljuk': 'Seljuk Empire',
+  'north-vietnam': 'North Vietnam',
+  'south-vietnam': 'South Vietnam',
+  'viet-cong': 'Viet Cong',
+  'pathet-lao': 'Pathet Lao',
+  'khmer-rouge': 'Khmer Rouge',
+  'coalition': 'Coalition forces',
+  'iraq-saddam': 'Ba’athist Iraq',
+  'iraq-government': 'Iraqi government',
+  'taliban': 'Taliban',
+  'afghan-government': 'Afghan government',
+  'imperial-japan': 'Empire of Japan',
+  'roc-china': 'Republic of China',
+  'mexico': 'Mexico',
+  'argentina': 'Argentina',
+  'dutch-republic': 'Dutch Republic',
+  'habsburg-spain': 'Habsburg Spain',
+  'kingdom-france-bourbon': 'Kingdom of France',
+  'kingdom-england': 'Kingdom of England',
+  'kingdom-scotland': 'Kingdom of Scotland',
+  'denmark-norway': 'Denmark-Norway',
+  'sweden-empire': 'Swedish Empire',
+  'rus': 'Russian forces',
+  'cuba-spain': 'Spanish Cuba',
+  'us-puerto-rico': 'US-held Puerto Rico',
+};
 
 // findSnapshot returns the territory snapshot in effect for a given war
 // at a given decimal year. Returns null only when the war has no snapshots

@@ -6,18 +6,19 @@ import type {
   Movement,
   Annotation,
   Faction,
+  PaletteContext,
 } from '../../types/replay';
 import { factionColorFor, factionGlowFor } from '../../types/replay';
 
 interface TacticalMapProps {
   phase: Phase;
   aspectRatio: number;
-  aggressor?: Faction;
+  paletteCtx?: PaletteContext;
 }
 
 const VIEW_H = 100;
 
-export default function TacticalMap({ phase, aspectRatio, aggressor }: TacticalMapProps) {
+export default function TacticalMap({ phase, aspectRatio, paletteCtx }: TacticalMapProps) {
   const viewW = useMemo(() => Math.round(VIEW_H * aspectRatio), [aspectRatio]);
 
   // Camera transform: when the phase declares a focus rect, scale+translate
@@ -62,20 +63,27 @@ export default function TacticalMap({ phase, aspectRatio, aggressor }: TacticalM
             <stop offset="60%" stopColor="rgba(0,0,0,0)" />
             <stop offset="100%" stopColor="rgba(0,0,0,0.5)" />
           </radialGradient>
-          {(['a', 'b', 'c'] as Faction[]).map((f) => (
-            <marker
-              key={f}
-              id={`arrow-${f}`}
-              viewBox="0 0 14 14"
-              refX="11"
-              refY="7"
-              markerWidth="6"
-              markerHeight="6"
-              orient="auto-start-reverse"
-            >
-              <path d="M 0 0 L 14 7 L 0 14 L 4 7 z" fill={factionColorFor(f, aggressor)} />
-            </marker>
-          ))}
+          {(['a', 'b', 'c'] as Faction[]).map((f) => {
+            const c = factionColorFor(f, paletteCtx);
+            return (
+              <marker
+                key={f}
+                id={`arrow-${f}`}
+                viewBox="0 0 16 16"
+                refX="13"
+                refY="8"
+                markerWidth="9"
+                markerHeight="9"
+                orient="auto-start-reverse"
+              >
+                <path
+                  d="M 0 1 L 16 8 L 0 15 L 5.5 8 z"
+                  fill={c}
+                  style={{ filter: `drop-shadow(0 0 1.4px ${c})` }}
+                />
+              </marker>
+            );
+          })}
         </defs>
 
         <rect x="0" y="0" width={viewW} height={VIEW_H} fill="url(#bg-glow)" />
@@ -90,19 +98,22 @@ export default function TacticalMap({ phase, aspectRatio, aggressor }: TacticalM
             <TerrainShape key={`terrain-${i}`} terrain={t} viewW={viewW} />
           ))}
 
-          {(phase.movements ?? []).map((m, i, all) => (
-            <MovementArrow key={`mv-${i}-${phase.index}`} movement={m} viewW={viewW} index={i} total={all.length} aggressor={aggressor} />
-          ))}
-
+          {/* Render order: terrain shapes, unit bodies (no labels), movement
+              arrows, impact pulses, unit labels. This puts arrow strokes and
+              arrowhead pulses on top of unit bodies so the destination is
+              visible, and floats labels above the rest so the text remains
+              readable without burying the arrows themselves. */}
           {phase.units.map((u) => (
-            <UnitBlock key={`unit-${u.label}`} unit={u} viewW={viewW} aggressor={aggressor} />
+            <UnitBlock key={`unit-${u.label}`} unit={u} viewW={viewW} paletteCtx={paletteCtx} />
           ))}
 
-          {/* Engagement pulses: shockwave rings + bright cores fire at the
-              destination of every charge / flank movement (to mark the point
-              of impact) and at the centre of every destroyed unit (to mark
-              the kill). Layered on top of units but below labels so the
-              user sees the punch without losing the unit identity. */}
+          {(phase.movements ?? []).map((m, i, all) => (
+            <MovementArrow key={`mv-${i}-${phase.index}`} movement={m} viewW={viewW} index={i} total={all.length} paletteCtx={paletteCtx} />
+          ))}
+
+          {/* Engagement pulses fire at the destination of every charge / flank
+              movement (the point of impact) and at the centre of every
+              destroyed unit (the kill). */}
           {(phase.movements ?? [])
             .filter((m) => m.kind === 'charge' || m.kind === 'flank')
             .map((m, i, all) => (
@@ -110,7 +121,7 @@ export default function TacticalMap({ phase, aspectRatio, aggressor }: TacticalM
                 key={`impact-mv-${i}-${phase.index}`}
                 x={scaleX(m.toX, viewW)}
                 y={m.toY}
-                color={factionColorFor(m.faction, aggressor)}
+                color={factionColorFor(m.faction, paletteCtx)}
                 delayMs={1200 + i * 250}
               />
             ))}
@@ -121,11 +132,18 @@ export default function TacticalMap({ phase, aspectRatio, aggressor }: TacticalM
                 key={`impact-u-${u.label}-${phase.index}`}
                 x={scaleX(u.x, viewW)}
                 y={u.y}
-                color={factionColorFor(u.faction, aggressor)}
+                color={factionColorFor(u.faction, paletteCtx)}
                 delayMs={600 + i * 220}
                 kill
               />
             ))}
+
+          {/* Unit labels render last so the text sits on top of arrows
+              and impact pulses. Strong dark halo via paintOrder/stroke keeps
+              them readable wherever they fall. */}
+          {phase.units.map((u) => (
+            <UnitLabel key={`label-${u.label}`} unit={u} viewW={viewW} paletteCtx={paletteCtx} />
+          ))}
 
           {(phase.annotations ?? []).map((a, i) => (
             <AnnotationText key={`ann-${i}`} annotation={a} viewW={viewW} />
@@ -475,12 +493,12 @@ function TerrainShape({ terrain, viewW }: TerrainProps) {
 interface UnitProps {
   unit: Unit;
   viewW: number;
-  aggressor?: Faction;
+  paletteCtx?: PaletteContext;
 }
 
-function UnitBlock({ unit, viewW, aggressor }: UnitProps) {
-  const color = factionColorFor(unit.faction, aggressor);
-  const glow = factionGlowFor(unit.faction, aggressor);
+function UnitBlock({ unit, viewW, paletteCtx }: UnitProps) {
+  const color = factionColorFor(unit.faction, paletteCtx);
+  const glow = factionGlowFor(unit.faction, paletteCtx);
   const x = scaleX(unit.x, viewW);
   const y = unit.y;
   const w = scaleX(unit.w ?? 8, viewW) - scaleX(0, viewW);
@@ -692,14 +710,40 @@ function UnitBlock({ unit, viewW, aggressor }: UnitProps) {
     >
       {body}
       {statusOverlay}
+    </g>
+  );
+}
+
+// UnitLabel renders just the unit's text label, in its own pass so the
+// rendering order is: terrain, unit bodies, arrows, impacts, labels. This
+// keeps the arrow strokes and arrowhead pulses visible at unit-destination
+// points instead of being covered by the label that used to sit in the
+// same group as the body.
+function UnitLabel({ unit, viewW, paletteCtx: _paletteCtx }: UnitProps) {
+  const x = scaleX(unit.x, viewW);
+  const y = unit.y;
+  const w = scaleX(unit.w ?? 8, viewW) - scaleX(0, viewW);
+  const h = unit.h ?? 6;
+  const dim = unit.status && ['broken', 'routed', 'destroyed'].includes(unit.status);
+  const opacity = dim ? 0.45 : unit.status === 'destroyed' ? 0.3 : 0.92;
+  return (
+    <g
+      transform={`translate(${x} ${y})`}
+      style={{ transition: 'transform 0.9s cubic-bezier(0.4, 0, 0.2, 1)' }}
+      opacity={opacity}
+    >
       <text
-        x={cx}
-        y={top + h + 2}
-        fontSize="1.6"
+        x={0}
+        y={h / 2 + 2}
+        fontSize="1.5"
         textAnchor="middle"
         fill="#e2e8f0"
-        opacity="0.85"
-        style={{ paintOrder: 'stroke', stroke: 'rgba(10,13,24,0.85)', strokeWidth: 0.8 }}
+        style={{
+          paintOrder: 'stroke',
+          stroke: 'rgba(8,11,20,0.95)',
+          strokeWidth: 1.1,
+          letterSpacing: '0.01em',
+        }}
       >
         {unit.label}
       </text>
@@ -717,11 +761,11 @@ interface MovementProps {
   // total is the number of movements in the phase, used to scale per-arrow
   // delay so the full choreography always finishes before the next phase.
   total: number;
-  aggressor?: Faction;
+  paletteCtx?: PaletteContext;
 }
 
-function MovementArrow({ movement, viewW, index, total, aggressor }: MovementProps) {
-  const color = factionColorFor(movement.faction, aggressor);
+function MovementArrow({ movement, viewW, index, total, paletteCtx }: MovementProps) {
+  const color = factionColorFor(movement.faction, paletteCtx);
   const x1 = scaleX(movement.fromX, viewW);
   const y1 = movement.fromY;
   const x2 = scaleX(movement.toX, viewW);
@@ -838,23 +882,81 @@ function MovementArrow({ movement, viewW, index, total, aggressor }: MovementPro
         />
       )}
 
-      {/* Arrowhead glow pulse at the destination, fires once the trace
-          lands. Reads as the column hitting the line. Skipped for routs
-          and retreats. */}
+      {/* Tracer comet train: a leading bright bead followed by three
+          fainter trailing beads, all pinned to the arrow's quadratic path
+          via SMIL animateMotion. The trail makes the movement feel like a
+          live force in motion, not a static line. Skipped for retreats and
+          routs since those should look broken, not driven. */}
       {kind !== 'retreat' && kind !== 'withdrawal' && kind !== 'rout' && (
-        <circle
-          cx={x2}
-          cy={y2}
-          r={1.6}
-          fill={color}
-          opacity={0}
-          style={{
-            transformBox: 'fill-box',
-            transformOrigin: 'center',
-            animation: `arrowhead-pulse 1100ms ${stagger + 1.45}s cubic-bezier(.25,.7,.25,1) forwards`,
-            filter: `drop-shadow(0 0 1.4px ${color})`,
-          }}
-        />
+        <>
+          {[
+            { r: 1.05, peak: 1.0,  beginOffset: 0.00, fade: '0;1;1;0',          keyTimes: '0;0.12;0.86;1' },
+            { r: 0.85, peak: 0.78, beginOffset: 0.06, fade: '0;0.78;0.78;0',    keyTimes: '0;0.15;0.84;1' },
+            { r: 0.65, peak: 0.55, beginOffset: 0.13, fade: '0;0.55;0.55;0',    keyTimes: '0;0.20;0.82;1' },
+            { r: 0.45, peak: 0.32, beginOffset: 0.20, fade: '0;0.32;0.32;0',    keyTimes: '0;0.25;0.80;1' },
+          ].map((t, i) => (
+            <circle
+              key={`comet-${i}`}
+              r={t.r}
+              fill="#fff"
+              opacity={0}
+              style={{ filter: `drop-shadow(0 0 ${1.4 + t.r}px ${color}) drop-shadow(0 0 ${2.0 + t.r * 1.4}px ${color})` }}
+            >
+              <animate
+                attributeName="opacity"
+                values={t.fade}
+                keyTimes={t.keyTimes}
+                dur="1.35s"
+                begin={`${stagger + 0.25 + t.beginOffset}s`}
+                fill="freeze"
+              />
+              <animateMotion
+                dur="1.35s"
+                begin={`${stagger + 0.25 + t.beginOffset}s`}
+                path={path}
+                rotate="0"
+                fill="freeze"
+              />
+            </circle>
+          ))}
+        </>
+      )}
+
+      {/* Arrowhead glow pulse at the destination, fires once the trace
+          lands. A bright inner core plus a wider, slightly delayed outer
+          halo reads as the column hitting the line. Skipped for routs and
+          retreats. */}
+      {kind !== 'retreat' && kind !== 'withdrawal' && kind !== 'rout' && (
+        <>
+          <circle
+            cx={x2}
+            cy={y2}
+            r={1.9}
+            fill={color}
+            opacity={0}
+            style={{
+              transformBox: 'fill-box',
+              transformOrigin: 'center',
+              animation: `arrowhead-pulse 1200ms ${stagger + 1.45}s cubic-bezier(.25,.7,.25,1) forwards`,
+              filter: `drop-shadow(0 0 1.8px ${color}) drop-shadow(0 0 3px ${color})`,
+            }}
+          />
+          <circle
+            cx={x2}
+            cy={y2}
+            r={2.6}
+            fill="none"
+            stroke={color}
+            strokeWidth={0.45}
+            opacity={0}
+            style={{
+              transformBox: 'fill-box',
+              transformOrigin: 'center',
+              animation: `arrowhead-pulse 1500ms ${stagger + 1.55}s cubic-bezier(.25,.7,.25,1) forwards`,
+              filter: `drop-shadow(0 0 1.4px ${color})`,
+            }}
+          />
+        </>
       )}
 
       {movement.label && (
@@ -920,18 +1022,24 @@ interface ImpactPulseProps {
 // happened here" consistently across the 2D tactical map and the 3D
 // globe.
 function ImpactPulse({ x, y, color, delayMs, kill = false }: ImpactPulseProps) {
-  // Spark vectors, normalised to a tactical-map unit radius (~3 units).
-  // Eight outgoing motes scattered around a circle, jittered so they do
-  // not look like a perfect star.
+  // Spark vectors: twelve motes scattered around a circle at 30° steps,
+  // with the radii lightly jittered so the burst does not look like a
+  // perfect star. A "kill" gets an extra outer-debris pass that flings
+  // smaller motes further so the destruction reads as decisive.
   const sparks = [
-    { dx: 6.0, dy: 0 }, { dx: 4.2, dy: 4.2 },
-    { dx: 0, dy: 6.0 }, { dx: -4.2, dy: 4.2 },
-    { dx: -6.0, dy: 0 }, { dx: -4.2, dy: -4.2 },
-    { dx: 0, dy: -6.0 }, { dx: 4.2, dy: -4.2 },
+    { dx: 6.2, dy: 0 },     { dx: 5.4, dy: 3.1 },   { dx: 3.1, dy: 5.4 },
+    { dx: 0, dy: 6.2 },     { dx: -3.1, dy: 5.4 },  { dx: -5.4, dy: 3.1 },
+    { dx: -6.2, dy: 0 },    { dx: -5.4, dy: -3.1 }, { dx: -3.1, dy: -5.4 },
+    { dx: 0, dy: -6.2 },    { dx: 3.1, dy: -5.4 },  { dx: 5.4, dy: -3.1 },
   ];
+  const outerSparks = kill ? [
+    { dx: 9.5, dy: 1.3 },   { dx: 6.6, dy: 7.0 },   { dx: 0.5, dy: 9.8 },
+    { dx: -6.6, dy: 7.0 },  { dx: -9.5, dy: 1.3 },  { dx: -6.6, dy: -7.0 },
+    { dx: 0.5, dy: -9.8 },  { dx: 6.6, dy: -7.0 },
+  ] : [];
   return (
     <g style={{ pointerEvents: 'none' }}>
-      {/* Outward shockwave ring. */}
+      {/* Primary shockwave ring. Tight start, expands fast. */}
       <circle
         cx={x} cy={y} r={1.4}
         fill="none"
@@ -944,19 +1052,34 @@ function ImpactPulse({ x, y, color, delayMs, kill = false }: ImpactPulseProps) {
           animation: `impact-ring 1400ms ${delayMs}ms cubic-bezier(.2,.6,.25,1) forwards`,
         }}
       />
-      {/* Wider, slower second ring for kills only — reads as "this was a
-          real kill, not a glancing blow". */}
+      {/* Secondary shockwave ring, slightly delayed so the eye sees two
+          concentric waves expanding rather than a single line. Always on
+          (not just kills) so every charge / flank reads as a meaningful hit. */}
+      <circle
+        cx={x} cy={y} r={1.8}
+        fill="none"
+        stroke={color}
+        strokeWidth={0.45}
+        style={{
+          opacity: 0,
+          transformBox: 'fill-box',
+          transformOrigin: 'center',
+          animation: `impact-ring 1700ms ${delayMs + 140}ms cubic-bezier(.2,.6,.25,1) forwards`,
+        }}
+      />
+      {/* Third shockwave for kills only — reads as "this was a real kill,
+          not a glancing blow". Even wider, even slower. */}
       {kill && (
         <circle
-          cx={x} cy={y} r={1.6}
+          cx={x} cy={y} r={2.2}
           fill="none"
           stroke={color}
-          strokeWidth={0.45}
+          strokeWidth={0.35}
           style={{
             opacity: 0,
             transformBox: 'fill-box',
             transformOrigin: 'center',
-            animation: `impact-ring 1900ms ${delayMs + 220}ms cubic-bezier(.2,.6,.25,1) forwards`,
+            animation: `impact-ring 2200ms ${delayMs + 360}ms cubic-bezier(.2,.6,.25,1) forwards`,
           }}
         />
       )}
@@ -972,7 +1095,7 @@ function ImpactPulse({ x, y, color, delayMs, kill = false }: ImpactPulseProps) {
           filter: `drop-shadow(0 0 1.2px ${color})`,
         }}
       />
-      {/* Debris sparks: eight motes flung out from the center. */}
+      {/* Inner debris burst. */}
       {sparks.map((s, i) => (
         <circle
           key={`sp-${i}`}
@@ -984,7 +1107,24 @@ function ImpactPulse({ x, y, color, delayMs, kill = false }: ImpactPulseProps) {
             opacity: 0,
             ['--sx' as string]: `${s.dx}px`,
             ['--sy' as string]: `${s.dy}px`,
-            animation: `impact-spark 950ms ${delayMs + 50 + i * 18}ms cubic-bezier(.25,.65,.25,1) forwards`,
+            animation: `impact-spark 950ms ${delayMs + 50 + i * 14}ms cubic-bezier(.25,.65,.25,1) forwards`,
+          }}
+        />
+      ))}
+      {/* Outer debris burst (kills only): smaller motes thrown further so
+          a destroyed unit looks like it shattered, not just took a hit. */}
+      {outerSparks.map((s, i) => (
+        <circle
+          key={`spx-${i}`}
+          cx={x}
+          cy={y}
+          r={0.22}
+          fill={color}
+          style={{
+            opacity: 0,
+            ['--sx' as string]: `${s.dx}px`,
+            ['--sy' as string]: `${s.dy}px`,
+            animation: `impact-spark 1300ms ${delayMs + 220 + i * 28}ms cubic-bezier(.25,.65,.25,1) forwards`,
           }}
         />
       ))}

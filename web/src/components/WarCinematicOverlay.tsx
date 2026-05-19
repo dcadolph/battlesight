@@ -14,6 +14,13 @@ interface WarSummaryShape {
   yearEnd: number;
   battleCount: number;
   totalCasualties: number;
+  // humanDeaths is the curated total (civilians + famine + genocide).
+  // Preferred for the stat strip and aftermath card when present.
+  humanDeaths?: number;
+  // curatedStartYear / curatedEndYear override the catalog years so the
+  // overture and stat strip read from the curator's calendar.
+  curatedStartYear?: number;
+  curatedEndYear?: number;
   finalVictor?: string;
 }
 
@@ -115,7 +122,13 @@ export default function WarCinematicOverlay({
   onBegin,
 }: WarCinematicOverlayProps) {
   const [autoBegun, setAutoBegun] = useState(false);
-  const midYear = summary ? (summary.yearStart + summary.yearEnd) / 2 : 1500;
+  // Prefer the curated years and curated death toll for display so World
+  // War II renders 1931-1945 / ~75M instead of the catalog's narrower
+  // 1939-1945 / battle-sum number.
+  const displayStart = summary?.curatedStartYear || summary?.yearStart || 0;
+  const displayEnd = summary?.curatedEndYear || summary?.yearEnd || 0;
+  const displayCasualties = (summary?.humanDeaths && summary.humanDeaths > 0) ? summary.humanDeaths : (summary?.totalCasualties ?? 0);
+  const midYear = summary ? (displayStart + displayEnd) / 2 : 1500;
   const theme = themeForYear(midYear);
   const reducedMotion = usePrefersReducedMotion();
 
@@ -252,7 +265,7 @@ export default function WarCinematicOverlay({
               reducedMotion={reducedMotion}
               delayMs={540}
               label="Span"
-              value={`${formatYear(summary.yearStart)}–${formatYear(summary.yearEnd)}`}
+              value={`${formatYear(displayStart)}–${formatYear(displayEnd)}`}
             />
             <span className="w-px h-7 bg-slate-700/60" />
             <StatCell
@@ -284,7 +297,7 @@ export default function WarCinematicOverlay({
               reducedMotion={reducedMotion}
               delayMs={540}
               label="Years"
-              value={Math.max(1, summary.yearEnd - summary.yearStart + 1)}
+              value={Math.max(1, displayEnd - displayStart + 1)}
             />
             <span className="w-px h-7 bg-slate-700/60" />
             <StatCell
@@ -294,7 +307,7 @@ export default function WarCinematicOverlay({
               label="Battles"
               value={summary.battleCount.toLocaleString('en-US')}
             />
-            {summary.totalCasualties > 0 && (
+            {displayCasualties > 0 && (
               <>
                 <span className="w-px h-7 bg-slate-700/60" />
                 <StatCell
@@ -302,7 +315,7 @@ export default function WarCinematicOverlay({
                   reducedMotion={reducedMotion}
                   delayMs={700}
                   label="Lives lost"
-                  value={formatCountCompact(summary.totalCasualties)}
+                  value={formatCountCompact(displayCasualties)}
                 />
               </>
             )}
@@ -385,12 +398,12 @@ export default function WarCinematicOverlay({
           </div>
         )}
 
-        {stage === 'aftermath' && summary && summary.totalCasualties > 0 && !summary.aftermath && (
+        {stage === 'aftermath' && summary && displayCasualties > 0 && !summary.aftermath && (
           <p
             className="mt-4 text-[12px] tracking-[0.18em] text-slate-400/90"
             style={{ animation: reducedMotion ? 'none' : 'wc-rise 800ms 1320ms cubic-bezier(.2,.7,.25,1) both' }}
           >
-            {formatCasualtyLine(summary.totalCasualties)}
+            {formatCasualtyLine(displayCasualties)}
           </p>
         )}
 

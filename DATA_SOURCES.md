@@ -1,10 +1,10 @@
 # Data Sources and Credits
 
-BattleTrace stands on the shoulders of open knowledge, open mapping, and open
+BattleSight stands on the shoulders of open knowledge, open mapping, and open
 source. Every record in the system is traceable to one of the sources below.
 We are grateful to the maintainers, contributors, and donors of each.
 
-If you reuse BattleTrace's data, preserve the attribution and licensing of the
+If you reuse BattleSight's data, preserve the attribution and licensing of the
 underlying sources. The combined database is not redistributed as a single
 licensed work — each row inherits the license of the source it came from.
 
@@ -20,7 +20,7 @@ licensed work — each row inherits the license of the source it came from.
   dates (`wdt:P585`), start and end dates (`wdt:P580` / `wdt:P582`), parent
   conflict (`wdt:P607`), and links to the English Wikipedia article. Queried
   via the public SPARQL endpoint at `https://query.wikidata.org/sparql`.
-- **Coverage in BattleTrace:** Approximately 12,000 records form the bulk
+- **Coverage in BattleSight:** Approximately 12,000 records form the bulk
   dataset. About 8,400 have usable coordinates and appear on the globe.
 - **Attribution:** Wikidata is maintained by the Wikimedia Foundation and its
   global community of editors.
@@ -41,7 +41,7 @@ licensed work — each row inherits the license of the source it came from.
   that points to the source article. The Wikipedia button in the battle
   panel deep-links back so a reader can verify any number themselves.
 - **Notice:** Wikipedia is written by volunteers. Treat any single infobox
-  number as a hypothesis, not a verdict. BattleTrace's tier system marks
+  number as a hypothesis, not a verdict. BattleSight's tier system marks
   Wikipedia-derived records as **Documented**, not **Reconstructed**.
 
 ### CDB90 — Concepts Analysis Agency Database of Battles
@@ -77,7 +77,7 @@ licensed work — each row inherits the license of the source it came from.
   each battle. Positions on the tactical map are schematic, not surveyed —
   the goal is to convey shape and pacing, not survey-grade geography.
 - **License:** The phase replay text and structure are original work by the
-  BattleTrace authors. The underlying historical facts are not copyrightable.
+  BattleSight authors. The underlying historical facts are not copyrightable.
 
 ---
 
@@ -127,9 +127,9 @@ licensed work — each row inherits the license of the source it came from.
 
 ---
 
-## How to credit BattleTrace in turn
+## How to credit BattleSight in turn
 
-If you use BattleTrace's data or screenshots:
+If you use BattleSight's data or screenshots:
 
 - Cite the underlying source (Wikipedia, Wikidata, CDB90) for any specific
   number you reproduce — those are the authoritative records.

@@ -1,11 +1,14 @@
 .DS_Store
 .idea
 .env
-/battletrace
+/battlesight
 /import
 *.db
 *.db-wal
 *.db-shm
+*.db.bak*
+*.json.bak*
+*.json.bak.*
 data/cdb90/
 data/wikidata_battles_raw.json
 data/.wikicache/

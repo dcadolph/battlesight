@@ -5,14 +5,14 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/dcadolph/battletrace/internal/db"
+	"github.com/dcadolph/battlesight/internal/db"
 )
 
 var yearRe = regexp.MustCompile(`\b(1[0-9]{3}|20[0-2][0-9])\b`)
 var bcYearRe = regexp.MustCompile(`(\d+)\s*BC`)
 
 func main() {
-	database, err := db.Open("data/battletrace.db")
+	database, err := db.Open("data/battlesight.db")
 	if err != nil {
 		log.Fatal(err)
 	}

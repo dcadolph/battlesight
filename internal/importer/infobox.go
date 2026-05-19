@@ -229,7 +229,7 @@ func fetchWikitext(ctx context.Context, titles []string) (map[string]string, err
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "BattleTrace/1.0 (https://github.com/dcadolph/battletrace)")
+	req.Header.Set("User-Agent", "BattleSight/1.0 (https://github.com/dcadolph/battlesight)")
 
 	resp, err := wikiHTTPDo(req)
 	if err != nil {

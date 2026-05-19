@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dcadolph/battletrace/internal/battles"
+	"github.com/dcadolph/battlesight/internal/battles"
 )
 
 // validBase returns a fully-populated curated battle that passes every

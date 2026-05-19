@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/dcadolph/battletrace/internal/battles"
+	"github.com/dcadolph/battlesight/internal/battles"
 )
 
 // ImportJSON reads a curated battles JSON file and upserts records into the

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 import { formatYear } from '../lib/format';
+import EyeLogo from './EyeLogo';
 
 interface NameCount { name: string; count: number; }
 interface StatsData {
@@ -30,7 +31,7 @@ interface CommandBarProps {
   soundOn: boolean;
   onToggleSound: () => void;
   // onResetView is the "home" action fired when the user clicks the
-  // BattleTrace wordmark. Clears every transient selection so the app
+  // BattleSight wordmark. Clears every transient selection so the app
   // returns to the bare landing globe.
   onResetView: () => void;
   // onWarSelect opens the war playback panel preselected on the named
@@ -177,7 +178,7 @@ export default function CommandBar({
           <button
             type="button"
             onClick={onResetView}
-            className="leading-none hover:opacity-95 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 rounded-sm"
+            className="leading-none hover:opacity-95 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 rounded-sm inline-flex items-center gap-2"
             title="Back to the main globe"
             aria-label="Reset view: back to the main globe"
             style={{
@@ -188,7 +189,8 @@ export default function CommandBar({
               color: '#ffffff',
             }}
           >
-            Battle<span style={{ color: '#60a5fa' }}>Trace</span>
+            <span>Battle<span style={{ color: '#60a5fa' }}>Sight</span></span>
+            <EyeLogo size={20} color="#60a5fa" />
           </button>
           <button
             onClick={onToggleSound}

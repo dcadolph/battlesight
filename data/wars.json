@@ -43,7 +43,11 @@
   },
   "Algerian War": {
     "outcome": "Algerian victory",
-    "keyTerms": "Conflict dates: 1 November 1954 – 19 March 1962, ()"
+    "keyTerms": "Conflict dates: 1 November 1954 – 19 March 1962, ()",
+    "humanDeaths": 1500000,
+    "startYear": 1954,
+    "endYear": 1962,
+    "parent": ""
   },
   "American Civil War": {
     "outcome": "Confederate surrender at Appomattox Court House (9 April 1865) and Bennett Place (26 April 1865). The Union won.",
@@ -54,7 +58,11 @@
       "Thirteenth, Fourteenth, and Fifteenth Amendments to the Constitution",
       "Reconstruction era (1865 to 1877)",
       "End of the institution of chattel slavery in the United States"
-    ]
+    ],
+    "humanDeaths": 750000,
+    "startYear": 1861,
+    "endYear": 1865,
+    "parent": ""
   },
   "American Indian Wars": {
     "keyTerms": "Conflict dates: 1609–1890"
@@ -67,7 +75,11 @@
       "Birth of the United States as an independent republic",
       "Adoption of the United States Constitution (1787)",
       "Direct influence on the French Revolution and later wars of independence in the Americas"
-    ]
+    ],
+    "humanDeaths": 70000,
+    "startYear": 1775,
+    "endYear": 1783,
+    "parent": ""
   },
   "Anglo-Russian invasion of Holland": {
     "aftermath": "The capitulation was favourable to the British and their Russian allies. They extracted their troops unharmed so that these could fight again in other theatres of war. The initial British reports about the conduct of the Russian troops had been highly unfavourable, reason for Czar Paul to dishonour them. The Duke of York thought this too harsh, and he sent a letter to Paul specifically exculpating a number of the Russian regiments.",
@@ -208,7 +220,11 @@
     "keyTerms": "Conflict dates: March–June 1929"
   },
   "Chinese Civil War": {
-    "aftermath": "Most observers expected Chiang's government to eventually fall to the imminent invasion of Taiwan by the People's Liberation Army, and the US was initially reluctant in offering full support for Chiang in their final stand. US President Harry S. Truman announced on 5 January 1950 that the United States would not engage in any dispute involving the Taiwan Strait, and that he would not intervene in the event of an attack by the PRC. Truman, seeking to exploit the possibility of a Titoist-style Sino-Soviet split, announced in his United States Policy toward Formosa that the US would obey the Cairo Declaration's designation of Taiwan as Chinese territory and would not assist the Nationalists."
+    "aftermath": "Most observers expected Chiang's government to eventually fall to the imminent invasion of Taiwan by the People's Liberation Army, and the US was initially reluctant in offering full support for Chiang in their final stand. US President Harry S. Truman announced on 5 January 1950 that the United States would not engage in any dispute involving the Taiwan Strait, and that he would not intervene in the event of an attack by the PRC. Truman, seeking to exploit the possibility of a Titoist-style Sino-Soviet split, announced in his United States Policy toward Formosa that the US would obey the Cairo Declaration's designation of Taiwan as Chinese territory and would not assist the Nationalists.",
+    "humanDeaths": 8000000,
+    "startYear": 1927,
+    "endYear": 1949,
+    "parent": ""
   },
   "Cisplatine War": {
     "aftermath": "In Brazil, the loss of Cisplatina added to growing discontent with Emperor Pedro I. The liberals became stronger in parliament and managed to downsize a seditious army and strengthen their local militias. Although it was far from the main reason, it was a factor that led to a rebellion which took place in Rio de Janeiro on 13 March 1831. These tensions led to the abdication of the Emperor."
@@ -253,7 +269,11 @@
   },
   "Crimean War": {
     "outcome": "Allied victory",
-    "keyTerms": "Conflict dates:, (2 years, 5 months and 2 weeks)"
+    "keyTerms": "Conflict dates:, (2 years, 5 months and 2 weeks)",
+    "humanDeaths": 750000,
+    "startYear": 1853,
+    "endYear": 1856,
+    "parent": ""
   },
   "Crimean–Nogai slave raids in Eastern Europe": {
     "outcome": "{{bulletedlist",
@@ -263,7 +283,11 @@
     "keyTerms": "Conflict dates: 235–284 AD ()"
   },
   "Crusades": {
-    "aftermath": "The fall of the Frankish East caused dismay rather than shock in the West and Western Christians mostly blamed the Franks' alleged immorality. Pope Nicholas IV appealed to EdwardI of England to lead a new crusade and imposed a tax to fund it, but the Gascon War with Philip IV of France ended English plans in 1294. Schemes to recover the Holy Land inspired treatises: Fidentius of Padua and Charles II of Naples urged a blockade of Egypt. James of Molay, Templar Grand Master, called for a large crusade. and the Armenian prince-turned-monk Hayton of Corycus proposed a two-stage expedition."
+    "aftermath": "The fall of the Frankish East caused dismay rather than shock in the West and Western Christians mostly blamed the Franks' alleged immorality. Pope Nicholas IV appealed to EdwardI of England to lead a new crusade and imposed a tax to fund it, but the Gascon War with Philip IV of France ended English plans in 1294. Schemes to recover the Holy Land inspired treatises: Fidentius of Padua and Charles II of Naples urged a blockade of Egypt. James of Molay, Templar Grand Master, called for a large crusade. and the Armenian prince-turned-monk Hayton of Corycus proposed a two-stage expedition.",
+    "humanDeaths": 3000000,
+    "startYear": 1095,
+    "endYear": 1291,
+    "parent": ""
   },
   "Cuban Revolution": {
     "outcome": "Revolutionary victory",
@@ -315,11 +339,19 @@
   "Eastern Front (World War I)": {
     "outcome": "{{ublist|Central Powers victory",
     "aftermath": "In historiography, the front is usually described as a Central Powers’ victory and a Russian defeat. Despite the Russian defeat of the Eastern Front, the failure of the German spring offensive is directly related to the fact that the Germans kept all their cavalry in the east.",
-    "keyTerms": "Conflict dates: 1 August 19143 March 1918"
+    "keyTerms": "Conflict dates: 1 August 19143 March 1918",
+    "humanDeaths": 3000000,
+    "startYear": 1914,
+    "endYear": 1918,
+    "parent": "World War I"
   },
   "Eastern Front (World War II)": {
     "aftermath": "Soviet soldiers celebrating the surrender of the German forces in Berlin, 2 May 1945\nThe Eastern Front was the largest and bloodiest theatre of World War II. It is generally accepted as being the deadliest conflict in human history, with over 30 million killed as a result., in the Eastern Front, Axis countries and German co-belligerents sustained 1,468,145 irrecoverable losses (668,163 KIA/MIA), Germany itself– 7,181,100 (3,604,800 KIA/MIA), and 579,900 PoWs died in Soviet captivity. So the Axis KIA/MIA amounted to 4.8 million in the East during the period of 1941–1945. This is more than a half of all Axis losses (including the Asia/Pacific theatre). The USSR sustained 10.5 million military losses (including PoWs who died in German captivity, according to Vadim Erlikman.",
-    "keyTerms": "Conflict dates: –, ()}}"
+    "keyTerms": "Conflict dates: –, ()}}",
+    "humanDeaths": 30000000,
+    "startYear": 1941,
+    "endYear": 1945,
+    "parent": "World War II"
   },
   "Eastern Front of World War II": {
     "outcome": "Total Soviet victory. The Wehrmacht surrendered after the fall of Berlin (2 May 1945) and Germany's unconditional surrender at Reims and Karlshorst (7 to 8 May 1945).",
@@ -330,14 +362,22 @@
       "Battle of Kursk (1943), end of German offensive capability in the East",
       "Operation Bagration (1944), destruction of Army Group Center",
       "Soviet occupation of Eastern Europe and the Cold War division of the continent"
-    ]
+    ],
+    "humanDeaths": 30000000,
+    "startYear": 1941,
+    "endYear": 1945,
+    "parent": "World War II"
   },
   "Eastern Front of the Russian Civil War": {
     "outcome": "Bolshevik victory",
     "keyTerms": "Conflict dates: 14 May 1918 – 16 June 1923"
   },
   "Eighty Years' War": {
-    "keyTerms": "Conflict dates: 1566/1568 – 30 January 1648"
+    "keyTerms": "Conflict dates: 1566/1568 – 30 January 1648",
+    "humanDeaths": 600000,
+    "startYear": 1568,
+    "endYear": 1648,
+    "parent": ""
   },
   "Estonian War of Independence": {
     "outcome": "Estonian victory",
@@ -355,7 +395,11 @@
   "Falklands War": {
     "outcome": "British victory",
     "aftermath": "The Monumento a los Caídos en Malvinas (\"Monument for the Fallen in the Falklands\") in Plaza San Martín, Buenos Aires. A member of the historic Patricios regiment stands guard|group=nb}}\nThis brief war brought many consequences for all the parties involved, besides the considerable casualty rate and large materiel loss, especially of shipping and aircraft, relative to the deployed military strengths of the opposing sides.",
-    "keyTerms": "Conflict dates:, ()"
+    "keyTerms": "Conflict dates:, ()",
+    "humanDeaths": 1000,
+    "startYear": 1982,
+    "endYear": 1982,
+    "parent": ""
   },
   "Father Le Loutre's War": {
     "outcome": "British victory",
@@ -384,7 +428,11 @@
   },
   "First Balkan War": {
     "aftermath": "Danish cartoon shows Balkan states attacking the Ottoman Empire in the First Balkan War, October 1912\nThe Treaty of London ended the First Balkan War on 30 May 1913. All Ottoman territory west of the Enez-Kıyıköy line was ceded to the Balkan League, according to the status quo at the time of the armistice. The treaty also declared Albania an independent state. Most of the territory designated to form the new Albanian state was occupied by Serbia and Greece, who only reluctantly withdrew their troops. Having unresolved disputes with Serbia over the division of northern Macedonia and with Greece over southern Macedonia, Bulgaria was prepared, if the need arose, to solve the problems by force, and began transferring its military from Eastern Thrace to the disputed regions.",
-    "keyTerms": "Conflict dates: {{plainlist|"
+    "keyTerms": "Conflict dates: {{plainlist|",
+    "humanDeaths": 200000,
+    "startYear": 1912,
+    "endYear": 1913,
+    "parent": ""
   },
   "First Barbary War": {
     "outcome": "See Aftermath",
@@ -407,7 +455,11 @@
   },
   "First English Civil War": {
     "aftermath": "In 1642, many Parliamentarians assumed military defeat would force Charles to negotiate terms, which proved a fundamental misunderstanding of his character. When Prince Rupert told him in August 1645 that the war could no longer be won, Charles responded that while this may have been an accurate assessment of the military situation, 'God will not suffer rebels and traitors to prosper'. This deeply-held conviction meant he refused to agree to any substantial concessions, frustrating both allies and opponents.",
-    "keyTerms": "Conflict dates: 1642–1646"
+    "keyTerms": "Conflict dates: 1642–1646",
+    "humanDeaths": 200000,
+    "startYear": 1642,
+    "endYear": 1646,
+    "parent": ""
   },
   "First Indochina War": {
     "aftermath": "Partition\nThe 1954 Geneva Conference\nStudent demonstration in Saigon, July 1964, observing the tenth anniversary of the July 1954 Geneva Agreements\nIn July 1954, the Geneva Conference recognized the 17th parallel north as a \"provisional military demarcation line\", temporarily dividing the country into two zones. Operation Passage to Freedom began in August, consisting of the evacuation of Vietnamese civilians from communist North Vietnam to pro-Western South Vietnam."
@@ -442,7 +494,11 @@
   "First Punic War": {
     "outcome": "Roman victory",
     "aftermath": "upright=1.35|alt=A map of the western Mediterranean showing the territory ceded to Rome by Carthage under the treaty.|",
-    "keyTerms": "Conflict dates: 264–241 BC ()"
+    "keyTerms": "Conflict dates: 264–241 BC ()",
+    "humanDeaths": 400000,
+    "startYear": -264,
+    "endYear": -241,
+    "parent": ""
   },
   "First Schleswig War": {
     "outcome": "Danish victory",
@@ -456,7 +512,11 @@
   "First Sino-Japanese War": {
     "outcome": "Japanese victory",
     "aftermath": "In Japan\nThe triumphal arch at Hibiya in Tokyo, 30 May 1895\nThe Japanese success during the war was the result of the modernisation and industrialisation embarked upon two decades earlier. The war demonstrated the superiority of Japanese tactics and training from the adoption of a Western-style military. The Imperial Japanese Army and Imperial Japanese Navy inflicted a string of defeats on the Chinese through foresight, endurance, strategy and power of organisation. Japan's prestige rose in the eyes of the world, and the victory reflected the success of the Meiji Restoration. Japan suffered only a small loss of lives and treasure in return for the dominance of Taiwan, the Pescadores, and the Liaotung Peninsula in China.",
-    "keyTerms": "Conflict dates: 25 July 189417 April 1895, ()"
+    "keyTerms": "Conflict dates: 25 July 189417 April 1895, ()",
+    "humanDeaths": 35000,
+    "startYear": 1894,
+    "endYear": 1895,
+    "parent": ""
   },
   "First Upper Peru campaign": {
     "outcome": "Viceroyalty of Peru victory",
@@ -482,7 +542,11 @@
     "keyTerms": "Conflict dates: 1798 – 4 May 1799"
   },
   "Franco-Prussian War": {
-    "aftermath": "Analysis\nGerman uhlans and an infantryman escorting captured French soldiers\nEurope at This Moment (1872) – A Political-Geographic Fantasy: An elaborate satirical map reflecting the European situation following the Franco-Prussian war. France had suffered a crushing defeat: the loss of Alsace and parts of Lorraine. The map contains satirical comments on 14 countries\nThe quick German victory over the French stunned neutral observers, many of whom had expected a French victory and a long war. The strategic advantages the Germans had were not appreciated outside Germany until after hostilities had ceased."
+    "aftermath": "Analysis\nGerman uhlans and an infantryman escorting captured French soldiers\nEurope at This Moment (1872) – A Political-Geographic Fantasy: An elaborate satirical map reflecting the European situation following the Franco-Prussian war. France had suffered a crushing defeat: the loss of Alsace and parts of Lorraine. The map contains satirical comments on 14 countries\nThe quick German victory over the French stunned neutral observers, many of whom had expected a French victory and a long war. The strategic advantages the Germans had were not appreciated outside Germany until after hostilities had ceased.",
+    "humanDeaths": 200000,
+    "startYear": 1870,
+    "endYear": 1871,
+    "parent": ""
   },
   "French Revolutionary War": {
     "outcome": "First Coalition: French victory",
@@ -490,7 +554,11 @@
   },
   "French Revolutionary Wars": {
     "outcome": "First Coalition: French victory",
-    "keyTerms": "Conflict dates: )}}"
+    "keyTerms": "Conflict dates: )}}",
+    "humanDeaths": 1400000,
+    "startYear": 1792,
+    "endYear": 1802,
+    "parent": ""
   },
   "French Wars of Religion": {
     "outcome": "See Aftermath",
@@ -520,7 +588,11 @@
   },
   "Genpei War": {
     "aftermath": "The end of the Genpei War and beginning of the Kamakura shogunate marked the rise to power of the warrior class (samurai) and the gradual suppression of the power of the emperor, who was compelled to govern without effective political or military power, being effectively reduced to a purely symbolical and ceremonial head of state, until the Meiji Restoration over 650 years later, though there was a short-lived attempt to restore imperial rule in the 1330s, the Kenmu Restoration.",
-    "keyTerms": "Conflict dates: June 20, 1180 – April 25, 1185, ()"
+    "keyTerms": "Conflict dates: June 20, 1180 – April 25, 1185, ()",
+    "humanDeaths": 30000,
+    "startYear": 1180,
+    "endYear": 1185,
+    "parent": ""
   },
   "Georgian–Seljuk wars": {
     "outcome": "Georgian victory",
@@ -575,7 +647,11 @@
   "Greek War of Independence": {
     "outcome": "Greek victory",
     "aftermath": "The consequences of the Greek revolution were somewhat ambiguous in the immediate aftermath. An independent Greek state had been established, but Britain, Russia and France still had significant influence in Greek politics, selecting an imported Bavarian prince as ruler. The country had been ravaged by ten years of fighting and was full of displaced refugees and empty Turkish estates, necessitating a series of land reforms over several decades.",
-    "keyTerms": "Conflict dates: 21 February 1821 – 12 September 1829, ()"
+    "keyTerms": "Conflict dates: 21 February 1821 – 12 September 1829, ()",
+    "humanDeaths": 105000,
+    "startYear": 1821,
+    "endYear": 1832,
+    "parent": ""
   },
   "Guelphs and Ghibellines": {
     "outcome": "1st phase: Peace of Constance (1186), 2nd phase: Stalemate (1392),",
@@ -586,7 +662,11 @@
     "keyTerms": "Conflict dates: 1779–1781"
   },
   "Gulf War": {
-    "aftermath": "Many returning coalition soldiers reported illnesses following their action in the war, a phenomenon known as Gulf War syndrome (GWS) or Gulf War illness (GWI). Common symptoms reported are chronic fatigue, fibromyalgia, and gastrointestinal disorder. There has been widespread speculation and disagreement about the causes of the illness and the possibly related birth defects. Researchers found that infants born to male veterans of the 1991 war had higher rates of two types of heart valve defects. Some children born after the war to Gulf War veterans had a certain kidney defect that was not found in Gulf War veterans' children born before the war. Researchers have said that they did not have enough information to link birth defects with exposure to toxic substances."
+    "aftermath": "Many returning coalition soldiers reported illnesses following their action in the war, a phenomenon known as Gulf War syndrome (GWS) or Gulf War illness (GWI). Common symptoms reported are chronic fatigue, fibromyalgia, and gastrointestinal disorder. There has been widespread speculation and disagreement about the causes of the illness and the possibly related birth defects. Researchers found that infants born to male veterans of the 1991 war had higher rates of two types of heart valve defects. Some children born after the war to Gulf War veterans had a certain kidney defect that was not found in Gulf War veterans' children born before the war. Researchers have said that they did not have enough information to link birth defects with exposure to toxic substances.",
+    "humanDeaths": 50000,
+    "startYear": 1990,
+    "endYear": 1991,
+    "parent": ""
   },
   "Gunboat War": {
     "keyTerms": "Conflict dates: 12 August 1807 – 14 January 1814, (6 years, 5 months and 3 days)"
@@ -596,12 +676,20 @@
     "keyTerms": "Conflict dates: 1350–1490"
   },
   "Hundred Years' War": {
-    "aftermath": "Historical significance\nBurgundian territories (orange/yellow) and limits of France (red) after the Burgundian War\nThe French victory marked the end of a long period of instability that had begun with the Norman Conquest (1066), when William the Conqueror added \"King of England\" to his titles, becoming both the vassal to (as Duke of Normandy) and the equal of (as king of England) the king of France."
+    "aftermath": "Historical significance\nBurgundian territories (orange/yellow) and limits of France (red) after the Burgundian War\nThe French victory marked the end of a long period of instability that had begun with the Norman Conquest (1066), when William the Conqueror added \"King of England\" to his titles, becoming both the vassal to (as Duke of Normandy) and the equal of (as king of England) the king of France.",
+    "humanDeaths": 3500000,
+    "startYear": 1337,
+    "endYear": 1453,
+    "parent": ""
   },
   "Hungarian Revolution of 1848": {
     "outcome": "Austro-Russian victory",
     "aftermath": "Julius Jacob von Haynau, the leader of the Austrian army, was appointed plenipotentiary to restore order in Hungary after the conflict. He ordered the execution of the 13 Martyrs of Arad (now Arad, Romania) and Prime Minister Batthyány was executed the same day in Pest.",
-    "keyTerms": "Conflict dates: 15 March 1848 – 4 October 1849, (1 year, 6 months, and 19 days)"
+    "keyTerms": "Conflict dates: 15 March 1848 – 4 October 1849, (1 year, 6 months, and 19 days)",
+    "humanDeaths": 50000,
+    "startYear": 1848,
+    "endYear": 1849,
+    "parent": ""
   },
   "Hungarian campaign of 1527–1528": {
     "outcome": "Habsburg victory",
@@ -646,7 +734,11 @@
     "keyTerms": "Conflict dates: 1 September]]"
   },
   "Iran–Iraq War": {
-    "aftermath": "Casualties\nThe Iran–Iraq War was the deadliest conventional war ever fought between regular armies of developing countries. while about 400,000 had been wounded and some 70,000 taken prisoner. Thousands of civilians on both sides died in air raids and ballistic missile attacks. Prisoners taken by both countries began to be released on 17 August 1990, though some were not released until more than 10 years after the end of the conflict. Cities on both sides had also been considerably damaged. While revolutionary Iran had been bloodied, Iraq was left with a large military and was a regional power, albeit with severe debt, financial problems, and labour shortages."
+    "aftermath": "Casualties\nThe Iran–Iraq War was the deadliest conventional war ever fought between regular armies of developing countries. while about 400,000 had been wounded and some 70,000 taken prisoner. Thousands of civilians on both sides died in air raids and ballistic missile attacks. Prisoners taken by both countries began to be released on 17 August 1990, though some were not released until more than 10 years after the end of the conflict. Cities on both sides had also been considerably damaged. While revolutionary Iran had been bloodied, Iraq was left with a large military and was a regional power, albeit with severe debt, financial problems, and labour shortages.",
+    "humanDeaths": 1000000,
+    "startYear": 1980,
+    "endYear": 1988,
+    "parent": ""
   },
   "Iraq War": {
     "outcome": "US-led coalition victory in the conventional phase (April 2003). Multi-decade insurgency, civil war, and counter-insurgency that followed. Combat operations formally ended 31 December 2011. a residual presence returned in 2014 against the Islamic State.",
@@ -658,7 +750,11 @@
       "Battles of Fallujah I and II (2004)",
       "Sectarian civil war following the Samarra bombing (2006)",
       "The Surge and Anbar Awakening (2007–2008)"
-    ]
+    ],
+    "humanDeaths": 500000,
+    "startYear": 2003,
+    "endYear": 2011,
+    "parent": ""
   },
   "Irish Confederate Wars": {
     "outcome": "English Parliamentarian victory",
@@ -738,7 +834,11 @@
       "First major proxy war of the Cold War",
       "United States military presence in South Korea continues to the present",
       "Technically still a state of war, not peace"
-    ]
+    ],
+    "humanDeaths": 3000000,
+    "startYear": 1950,
+    "endYear": 1953,
+    "parent": ""
   },
   "Kosovo War": {
     "keyTerms": "Conflict dates: 28 February 1998 – 11 June 1999, ()"
@@ -757,11 +857,19 @@
     "aftermath": "Athens' punishment\nBust of Demosthenes in the Louvre. Demosthenes committed suicide to avoid his capture by Macedonia.\nOnce Antipater reached Boeotia, Athens sought for peace. The Athenian delegation to Antipater was composed of Demades and Phocion, the two leading politician who had spoken against the war with Macedonia, as well as Xenocrates of Chalcedon, the head of Plato's Academy. Antipater demanded the installation of a Macedonian garrison in the fortress of Munychia in the harbour of Piraeus, which was thus taken on 18 September 322 BC."
   },
   "Lebanese Civil War": {
-    "aftermath": "Post-conflict Syrian occupation\nThe post-war occupation of the country by the Syrian Arab Republic was particularly politically disadvantageous to the Maronite population, as most of their leadership was driven into exile, or had been assassinated or jailed."
+    "aftermath": "Post-conflict Syrian occupation\nThe post-war occupation of the country by the Syrian Arab Republic was particularly politically disadvantageous to the Maronite population, as most of their leadership was driven into exile, or had been assassinated or jailed.",
+    "humanDeaths": 150000,
+    "startYear": 1975,
+    "endYear": 1990,
+    "parent": ""
   },
   "Libyan civil war (2014–2020)": {
     "outcome": "Ceasefire",
-    "keyTerms": "Conflict dates: 16 May 2014 – 23 October 2020, ()"
+    "keyTerms": "Conflict dates: 16 May 2014 – 23 October 2020, ()",
+    "humanDeaths": 25000,
+    "startYear": 2014,
+    "endYear": 2020,
+    "parent": ""
   },
   "Lithuanian Civil War (1432–1438)": {
     "aftermath": "Švitrigaila was losing his influence in the Slavic principalities and could no longer resist Poland and Sigismund Kęstutaitis. On 4 September 1437, he attempted to reconcile with Poland: he would rule the lands that still backed him (chiefly Kiev and Volhynia), and after his death these territories would pass to the King of Poland. However, under strong protest from Sigismund, the Polish Senate declined to ratify the treaty. In 1438 Švitrigaila withdrew to Moldavia.}} The reign of Sigismund Kęstutaitis was brief, he was assassinated in 1440. Švitrigaila returned from exile in 1442 and ruled Lutsk until his death a decade later.",
@@ -798,7 +906,11 @@
   },
   "Mahdist War": {
     "aftermath": "The British set up a new colonial system, the Anglo-Egyptian administration, which effectively established British domination over Sudan. This ended with the independence of Sudan in 1956. The Tukrir sided with the Mahdists during their war against Ethiopia and disappeared with their defeat.",
-    "keyTerms": "Conflict dates: –"
+    "keyTerms": "Conflict dates: –",
+    "humanDeaths": 1500000,
+    "startYear": 1881,
+    "endYear": 1899,
+    "parent": ""
   },
   "Mali War": {
     "keyTerms": "Conflict dates: 16 January 2012 – present, ()"
@@ -816,15 +928,27 @@
   "Mexican War of Independence": {
     "outcome": "Mexican victory and Independence agreement",
     "aftermath": "Flag of the Mexican Empire of Iturbide, the template for the modern Mexican flag with the eagle perched on a cactus. The crown on the eagle's head symbolizes monarchy in Mexico.",
-    "keyTerms": "Conflict dates: 16 September 1810 – 27 September 1821, ()"
+    "keyTerms": "Conflict dates: 16 September 1810 – 27 September 1821, ()",
+    "humanDeaths": 500000,
+    "startYear": 1810,
+    "endYear": 1821,
+    "parent": ""
   },
   "Mexican–American War": {
-    "aftermath": "Altered territories\nupright=1.35|The Mexican Cession, shown in red, and the later Gadsden Purchase, shown in yellow"
+    "aftermath": "Altered territories\nupright=1.35|The Mexican Cession, shown in red, and the later Gadsden Purchase, shown in yellow",
+    "humanDeaths": 25000,
+    "startYear": 1846,
+    "endYear": 1848,
+    "parent": ""
   },
   "Middle Eastern theatre of World War I": {
     "outcome": "Allied victory",
     "aftermath": "On 30 October 1918, the Armistice of Mudros was signed aboard in Mudros port on the island of Lemnos between the Ottoman Empire and the Triple Entente. Ottoman operations in the active combat theatres ceased.",
-    "keyTerms": "Conflict dates: 29 October 1914 – 30 October 1918"
+    "keyTerms": "Conflict dates: 29 October 1914 – 30 October 1918",
+    "humanDeaths": 1500000,
+    "startYear": 1914,
+    "endYear": 1918,
+    "parent": "World War I"
   },
   "Moldavian Magnate Wars": {
     "keyTerms": "Conflict dates: 1593–1621"
@@ -881,7 +1005,11 @@
       "Creation of the German Confederation",
       "Loss of most Spanish colonies in the Americas over the next decade",
       "Foundation of the post-1815 Concert of Europe"
-    ]
+    ],
+    "humanDeaths": 6000000,
+    "startYear": 1803,
+    "endYear": 1815,
+    "parent": ""
   },
   "Neapolitan War": {
     "aftermath": "Shortly after the end of the war, the Kingdoms of Naples and Sicily were finally united to create the Kingdom of the Two Sicilies. Although the two kingdoms had been ruled by the same king since 1721, the formal union did not happen until 1816. King Ferdinand IV of Naples and III of Sicily would become King Ferdinand I of the Two Sicilies. Meanwhile, the Austrians consolidated their gains in Northern Italy into the Kingdom of Lombardy–Venetia.",
@@ -940,7 +1068,11 @@
       "United States occupation and democratization of Japan",
       "Independence movements in Korea, Vietnam, Indonesia, and the Philippines",
       "Chinese Civil War resumes, won by Mao Zedong in 1949"
-    ]
+    ],
+    "humanDeaths": 30000000,
+    "startYear": 1937,
+    "endYear": 1945,
+    "parent": "World War II"
   },
   "Paraguay campaign": {
     "outcome": "*Spanish-Paraguayan victory",
@@ -949,7 +1081,11 @@
   },
   "Paraguayan War": {
     "outcome": "Allied victory",
-    "keyTerms": "Conflict dates: 13 November 1864 – 1 March 1870, ()"
+    "keyTerms": "Conflict dates: 13 November 1864 – 1 March 1870, ()",
+    "humanDeaths": 400000,
+    "startYear": 1864,
+    "endYear": 1870,
+    "parent": ""
   },
   "Paris Commune": {
     "outcome": "Revolt suppressed",
@@ -970,10 +1106,18 @@
   },
   "Philippine Revolution": {
     "outcome": "Inconclusive",
-    "keyTerms": "Conflict dates: August 23, 1896 – April 16, 1902 ()"
+    "keyTerms": "Conflict dates: August 23, 1896 – April 16, 1902 ()",
+    "humanDeaths": 60000,
+    "startYear": 1896,
+    "endYear": 1898,
+    "parent": ""
   },
   "Philippine–American War": {
-    "aftermath": "Postwar conflicts\nAfter military rule was terminated on July 4, 1901, the Philippine Constabulary was established as an archipelago-wide police force to control brigandage and deal with the remnants of the Republic. Organized and initially commanded by Brigadier General Henry Tureman Allen, the Philippine Constabulary gradually took responsibility for suppressing hostile forces' activities. Remnants of Aguinaldo's Republic, and remnants or holdovers of the Katipunan organization, which had predated the American presence, and other resistance groups all remained active, fighting for nearly a decade after the official end of the war."
+    "aftermath": "Postwar conflicts\nAfter military rule was terminated on July 4, 1901, the Philippine Constabulary was established as an archipelago-wide police force to control brigandage and deal with the remnants of the Republic. Organized and initially commanded by Brigadier General Henry Tureman Allen, the Philippine Constabulary gradually took responsibility for suppressing hostile forces' activities. Remnants of Aguinaldo's Republic, and remnants or holdovers of the Katipunan organization, which had predated the American presence, and other resistance groups all remained active, fighting for nearly a decade after the official end of the war.",
+    "humanDeaths": 250000,
+    "startYear": 1899,
+    "endYear": 1902,
+    "parent": ""
   },
   "Phyle Campaign": {
     "aftermath": "Lysander's faction at Sparta was furious and along with King Agis brought Pausanias to trial to the end of 403 BCE. The exact charge is uncertain but the essence was presumably that he had been soft on Athens. Fifteen of the Gerousia, including Agis, voted guilty, but fourteen Gerousia, as well as all five Ephors, voted not guilty so he was acquitted."
@@ -989,7 +1133,11 @@
   },
   "Polish–Soviet War": {
     "outcome": "{{ublist|Polish victory",
-    "keyTerms": "Conflict dates: 1918/1919 However, military confrontations between forces that can be considered officially Polish and the Red Army were already happening by late autumn 1918 and in January 1919. The city of Vilnius, for example, was taken by the Soviets on 5 January 1919.}} – 18 March 1921Main phase:25 April – 18 October 1920"
+    "keyTerms": "Conflict dates: 1918/1919 However, military confrontations between forces that can be considered officially Polish and the Red Army were already happening by late autumn 1918 and in January 1919. The city of Vilnius, for example, was taken by the Soviets on 5 January 1919.}} – 18 March 1921Main phase:25 April – 18 October 1920",
+    "humanDeaths": 100000,
+    "startYear": 1919,
+    "endYear": 1921,
+    "parent": ""
   },
   "Polish–Swedish War (1600–1611)": {
     "outcome": "See",
@@ -1025,7 +1173,11 @@
     "keyTerms": "Conflict dates: 20 September 1835 – 1 March 1845, ()"
   },
   "Reconquista": {
-    "aftermath": "Since the 19th century, traditional Western and especially Iberian historiography has stressed the existence of the Reconquista, a continual phenomenon by which the Christian Iberian kingdoms opposed and conquered the Muslim kingdoms, understood as a common enemy who had militarily seized territory from native Iberian Christians. The concept has served the idea \"that Spain is a nation shaped against Islam\", contributing to \"a largely biased and distorted vision of the Iberian medieval past, aimed at delegitimizing the Islamic presence (al-Andalus) and therefore at legitimizing the Christian conquest of the Muslim territory.\" Among other arguments, one of those advanced by scholars is that \"no military campaign lasts eight centuries."
+    "aftermath": "Since the 19th century, traditional Western and especially Iberian historiography has stressed the existence of the Reconquista, a continual phenomenon by which the Christian Iberian kingdoms opposed and conquered the Muslim kingdoms, understood as a common enemy who had militarily seized territory from native Iberian Christians. The concept has served the idea \"that Spain is a nation shaped against Islam\", contributing to \"a largely biased and distorted vision of the Iberian medieval past, aimed at delegitimizing the Islamic presence (al-Andalus) and therefore at legitimizing the Christian conquest of the Muslim territory.\" Among other arguments, one of those advanced by scholars is that \"no military campaign lasts eight centuries.",
+    "humanDeaths": 7000000,
+    "startYear": 711,
+    "endYear": 1492,
+    "parent": ""
   },
   "Reform War": {
     "aftermath": "A French invasion and the establishment of the Second Mexican Empire followed almost immediately after the end of the Reform War, and key figures of the war would continue to play roles during its rise and fall.",
@@ -1036,7 +1188,11 @@
     "keyTerms": "Conflict dates: 1054/1055/1060 – 1223/1238"
   },
   "Russian Civil War": {
-    "aftermath": "upright=1.2|A map of Europe in 1923 after the revolutions of 1917–1923\nWith the end of the war, the Russian Communist Party (Bolsheviks) no longer faced an acute military threat to its existence and power. However, the perceived threat of continued popular discontent, combined with the failure of socialist revolutions in other countries, such as the German revolution of 1918–1919, contributed to the continued militarization of Soviet society."
+    "aftermath": "upright=1.2|A map of Europe in 1923 after the revolutions of 1917–1923\nWith the end of the war, the Russian Communist Party (Bolsheviks) no longer faced an acute military threat to its existence and power. However, the perceived threat of continued popular discontent, combined with the failure of socialist revolutions in other countries, such as the German revolution of 1918–1919, contributed to the continued militarization of Soviet society.",
+    "humanDeaths": 9000000,
+    "startYear": 1917,
+    "endYear": 1922,
+    "parent": ""
   },
   "Russian invasion of Ukraine": {
     "outcome": "Ongoing as of mid-2026. The full-scale invasion began before dawn on 24 February 2022 with cruise missile strikes across Ukraine and ground crossings from Belarus, Russia, and Crimea.",
@@ -1056,7 +1212,11 @@
   },
   "Russo-Japanese War": {
     "outcome": "Japanese victory",
-    "keyTerms": "Conflict dates: 8 February 1904"
+    "keyTerms": "Conflict dates: 8 February 1904",
+    "humanDeaths": 150000,
+    "startYear": 1904,
+    "endYear": 1905,
+    "parent": ""
   },
   "Russo-Persian War (1804–1813)": {
     "outcome": "Russian victory",
@@ -1140,14 +1300,22 @@
   },
   "Second Balkan War": {
     "aftermath": "The Second Balkan War made Serbia the most militarily powerful state south of the Danube. Years of military investment financed by French loans borne fruit. Central Vardar and the eastern half of the Sanjak of Novi Pazar were acquired. Its territory grew in extent from 18,650 to 33,891 square miles, and its population grew by more than one and a half million. The aftermath brought harassment and oppression for those in the newly conquered lands. The freedom of association, assembly and the press guaranteed under the Serbian constitution of 1903 was not introduced into the new territories.",
-    "keyTerms": "Conflict dates: {{plainlist|"
+    "keyTerms": "Conflict dates: {{plainlist|",
+    "humanDeaths": 65000,
+    "startYear": 1913,
+    "endYear": 1913,
+    "parent": ""
   },
   "Second Banda Oriental campaign": {
     "outcome": "United Provinces victory"
   },
   "Second Boer War": {
     "outcome": "British victory",
-    "keyTerms": "Conflict dates: 11 October 189931 May 1902 (2 years, 7 months, 2 weeks, and 6 days)"
+    "keyTerms": "Conflict dates: 11 October 189931 May 1902 (2 years, 7 months, 2 weeks, and 6 days)",
+    "humanDeaths": 60000,
+    "startYear": 1899,
+    "endYear": 1902,
+    "parent": ""
   },
   "Second Crusade": {
     "outcome": "See",
@@ -1157,7 +1325,11 @@
   "Second English Civil War": {
     "outcome": "Parliamentarian victory",
     "aftermath": "Following Charles's execution, the Commonwealth of England was established. In Scotland, Charles II became the new king, the resulting tensions leading to the Anglo-Scottish War of 1650 to 1652.",
-    "keyTerms": "Conflict dates: February to August 1648"
+    "keyTerms": "Conflict dates: February to August 1648",
+    "humanDeaths": 50000,
+    "startYear": 1648,
+    "endYear": 1649,
+    "parent": ""
   },
   "Second Fitna": {
     "aftermath": "First Umayyad gold alt=Coin with protruded inscription in Arabic and a bearded man standing with sheathed sword, seen face-on\nWith the victory of Abd al-Malik, Umayyad authority was restored and hereditary rule in the caliphate was solidified. Abd al-Malik and his descendants, in two cases his nephews, ruled for another fifty-eight years, before being overthrown by the Abbasid Revolution in 750.",
@@ -1166,7 +1338,11 @@
   "Second French intervention in Mexico": {
     "outcome": "Mexican Republican victory",
     "aftermath": "The republican victory transformed Mexico’s political landscape. The defeat of the French consolidated liberal hegemony and allowed central elites, now organized within the Liberal Party, to impose a state-building project over regional and peripheral powers. in spite of a constitutional prohibition of re-elections.",
-    "keyTerms": "Conflict dates: 8 December 1861 – 21 June 1867, ()"
+    "keyTerms": "Conflict dates: 8 December 1861 – 21 June 1867, ()",
+    "humanDeaths": 75000,
+    "startYear": 1861,
+    "endYear": 1867,
+    "parent": ""
   },
   "Second Italian War of Independence": {
     "outcome": "Franco-Sardinian victory",
@@ -1183,7 +1359,11 @@
   },
   "Second Punic War": {
     "outcome": "Roman victory",
-    "keyTerms": "Conflict dates: Spring 218–201 BC ()"
+    "keyTerms": "Conflict dates: Spring 218–201 BC ()",
+    "humanDeaths": 770000,
+    "startYear": -218,
+    "endYear": -201,
+    "parent": ""
   },
   "Second Schleswig War": {
     "outcome": "Austro-Prussian victory",
@@ -1196,7 +1376,11 @@
     "keyTerms": "Conflict dates: December 23, 1835 – August 14, 1842, ()"
   },
   "Second Sino-Japanese War": {
-    "aftermath": "Resumption of the Chinese Civil War\nChiang Kai-shek and Mao Zedong in 1945"
+    "aftermath": "Resumption of the Chinese Civil War\nChiang Kai-shek and Mao Zedong in 1945",
+    "humanDeaths": 20000000,
+    "startYear": 1937,
+    "endYear": 1945,
+    "parent": "World War II"
   },
   "Second War of Scottish Independence": {
     "outcome": "Scottish victory"
@@ -1232,19 +1416,31 @@
     "keyTerms": "Conflict dates: 1 March 1932 – 16 September 1939, ()"
   },
   "Spanish Civil War": {
-    "aftermath": "Tribute and plaque in memory of murdered or persecuted teachers, Navarre, 1936 and later"
+    "aftermath": "Tribute and plaque in memory of murdered or persecuted teachers, Navarre, 1936 and later",
+    "humanDeaths": 500000,
+    "startYear": 1936,
+    "endYear": 1939,
+    "parent": ""
   },
   "Spanish conquest of the Aztec Empire": {
     "outcome": "Spanish-Indigenous allied victory",
     "keyTerms": "Conflict dates: February 1519 – 13 August 1521 against the Aztec Empire,, after 1529 – 17 February 1530 against the Purépecha Empire"
   },
   "Spanish–American War": {
-    "aftermath": "The war lasted 16 weeks. John Hay (the U.S. ambassador in London) boasted that it had been \"a splendid little war\". The press showed Northerners and Southerners, blacks and whites fighting against a common foe, helping to ease the scars left from the American Civil War. Exemplary of this was that four former Confederate States Army generals had served in the war, now in the U.S. Army and all of them again carrying similar ranks. These officers were Matthew Butler, Fitzhugh Lee, Thomas L."
+    "aftermath": "The war lasted 16 weeks. John Hay (the U.S. ambassador in London) boasted that it had been \"a splendid little war\". The press showed Northerners and Southerners, blacks and whites fighting against a common foe, helping to ease the scars left from the American Civil War. Exemplary of this was that four former Confederate States Army generals had served in the war, now in the U.S. Army and all of them again carrying similar ranks. These officers were Matthew Butler, Fitzhugh Lee, Thomas L.",
+    "humanDeaths": 60000,
+    "startYear": 1898,
+    "endYear": 1898,
+    "parent": ""
   },
   "Sri Lankan civil war": {
     "outcome": "Sri Lankan government victory",
     "aftermath": "Political solution\nAfter the complete military defeat of the LTTE, President Mahinda Rajapaksa announced that the government was committed to a political solution, and for this purpose action would be taken based on the 13th Amendment to the Constitution. The pro-LTTE political party Tamil National Alliance (TNA), also the largest political group representing Sri Lankan Tamil community, dropped its demand for a separate state, in favour of a federal solution. In 2011, there were bilateral talks between President Rajapaksa's UPFA government and the TNA, on a viable political solution and devolution of power.",
-    "keyTerms": "Conflict dates: 23 July 1983 – 18 May 2009, ()"
+    "keyTerms": "Conflict dates: 23 July 1983 – 18 May 2009, ()",
+    "humanDeaths": 100000,
+    "startYear": 1983,
+    "endYear": 2009,
+    "parent": ""
   },
   "Swabian War": {
     "outcome": "Swiss victory, Peace of Basel",
@@ -1270,12 +1466,20 @@
       "Chemical weapons attacks on Khan Shaykhun (2017) and Douma (2018)",
       "Turkish operations against the SDF in northern Syria (Olive Branch 2018, Peace Spring 2019)",
       "Lightning opposition offensive captures Aleppo, Hama, Homs, Damascus (Nov-Dec 2024)"
-    ]
+    ],
+    "humanDeaths": 600000,
+    "startYear": 2011,
+    "endYear": 0,
+    "parent": ""
   },
   "Taiping Rebellion": {
     "outcome": "Qing victory. The Heavenly Kingdom is crushed at Nanjing in 1864 after fourteen years of war.",
     "aftermath": "Estimated 20 to 30 million dead across south-central China, mostly from famine and disease in the aftermath of the campaigns. The Qing dynasty survived but was structurally weakened. regional armies under Zeng Guofan and Li Hongzhang outgrew imperial control, foreshadowing the warlord era. The Yangtze basin took a generation to repopulate.",
-    "keyTerms": "December 1850 to August 1864."
+    "keyTerms": "December 1850 to August 1864.",
+    "humanDeaths": 25000000,
+    "startYear": 1850,
+    "endYear": 1864,
+    "parent": ""
   },
   "Texas Revolution": {
     "outcome": "Texian victory",
@@ -1298,7 +1502,11 @@
   },
   "Third Punic War": {
     "aftermath": "alt= a colour photograph of the remains today of part of ancient Carthage |",
-    "keyTerms": "Conflict dates: 149–146 BC ()"
+    "keyTerms": "Conflict dates: 149–146 BC ()",
+    "humanDeaths": 320000,
+    "startYear": -149,
+    "endYear": -146,
+    "parent": ""
   },
   "Third Servile War": {
     "outcome": "Roman victory",
@@ -1310,7 +1518,11 @@
   },
   "Thirty Years' War": {
     "outcome": "Peace of Westphalia",
-    "keyTerms": "Conflict dates: 23 May 1618 – 24 October 1648"
+    "keyTerms": "Conflict dates: 23 May 1618 – 24 October 1648",
+    "humanDeaths": 8000000,
+    "startYear": 1618,
+    "endYear": 1648,
+    "parent": ""
   },
   "Tonkin campaign": {
     "outcome": "French victory",
@@ -1346,7 +1558,11 @@
       "Cambodian genocide under the Khmer Rouge (1975 to 1979)",
       "Boat people exodus of refugees from Indochina",
       "Lasting effect on American politics and military doctrine"
-    ]
+    ],
+    "humanDeaths": 3000000,
+    "startYear": 1955,
+    "endYear": 1975,
+    "parent": ""
   },
   "War against the Islamic State": {
     "outcome": "Coalition victory. The territorial caliphate declared by Abu Bakr al-Baghdadi in Mosul in June 2014 was destroyed by March 2019 with the fall of Baghouz, Syria. The organization persists as an insurgency and franchise.",
@@ -1370,7 +1586,11 @@
       "Operation Anaconda (March 2002), first large conventional US ground action",
       "Surge and counterinsurgency strategy (2009–2012)",
       "Fall of Kabul and the Kabul Airport evacuation (August 2021)"
-    ]
+    ],
+    "humanDeaths": 250000,
+    "startYear": 2001,
+    "endYear": 2021,
+    "parent": ""
   },
   "War in Iraq (2013–2017)": {
     "outcome": "Iraqi and allied victory",
@@ -1390,7 +1610,11 @@
       "Andrew Jackson's victory at New Orleans (January 1815)",
       "End of organized Native resistance east of the Mississippi",
       "Beginning of nearly two centuries of unguarded United States to Canada border"
-    ]
+    ],
+    "humanDeaths": 20000,
+    "startYear": 1812,
+    "endYear": 1815,
+    "parent": ""
   },
   "War of Jenkins' Ear": {
     "outcome": "Treaty of Aix-la-Chapelle",
@@ -1508,7 +1732,11 @@
       "Creation of Poland, Czechoslovakia, Yugoslavia, and the Baltic states",
       "Mandate system divides the former Ottoman lands",
       "Russian Revolution removed Russia from the war in 1917"
-    ]
+    ],
+    "humanDeaths": 40000000,
+    "startYear": 1914,
+    "endYear": 1918,
+    "parent": ""
   },
   "World War II": {
     "outcome": "Unconditional surrender of Germany (8 May 1945) and Japan (2 September 1945). The Allies (Soviet Union, United States, United Kingdom, China, France) won.",
@@ -1519,7 +1747,11 @@
       "Partition of Germany and creation of the United Nations",
       "Start of the nuclear age following Hiroshima and Nagasaki",
       "Beginning of the Cold War"
-    ]
+    ],
+    "humanDeaths": 75000000,
+    "startYear": 1931,
+    "endYear": 1945,
+    "parent": ""
   },
   "World War II in Yugoslavia": {
     "outcome": "Yugoslav Partisan–Allied victory",
@@ -1537,5 +1769,209 @@
   "transition from Sui to Tang": {
     "outcome": "China united by the Tang dynasty",
     "keyTerms": "Conflict dates: 613–628"
+  },
+  "Mongol invasions": {
+    "humanDeaths": 40000000,
+    "startYear": 1206,
+    "endYear": 1294,
+    "parent": ""
+  },
+  "Russia-Ukraine War": {
+    "humanDeaths": 500000,
+    "startYear": 2014,
+    "endYear": 0,
+    "parent": ""
+  },
+  "Seven Years' War": {
+    "humanDeaths": 1500000,
+    "startYear": 1756,
+    "endYear": 1763,
+    "parent": ""
+  },
+  "Boer War": {
+    "humanDeaths": 60000,
+    "startYear": 1899,
+    "endYear": 1902,
+    "parent": ""
+  },
+  "North African Campaign": {
+    "humanDeaths": 1000000,
+    "startYear": 1940,
+    "endYear": 1943,
+    "parent": "World War II"
+  },
+  "Italian Campaign (World War II)": {
+    "humanDeaths": 700000,
+    "startYear": 1943,
+    "endYear": 1945,
+    "parent": "World War II"
+  },
+  "Western Front (World War II)": {
+    "humanDeaths": 1400000,
+    "startYear": 1944,
+    "endYear": 1945,
+    "parent": "World War II"
+  },
+  "Mediterranean and Middle East theatre of World War II": {
+    "humanDeaths": 1500000,
+    "startYear": 1940,
+    "endYear": 1945,
+    "parent": "World War II"
+  },
+  "Western Front (World War I)": {
+    "humanDeaths": 5500000,
+    "startYear": 1914,
+    "endYear": 1918,
+    "parent": "World War I"
+  },
+  "Italian Front (World War I)": {
+    "humanDeaths": 1400000,
+    "startYear": 1915,
+    "endYear": 1918,
+    "parent": "World War I"
+  },
+  "Laotian Civil War": {
+    "humanDeaths": 60000,
+    "startYear": 1959,
+    "endYear": 1975,
+    "parent": "Vietnam War"
+  },
+  "Cambodian Civil War": {
+    "humanDeaths": 300000,
+    "startYear": 1967,
+    "endYear": 1975,
+    "parent": "Vietnam War"
+  },
+  "Hundred Years War": {
+    "humanDeaths": 3500000,
+    "startYear": 1337,
+    "endYear": 1453,
+    "parent": ""
+  },
+  "Sengoku period": {
+    "humanDeaths": 800000,
+    "startYear": 1467,
+    "endYear": 1615,
+    "parent": ""
+  },
+  "Mexican Revolution": {
+    "humanDeaths": 2000000,
+    "startYear": 1910,
+    "endYear": 1920,
+    "parent": ""
+  },
+  "Polish-Soviet War": {
+    "humanDeaths": 100000,
+    "startYear": 1919,
+    "endYear": 1921,
+    "parent": ""
+  },
+  "First Italian War": {
+    "humanDeaths": 80000,
+    "startYear": 1494,
+    "endYear": 1498,
+    "parent": ""
+  },
+  "Italian Wars": {
+    "humanDeaths": 500000,
+    "startYear": 1494,
+    "endYear": 1559,
+    "parent": ""
+  },
+  "Wars of the Roses": {
+    "humanDeaths": 50000,
+    "startYear": 1455,
+    "endYear": 1487,
+    "parent": ""
+  },
+  "Onin War": {
+    "humanDeaths": 75000,
+    "startYear": 1467,
+    "endYear": 1477,
+    "parent": ""
+  },
+  "Sri Lankan Civil War": {
+    "humanDeaths": 100000,
+    "startYear": 1983,
+    "endYear": 2009,
+    "parent": ""
+  },
+  "Boko Haram insurgency": {
+    "humanDeaths": 50000,
+    "startYear": 2009,
+    "endYear": 0,
+    "parent": ""
+  },
+  "Yemeni Civil War": {
+    "humanDeaths": 380000,
+    "startYear": 2014,
+    "endYear": 0,
+    "parent": ""
+  },
+  "Yemeni civil war (2014–present)": {
+    "humanDeaths": 380000,
+    "startYear": 2014,
+    "endYear": 0,
+    "parent": ""
+  },
+  "First Libyan Civil War": {
+    "humanDeaths": 30000,
+    "startYear": 2011,
+    "endYear": 2011,
+    "parent": ""
+  },
+  "Tigray War": {
+    "humanDeaths": 600000,
+    "startYear": 2020,
+    "endYear": 2022,
+    "parent": ""
+  },
+  "Wars at the end of the Han dynasty": {
+    "humanDeaths": 30000000,
+    "startYear": 184,
+    "endYear": 220,
+    "parent": ""
+  },
+  "An Lushan Rebellion": {
+    "humanDeaths": 36000000,
+    "startYear": 755,
+    "endYear": 763,
+    "parent": ""
+  },
+  "First French intervention in Mexico": {
+    "humanDeaths": 5000,
+    "startYear": 1838,
+    "endYear": 1839,
+    "parent": ""
+  },
+  "Battle of the Atlantic": {
+    "humanDeaths": 100000,
+    "startYear": 1939,
+    "endYear": 1945,
+    "parent": "World War II"
+  },
+  "Eastern Front (Soviet Union)": {
+    "humanDeaths": 30000000,
+    "startYear": 1941,
+    "endYear": 1945,
+    "parent": "World War II"
+  },
+  "Manchurian Incident": {
+    "humanDeaths": 5000,
+    "startYear": 1931,
+    "endYear": 1932,
+    "parent": "World War II"
+  },
+  "Pacification of Manchukuo": {
+    "humanDeaths": 80000,
+    "startYear": 1932,
+    "endYear": 1945,
+    "parent": "World War II"
+  },
+  "Three Kingdoms": {
+    "humanDeaths": 35000000,
+    "startYear": 220,
+    "endYear": 280,
+    "parent": ""
   }
 }

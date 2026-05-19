@@ -1,20 +1,20 @@
-# BattleTrace handoff
+# BattleSight handoff
 
-You are picking up an in-progress polish push on BattleTrace, an interactive
+You are picking up an in-progress polish push on BattleSight, an interactive
 visual encyclopedia of battles and wars. The owner is dialing the product
 toward "world renowned quality" — every surface needs to read tight, every
 piece of data needs to be trustworthy, every animation needs intent. He has
 been frustrated with the agent he handed off from, so do not over-promise,
 do not hedge, and ship work that holds up to a glance from a stranger.
 
-Repository: `/Users/douglasadolph/src/dcadolph/battletrace/`. Web app is in
-`web/`. Backend Go server in `cmd/battletrace`. Importer / tooling in
+Repository: `/Users/douglasadolph/src/dcadolph/battlesight/`. Web app is in
+`web/`. Backend Go server in `cmd/battlesight`. Importer / tooling in
 `cmd/import` and `internal/importer`.
 
 Style preferences live in `/Users/douglasadolph/Downloads/aboutme.md` (his
 cross-project handoff). The cinematic style guide is in §5 of that doc.
 Project-specific memory is at
-`/Users/douglasadolph/.claude/projects/-Users-douglasadolph-src-dcadolph-battletrace/memory/`
+`/Users/douglasadolph/.claude/projects/-Users-douglasadolph-src-dcadolph-battlesight/memory/`
 — read `MEMORY.md` for the index.
 
 ---
@@ -23,8 +23,8 @@ Project-specific memory is at
 
 - Go API on `http://localhost:8080` (battletra process, listening on `*:8080`)
 - Vite dev on `http://localhost:5173` (node process)
-- SQLite database at `data/battletrace.db` (about 18 MB)
-- Recent backups: `data/battletrace.db.bak.*`, `data/wars.json.bak.*`
+- SQLite database at `data/battlesight.db` (about 18 MB)
+- Recent backups: `data/battlesight.db.bak.*`, `data/wars.json.bak.*`
 
 Vite HMR is the iteration loop. The Go server only needs a restart when
 backend code changes (war / phase JSON files hot-reload automatically).
@@ -282,7 +282,7 @@ bulk file), drop it first — the importer would otherwise reject a
 duplicate. Python one-liner pattern:
 ```python
 import json
-p = '/Users/douglasadolph/src/dcadolph/battletrace/data/battles.json'
+p = '/Users/douglasadolph/src/dcadolph/battlesight/data/battles.json'
 d = json.load(open(p))
 drop = {'foo-id', 'bar-id'}
 d = [b for b in d if b['id'] not in drop]
@@ -291,7 +291,7 @@ json.dump(d, open(p, 'w'), indent=2, ensure_ascii=False)
 
 Validate then import:
 ```
-cd /Users/douglasadolph/src/dcadolph/battletrace
+cd /Users/douglasadolph/src/dcadolph/battlesight
 go run ./cmd/import -json data/battles.json -validate
 go run ./cmd/import -json data/battles.json
 ```

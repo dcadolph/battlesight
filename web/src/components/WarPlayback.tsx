@@ -34,11 +34,23 @@ interface WarPlaybackProps {
   // currently-focused battle. App threads it into BattleGlobe so the
   // globe re-shades as the war playhead crosses a snapshot boundary
   // (Axis red advances across Europe in 1940-42, recedes in 1943-45).
-  onWarTerritory?: (colors: Record<string, string> | null, label: string | null) => void;
+  // factions is the active owner-key list for the snapshot, in display
+  // order, so App can render a faction legend mapping color to label.
+  onWarTerritory?: (
+    colors: Record<string, string> | null,
+    label: string | null,
+    factions: string[],
+  ) => void;
   // initialWar optionally pre-selects a war on mount so an external action
   // (search-bar war click, deep link, etc.) can open WarPlayback already
   // pointing at the war the user named.
   initialWar?: string;
+  // cinematicAdvanceTick increments when the active BattleReplay reports
+  // its outro pause has elapsed. WarPlayback uses it to skip its own dwell
+  // timer and advance immediately, which keeps long hand-crafted replays
+  // from getting trapped on the outro card when the dwell budget is
+  // shorter than the actual phase total.
+  cinematicAdvanceTick?: number;
 }
 
 interface WarCount {
@@ -46,10 +58,37 @@ interface WarCount {
   count: number;
   minYear: number;
   casualties: number;
+  // humanDeaths is the curated total including civilians, famine, genocide,
+  // and disease. Zero when the war has no curated override. Preferred over
+  // casualties for display when present.
+  humanDeaths?: number;
   parent?: string;
   rolledCount: number;
   rolledCasualties: number;
+  // rolledHumanDeaths is the curated-first total summed across the war and
+  // every descendant theater / campaign, falling back to descendant battle
+  // sums where no curated number exists. Zero when nothing rolled up.
+  rolledHumanDeaths?: number;
   countries?: string[];
+}
+
+// preferredTotalForWar returns the war's best-available casualty figure.
+// Order: rolledHumanDeaths (curated + rolled), humanDeaths (curated),
+// rolledCasualties (battle sum + rolled), casualties (battle sum). The
+// returned number powers the war list's bloodiest-sort key and the value
+// shown next to each row.
+function preferredTotalForWar(w: WarCount): number {
+  return w.rolledHumanDeaths || w.humanDeaths || w.rolledCasualties || w.casualties || 0;
+}
+
+// formatCasualtyCompact renders large casualty totals in a tight slot: 75M
+// for 75,000,000, 4.5M for 4.5 million, 750k for hundreds of thousands.
+// Used by the war-list value column where horizontal space is at a premium.
+function formatCasualtyCompact(n: number): string {
+  if (n <= 0) return '';
+  if (n >= 10_000_000) return `${(n / 1_000_000).toFixed(0)}M`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  return `${(n / 1000).toFixed(0)}k`;
 }
 
 type WarSort = 'casualties' | 'battles' | 'alpha' | 'chrono' | 'country';
@@ -77,7 +116,7 @@ function groupConcurrentBattles(battles: Battle[]): BattleGroup[] {
   return groups;
 }
 
-export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, onWarTerritory, initialWar }: WarPlaybackProps) {
+export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, onWarTerritory, initialWar, cinematicAdvanceTick = 0 }: WarPlaybackProps) {
   const [wars, setWars] = useState<WarCount[]>([]);
   const [warSearch, setWarSearch] = useState('');
   const [warSort, setWarSort] = useState<WarSort>('casualties');
@@ -111,7 +150,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // warSummary mirrors the data the WarSummaryCard fetches so the
   // cinematic overlay can show outcome and aftermath text on the
   // closing card without a second round trip.
-  const [warSummary, setWarSummary] = useState<{ outcome?: string; aftermath?: string; notable?: string[]; yearStart: number; yearEnd: number; battleCount: number; totalCasualties: number; finalVictor?: string } | null>(null);
+  const [warSummary, setWarSummary] = useState<{ outcome?: string; aftermath?: string; notable?: string[]; yearStart: number; yearEnd: number; battleCount: number; totalCasualties: number; humanDeaths?: number; curatedStartYear?: number; curatedEndYear?: number; finalVictor?: string } | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   // openReplayBattleIdRef remembers which battle the cinematic has already
   // opened a replay overlay for. Without this, every pause/resume cycle
@@ -129,6 +168,10 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // dwell on a battle the user already watched 25 seconds of.
   const dwellEndsAtRef = useRef<number | null>(null);
   const dwellRemainingMsRef = useRef<number | null>(null);
+  // lastAdvanceTickRef holds the cinematicAdvanceTick value already
+  // consumed. The advance effect only fires when the prop value moves
+  // past it so a fresh mount with a non-zero tick does not auto-skip.
+  const lastAdvanceTickRef = useRef(cinematicAdvanceTick);
 
   useEffect(() => {
     fetch('/api/battles/stats')
@@ -470,15 +513,17 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       onPlayReplay(battle);
       openReplayBattleIdRef.current = battle.id;
     }
-    // Per-battle dwell budget. Hand-crafted replays run 4-5 phases at
-    // ~5.5s each (24-28s); schematic auto-replays run 3 phases (~17s);
-    // tooltip-only battles get a brief 14s read. Concurrent siblings on
-    // the same date get half the manual speed so the cluster pulses
-    // rather than crawls.
+    // Per-battle dwell budget. Hand-crafted replays vary 22-40s depending
+    // on phase count; we now wait for the BattleReplay-driven onEnded
+    // signal to advance and treat this dwell as a safety backstop, so the
+    // budget is generously oversized rather than tuned to a typical phase
+    // total. Schematic auto-replays run 3 phases (~17s); tooltip-only
+    // battles get a brief 14s read. Concurrent siblings on the same date
+    // get half the manual speed so the cluster pulses rather than crawls.
     let fullDwellMs: number;
     if (isCinematic) {
-      if (battle?.hasReplay) fullDwellMs = 28000;
-      else if (battle?.hasSchematic) fullDwellMs = 20000;
+      if (battle?.hasReplay) fullDwellMs = 55000;
+      else if (battle?.hasSchematic) fullDwellMs = 22000;
       else fullDwellMs = 14000;
     } else if (group.concurrent && subIndex < group.battles.length - 1) {
       fullDwellMs = Math.max(speed / 2, 1500);
@@ -535,11 +580,41 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, groupIndex, subIndex, groups, speed, cinematic, onPlayReplay, onCloseReplay]);
 
+  // Cinematic short-circuit: when the active BattleReplay reports its
+  // outro pause has finished (cinematicAdvanceTick increments), close the
+  // overlay and jump to the next battle right now. The wall-clock dwell
+  // timer stays armed as a backstop in case the inner replay never fires
+  // ended (broken phases, missing replay, etc.).
+  useEffect(() => {
+    if (cinematicAdvanceTick === lastAdvanceTickRef.current) return;
+    lastAdvanceTickRef.current = cinematicAdvanceTick;
+    if (!cinematic || !playing || groups.length === 0) return;
+    const group = groups[groupIndex];
+    if (!group) return;
+    clearTimeout(timerRef.current);
+    dwellEndsAtRef.current = null;
+    dwellRemainingMsRef.current = null;
+    if (onCloseReplay) onCloseReplay();
+    openReplayBattleIdRef.current = null;
+    if (group.concurrent && subIndex < group.battles.length - 1) {
+      const next = subIndex + 1;
+      setSubIndex(next);
+      focusBattle(group.battles[next]);
+    } else if (groupIndex < groups.length - 1) {
+      goTo(groupIndex + 1, 0);
+    } else {
+      setPlaying(false);
+      if (cinematicStage === 'playing') setCinematicStage('aftermath');
+    }
+    // focusBattle and goTo are stable; intentionally omitted from deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cinematicAdvanceTick, cinematic, playing, groupIndex, subIndex, groups, onCloseReplay, cinematicStage]);
+
   // Build a hierarchical tree: top-level wars at depth 0, child theaters and
   // campaigns nested below their parent. The "Bloodiest" and "Most Battles"
   // sorts use the rolled totals so parents always rank above their children.
   const sortKey = (w: WarCount): number => {
-    if (warSort === 'casualties') return -(w.rolledCasualties || w.casualties);
+    if (warSort === 'casualties') return -preferredTotalForWar(w);
     if (warSort === 'battles') return -(w.rolledCount || w.count);
     if (warSort === 'chrono') return w.minYear;
     return 0;
@@ -582,13 +657,13 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         const warsInCountry = (byCountry.get(country) ?? [])
           .slice()
           .sort((a, b) => {
-            const ca = a.rolledCasualties || a.casualties;
-            const cb = b.rolledCasualties || b.casualties;
+            const ca = preferredTotalForWar(a);
+            const cb = preferredTotalForWar(b);
             if (ca !== cb) return cb - ca;
             return a.name.localeCompare(b.name);
           });
         const totalCas = warsInCountry.reduce(
-          (s, w) => s + (w.rolledCasualties || w.casualties),
+          (s, w) => s + preferredTotalForWar(w),
           0,
         );
         flat.push({
@@ -640,7 +715,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     warSort === 'casualties'
       ? tree.filter((w) => {
           if (w.kind !== 'war') return true;
-          const v = w.depth === 0 ? w.rolledCasualties || w.casualties : w.casualties;
+          const v = w.depth === 0 ? preferredTotalForWar(w) : (w.humanDeaths || w.casualties);
           return v > 0;
         })
       : tree;
@@ -684,18 +759,18 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   useEffect(() => {
     if (!onWarTerritory) return;
     if (!selectedWar || !currentBattle) {
-      onWarTerritory(null, null);
+      onWarTerritory(null, null, []);
       return;
     }
-    // Decimal year: prefer the precise battle year (already an integer);
-    // a future enrichment can use the parsed month/day to pick a sub-
-    // snapshot when multiple snapshots share a year.
+    // Year matching uses the integer battle year. Future enrichment can
+    // use parsed month/day to pick a sub-snapshot when multiple snapshots
+    // share a year.
     const snap = findSnapshot(selectedWar, currentBattle.year);
     if (!snap) {
-      onWarTerritory(null, null);
+      onWarTerritory(null, null, []);
       return;
     }
-    onWarTerritory(buildCountryColorMap(snap), snap.label);
+    onWarTerritory(buildCountryColorMap(snap), snap.label, Object.keys(snap.control));
   }, [selectedWar, currentBattle, onWarTerritory]);
 
   // Two distinct shells: a centered modal while the user is browsing the war
@@ -758,11 +833,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                 const w = row;
                 const showVal =
                   warSort === 'casualties'
-                    ? (w.depth === 0 ? w.rolledCasualties : w.casualties)
+                    ? (w.depth === 0 ? preferredTotalForWar(w) : (w.humanDeaths || w.casualties))
                     : warSort === 'chrono'
                     ? w.minYear
                     : warSort === 'country'
-                    ? (w.rolledCasualties || w.casualties)
+                    ? preferredTotalForWar(w)
                     : (w.depth === 0 ? w.rolledCount : w.count);
                 const eraTheme = themeForYear(w.minYear || 1900);
                 const stripeColor = eraTheme.accent;
@@ -804,11 +879,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                       </span>
                       <span className="text-[10px] text-slate-600 flex-shrink-0 tabular-nums">
                         {warSort === 'casualties' && showVal > 0
-                          ? `${(showVal / 1000).toFixed(0)}k`
+                          ? formatCasualtyCompact(showVal)
                           : warSort === 'chrono'
                           ? formatYear(showVal)
                           : warSort === 'country' && showVal > 0
-                          ? `${(showVal / 1000).toFixed(0)}k`
+                          ? formatCasualtyCompact(showVal)
                           : warSort === 'country'
                           ? `${w.rolledCount || w.count}`
                           : `${showVal}`}

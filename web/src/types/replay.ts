@@ -14,12 +14,20 @@ export interface Replay {
   factionB: string;
   factionC?: string;
   // aggressor optionally identifies which side opened hostilities. When set,
-  // the renderer guarantees that side gets the hostile red palette and the
-  // defender gets the cool blue palette, regardless of which letter slot
-  // the curator put them in. This avoids historical absurdities like Nazi
-  // Germany rendering blue at Stalingrad. Unset → fall back to positional
-  // (a=red, b=blue).
+  // and no explicit factionAColorKey / factionBColorKey is provided, the
+  // renderer guarantees that side gets the hostile red palette and the
+  // defender gets the cool blue palette. This is the legacy fallback for
+  // pre-palette replays.
   aggressor?: Faction;
+  // factionAColorKey / factionBColorKey / factionCColorKey assign an iconic
+  // ColorKey from the faction palette to a specific side of this replay.
+  // When set, they override the auto-detect from factionA / factionB names
+  // and the positional aggressor swap. Use for wars where the historical
+  // color identity is fixed: Wehrmacht is nazi-black, Red Army is soviet-red,
+  // Wehrmacht vs Red Army should not look like two red blobs.
+  factionAColorKey?: ColorKey;
+  factionBColorKey?: ColorKey;
+  factionCColorKey?: ColorKey;
   schematic?: boolean;
   phases: Phase[];
 }
@@ -165,6 +173,9 @@ export interface Annotation {
   y: number;
 }
 
+import type { ColorKey } from '../data/faction-palette';
+import { detectColorKey, paletteFor } from '../data/faction-palette';
+
 export const FACTION_COLOR: Record<Faction, string> = {
   a: '#f43f5e',
   b: '#3b82f6',
@@ -177,14 +188,49 @@ export const FACTION_GLOW: Record<Faction, string> = {
   c: 'rgba(168, 85, 247, 0.35)',
 };
 
-// factionColorFor resolves a faction's display color taking the replay's
-// `aggressor` field into account. When aggressor is unset, the result is
-// the positional FACTION_COLOR — same as direct lookup. When the aggressor
-// sits in slot 'b', the red and blue palettes swap so the attacker still
-// reads red and the defender still reads blue. Faction 'c' (rare third
-// belligerent) keeps its purple regardless. This stops cases like Nazi
-// Germany on offense at Stalingrad showing up blue against red Soviets.
-export function factionColorFor(faction: Faction, aggressor?: Faction): string {
+// PaletteContext is the minimum a renderer needs to resolve a faction's
+// color: explicit ColorKey overrides (if the replay declared them), the
+// side display names (so we can auto-detect a key from the string), and
+// the optional aggressor field (legacy fallback). Replay itself satisfies
+// this interface structurally, so most callers can pass the whole Replay.
+export interface PaletteContext {
+  aggressor?: Faction;
+  factionA?: string;
+  factionB?: string;
+  factionC?: string;
+  factionAColorKey?: ColorKey;
+  factionBColorKey?: ColorKey;
+  factionCColorKey?: ColorKey;
+}
+
+// resolveFactionKey returns the ColorKey we should use for a faction slot
+// given the replay's palette context, or null when no key resolves. Order:
+// explicit ColorKey override, then name auto-detect.
+function resolveFactionKey(faction: Faction, ctx?: PaletteContext): ColorKey | null {
+  const explicit: ColorKey | undefined =
+    faction === 'a' ? ctx?.factionAColorKey :
+    faction === 'b' ? ctx?.factionBColorKey :
+    ctx?.factionCColorKey;
+  if (explicit) return explicit;
+  const name: string | undefined =
+    faction === 'a' ? ctx?.factionA :
+    faction === 'b' ? ctx?.factionB :
+    ctx?.factionC;
+  if (name) {
+    const detected = detectColorKey(name);
+    if (detected) return detected;
+  }
+  return null;
+}
+
+// factionColorFor resolves a faction's solid display color. Resolution
+// order: explicit ColorKey on the replay, then auto-detect from the side
+// name, then the legacy aggressor swap (so an aggressor on slot 'b' still
+// gets the hostile red palette), then the raw positional FACTION_COLOR.
+export function factionColorFor(faction: Faction, ctx?: PaletteContext): string {
+  const key = resolveFactionKey(faction, ctx);
+  if (key) return paletteFor(key).primary;
+  const aggressor = ctx?.aggressor;
   if (!aggressor || aggressor === 'a' || faction === 'c') return FACTION_COLOR[faction];
   if (faction === 'a') return FACTION_COLOR.b;
   if (faction === 'b') return FACTION_COLOR.a;
@@ -193,7 +239,10 @@ export function factionColorFor(faction: Faction, aggressor?: Faction): string {
 
 // factionGlowFor mirrors factionColorFor for the soft halo palette used by
 // unit chips, side tags, and arrow stops.
-export function factionGlowFor(faction: Faction, aggressor?: Faction): string {
+export function factionGlowFor(faction: Faction, ctx?: PaletteContext): string {
+  const key = resolveFactionKey(faction, ctx);
+  if (key) return paletteFor(key).glow;
+  const aggressor = ctx?.aggressor;
   if (!aggressor || aggressor === 'a' || faction === 'c') return FACTION_GLOW[faction];
   if (faction === 'a') return FACTION_GLOW.b;
   if (faction === 'b') return FACTION_GLOW.a;

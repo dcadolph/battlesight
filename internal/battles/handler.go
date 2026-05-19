@@ -191,7 +191,7 @@ func (h *Handler) searchBattles(w http.ResponseWriter, r *http.Request) {
 
 // stats returns aggregate counts for the filter UI.
 func (h *Handler) stats(w http.ResponseWriter, r *http.Request) {
-	s, err := h.store.Stats(r.Context())
+	s, err := h.store.Stats(r.Context(), h.wars)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to load stats")
 		return

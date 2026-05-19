@@ -54,6 +54,19 @@ type WarSummary struct {
 	// Notable is an optional 1-3 item list of notable outcomes beyond the
 	// victor field: war crimes trials, partition, redrawn borders, etc.
 	Notable []string `json:"notable,omitempty"`
+	// HumanDeaths is the curated total deaths including civilians, famine,
+	// genocide, and disease. Zero when no curated override exists; UI then
+	// falls back to TotalCasualties (the battle-roll-up sum).
+	HumanDeaths int64 `json:"humanDeaths,omitempty"`
+	// CuratedStartYear is the curated calendar year the war begins, when
+	// it differs from the catalog's earliest battle year. Lets WW2 start
+	// with the 1931 Mukden Incident rather than the Invasion of Poland.
+	CuratedStartYear int `json:"curatedStartYear,omitempty"`
+	// CuratedEndYear is the curated calendar year the war ends.
+	CuratedEndYear int `json:"curatedEndYear,omitempty"`
+	// Parent names the war this summary rolls up under. Empty for top-level
+	// wars.
+	Parent string `json:"parent,omitempty"`
 }
 
 // VictorTally is one entry in the per-war victor distribution.
@@ -78,8 +91,14 @@ type WarBattleRef struct {
 }
 
 // WarNarrative is the curated narrative slot for a single war. It is the
-// shape of each entry in wars.json — battle aggregation does not depend on
-// this file, so wars without curated narratives still surface stats.
+// shape of each entry in wars.json. Battle aggregation does not depend on
+// this file, so wars without curated narratives still surface stats. The
+// numeric fields (HumanDeaths, StartYear, EndYear) and the Parent pointer
+// let curators override aggregations the database cannot derive from
+// battle records alone: total deaths including civilians, famine, and
+// genocide; the canonical start year before the first recorded battle;
+// and the parent war this entry rolls up under (theaters, campaigns,
+// preludes).
 type WarNarrative struct {
 	// Outcome is a one-sentence "how it ended" line.
 	Outcome string `json:"outcome,omitempty"`
@@ -89,6 +108,22 @@ type WarNarrative struct {
 	KeyTerms string `json:"keyTerms,omitempty"`
 	// Notable is an optional list of notable outcomes.
 	Notable []string `json:"notable,omitempty"`
+	// HumanDeaths is the curated total deaths including civilians, famine,
+	// and genocide. Zero means no curated override; the battle roll-up
+	// stands. Use this when the battle sum is grossly low because the war
+	// killed many more people off the battlefield (WW2 holocaust + famine,
+	// Mongol massacres, Taiping famine, etc.).
+	HumanDeaths int64 `json:"humanDeaths,omitempty"`
+	// StartYear is the curated calendar year the war begins. Lets a
+	// curator define WW2 as starting with the Mukden Incident in 1931
+	// rather than the date of the earliest battle in the catalog.
+	StartYear int `json:"startYear,omitempty"`
+	// EndYear is the curated calendar year the war ends.
+	EndYear int `json:"endYear,omitempty"`
+	// Parent names the war this entry is a theater, campaign, or prelude
+	// of. The frontend uses this to roll children up under their parent
+	// in the war list. Empty string means top-level.
+	Parent string `json:"parent,omitempty"`
 }
 
 // Wars is a thread-safe registry of curated war narratives loaded from a
@@ -308,6 +343,10 @@ func SummarizeWar(ctx context.Context, store *Store, wars *Wars, name string) (W
 			sum.Aftermath = n.Aftermath
 			sum.KeyTerms = n.KeyTerms
 			sum.Notable = n.Notable
+			sum.HumanDeaths = n.HumanDeaths
+			sum.CuratedStartYear = n.StartYear
+			sum.CuratedEndYear = n.EndYear
+			sum.Parent = n.Parent
 		}
 	}
 	return sum, nil

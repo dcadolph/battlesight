@@ -24,9 +24,25 @@ interface BattleReplayProps {
   // moment" indicator and leaves the final tactical frame visible until
   // the parent advances.
   cinematicMode?: boolean;
+  // onEnded fires once a short outro pause has elapsed after the replay's
+  // final phase finishes. War cinematic playback wires this to advance
+  // to the next battle as soon as the outro card has had time to register,
+  // instead of waiting on a wall-clock dwell budget that can be shorter
+  // than the actual phase total. Only fired once per replay instance.
+  onEnded?: () => void;
+  // outroPauseMs is how long the outro card stays visible after ended
+  // before onEnded fires. Default 2400ms reads as "this battle is done,
+  // here comes the next one" without lingering.
+  outroPauseMs?: number;
+  // warCountryColors flows the active war-territory snapshot from App
+  // straight through to the inner GlobeReplay so country-level shading
+  // stays visible while watching an individual battle inside a war
+  // cinematic. Without it, opening a replay collapses the globe to just
+  // the highlighted host country and the user loses the campaign sweep.
+  warCountryColors?: Record<string, string>;
 }
 
-export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange, cinematicMode = false }: BattleReplayProps) {
+export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange, cinematicMode = false, onEnded, outroPauseMs = 2400, warCountryColors }: BattleReplayProps) {
   const [replay, setReplay] = useState<Replay | null>(null);
   const [phaseIdx, setPhaseIdx] = useState(initialPhase);
   // Auto-play on open. Opening "Watch the battle" implies "play it". Making
@@ -86,6 +102,16 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     // Soft thump on every phase advance. No-op when sound is disabled.
     playPhaseAdvance();
   }, [phaseIdx, onPhaseChange]);
+
+  // Fire onEnded a short pause after the replay's final phase lands. The
+  // pause gives the outro card time to read; the callback then lets the
+  // parent (war cinematic) advance immediately without waiting on a
+  // separate dwell timer. Reduced-motion path collapses the pause to 0.
+  useEffect(() => {
+    if (!ended || !onEnded) return;
+    const t = setTimeout(onEnded, prefersReducedMotion ? 0 : outroPauseMs);
+    return () => clearTimeout(t);
+  }, [ended, onEnded, outroPauseMs, prefersReducedMotion]);
 
   // Tint the ambient bed to the battle's era while the replay is open.
   useEffect(() => {
@@ -319,7 +345,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         <div className="flex items-center gap-2">
           {/* One-click jump to the battlefield in Google Earth. Opens in a
               new tab so the replay session is preserved — the user can come
-              back to BattleTrace from the same tab they left. */}
+              back to BattleSight from the same tab they left. */}
           <a
             href={`https://earth.google.com/web/@${battle.lat},${battle.lng},0a,8000d,35y,0h,55t,0r`}
             target="_blank"
@@ -350,12 +376,13 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 replay={replay}
                 phase={phase}
                 phaseIdx={phaseIdx}
+                warCountryColors={warCountryColors}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <div className="w-full max-w-6xl">
                   <div className="rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
-                    <TacticalMap key={phaseIdx} phase={phase} aspectRatio={aspectRatio} aggressor={replay.aggressor} />
+                    <TacticalMap key={phaseIdx} phase={phase} aspectRatio={aspectRatio} paletteCtx={replay} />
                   </div>
                 </div>
               </div>
@@ -435,9 +462,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 get cramped on narrow stages. */}
             <div className="mb-4 pb-4 border-b border-slate-800/80 space-y-1.5">
               <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-1.5">Sides</div>
-              <SideRow color={factionColorFor('a', replay.aggressor)} label={replay.factionA} />
-              <SideRow color={factionColorFor('b', replay.aggressor)} label={replay.factionB} />
-              {replay.factionC && <SideRow color={factionColorFor('c', replay.aggressor)} label={replay.factionC} />}
+              <SideRow color={factionColorFor('a', replay)} label={replay.factionA} />
+              <SideRow color={factionColorFor('b', replay)} label={replay.factionB} />
+              {replay.factionC && <SideRow color={factionColorFor('c', replay)} label={replay.factionC} />}
             </div>
 
             <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2">

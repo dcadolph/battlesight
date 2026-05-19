@@ -101,11 +101,16 @@ export default function App() {
   const [replayCinematic, setReplayCinematic] = useState(false);
   const [replayPhase, setReplayPhase] = useState(0);
   // cinematicAdvanceTick increments every time the inner BattleReplay
-  // signals "battle done, move on". WarPlayback watches this prop and
+  // signals "battle done, move on" or the user clicks the manual Next
+  // button on the cinematic outro. WarPlayback watches this prop and
   // jumps to the next battle without waiting on its wall-clock dwell. Lets
   // a long replay (>28s of phases) close cleanly instead of stranding the
   // viewer on its outro card.
   const [cinematicAdvanceTick, setCinematicAdvanceTick] = useState(0);
+  // cinematicPrevTick mirrors the advance tick for the "Previous battle"
+  // manual control. Same propagation path; WarPlayback decrements
+  // groupIndex by one when this changes.
+  const [cinematicPrevTick, setCinematicPrevTick] = useState(0);
   const [introVisible, setIntroVisible] = useState(false);
   const [featured, setFeatured] = useState<Battle | null>(null);
   // historyMode is true whenever the user is in the play-history overlay,
@@ -332,6 +337,11 @@ export default function App() {
   // dwell timer has not fired yet (replay phases ran long).
   const handleCinematicBattleEnded = useCallback(() => {
     setCinematicAdvanceTick((t) => t + 1);
+  }, []);
+  // handleCinematicAdvancePrev rewinds one battle. Same propagation path
+  // as the next advance, just routed to WarPlayback's prev tick prop.
+  const handleCinematicAdvancePrev = useCallback(() => {
+    setCinematicPrevTick((t) => t + 1);
   }, []);
   const handleWarSelected = useCallback((name: string) => {
     if (name) {
@@ -944,6 +954,7 @@ export default function App() {
           onCloseReplay={handleWarCloseReplay}
           onWarTerritory={handleWarTerritory}
           cinematicAdvanceTick={cinematicAdvanceTick}
+          cinematicPrevTick={cinematicPrevTick}
           initialWar={initialWar}
         />
       )}
@@ -956,6 +967,8 @@ export default function App() {
           onClose={handleCloseReplay}
           cinematicMode={replayCinematic}
           onEnded={replayCinematic ? handleCinematicBattleEnded : undefined}
+          onAdvanceNext={replayCinematic ? handleCinematicBattleEnded : undefined}
+          onAdvancePrev={replayCinematic ? handleCinematicAdvancePrev : undefined}
           warCountryColors={warCountryColors ?? undefined}
         />
       )}

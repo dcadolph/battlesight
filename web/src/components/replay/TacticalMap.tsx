@@ -775,41 +775,42 @@ function MovementArrow({ movement, viewW, index, total, paletteCtx }: MovementPr
   // still completes inside its 6-7s window.
   const stagger = total <= 1 ? 0 : Math.min(0.6, 4 / Math.max(total, 1)) * index;
 
-  // Curve depth tuned per movement kind for visual drama. Flank arrows bend
-  // hard; charges drive nearly straight; retreats and routs curve outward
-  // to feel like flight.
+  // Curve depth tuned per movement kind for visual drama. Bumped across
+  // the board so every arrow reads as a sweeping campaign arc rather than
+  // a straight diagram line. Flank arrows bend hard, retreats curve
+  // outward like flight, charges still drive close to direct.
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
   const offsetMag =
-    kind === 'flank' ? 14 :
-    kind === 'rout' ? -8 :
-    kind === 'retreat' || kind === 'withdrawal' ? -5 :
-    kind === 'charge' ? 4 :
-    6;
+    kind === 'flank' ? 22 :
+    kind === 'rout' ? -14 :
+    kind === 'retreat' || kind === 'withdrawal' ? -10 :
+    kind === 'charge' ? 7 :
+    11;
   const cx = (x1 + x2) / 2 - (dy / len) * offsetMag;
   const cy = (y1 + y2) / 2 + (dx / len) * offsetMag;
   const path = `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
 
-  // Style by kind: solid sweeping arc by default, dashed for retreats and
-  // routs, thicker for charge/flank. Far heavier than the old 1.2-unit
-  // pencil stroke. These should read at a glance as army movement, not
-  // a graph plot.
+  // Style by kind. Stroke widths bumped so every arrow has weight on the
+  // tactical map. Retreats and routs stay dashed (so the eye reads them as
+  // broken motion) but they still march and trail a comet so they don't
+  // look frozen on the field.
   let dash: string | undefined;
-  let strokeWidth = 2.4;
-  let opacity = 0.92;
+  let strokeWidth = 3.4;
+  let opacity = 0.95;
   if (kind === 'retreat' || kind === 'withdrawal') {
-    dash = '3,1.5';
-    strokeWidth = 2.2;
+    dash = '3.5,2';
+    strokeWidth = 3.0;
     opacity = 0.85;
   } else if (kind === 'rout') {
-    dash = '1.2,1.2';
-    strokeWidth = 1.8;
-    opacity = 0.75;
+    dash = '1.5,1.5';
+    strokeWidth = 2.6;
+    opacity = 0.78;
   } else if (kind === 'charge') {
-    strokeWidth = 3.2;
+    strokeWidth = 4.6;
   } else if (kind === 'flank') {
-    strokeWidth = 2.8;
+    strokeWidth = 4.0;
   }
 
   // Each arrow gets its own gradient + flow-id so colors blend along the
@@ -825,7 +826,33 @@ function MovementArrow({ movement, viewW, index, total, paletteCtx }: MovementPr
           <stop offset="55%" stopColor={color} stopOpacity="0.85" />
           <stop offset="100%" stopColor={color} stopOpacity="1" />
         </linearGradient>
+        {/* Smoke / haze trail gradient: same hue as the arrow stroke but
+            stretched to a wide soft band along the path, dropping to fully
+            transparent at the head so the comet looks like it leaves dust
+            in its wake. */}
+        <linearGradient id={`${gradId}-smoke`} x1={x1} y1={y1} x2={x2} y2={y2} gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={color} stopOpacity="0.45" />
+          <stop offset="70%" stopColor={color} stopOpacity="0.18" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.0" />
+        </linearGradient>
       </defs>
+
+      {/* Outer haze: wide, blurred volume under the stroke. Reads as the
+          atmospheric weight of moving troops / dust column kicked up. */}
+      <path
+        d={path}
+        fill="none"
+        stroke={`url(#${gradId}-smoke)`}
+        strokeWidth={strokeWidth + 5.2}
+        strokeLinecap="round"
+        opacity={0}
+        style={{
+          filter: 'blur(1.6px)',
+          strokeDasharray: dash ?? '180',
+          strokeDashoffset: 180,
+          animation: `arrow-haze-in 1.8s ease-out ${stagger + 0.1}s forwards, dash-in 1.6s ease-out ${stagger}s forwards`,
+        }}
+      />
 
       {/* Soft glow under the stroke for atmospheric depth. */}
       <path
@@ -834,7 +861,7 @@ function MovementArrow({ movement, viewW, index, total, paletteCtx }: MovementPr
         stroke={color}
         strokeWidth={strokeWidth + 1.6}
         strokeLinecap="round"
-        opacity={0.18}
+        opacity={0.22}
         style={{
           strokeDasharray: dash ?? '180',
           strokeDashoffset: 180,
@@ -862,102 +889,131 @@ function MovementArrow({ movement, viewW, index, total, paletteCtx }: MovementPr
 
       {/* Flowing march dashes: an overlay stroke that runs continuously
           along the path after the trace lands, giving the arrow a sense
-          of ongoing motion rather than a frozen line. The dash period is
-          short and the cycle is loose enough to read as flow, not strobe.
-          Skipped for retreat / rout kinds since those should look broken,
-          not aggressive. */}
-      {kind !== 'retreat' && kind !== 'withdrawal' && kind !== 'rout' && (
-        <path
-          d={path}
-          fill="none"
-          stroke={color}
-          strokeWidth={Math.max(1.0, strokeWidth * 0.55)}
-          strokeLinecap="round"
-          strokeDasharray="2.2 5"
-          opacity={0}
-          style={{
-            animation: `arrow-march-in 600ms ease-out ${stagger + 1.4}s forwards, arrow-march-flow 2.2s linear ${stagger + 1.4}s infinite`,
-            mixBlendMode: 'screen',
-          }}
-        />
-      )}
+          of ongoing motion rather than a frozen line. Every kind gets a
+          march so defenders and retreats don't look stationary; routs
+          march faster and dimmer to read as a broken stampede, retreats
+          slower and somber, advances/charges/flanks at the standard
+          cadence. */}
+      {(() => {
+        const marchDur =
+          kind === 'rout' ? '1.4s' :
+          kind === 'retreat' || kind === 'withdrawal' ? '3.2s' :
+          kind === 'charge' ? '1.6s' :
+          kind === 'flank' ? '1.9s' :
+          2.2 + 's';
+        const marchOpacity =
+          kind === 'rout' ? 0.55 :
+          kind === 'retreat' || kind === 'withdrawal' ? 0.7 :
+          0.9;
+        return (
+          <path
+            d={path}
+            fill="none"
+            stroke={color}
+            strokeWidth={Math.max(1.0, strokeWidth * 0.55)}
+            strokeLinecap="round"
+            strokeDasharray="2.2 5"
+            opacity={0}
+            style={{
+              animation: `arrow-march-in 600ms ease-out ${stagger + 1.4}s forwards, arrow-march-flow ${marchDur} linear ${stagger + 1.4}s infinite`,
+              mixBlendMode: 'screen',
+              ['--march-target' as string]: marchOpacity,
+            }}
+          />
+        );
+      })()}
 
-      {/* Tracer comet train: a leading bright bead followed by three
-          fainter trailing beads, all pinned to the arrow's quadratic path
-          via SMIL animateMotion. The trail makes the movement feel like a
-          live force in motion, not a static line. Skipped for retreats and
-          routs since those should look broken, not driven. */}
-      {kind !== 'retreat' && kind !== 'withdrawal' && kind !== 'rout' && (
-        <>
-          {[
-            { r: 1.05, peak: 1.0,  beginOffset: 0.00, fade: '0;1;1;0',          keyTimes: '0;0.12;0.86;1' },
-            { r: 0.85, peak: 0.78, beginOffset: 0.06, fade: '0;0.78;0.78;0',    keyTimes: '0;0.15;0.84;1' },
-            { r: 0.65, peak: 0.55, beginOffset: 0.13, fade: '0;0.55;0.55;0',    keyTimes: '0;0.20;0.82;1' },
-            { r: 0.45, peak: 0.32, beginOffset: 0.20, fade: '0;0.32;0.32;0',    keyTimes: '0;0.25;0.80;1' },
-          ].map((t, i) => (
-            <circle
-              key={`comet-${i}`}
-              r={t.r}
-              fill="#fff"
-              opacity={0}
-              style={{ filter: `drop-shadow(0 0 ${1.4 + t.r}px ${color}) drop-shadow(0 0 ${2.0 + t.r * 1.4}px ${color})` }}
-            >
-              <animate
-                attributeName="opacity"
-                values={t.fade}
-                keyTimes={t.keyTimes}
-                dur="1.35s"
-                begin={`${stagger + 0.25 + t.beginOffset}s`}
-                fill="freeze"
-              />
-              <animateMotion
-                dur="1.35s"
-                begin={`${stagger + 0.25 + t.beginOffset}s`}
-                path={path}
-                rotate="0"
-                fill="freeze"
-              />
-            </circle>
-          ))}
-        </>
-      )}
+      {/* Tracer comet train: a leading bright bead followed by trailing
+          beads, all pinned to the arrow's quadratic path via SMIL
+          animateMotion. Every kind gets a train — retreats and routs use a
+          dimmer, slower train so they still read as a live unit drifting
+          back rather than a static dashed line. Advances and charges get
+          the full bright train at standard pace. */}
+      {(() => {
+        const dimmer = kind === 'rout' || kind === 'retreat' || kind === 'withdrawal';
+        const dur = kind === 'rout'
+          ? '1.8s'
+          : kind === 'retreat' || kind === 'withdrawal'
+            ? '1.9s'
+            : '1.35s';
+        const intensity = dimmer ? 0.55 : 1.0;
+        return [
+          { r: 1.10, peak: 1.0 * intensity, beginOffset: 0.00, fade: `0;${1.0 * intensity};${1.0 * intensity};0`, keyTimes: '0;0.12;0.86;1' },
+          { r: 0.92, peak: 0.78 * intensity, beginOffset: 0.06, fade: `0;${0.78 * intensity};${0.78 * intensity};0`, keyTimes: '0;0.15;0.84;1' },
+          { r: 0.72, peak: 0.55 * intensity, beginOffset: 0.13, fade: `0;${0.55 * intensity};${0.55 * intensity};0`, keyTimes: '0;0.20;0.82;1' },
+          { r: 0.55, peak: 0.38 * intensity, beginOffset: 0.20, fade: `0;${0.38 * intensity};${0.38 * intensity};0`, keyTimes: '0;0.25;0.80;1' },
+          { r: 0.40, peak: 0.22 * intensity, beginOffset: 0.28, fade: `0;${0.22 * intensity};${0.22 * intensity};0`, keyTimes: '0;0.30;0.78;1' },
+        ].map((t, i) => (
+          <circle
+            key={`comet-${i}`}
+            r={t.r}
+            fill="#fff"
+            opacity={0}
+            style={{ filter: `drop-shadow(0 0 ${1.4 + t.r}px ${color}) drop-shadow(0 0 ${2.0 + t.r * 1.4}px ${color})` }}
+          >
+            <animate
+              attributeName="opacity"
+              values={t.fade}
+              keyTimes={t.keyTimes}
+              dur={dur}
+              begin={`${stagger + 0.25 + t.beginOffset}s`}
+              fill="freeze"
+            />
+            <animateMotion
+              dur={dur}
+              begin={`${stagger + 0.25 + t.beginOffset}s`}
+              path={path}
+              rotate="0"
+              fill="freeze"
+            />
+          </circle>
+        ));
+      })()}
 
       {/* Arrowhead glow pulse at the destination, fires once the trace
           lands. A bright inner core plus a wider, slightly delayed outer
-          halo reads as the column hitting the line. Skipped for routs and
-          retreats. */}
-      {kind !== 'retreat' && kind !== 'withdrawal' && kind !== 'rout' && (
-        <>
-          <circle
-            cx={x2}
-            cy={y2}
-            r={1.9}
-            fill={color}
-            opacity={0}
-            style={{
-              transformBox: 'fill-box',
-              transformOrigin: 'center',
-              animation: `arrowhead-pulse 1200ms ${stagger + 1.45}s cubic-bezier(.25,.7,.25,1) forwards`,
-              filter: `drop-shadow(0 0 1.8px ${color}) drop-shadow(0 0 3px ${color})`,
-            }}
-          />
-          <circle
-            cx={x2}
-            cy={y2}
-            r={2.6}
-            fill="none"
-            stroke={color}
-            strokeWidth={0.45}
-            opacity={0}
-            style={{
-              transformBox: 'fill-box',
-              transformOrigin: 'center',
-              animation: `arrowhead-pulse 1500ms ${stagger + 1.55}s cubic-bezier(.25,.7,.25,1) forwards`,
-              filter: `drop-shadow(0 0 1.4px ${color})`,
-            }}
-          />
-        </>
-      )}
+          halo reads as the column hitting the line. Every kind gets a
+          pulse so defenders and retreats have a clear "arrived here" beat;
+          retreats land softer to keep the somber tone. */}
+      {(() => {
+        const dimmer = kind === 'rout' || kind === 'retreat' || kind === 'withdrawal';
+        const innerR = dimmer ? 1.4 : 1.9;
+        const outerR = dimmer ? 2.0 : 2.6;
+        const innerDur = dimmer ? '900ms' : '1200ms';
+        const outerDur = dimmer ? '1100ms' : '1500ms';
+        return (
+          <>
+            <circle
+              cx={x2}
+              cy={y2}
+              r={innerR}
+              fill={color}
+              opacity={0}
+              style={{
+                transformBox: 'fill-box',
+                transformOrigin: 'center',
+                animation: `arrowhead-pulse ${innerDur} ${stagger + 1.45}s cubic-bezier(.25,.7,.25,1) forwards`,
+                filter: `drop-shadow(0 0 1.8px ${color}) drop-shadow(0 0 3px ${color})`,
+              }}
+            />
+            <circle
+              cx={x2}
+              cy={y2}
+              r={outerR}
+              fill="none"
+              stroke={color}
+              strokeWidth={0.45}
+              opacity={0}
+              style={{
+                transformBox: 'fill-box',
+                transformOrigin: 'center',
+                animation: `arrowhead-pulse ${outerDur} ${stagger + 1.55}s cubic-bezier(.25,.7,.25,1) forwards`,
+                filter: `drop-shadow(0 0 1.4px ${color})`,
+              }}
+            />
+          </>
+        );
+      })()}
 
       {movement.label && (
         <text

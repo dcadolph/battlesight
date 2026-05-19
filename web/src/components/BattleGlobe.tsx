@@ -367,7 +367,22 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     return () => clearInterval(id);
   }, [flipRings.length]);
 
-  const rings = useMemo(() => [...replayRings, ...ignitionRings, ...flipRings], [replayRings, ignitionRings, flipRings]);
+  // Focus rings: a bright doppler pulse pinned to the currently selected
+  // battle. Three concentric copies stacked so the rings cascade outward
+  // like sonar pings. Always lives while a battle is selected — gives the
+  // user a clear "the action is here" anchor on the globe behind any
+  // open replay or war cinematic.
+  const focusRings = useMemo(() => {
+    if (!selectedBattle) return [] as Array<{ lat: number; lng: number; id: string; kind: 'focus'; color: string }>;
+    const eraColor = ERA_COLORS[selectedBattle.era] || '#fbbf24';
+    return [
+      { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `focus-${selectedBattle.id}-a`, kind: 'focus' as const, color: eraColor },
+      { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `focus-${selectedBattle.id}-b`, kind: 'focus' as const, color: eraColor },
+      { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `focus-${selectedBattle.id}-c`, kind: 'focus' as const, color: eraColor },
+    ];
+  }, [selectedBattle]);
+
+  const rings = useMemo(() => [...replayRings, ...ignitionRings, ...flipRings, ...focusRings], [replayRings, ignitionRings, flipRings, focusRings]);
 
   useEffect(() => {
     fetch(COUNTRIES_URL)
@@ -761,7 +776,7 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       ringLat="lat"
       ringLng="lng"
       ringColor={(d: object) => {
-        const r = d as { kind: 'replay' | 'ignition' | 'flip'; color: string };
+        const r = d as { kind: 'replay' | 'ignition' | 'flip' | 'focus'; color: string };
         const base = r.color;
         if (r.kind === 'ignition') {
           // Single bright burst that fades fast: era-colored core dropping
@@ -774,18 +789,24 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
           // the replay ring, with a slight inner-glow plateau before fade.
           return (t: number) => hexToRgba(base, t < 0.18 ? 0.95 : 0.95 * (1 - (t - 0.18) / 0.82));
         }
+        if (r.kind === 'focus') {
+          // Persistent doppler pulse on the selected battle. Bright at
+          // start, smooth fade to zero so the three stacked copies cascade
+          // outward like radar sweeps without flat banding.
+          return (t: number) => hexToRgba(base, 0.85 * (1 - t * t));
+        }
         return (t: number) => hexToRgba(base, 0.7 * (1 - t));
       }}
-      ringMaxRadius={2.6}
-      ringPropagationSpeed={1.6}
-      ringRepeatPeriod={2200}
+      ringMaxRadius={3.2}
+      ringPropagationSpeed={1.8}
+      ringRepeatPeriod={1900}
       ringAltitude={0.005}
       polygonsData={highlightedCountry}
-      polygonCapColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.42) : 'rgba(59,130,246,0.08)'}
-      polygonSideColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.55) : 'rgba(59,130,246,0.15)'}
-      polygonStrokeColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.85) : 'rgba(59,130,246,0.4)'}
-      polygonAltitude={0.008}
-      polygonsTransitionDuration={1400}
+      polygonCapColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.58) : 'rgba(59,130,246,0.08)'}
+      polygonSideColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.72) : 'rgba(59,130,246,0.15)'}
+      polygonStrokeColor={(feat: object) => hasWarShading ? hexToRgba(colorFor(feat), 0.95) : 'rgba(59,130,246,0.4)'}
+      polygonAltitude={0.012}
+      polygonsTransitionDuration={1200}
       polygonLabel={polygonLabel}
     />
     </div>

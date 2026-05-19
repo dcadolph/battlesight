@@ -161,25 +161,28 @@ function arrowTiming(kind: string | undefined, index: number): {
   // hit just as the trace completes so the eye reads "force arrives → land."
   impactDelay: number;
 } {
-  const appearDelay = index * 240;
+  const appearDelay = index * 280;
+  // Sweep timings deliberately slower than they used to be so every arrow
+  // reads as a flowing campaign movement rather than a quick diagram line.
+  // Even charges get a meaningful arc; retreats are stretched longer so
+  // the somber drift back has weight.
   const traceMs = kind === 'charge'
-    ? 700
+    ? 1100
     : kind === 'flank'
-      ? 950
+      ? 1400
       : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal'
-        ? 1500
-        : 1100;
+        ? 1800
+        : 1500;
   const marchSpeed = kind === 'charge'
-    ? 700
+    ? 900
     : kind === 'flank'
-      ? 850
+      ? 1100
       : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal'
-        ? 1500
-        : 1100;
+        ? 2400
+        : 1400;
   // Impact fires 80ms before the trace formally ends so the ring and the
-  // arrowhead read as a single event. Retreats are deliberately quieter:
-  // the flash is the moment of contact, and a withdrawal does not make
-  // contact, so we delay it to coincide with arrival rather than impact.
+  // arrowhead read as a single event. Retreats land more softly but still
+  // get a beat so the eye knows the unit completed its movement.
   const impactDelay = appearDelay + traceMs - 80;
   return { appearDelay, traceMs, marchSpeed, impactDelay };
 }
@@ -448,10 +451,10 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         if (!color) continue;
         out.push({
           feature: feat as Feature<Geometry>,
-          capColor: hexWithAlpha(color, 0.42),
-          strokeColor: hexWithAlpha(color, 0.85),
-          sideColor: hexWithAlpha(color, 0.55),
-          altitude: 0.008,
+          capColor: hexWithAlpha(color, 0.58),
+          strokeColor: hexWithAlpha(color, 0.95),
+          sideColor: hexWithAlpha(color, 0.72),
+          altitude: 0.012,
         });
       }
     }
@@ -708,6 +711,23 @@ function ArrowVector({ phaseIdx, arrow, paletteCtx }: ArrowVectorProps) {
   // pathLength=1 dash with a tiny visible window that slides from 0 to 1.
   return (
     <g>
+      {/* Atmospheric volume layer: a very wide, heavily blurred halo that
+          gives the arrow weight from the cinematic distance. Fades in
+          slowly so it reads as the campaign's "weight" rather than a hard
+          line, lingers after the trace lands so the front of advance keeps
+          a luminous ghost. */}
+      <path
+        d={path}
+        stroke={color}
+        strokeOpacity={0}
+        strokeWidth={stroke + 22}
+        fill="none"
+        strokeLinecap="round"
+        style={{
+          filter: 'blur(14px)',
+          animation: `arrow-vol-in 1200ms ${appearDelay}ms ease-out forwards`,
+        }}
+      />
       {/* Outer halo. Wide, soft, lower opacity. Gives the line the volume
           that reads as cinematic rather than diagrammatic. */}
       <path

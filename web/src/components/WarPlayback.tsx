@@ -3,7 +3,7 @@ import type { Battle } from '../types/battle';
 import { ERA_COLORS } from '../types/battle';
 import { themeForYear } from '../theme/era';
 import { canonBelligerentKey, canonBelligerentLabel } from '../lib/country';
-import { findSnapshot, buildCountryColorMap } from '../data/territory-snapshots';
+import { findSnapshot, buildCountryColorMap, TERRITORY } from '../data/territory-snapshots';
 import WarSummaryCard from './WarSummaryCard';
 import WarCinematicOverlay from './WarCinematicOverlay';
 import CloseButton from './CloseButton';
@@ -51,6 +51,10 @@ interface WarPlaybackProps {
   // from getting trapped on the outro card when the dwell budget is
   // shorter than the actual phase total.
   cinematicAdvanceTick?: number;
+  // cinematicPrevTick increments when the user clicks "Previous battle"
+  // on the cinematic outro card. WarPlayback rewinds the group index by
+  // one and re-focuses that battle.
+  cinematicPrevTick?: number;
 }
 
 interface WarCount {
@@ -116,7 +120,7 @@ function groupConcurrentBattles(battles: Battle[]): BattleGroup[] {
   return groups;
 }
 
-export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, onWarTerritory, initialWar, cinematicAdvanceTick = 0 }: WarPlaybackProps) {
+export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, onWarTerritory, initialWar, cinematicAdvanceTick = 0, cinematicPrevTick = 0 }: WarPlaybackProps) {
   const [wars, setWars] = useState<WarCount[]>([]);
   const [warSearch, setWarSearch] = useState('');
   const [warSort, setWarSort] = useState<WarSort>('casualties');
@@ -136,8 +140,15 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   const groups = useMemo<BattleGroup[]>(() => {
     if (battles.length === 0) return [];
     if (!cinematic) return groupConcurrentBattles(battles);
-    const cinematicGrade = battles.filter((b) => b.verified || b.hasReplay);
-    const usable = cinematicGrade.length >= 5 ? cinematicGrade : battles;
+    // Cinematic-grade is now strictly hand-crafted phase replays only.
+    // Verified-but-no-replay and schematic auto-replays are excluded so the
+    // war cinematic plays exclusively through the curated set instead of
+    // surfacing obscure naval convoy stubs and misclassified battles the
+    // importer dropped in. Falls back to the full list only when no
+    // hand-crafted replays exist for the war, so smaller wars without
+    // curation coverage still have a playable cinematic.
+    const cinematicGrade = battles.filter((b) => b.hasReplay && !b.hasSchematic);
+    const usable = cinematicGrade.length >= 3 ? cinematicGrade : battles;
     return groupConcurrentBattles(usable);
   }, [battles, cinematic]);
   const [speed, setSpeed] = useState(4000);
@@ -172,6 +183,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // consumed. The advance effect only fires when the prop value moves
   // past it so a fresh mount with a non-zero tick does not auto-skip.
   const lastAdvanceTickRef = useRef(cinematicAdvanceTick);
+  const lastPrevTickRef = useRef(cinematicPrevTick);
 
   useEffect(() => {
     fetch('/api/battles/stats')
@@ -587,10 +599,17 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // ended (broken phases, missing replay, etc.).
   useEffect(() => {
     if (cinematicAdvanceTick === lastAdvanceTickRef.current) return;
-    lastAdvanceTickRef.current = cinematicAdvanceTick;
-    if (!cinematic || !playing || groups.length === 0) return;
+    // Cinematic must be active and groups must be loaded, but we no
+    // longer gate on `playing`. The tick is incremented either by the
+    // inner BattleReplay's natural end (which only happens during active
+    // playback) or by the user explicitly clicking "Next battle" on the
+    // outro card, in which case "stuck on outro, paused" is exactly when
+    // they need the jump to fire. Forcing play resumption alongside the
+    // advance rescues both paths in one shot.
+    if (!cinematic || groups.length === 0) return;
     const group = groups[groupIndex];
     if (!group) return;
+    lastAdvanceTickRef.current = cinematicAdvanceTick;
     clearTimeout(timerRef.current);
     dwellEndsAtRef.current = null;
     dwellRemainingMsRef.current = null;
@@ -600,15 +619,42 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       const next = subIndex + 1;
       setSubIndex(next);
       focusBattle(group.battles[next]);
+      setPlaying(true);
     } else if (groupIndex < groups.length - 1) {
       goTo(groupIndex + 1, 0);
+      setPlaying(true);
     } else {
       setPlaying(false);
       if (cinematicStage === 'playing') setCinematicStage('aftermath');
     }
     // focusBattle and goTo are stable; intentionally omitted from deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cinematicAdvanceTick, cinematic, playing, groupIndex, subIndex, groups, onCloseReplay, cinematicStage]);
+  }, [cinematicAdvanceTick, cinematic, groupIndex, subIndex, groups, onCloseReplay, cinematicStage]);
+
+  // Manual previous-battle handler. Same propagation pattern as the
+  // advance tick: the user clicks "Previous battle" on the outro, App
+  // increments cinematicPrevTick, this effect catches the change and
+  // rewinds one group. Cinematic mode is required so the prev button
+  // only ever fires during a cinematic playthrough.
+  useEffect(() => {
+    if (cinematicPrevTick === lastPrevTickRef.current) return;
+    if (!cinematic || groups.length === 0) return;
+    lastPrevTickRef.current = cinematicPrevTick;
+    clearTimeout(timerRef.current);
+    dwellEndsAtRef.current = null;
+    dwellRemainingMsRef.current = null;
+    if (onCloseReplay) onCloseReplay();
+    openReplayBattleIdRef.current = null;
+    if (subIndex > 0) {
+      const next = subIndex - 1;
+      setSubIndex(next);
+      focusBattle(groups[groupIndex].battles[next]);
+    } else if (groupIndex > 0) {
+      goTo(groupIndex - 1, 0);
+    }
+    setPlaying(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cinematicPrevTick, cinematic, groupIndex, subIndex, groups, onCloseReplay]);
 
   // Build a hierarchical tree: top-level wars at depth 0, child theaters and
   // campaigns nested below their parent. The "Bloodiest" and "Most Battles"
@@ -754,24 +800,47 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
 
   // Time-shifting territory: when the playhead moves to a new battle,
   // resolve the snapshot for the current war + battle year and emit it
-  // upward so BattleGlobe re-paints. Cleared when no war is selected so
-  // the globe falls back to its idle state.
+  // upward so BattleGlobe re-paints. Once the campaign reaches its
+  // aftermath stage, pin the final (latest) snapshot so the post-war
+  // ownership stays visible behind the aftermath card and after the user
+  // dismisses it. Cleared only when no war is selected so the globe falls
+  // back to its idle state.
   useEffect(() => {
     if (!onWarTerritory) return;
-    if (!selectedWar || !currentBattle) {
+    if (!selectedWar) {
       onWarTerritory(null, null, []);
       return;
     }
-    // Year matching uses the integer battle year. Future enrichment can
-    // use parsed month/day to pick a sub-snapshot when multiple snapshots
-    // share a year.
+    // Aftermath path: emit the latest snapshot we have for this war,
+    // regardless of which battle the playhead is parked on.
+    if (cinematicStage === 'aftermath') {
+      const entry = TERRITORY.find((t) => t.war === selectedWar);
+      const finalSnap = entry?.snapshots[entry.snapshots.length - 1];
+      if (finalSnap) {
+        onWarTerritory(buildCountryColorMap(finalSnap), finalSnap.label, Object.keys(finalSnap.control));
+        return;
+      }
+    }
+    if (!currentBattle) {
+      // No battle focused but we still want shading: fall back to the most
+      // recent snapshot so the globe holds the post-war state rather than
+      // collapsing to bare.
+      const entry = TERRITORY.find((t) => t.war === selectedWar);
+      const fallback = entry?.snapshots[entry.snapshots.length - 1];
+      if (fallback) {
+        onWarTerritory(buildCountryColorMap(fallback), fallback.label, Object.keys(fallback.control));
+      } else {
+        onWarTerritory(null, null, []);
+      }
+      return;
+    }
     const snap = findSnapshot(selectedWar, currentBattle.year);
     if (!snap) {
       onWarTerritory(null, null, []);
       return;
     }
     onWarTerritory(buildCountryColorMap(snap), snap.label, Object.keys(snap.control));
-  }, [selectedWar, currentBattle, onWarTerritory]);
+  }, [selectedWar, currentBattle, onWarTerritory, cinematicStage]);
 
   // Two distinct shells: a centered modal while the user is browsing the war
   // list (the globe doesn't help here, the list is what matters), and a slim

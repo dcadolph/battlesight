@@ -39,51 +39,69 @@ export interface WarTerritory {
 // powers in blue-cyan; neutral / Other in slate. Hex without alpha; the
 // renderer mixes alpha at paint time.
 export const OWNER_COLORS: Record<string, string> = {
-  'nazi-germany': '#dc2626',
-  'imperial-germany': '#b91c1c',
-  'germany': '#dc2626',
-  'japan': '#ea580c',
-  'italy': '#f97316',
+  // World War II Axis. Nazis read black (SS uniform) so red stays free for
+  // the Soviet sphere; Imperial Japan reads as blood crimson; Italy reads
+  // as fascist green. Each Axis power has its own distinct silhouette on
+  // the European map at peak occupation.
+  // Nazi Germany painted as deep blood crimson rather than pure SS black.
+  // Black on a dark satellite globe disappears; the eye reads "no shading"
+  // even when the territory is supposed to be shaded. The deep crimson is
+  // still distinct from Soviet bright red and Imperial Japan blood red.
+  'nazi-germany': '#7c1d1d',
+  'imperial-germany': '#374151',
+  'germany': '#7c1d1d',
+  'japan': '#9b1c1c',
+  'italy': '#16732b',
   'vichy': '#a16207',
-  'ussr': '#0ea5e9',
-  'russia': '#dc2626',
-  'ukraine': '#2563eb',
-  'us': '#2563eb',
-  'uk': '#1d4ed8',
-  'canada': '#3b82f6',
-  'australia': '#60a5fa',
-  'new-zealand': '#60a5fa',
-  'france': '#6366f1',
-  'french-empire': '#1e40af',
-  'china-roc': '#0891b2',
-  'china-prc': '#dc2626',
+  // Soviet sphere reads as bright Red Army red. Modern Russia keeps a
+  // darker blood red so the two eras don't look identical when adjacent.
+  'ussr': '#dc2626',
+  'russia': '#a5121b',
+  'ukraine': '#0c5fdb',
+  // Western Allies palette: each gets a different cool tone so France,
+  // UK, and the US stay distinguishable when they're side-by-side on
+  // the map (e.g. occupied Germany 1945).
+  'us': '#1d4ed8',
+  'uk': '#1e3a8a',
+  'canada': '#0ea5e9',
+  'australia': '#06b6d4',
+  'new-zealand': '#67e8f9',
+  'france': '#3b82f6',
+  'french-empire': '#6366f1',
+  'china-roc': '#1e40af',
+  'china-prc': '#b91c1c',
   'china': '#0891b2',
   'poland': '#9333ea',
-  'ottoman': '#16a34a',
-  'turkey': '#16a34a',
-  'syria': '#16a34a',
-  'isis': '#000000',
-  'hts': '#16a34a',
-  'us-union': '#2563eb',
-  'us-confederacy': '#9ca3af',
-  'rome': '#ca8a04',
+  'ottoman': '#9f1239',
+  'turkey': '#15803d',
+  'syria': '#15803d',
+  'isis': '#0f1116',
+  'hts': '#475569',
+  'us-union': '#1e3a8a',
+  'us-confederacy': '#6b7280',
+  'rome': '#b91c1c',
   'finland': '#94a3b8',
-  'hungary': '#a16207',
+  // Axis-aligned minor powers cluster in mustard/amber tones so they
+  // read as "with the Axis but not Germany" at a glance.
+  'hungary': '#854d0e',
   'romania': '#a16207',
-  'bulgaria': '#a16207',
+  'bulgaria': '#854d0e',
   'yugoslavia': '#9333ea',
   'greece': '#0891b2',
+  // Low Countries and Scandinavia: amber pre-occupation, recolored to
+  // nazi-black inside the snapshots once they fall. The amber tone gives
+  // them a distinct identity from the green saracen/turkey palette.
   'netherlands': '#f59e0b',
   'belgium': '#f59e0b',
   'norway': '#f59e0b',
   'denmark': '#f59e0b',
-  'austria-hungary': '#a16207',
+  'austria-hungary': '#854d0e',
   'serbia': '#0891b2',
   'north-korea': '#dc2626',
-  'south-korea': '#2563eb',
-  'un-coalition': '#1d4ed8',
-  'prussia': '#1e3a8a',
-  'austria': '#a16207',
+  'south-korea': '#1d4ed8',
+  'un-coalition': '#0ea5e9',
+  'prussia': '#1e2a4a',
+  'austria': '#e5e7eb',
   'spain': '#16a34a',
   'portugal': '#22c55e',
   'british-empire': '#dc2626',

@@ -40,9 +40,16 @@ interface BattleReplayProps {
   // cinematic. Without it, opening a replay collapses the globe to just
   // the highlighted host country and the user loses the campaign sweep.
   warCountryColors?: Record<string, string>;
+  // onAdvanceNext / onAdvancePrev are imperative jumps to the next or
+  // previous battle in the war cinematic sequence. When provided, they
+  // surface manual next/prev buttons in the outro card so the user always
+  // has a way to push past a stuck auto-advance. Each takes precedence
+  // over the timer-driven onEnded path.
+  onAdvanceNext?: () => void;
+  onAdvancePrev?: () => void;
 }
 
-export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange, cinematicMode = false, onEnded, outroPauseMs = 2400, warCountryColors }: BattleReplayProps) {
+export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange, cinematicMode = false, onEnded, outroPauseMs = 2400, warCountryColors, onAdvanceNext, onAdvancePrev }: BattleReplayProps) {
   const [replay, setReplay] = useState<Replay | null>(null);
   const [phaseIdx, setPhaseIdx] = useState(initialPhase);
   // Auto-play on open. Opening "Watch the battle" implies "play it". Making
@@ -122,7 +129,16 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   // Without this the timer keeps firing in the background, the user comes
   // back to find the replay finished, and the audio drone keeps playing
   // even though nothing is on screen.
-  usePauseOnHidden(useCallback(() => setPlaying(false), []));
+  // Pause-on-hidden only applies in standalone (dossier) viewing. During
+  // cinematic playback the war timer is the source of truth: pausing the
+  // inner replay while the outer cinematic keeps advancing leaves the
+  // inner stuck on a frozen frame after the user resumes, which is the
+  // bug that "shits the bed after Battle of France". Skip the pause in
+  // cinematic mode and let the outer war timer drive everything.
+  usePauseOnHidden(useCallback(() => {
+    if (cinematicMode) return;
+    setPlaying(false);
+  }, [cinematicMode]));
 
   const goto = useCallback((i: number) => {
     if (!replay) return;
@@ -196,6 +212,14 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         @keyframes arrow-fade-in {
           to { opacity: 1; }
         }
+        /* Smoke / haze trail: a wide blurred band that fills in alongside
+           the arrow stroke, then lingers at low opacity after the comet
+           passes so the path of the force remains visible. */
+        @keyframes arrow-haze-in {
+          0%   { opacity: 0; }
+          35%  { opacity: 0.85; }
+          100% { opacity: 0.55; }
+        }
         /* Arrow trace-in: the line draws itself from start to destination.
            pathLength=1 on the path means stroke-dashoffset ranges from 1 to 0
            regardless of geometric length. */
@@ -237,6 +261,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
            cinematic volume. */
         @keyframes arrow-halo-in {
           to { stroke-opacity: 0.32; }
+        }
+        /* Atmospheric volume: huge soft glow ring behind every arrow, fades
+           in slow and lingers low so the front of advance keeps a luminous
+           ghost long after the trace lands. Reads from cinematic distance. */
+        @keyframes arrow-vol-in {
+          to { stroke-opacity: 0.22; }
         }
         /* Comet head: a short bright window slides along the path during the
            trace. strokeDasharray='0.06 1' means a 6% visible segment on a
@@ -432,6 +462,8 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 onRestart={restartReplay}
                 onBackToStory={onClose}
                 cinematicMode={cinematicMode}
+                onAdvanceNext={onAdvanceNext}
+                onAdvancePrev={onAdvancePrev}
               />
             )}
 
@@ -901,9 +933,15 @@ interface BattleOutroProps {
   // motion. The user is not deciding what to do; they're reading the
   // verdict while the campaign rolls on.
   cinematicMode?: boolean;
+  // onAdvanceNext / onAdvancePrev surface manual jump buttons next to the
+  // "Next battle in a moment" cue so the user can always push past a
+  // stuck auto-advance. Each is wired through App so the underlying war
+  // cinematic actually moves rather than just dismissing this card.
+  onAdvanceNext?: () => void;
+  onAdvancePrev?: () => void;
 }
 
-function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinematicMode = false }: BattleOutroProps) {
+function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinematicMode = false, onAdvanceNext, onAdvancePrev }: BattleOutroProps) {
   void replay;
   const victor = (battle.victor || '').trim();
   const sides = battle.sides || [];
@@ -1322,7 +1360,7 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinemati
             outro typography. */}
         {cinematicMode ? (
           <div
-            className="mt-10 mb-2 flex flex-col items-center justify-center gap-3"
+            className="mt-10 mb-2 flex flex-col items-center justify-center gap-4"
             style={{ animation: 'outro-text-rise 700ms 1560ms cubic-bezier(.2,.7,.25,1) both' }}
           >
             <div
@@ -1344,6 +1382,51 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinemati
                   animation: 'outro-cinematic-sweep 4500ms ease-in-out infinite',
                 }}
               />
+            </div>
+            {/* Manual jump controls. The cinematic auto-advance fires after
+                its outro pause, but a clear next/prev pair lets the user
+                push past it whenever they want, and rescues the campaign
+                from any stuck auto-advance. Sits below the sweep so the
+                cinematic illusion still feels cinematic when nothing is
+                clicked, but agency is one tap away. */}
+            <div className="flex items-center gap-3 mt-2">
+              {onAdvancePrev && (
+                <button
+                  type="button"
+                  onClick={onAdvancePrev}
+                  className="inline-flex items-center justify-center gap-2 h-10 px-5 rounded-full text-[12px] font-semibold tracking-[0.04em] border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.04] whitespace-nowrap"
+                  style={{
+                    fontFamily: theme.titleFont,
+                    color: '#e2e8f0',
+                    borderColor: 'rgba(148,163,184,0.45)',
+                    background: 'rgba(15,18,28,0.7)',
+                    backdropFilter: 'blur(8px)',
+                  }}
+                  title="Previous battle"
+                  aria-label="Previous battle in the cinematic"
+                >
+                  <svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><path d="M7.5 1.5 L3 5.5 L7.5 9.5 Z"/></svg>
+                  Previous
+                </button>
+              )}
+              {onAdvanceNext && (
+                <button
+                  type="button"
+                  onClick={onAdvanceNext}
+                  className="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-full text-[12.5px] font-semibold tracking-[0.04em] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.04] whitespace-nowrap"
+                  style={{
+                    fontFamily: theme.titleFont,
+                    color: '#0a0d18',
+                    background: theme.accent,
+                    boxShadow: `0 10px 24px -10px ${theme.accent}aa, 0 0 0 1px ${theme.accent}55`,
+                  }}
+                  title="Next battle"
+                  aria-label="Next battle in the cinematic"
+                >
+                  Next battle
+                  <svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><path d="M3.5 1.5 L8 5.5 L3.5 9.5 Z"/></svg>
+                </button>
+              )}
             </div>
           </div>
         ) : (

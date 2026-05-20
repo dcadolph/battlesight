@@ -328,9 +328,14 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     const color = ERA_COLORS[selectedBattle.era] || '#fbbf24';
     setIgnitionRings((existing) => {
       const alive = existing.filter((r) => r.expires > tNow);
+      // Triple-burst — white core ring + double era-colored shock wave.
+      // Multiple expanding rings staggered in expiry produce a deeper,
+      // more cinematic "this is the battle" thump than a single pulse.
       return [
         ...alive,
-        { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-${tNow}`, kind: 'ignition' as const, color, expires: tNow + 2600 },
+        { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-core-${tNow}`, kind: 'ignition' as const, color: '#ffffff', expires: tNow + 1100 },
+        { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-a-${tNow}`, kind: 'ignition' as const, color, expires: tNow + 2400 },
+        { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-b-${tNow}`, kind: 'ignition' as const, color, expires: tNow + 3000 },
       ];
     });
     if (prev) {
@@ -435,10 +440,15 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
   const focusRings = useMemo(() => {
     if (!selectedBattle) return [] as Array<{ lat: number; lng: number; id: string; kind: 'focus'; color: string }>;
     const eraColor = ERA_COLORS[selectedBattle.era] || '#fbbf24';
+    // Five stacked rings instead of three — gives a denser, more dramatic
+    // pulsing radar sweep on the active battle. White core ring reads as the
+    // "epicenter flash" anchoring the eye.
     return [
+      { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `focus-${selectedBattle.id}-core`, kind: 'focus' as const, color: '#ffffff' },
       { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `focus-${selectedBattle.id}-a`, kind: 'focus' as const, color: eraColor },
       { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `focus-${selectedBattle.id}-b`, kind: 'focus' as const, color: eraColor },
       { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `focus-${selectedBattle.id}-c`, kind: 'focus' as const, color: eraColor },
+      { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `focus-${selectedBattle.id}-d`, kind: 'focus' as const, color: eraColor },
     ];
   }, [selectedBattle]);
 
@@ -868,28 +878,32 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
         const r = d as { kind: 'replay' | 'ignition' | 'flip' | 'focus'; color: string };
         const base = r.color;
         if (r.kind === 'ignition') {
-          // Single bright burst that fades fast: era-colored core dropping
-          // from 95% to 0 alpha along the ring's outward propagation.
-          return (t: number) => hexToRgba(base, 0.95 * (1 - t));
+          // Bright burst, slower fade with a hot plateau early to feel more
+          // like an impact than a pulse. White ignition rings (selection
+          // burst core) get an extra-bright envelope.
+          const peak = base === '#ffffff' ? 1.0 : 0.98;
+          return (t: number) => hexToRgba(base, t < 0.12 ? peak : peak * Math.max(0, 1 - (t - 0.12) / 0.88));
         }
         if (r.kind === 'flip') {
           // Territory-flip pulse: country flares in the new owner's color
           // as control changes hands at a snapshot boundary. Brighter than
           // the replay ring, with a slight inner-glow plateau before fade.
-          return (t: number) => hexToRgba(base, t < 0.18 ? 0.95 : 0.95 * (1 - (t - 0.18) / 0.82));
+          return (t: number) => hexToRgba(base, t < 0.18 ? 0.98 : 0.98 * (1 - (t - 0.18) / 0.82));
         }
         if (r.kind === 'focus') {
-          // Persistent doppler pulse on the selected battle. Bright at
-          // start, smooth fade to zero so the three stacked copies cascade
-          // outward like radar sweeps without flat banding.
-          return (t: number) => hexToRgba(base, 0.85 * (1 - t * t));
+          // Persistent doppler pulse on the selected battle. White core ring
+          // burns brighter than the era-colored shock waves so the eye
+          // immediately anchors on the active battle.
+          const isCore = base === '#ffffff';
+          const peak = isCore ? 1.0 : 0.92;
+          return (t: number) => hexToRgba(base, peak * (1 - t * t));
         }
-        return (t: number) => hexToRgba(base, 0.7 * (1 - t));
+        return (t: number) => hexToRgba(base, 0.78 * (1 - t));
       }}
-      ringMaxRadius={4.2}
-      ringPropagationSpeed={2.4}
-      ringRepeatPeriod={1400}
-      ringAltitude={0.006}
+      ringMaxRadius={5.5}
+      ringPropagationSpeed={2.8}
+      ringRepeatPeriod={1100}
+      ringAltitude={0.008}
       arcsData={traceArcs}
       arcStartLat={(d: object) => (d as { startLat: number }).startLat}
       arcStartLng={(d: object) => (d as { startLng: number }).startLng}
@@ -907,22 +921,24 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       arcsTransitionDuration={0}
       polygonsData={highlightedCountry}
       polygonCapColor={(feat: object) => {
-        if (!hasWarShading) return 'rgba(59,130,246,0.10)';
+        if (!hasWarShading) return 'rgba(59,130,246,0.14)';
         const c = colorFor(feat);
-        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 0.50);
+        // High-opacity cap (0.82) so the faction color reads cleanly over
+        // the satellite Earth texture instead of getting muddied by it.
+        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 0.82);
       }}
       polygonSideColor={() => 'rgba(0,0,0,0)'}
       polygonStrokeColor={(feat: object) => {
-        if (!hasWarShading) return 'rgba(59,130,246,0.35)';
+        if (!hasWarShading) return 'rgba(59,130,246,0.55)';
         const c = colorFor(feat);
-        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 0.55);
+        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 1.0);
       }}
       polygonAltitude={(feat: object) => {
-        if (!hasWarShading) return 0.0015;
+        if (!hasWarShading) return 0.0018;
         const c = colorFor(feat);
-        return c === '__neutral__' ? 0.0005 : 0.0035;
+        return c === '__neutral__' ? 0.0005 : 0.0055;
       }}
-      polygonsTransitionDuration={600}
+      polygonsTransitionDuration={700}
       polygonLabel={polygonLabel}
     />
     </div>

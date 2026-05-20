@@ -474,8 +474,8 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         if (color) {
           out.push({
             feature: feat as Feature<Geometry>,
-            capColor: hexWithAlpha(color, 0.50),
-            strokeColor: hexWithAlpha(color, 0.55),
+            capColor: hexWithAlpha(color, 0.82),
+            strokeColor: hexWithAlpha(color, 1.0),
             sideColor: 'rgba(0,0,0,0)',
             altitude: 0.0035,
           });

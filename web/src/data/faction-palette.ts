@@ -66,10 +66,10 @@ export interface Palette {
 
 const PALETTE: Record<ColorKey, Palette> = {
   // World War II.
-  'nazi-black': { primary: '#6b5d2e', glow: 'rgba(107,93,46,0.55)' },
+  'nazi-black': { primary: '#a16207', glow: 'rgba(161,98,7,0.55)' },
   'soviet-red': { primary: '#dc2626', glow: 'rgba(220,38,38,0.40)' },
   'imperial-japan': { primary: '#9b1c1c', glow: 'rgba(155,28,28,0.45)' },
-  'fascist-italy': { primary: '#16732b', glow: 'rgba(22,115,43,0.45)' },
+  'fascist-italy': { primary: '#ec4899', glow: 'rgba(236,72,153,0.45)' },
   'us-blue': { primary: '#1d4ed8', glow: 'rgba(29,78,216,0.40)' },
   'royal-navy': { primary: '#1e3a8a', glow: 'rgba(30,58,138,0.45)' },
   'free-french': { primary: '#3b82f6', glow: 'rgba(59,130,246,0.40)' },
@@ -92,7 +92,7 @@ const PALETTE: Record<ColorKey, Palette> = {
   'continental-blue': { primary: '#1e3a8a', glow: 'rgba(30,58,138,0.45)' },
   'prussian-blue': { primary: '#1e2a4a', glow: 'rgba(30,42,74,0.50)' },
   'habsburg-white': { primary: '#e5e7eb', glow: 'rgba(229,231,235,0.40)' },
-  'russian-green': { primary: '#15532f', glow: 'rgba(21,83,47,0.45)' },
+  'russian-green': { primary: '#475569', glow: 'rgba(71,85,105,0.45)' },
   // Ancient and medieval.
   'roman-crimson': { primary: '#b91c1c', glow: 'rgba(185,28,28,0.45)' },
   'carthage-purple': { primary: '#6b21a8', glow: 'rgba(107,33,168,0.45)' },
@@ -100,7 +100,7 @@ const PALETTE: Record<ColorKey, Palette> = {
   'greek-slate': { primary: '#475569', glow: 'rgba(71,85,105,0.45)' },
   'mongol-amber': { primary: '#b45309', glow: 'rgba(180,83,9,0.45)' },
   'crusader-cream': { primary: '#fef3c7', glow: 'rgba(254,243,199,0.40)' },
-  'saracen-green': { primary: '#15803d', glow: 'rgba(21,128,61,0.45)' },
+  'saracen-green': { primary: '#7c3aed', glow: 'rgba(124,58,237,0.45)' },
   'ottoman-burgundy': { primary: '#9f1239', glow: 'rgba(159,18,57,0.45)' },
   'spanish-gold': { primary: '#ca8a04', glow: 'rgba(202,138,4,0.45)' },
   // Generic.

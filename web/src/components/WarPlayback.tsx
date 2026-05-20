@@ -254,6 +254,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   const [detail, setDetail] = useState<Battle | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [warSummaryLoading, setWarSummaryLoading] = useState(false);
+  // initialPaneLoaded is set true once we've successfully loaded the FIRST
+  // (battles list + battle detail + war summary) round for this war. It
+  // suppresses re-showing the full-pane loading on subsequent battle hops
+  // — those finish in ~50-200ms and don't need a heavy overlay.
+  const [initialPaneLoaded, setInitialPaneLoaded] = useState(false);
   // cinematicStage drives the full-screen war overlay: an opening title
   // card before the first battle plays, the playthrough itself, then a
   // closing aftermath card. The existing per-battle playback loop runs
@@ -317,8 +322,9 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         onWarCountries(matchedWar?.countries?.length ? matchedWar.countries : (inherited ?? []));
       }
     }
-    if (!selectedWar) { setBattles([]); setBattlesLoading(false); onBattlesLoaded(null); return; }
+    if (!selectedWar) { setBattles([]); setBattlesLoading(false); setInitialPaneLoaded(false); onBattlesLoaded(null); return; }
     setBattlesLoading(true);
+    setInitialPaneLoaded(false);
     fetch(`/api/battles?war=${encodeURIComponent(selectedWar)}&limit=2000`)
       .then((r) => r.json())
       .then((d) => {
@@ -365,6 +371,19 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // Fetch the war summary for the cinematic overlay. Same endpoint the
   // WarSummaryCard uses; keeping a local copy lets the overlay render its
   // closing aftermath card without waiting on a child re-render.
+  // Flip initialPaneLoaded once all three async paths have settled for the
+  // first time after a war selection. After that, intra-war transitions
+  // (next/prev battle in cinematic) don't re-show the heavy overlay.
+  useEffect(() => {
+    if (initialPaneLoaded) return;
+    if (!selectedWar) return;
+    if (battlesLoading) return;
+    if (battles.length === 0) return;
+    if (detailLoading || !detail) return;
+    if (warSummaryLoading || !warSummary) return;
+    setInitialPaneLoaded(true);
+  }, [initialPaneLoaded, selectedWar, battlesLoading, battles.length, detailLoading, detail, warSummaryLoading, warSummary]);
+
   useEffect(() => {
     if (!selectedWar) { setWarSummary(null); setWarSummaryLoading(false); return; }
     let cancelled = false;
@@ -603,7 +622,12 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // playback effect below).
   useEffect(() => {
     if (groups.length === 0) return;
-    if (groupIndex === 0 && subIndex === 0) return;
+    // Always fetch detail for the current battle, including the initial
+    // (0,0) position. The previous early-return left detail null forever
+    // on initial load, which deadlocked the right-pane loading state
+    // because it waits for detail to arrive. Globe camera focus is still
+    // managed by the dedicated framing effect below, so this only fires
+    // the dossier fetch.
     focusBattle(groups[groupIndex].battles[subIndex]);
   }, [groups, groupIndex, subIndex, focusBattle]);
 
@@ -1150,7 +1174,44 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       </div>
 
       <div className="p-4 overflow-y-auto flex-1">
-        {currentBattle && (
+        {/* Single unified loading overlay. Stays mounted until ALL three
+            async paths (battles list + current-battle detail + war summary)
+            have settled for the FIRST time after a war selection. After
+            that, intra-war battle hops are fast enough not to need a heavy
+            overlay — the existing per-section state handles those quietly. */}
+        {!initialPaneLoaded && (
+          <div className="mb-3 rounded-xl border border-amber-400/25 bg-slate-900/55 px-4 py-5">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="h-9 w-9 rounded-full bg-amber-500/20 flex items-center justify-center ring-1 ring-amber-400/40">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="text-amber-200 animate-spin" style={{ animationDuration: '1.4s' }}>
+                  <path d="M21 12a9 9 0 11-6.219-8.56" strokeLinecap="round" />
+                </svg>
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="text-[12.5px] font-semibold text-slate-100 tracking-wide">
+                  Loading {selectedWar}…
+                </div>
+                <div className="text-[10.5px] text-slate-400 mt-0.5">
+                  {battlesLoading
+                    ? 'Fetching the campaign'
+                    : (detailLoading || !detail)
+                      ? 'Loading the first battle dossier'
+                      : (warSummaryLoading || !warSummary)
+                        ? 'Loading the war narrative'
+                        : 'Almost ready'}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2.5">
+              <div className="h-3 w-3/4 rounded bg-slate-800/70 animate-pulse" />
+              <div className="h-2 w-1/2 rounded bg-slate-800/55 animate-pulse" />
+              <div className="h-2 w-2/3 rounded bg-slate-800/40 animate-pulse" />
+              <div className="h-2 w-3/5 rounded bg-slate-800/40 animate-pulse" style={{ animationDelay: '0.2s' }} />
+            </div>
+          </div>
+        )}
+
+        {currentBattle && initialPaneLoaded && (
           <div className="mb-3 rounded-xl border border-slate-800/60 bg-slate-900/30 px-4 py-3.5">
             <div className="text-[9px] font-semibold uppercase tracking-[0.32em] text-amber-300/80 mb-1.5">
               About this battle
@@ -1196,42 +1257,9 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           </div>
         )}
 
-        {/* Loading skeleton with explicit "Loading…" label so the pane never
-            reads as dead during the fetch. Two pulsing rows hint at the
-            shape that's about to land + a verbal cue removes any "did the
-            app die?" ambiguity. */}
-        {battlesLoading && battles.length === 0 && (
-          <div className="mb-4 rounded-xl border border-slate-800/60 bg-slate-900/40 px-4 py-5">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="h-9 w-9 rounded-full bg-blue-500/15 flex items-center justify-center ring-1 ring-blue-400/30">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="text-blue-300 animate-spin" style={{ animationDuration: '1.6s' }}>
-                  <path d="M21 12a9 9 0 11-6.219-8.56" strokeLinecap="round" />
-                </svg>
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="text-[12px] font-semibold text-slate-200 tracking-wide">
-                  Loading battles…
-                </div>
-                <div className="text-[10.5px] text-slate-500 mt-0.5">
-                  Fetching the campaign and aligning the timeline
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2.5">
-              <div className="h-3 w-3/4 rounded bg-slate-800/70 animate-pulse" />
-              <div className="h-2 w-1/2 rounded bg-slate-800/50 animate-pulse" />
-              <div className="h-2 w-2/3 rounded bg-slate-800/40 animate-pulse" />
-            </div>
-          </div>
-        )}
-
         {/* Unified transport. One card carrying the hero "Play the war"
-            launcher on top and a single thin transport row beneath it. The
-            two used to be stacked into two competing visual blocks, which
-            the user called out as cluttered. Now they share a single
-            container with a hairline divider; the eye reads "watch" first
-            and "browse" as a refinement of the same control surface. */}
-        {!battlesLoading && groups.length > 0 && (() => {
+            launcher on top and a single thin transport row beneath it. */}
+        {initialPaneLoaded && groups.length > 0 && (() => {
           const totalBattles = groups.reduce((s, g) => s + g.battles.length, 0);
           return (
             <div className="mb-4 rounded-xl overflow-hidden border border-blue-400/30 bg-gradient-to-br from-blue-500/[0.10] to-transparent">
@@ -1321,31 +1349,28 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           );
         })()}
 
-        {/* How-it-ended card. Always visible while browsing a war so the
-            outcome and stats are an anchor for the user. Auto-emphasized
-            (expanded + blue border) when playback reaches the last
-            battle, fulfilling the "every war story ends with how the war
-            was won" rule. */}
-        <WarSummaryCard
-          warName={selectedWar}
-          emphasize={
-            groupIndex >= groups.length - 1 &&
-            subIndex >= (groups[groupIndex]?.battles.length ?? 1) - 1
-          }
-          onEndingBattleClick={(id) => {
-            const battle = battles.find((b) => b.id === id);
-            if (battle) focusBattle(battle);
-          }}
-        />
-
-        {/* Watch & Read — curated film, book, and series links keyed to the
-            current battle and its parent war. Battle-scoped entries appear
-            first; falls through to war-scoped when no battle-specific match
-            exists. Hidden entirely when there is nothing to recommend. */}
-        <MediaShelf
-          warName={selectedWar}
-          battleId={currentBattle?.id}
-        />
+        {/* How-it-ended card + Watch & Read shelf. Both gated on the same
+            initialPaneLoaded flag as the rest of the right pane so nothing
+            paints until the loading state has cleared. */}
+        {initialPaneLoaded && (
+          <>
+            <WarSummaryCard
+              warName={selectedWar}
+              emphasize={
+                groupIndex >= groups.length - 1 &&
+                subIndex >= (groups[groupIndex]?.battles.length ?? 1) - 1
+              }
+              onEndingBattleClick={(id) => {
+                const battle = battles.find((b) => b.id === id);
+                if (battle) focusBattle(battle);
+              }}
+            />
+            <MediaShelf
+              warName={selectedWar}
+              battleId={currentBattle?.id}
+            />
+          </>
+        )}
       </div>
       {/* Cinematic full-screen overlay. Mounted via portal-style fixed
           positioning rather than inside the side panel so the title

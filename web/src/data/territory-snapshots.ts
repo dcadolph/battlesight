@@ -47,19 +47,22 @@ export const OWNER_COLORS: Record<string, string> = {
   // color. Distinct enough from Soviet bright red that the Eastern Front
   // reads as two competing forces, not one red blob. Visible on dark
   // satellite imagery and historically iconic.
-  'nazi-germany': '#6b5d2e',
-  'imperial-germany': '#5c4a2a',
-  'germany': '#6b5d2e',
-  'japan': '#9b1c1c',
-  'italy': '#16732b',
-  'vichy': '#a16207',
+  // Curated palette: avoid greens (which blend with forested land) and
+  // saturated mid-blues (which blend with ocean). Every shade below was
+  // chosen to read clearly against the satellite-style Earth texture.
+  'nazi-germany': '#a16207',
+  'imperial-germany': '#854d0e',
+  'germany': '#a16207',
+  'japan': '#dc2626',
+  'italy': '#ec4899',
+  'vichy': '#fb923c',
   // Soviet sphere reads as bright Red Army red. Modern Russia keeps a
   // deep blood red — visually distinct from Ukrainian blue and from the
   // Soviet bright red so all three can sit on the same map without
   // confusion.
   'ussr': '#dc2626',
   'russia': '#b91c1c',
-  'ukraine': '#1d4ed8',
+  'ukraine': '#facc15',
   // Western Allies palette: each gets a different cool tone so France,
   // UK, and the US stay distinguishable when they're side-by-side on
   // the map (e.g. occupied Germany 1945).
@@ -67,36 +70,36 @@ export const OWNER_COLORS: Record<string, string> = {
   // see UK, US, Canada/Australia, Free French, and India as separate
   // territories on the same map. India gets a warm orange so it reads as
   // the Raj on the Asian rim rather than blending with the Commonwealth.
-  'us': '#1d4ed8',
-  'uk': '#3b5fa8',
-  'canada': '#0ea5e9',
-  'australia': '#0891b2',
+  'us': '#2563eb',
+  'uk': '#eab308',
+  'canada': '#f43f5e',
+  'australia': '#22d3ee',
   'new-zealand': '#06b6d4',
-  'commonwealth': '#0891b2',
+  'commonwealth': '#22d3ee',
   'india': '#ea580c',
-  'south-africa': '#15803d',
+  'south-africa': '#d97706',
   'france': '#6366f1',
   'french-empire': '#818cf8',
-  'china-roc': '#1e40af',
+  'china-roc': '#0ea5e9',
   'china-prc': '#b91c1c',
-  'china': '#0891b2',
+  'china': '#fb7185',
   'poland': '#9333ea',
   'ottoman': '#9f1239',
-  'turkey': '#15803d',
-  'syria': '#15803d',
+  'turkey': '#06b6d4',
+  'syria': '#7c3aed',
   'isis': '#0f1116',
   'hts': '#475569',
-  'us-union': '#1e3a8a',
-  'us-confederacy': '#6b7280',
+  'us-union': '#2563eb',
+  'us-confederacy': '#a16207',
   'rome': '#b91c1c',
-  'finland': '#94a3b8',
+  'finland': '#cbd5e1',
   // Axis-aligned minor powers cluster in mustard/amber tones so they
   // read as "with the Axis but not Germany" at a glance.
   'hungary': '#854d0e',
   'romania': '#a16207',
   'bulgaria': '#854d0e',
   'yugoslavia': '#9333ea',
-  'greece': '#0891b2',
+  'greece': '#06b6d4',
   // Low Countries and Scandinavia: amber pre-occupation, recolored to
   // nazi-black inside the snapshots once they fall. The amber tone gives
   // them a distinct identity from the green saracen/turkey palette.
@@ -107,22 +110,22 @@ export const OWNER_COLORS: Record<string, string> = {
   'austria-hungary': '#854d0e',
   'serbia': '#0891b2',
   'north-korea': '#dc2626',
-  'south-korea': '#1d4ed8',
-  'un-coalition': '#0ea5e9',
+  'south-korea': '#2563eb',
+  'un-coalition': '#22d3ee',
   'prussia': '#1e2a4a',
   'austria': '#e5e7eb',
-  'spain': '#16a34a',
-  'portugal': '#22c55e',
+  'spain': '#f97316',
+  'portugal': '#c084fc',
   'british-empire': '#dc2626',
-  'continental-army': '#1e40af',
+  'continental-army': '#2563eb',
   'mongol': '#b45309',
   'crusader': '#eab308',
-  'saracen': '#15803d',
-  'byzantine': '#7c3aed',
-  'fatimid': '#16a34a',
-  'seljuk': '#15803d',
+  'saracen': '#7c3aed',
+  'byzantine': '#a855f7',
+  'fatimid': '#f59e0b',
+  'seljuk': '#be123c',
   'north-vietnam': '#dc2626',
-  'south-vietnam': '#1d4ed8',
+  'south-vietnam': '#2563eb',
   'viet-cong': '#7f1d1d',
   'pathet-lao': '#b91c1c',
   'khmer-rouge': '#7f1d1d',

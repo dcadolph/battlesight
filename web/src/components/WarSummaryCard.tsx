@@ -138,11 +138,16 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
         aria-expanded={expanded}
       >
         <div className="flex items-center justify-between gap-3 mb-1.5">
-          <div
-            className="text-[9px] font-semibold uppercase tracking-[0.34em]"
-            style={{ color: theme.accent }}
-          >
-            How it ended
+          <div className="flex items-baseline gap-2 min-w-0">
+            <div
+              className="text-[9px] font-semibold uppercase tracking-[0.34em]"
+              style={{ color: theme.accent }}
+            >
+              How the war ended
+            </div>
+            <div className="text-[8.5px] uppercase tracking-[0.28em] text-slate-500 truncate">
+              {warName}
+            </div>
           </div>
           <span
             className="text-[12px] text-slate-500 flex-shrink-0 tabular-nums"
@@ -178,7 +183,7 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
       {expanded && (
         <div className="px-4 pb-4 pt-4 space-y-5">
           {cleanProseText(summary.aftermath) && (
-            <Section theme={theme} label="Aftermath">
+            <Section theme={theme} label="Aftermath of the war">
               <p
                 className="text-[13.5px] leading-[1.65] text-slate-200/90"
                 style={{ fontFamily: theme.titleFont }}
@@ -189,7 +194,7 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
           )}
 
           {summary.keyTerms && (
-            <Section theme={theme} label="Terms">
+            <Section theme={theme} label="Terms of peace">
               <p
                 className="text-[13.5px] leading-[1.6] text-slate-300/90 italic"
                 style={{ fontFamily: theme.titleFont }}
@@ -200,7 +205,7 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
           )}
 
           {summary.notable && summary.notable.length > 0 && (
-            <Section theme={theme} label="Notable">
+            <Section theme={theme} label="Notable about the war">
               <ul className="space-y-1.5">
                 {summary.notable.map((n, i) => {
                   // Each notable line names a person, treaty, event, or
@@ -252,7 +257,7 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
                 color: theme.accent,
               }}
             >
-              <span className="text-[9px] uppercase tracking-[0.22em] block mb-0.5 opacity-80">Final battle</span>
+              <span className="text-[9px] uppercase tracking-[0.22em] block mb-0.5 opacity-80">Final battle of the war</span>
               <span className="text-slate-100">{summary.endingBattle.name}</span>
               <span className="ml-2 text-slate-500 tabular-nums">{formatYearLabel(summary.endingBattle.year)}</span>
               <span className="float-right opacity-80">→</span>

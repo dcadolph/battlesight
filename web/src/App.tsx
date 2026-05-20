@@ -63,6 +63,11 @@ export default function App() {
   const [battles, setBattles] = useState<Battle[]>([]);
   const [yearRange, setYearRange] = useState<[number, number]>([MIN_YEAR, MAX_YEAR]);
   const [selectedBattle, setSelectedBattle] = useState<Battle | null>(null);
+  // panelDismissed lets the user close the BattlePanel dossier without
+  // wiping selectedBattle — the battle's dot stays painted on the globe
+  // so they can see what they were just looking at. Reset whenever a new
+  // battle is selected so the panel reopens on the next click.
+  const [panelDismissed, setPanelDismissed] = useState(false);
   const [isolatedBattle, setIsolatedBattle] = useState<Battle | null>(null);
   const [playbackBattles, setPlaybackBattles] = useState<Battle[] | null>(null);
   // warCountries is the top-N participating countries for the currently
@@ -276,10 +281,18 @@ export default function App() {
 
   const handleBattleClick = useCallback((battle: Battle) => {
     setSelectedBattle(battle);
+    setPanelDismissed(false);
   }, []);
 
+  // Closing the dossier returns to the bare globe but keeps the battle's
+  // dot painted in place. The user can re-open the dossier by clicking
+  // the dot again. Previously we cleared selectedBattle, which erased
+  // every visual trace of "I was just looking at this." Now the marker
+  // stays but the panel goes away.
   const handleClosePanel = useCallback(() => {
-    setSelectedBattle(null);
+    setPanelDismissed(true);
+    setReplayBattle(null);
+    setReplayPhase(0);
   }, []);
 
   const handleIsolate = useCallback((battle: Battle | null) => {
@@ -557,16 +570,12 @@ export default function App() {
     setHistoryBeat(beat);
   }, []);
 
+  // Audio is currently disabled entirely. The ambient hum and per-action
+  // chimes read as kitsch against the cinematic visuals, so the toggle is
+  // gone from the chrome and this handler is a no-op. Re-enable by
+  // restoring the previous body and re-mounting the sound button.
   const handleToggleSound = useCallback(() => {
-    if (soundEnabled()) {
-      disableSound();
-      setSoundOn(false);
-    } else {
-      enableSound();
-      setSoundOn(true);
-      // Soft confirmation so the user hears that audio came online.
-      playSelect();
-    }
+    // intentional no-op
   }, []);
 
   const handleDismissIntro = useCallback(() => {
@@ -636,7 +645,7 @@ export default function App() {
               textShadow: '0 2px 14px rgba(0,0,0,0.7), 0 0 24px rgba(147,197,253,0.35)',
             }}
           >
-            BATTLE TRACE
+            BATTLE SIGHT
           </div>
           {/* Headline: two clean lines with explicit <span> blocks per
               line. Previously a single string with <br/> let the renderer
@@ -835,7 +844,7 @@ export default function App() {
           screen. Both of those have their own primary panels and rendering
           BattlePanel on top of them caused the right column to flicker as
           focus changed. */}
-      {selectedBattle && !showPlayback && !historyMode && (
+      {selectedBattle && !panelDismissed && !showPlayback && !historyMode && (
         <BattlePanel
           battle={selectedBattle}
           onClose={handleClosePanel}
@@ -971,6 +980,7 @@ export default function App() {
           onClose={handleCloseReplay}
           cinematicMode={replayCinematic}
           onEnded={replayCinematic ? handleCinematicBattleEnded : undefined}
+          outroPauseMs={replayCinematic ? 1200 : 2400}
           onAdvanceNext={replayCinematic ? handleCinematicBattleEnded : undefined}
           onAdvancePrev={replayCinematic ? handleCinematicAdvancePrev : undefined}
           warCountryColors={warCountryColors ?? undefined}

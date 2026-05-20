@@ -313,23 +313,38 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     return { lat: latSum / n, lng: lngSum / n };
   }, [phase, battle.lat, battle.lng, extentLatDeg, extentLngDeg, replay.aspectRatio]);
 
-  // Camera choreography per phase:
-  //   1. Cut to the curated phase target on a long ease (the establishing shot).
-  //   2. After it lands, drift the framing toward the action centroid and
-  //      push in slightly so the climax feels closer than the setup.
-  //   3. Run a near-imperceptible auto-rotate during the hold so the globe
-  //      never freezes between phases. That tiny drift is what reads as
-  //      "alive" versus "screenshot."
+  // Camera choreography per phase. The first phase of any battle snaps the
+  // camera straight to the target longitude with a slightly-pulled-back
+  // altitude — this kills the "globe starts on the Atlantic, slowly flies to
+  // Europe" awkwardness that made replays feel like they were buffering. The
+  // tween then settles in to the desired vantage. Subsequent phases run the
+  // full eased tween because they're moving from one curated vantage to the
+  // next.
+  const firstPhaseAppliedRef = useRef(false);
   useEffect(() => {
     if (!globeRef.current) return;
     const globe = globeRef.current;
     const controls = globe.controls();
     controls.autoRotate = false;
 
-    globe.pointOfView(
-      { lat: cameraLat, lng: cameraLng, altitude: cameraAlt },
-      tweenMs,
-    );
+    if (!firstPhaseAppliedRef.current) {
+      // Single hard snap directly to the final pose. The previous snap-then-
+      // settle produced two visible camera moves on mount (a hard jump
+      // followed by a 900ms ease), which read as a stutter. One snap, no
+      // tween, no second move — the first frame already shows the right
+      // region at the right altitude. Subsequent phases get the smooth
+      // tween because they're moving between two curated vantages.
+      globe.pointOfView(
+        { lat: cameraLat, lng: cameraLng, altitude: cameraAlt },
+        0,
+      );
+      firstPhaseAppliedRef.current = true;
+    } else {
+      globe.pointOfView(
+        { lat: cameraLat, lng: cameraLng, altitude: cameraAlt },
+        tweenMs,
+      );
+    }
 
     const driftTimer = setTimeout(() => {
       if (!globeRef.current) return;
@@ -360,6 +375,12 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
       if (c) c.autoRotate = false;
     };
   }, [cameraLat, cameraLng, cameraAlt, tweenMs, movementCentroid]);
+
+  // Reset the snap-on-mount flag when the battle changes so the next battle
+  // also gets a clean snap-then-settle on its first phase.
+  useEffect(() => {
+    firstPhaseAppliedRef.current = false;
+  }, [battle.id]);
 
   // Pre-compute lat/lng for each movement. Geographic coordinates take
   // precedence; normalized x/y is the fallback for legacy / auto-generated
@@ -453,10 +474,10 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         if (color) {
           out.push({
             feature: feat as Feature<Geometry>,
-            capColor: hexWithAlpha(color, 0.68),
-            strokeColor: hexWithAlpha(color, 1.0),
-            sideColor: hexWithAlpha(color, 0.88),
-            altitude: 0.022,
+            capColor: hexWithAlpha(color, 0.50),
+            strokeColor: hexWithAlpha(color, 0.55),
+            sideColor: 'rgba(0,0,0,0)',
+            altitude: 0.0035,
           });
         } else {
           out.push({
@@ -472,10 +493,10 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     if (highlightedCountry.length) {
       out.push({
         feature: highlightedCountry[0],
-        capColor: 'rgba(59,130,246,0.04)',
-        strokeColor: 'rgba(147,197,253,0.55)',
-        sideColor: 'rgba(59,130,246,0.08)',
-        altitude: 0.012,
+        capColor: 'rgba(59,130,246,0.05)',
+        strokeColor: 'rgba(147,197,253,0.40)',
+        sideColor: 'rgba(0,0,0,0)',
+        altitude: 0.0035,
       });
     }
     (phase.controlRegions ?? []).forEach((r: ControlRegion) => {
@@ -490,10 +511,10 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
           geometry: { type: 'Polygon', coordinates: [closed] },
           properties: { id: r.id, label: r.label ?? '' },
         },
-        capColor: hexWithAlpha(color, 0.16),
-        strokeColor: hexWithAlpha(color, 0.55),
-        sideColor: hexWithAlpha(color, 0.12),
-        altitude: 0.014,
+        capColor: hexWithAlpha(color, 0.22),
+        strokeColor: hexWithAlpha(color, 0.45),
+        sideColor: 'rgba(0,0,0,0)',
+        altitude: 0.005,
       });
     });
     return out;
@@ -737,34 +758,18 @@ function ArrowVector({ phaseIdx, arrow, paletteCtx }: ArrowVectorProps) {
   // pathLength=1 dash with a tiny visible window that slides from 0 to 1.
   return (
     <g>
-      {/* Atmospheric volume layer: a very wide, heavily blurred halo that
-          gives the arrow weight from the cinematic distance. Fades in
-          slowly so it reads as the campaign's "weight" rather than a hard
-          line, lingers after the trace lands so the front of advance keeps
-          a luminous ghost. */}
+      {/* Single soft halo. Wide-but-not-smudgy glow gives the arrow weight
+          from cinematic distance without the previous double-halo stack that
+          made overlapping arrows read as smoke smears. */}
       <path
         d={path}
         stroke={color}
         strokeOpacity={0}
-        strokeWidth={stroke + 22}
+        strokeWidth={stroke + 12}
         fill="none"
         strokeLinecap="round"
         style={{
-          filter: 'blur(14px)',
-          animation: `arrow-vol-in 1200ms ${appearDelay}ms ease-out forwards`,
-        }}
-      />
-      {/* Outer halo. Wide, soft, lower opacity. Gives the line the volume
-          that reads as cinematic rather than diagrammatic. */}
-      <path
-        d={path}
-        stroke={color}
-        strokeOpacity={0}
-        strokeWidth={stroke + 14}
-        fill="none"
-        strokeLinecap="round"
-        style={{
-          filter: 'blur(8px)',
+          filter: 'blur(6px)',
           animation: `arrow-halo-in 800ms ${appearDelay}ms ease-out forwards`,
         }}
       />
@@ -835,19 +840,20 @@ function ArrowVector({ phaseIdx, arrow, paletteCtx }: ArrowVectorProps) {
       />
       {/* Marching layer. Hidden until the trace finishes, then loops forever.
           The arrowhead is attached here so it appears only after the line
-          has actually arrived. */}
+          has actually arrived. Dashes pulled tighter and softer than before
+          so multiple overlapping arrows don't render as a smudgy hatch. */}
       <path
         d={path}
         stroke={color}
-        strokeWidth={stroke}
+        strokeWidth={Math.max(1.4, stroke * 0.7)}
         fill="none"
         strokeLinecap="round"
         markerEnd={`url(#${markerId})`}
         style={{
           opacity: 0,
-          strokeDasharray: `${dashLen} ${gapLen}`,
+          strokeDasharray: `${Math.max(8, stroke * 2.4)} ${Math.max(10, stroke * 3)}`,
           ['--march' as string]: `${-period}px`,
-          animation: `arrow-march-in 220ms ${marchDelay}ms ease-out forwards, march ${marchSpeed}ms ${marchDelay}ms linear infinite`,
+          animation: `arrow-march-in 220ms ${marchDelay}ms ease-out forwards, march ${marchSpeed * 1.25}ms ${marchDelay}ms linear infinite`,
         }}
       />
     </g>

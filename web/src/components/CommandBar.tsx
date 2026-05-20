@@ -192,19 +192,6 @@ export default function CommandBar({
             <EyeLogo size={14} color="#60a5fa" />
             <span>Battle<span style={{ color: '#60a5fa' }}>Sight</span></span>
           </button>
-          <button
-            onClick={onToggleSound}
-            className="inline-flex items-center justify-center h-6 w-6 rounded-full text-slate-500 hover:text-slate-200 hover:bg-slate-800/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40"
-            title={soundOn ? 'Sound on. Click to mute.' : 'Sound off. Click for ambient audio.'}
-            aria-label={soundOn ? 'Mute ambient audio' : 'Enable ambient audio'}
-            aria-pressed={soundOn}
-          >
-            {soundOn ? (
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M2 5 L4 5 L7 2 L7 10 L4 7 L2 7 Z"/><path d="M8.5 4 Q10 6 8.5 8" stroke="currentColor" strokeWidth="0.9" fill="none" strokeLinecap="round"/></svg>
-            ) : (
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M2 5 L4 5 L7 2 L7 10 L4 7 L2 7 Z"/><path d="M9 4 L11 8 M11 4 L9 8" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/></svg>
-            )}
-          </button>
         </div>
         <div
           className="mt-1.5 text-[9.5px] tabular-nums leading-none"
@@ -247,7 +234,7 @@ export default function CommandBar({
             onFocus={() => (results.length > 0 || warResults.length > 0) && setSearchOpen(true)}
             onBlur={() => setTimeout(() => setSearchOpen(false), 150)}
             placeholder="Search battles, wars, places…"
-            className="w-full h-9 pl-9 pr-9 bg-[#0d0f17]/85 backdrop-blur-md border border-slate-700/45 rounded-md text-[12.5px] text-white placeholder-slate-500 focus:outline-none focus:border-blue-400/60 focus:bg-[#11141e]/90 transition-colors"
+            className="w-full h-9 pl-9 pr-9 bg-[#0d0f17]/85 backdrop-blur-md border border-slate-700/40 rounded-md text-[12.5px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-300/50 focus:bg-[#11141e]/90 transition-colors"
             style={{ letterSpacing: '0.01em' }}
           />
           {query && (
@@ -358,83 +345,47 @@ export default function CommandBar({
           below the search row (search at top-78 + h-9 ends at 114, then
           a 12px gap). Earlier the rail sat at top-88 which collided with
           the new search height and hid the rail entirely. */}
+      {/* Mode rail. Editorial chapter labels rather than SaaS-blue pills.
+          Each label sits inline with a tracked-caps treatment; the active
+          one carries a thin warm-amber underline that reads like a
+          newspaper-section accent. No bright fills, no rounded
+          baby-button shapes — the chrome is meant to disappear behind the
+          globe. */}
       <div className="fixed top-[126px] left-6 z-30">
-        <div
-          className="inline-flex items-center gap-1 rounded-full p-1 backdrop-blur-md"
-          style={{
-            background: 'rgba(8, 10, 18, 0.6)',
-            border: '1px solid rgba(148, 163, 184, 0.16)',
-            boxShadow: '0 8px 24px -10px rgba(0, 0, 0, 0.55)',
-          }}
-        >
-          <ModeTab
-            label="Explore"
-            active={!playbackActive && !historyActive}
-            onClick={() => { setPanel('none'); }}
-            icon={
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <circle cx="6" cy="6" r="4.5" />
-                <path d="M6 1.5 V 10.5 M1.5 6 H 10.5" />
-              </svg>
-            }
-          />
+        <div className="inline-flex items-baseline gap-5">
           <ModeTab
             label="Wars"
             active={playbackActive}
             onClick={onPlaybackOpen}
-            icon={
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <path d="M2 1.5 V 10.5 M2 1.5 L 9 4 L 2 6" />
-              </svg>
-            }
           />
           <ModeTab
             label="History"
             active={historyActive}
             onClick={onHistoryPlay}
             title="Play 3,500 years of history in 90 seconds"
-            icon={
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
-                <path d="M2.5 1.5 L 10.5 6 L 2.5 10.5 Z" />
-              </svg>
-            }
           />
         </div>
 
         {!playbackActive && (
-          <div className="flex gap-1.5 mt-3">
+          <div className="flex items-baseline gap-4 mt-3">
             <button
               onClick={() => setPanel(panel === 'filters' ? 'none' : 'filters')}
-              className={`h-8 px-3 rounded-full text-[11px] font-semibold tracking-wide transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 ${
-                panel === 'filters' || hasFilters
-                  ? 'bg-blue-500/20 text-blue-200 border border-blue-500/40'
-                  : 'bg-slate-800/70 text-slate-300 border border-slate-600/50 hover:text-white hover:border-slate-500/70 backdrop-blur-md'
-              }`}
+              className="text-[10px] font-semibold uppercase tracking-[0.32em] transition-colors focus:outline-none"
+              style={{
+                color: panel === 'filters' || hasFilters ? '#fbbf24' : '#94a3b8',
+              }}
             >
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                <path d="M1 2.5 H 11 M3 6 H 9 M5 9.5 H 7" />
-              </svg>
               Filters
               {hasFilters && (
-                <span
-                  className="ml-0.5 inline-flex items-center justify-center text-[9px] font-bold tabular-nums"
-                  style={{
-                    minWidth: 14,
-                    height: 14,
-                    padding: '0 4px',
-                    borderRadius: 9999,
-                    background: 'rgba(96,165,250,0.35)',
-                    color: '#fff',
-                  }}
-                >
-                  {[filters.era, filters.war, filters.battleType, filters.quality].filter(Boolean).length}
+                <span className="ml-1.5 tabular-nums text-[9px] font-bold" style={{ color: '#fbbf24' }}>
+                  · {[filters.era, filters.war, filters.battleType, filters.quality].filter(Boolean).length}
                 </span>
               )}
             </button>
             {hasFilters && (
               <button
                 onClick={() => onFiltersChange({ era: '', war: '', battleType: '', quality: '' })}
-                className="h-8 px-3 rounded-full text-[10px] font-semibold tracking-wide text-slate-400 hover:text-rose-200 hover:bg-rose-500/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+                className="text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-500 hover:text-rose-300 transition-colors focus:outline-none"
               >
                 Clear
               </button>
@@ -521,13 +472,11 @@ function ModeTab({
   label,
   active,
   onClick,
-  icon,
   title,
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
-  icon: React.ReactNode;
   title?: string;
 }) {
   return (
@@ -535,17 +484,23 @@ function ModeTab({
       onClick={onClick}
       title={title}
       aria-pressed={active}
-      className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[11px] font-semibold tracking-wide transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40"
+      className="relative inline-flex items-baseline text-[10.5px] font-semibold uppercase tracking-[0.32em] transition-colors focus:outline-none"
       style={{
-        background: active ? 'rgba(96, 165, 250, 0.18)' : 'transparent',
-        color: active ? '#fff' : '#94a3b8',
-        border: active ? '1px solid rgba(96, 165, 250, 0.45)' : '1px solid transparent',
+        color: active ? '#ffffff' : '#94a3b8',
+        paddingBottom: 4,
       }}
     >
-      <span style={{ color: active ? '#93c5fd' : '#64748b', display: 'inline-flex' }}>
-        {icon}
-      </span>
       {label}
+      {active && (
+        <span
+          aria-hidden="true"
+          className="absolute left-0 right-0 bottom-0 h-[1.5px] rounded-full"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, #fbbf24 50%, transparent 100%)',
+            boxShadow: '0 0 8px rgba(251,191,36,0.55)',
+          }}
+        />
+      )}
     </button>
   );
 }

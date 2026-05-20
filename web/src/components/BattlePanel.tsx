@@ -4,6 +4,15 @@ import { ERA_COLORS, ERA_LABELS, TIER_LABELS, TIER_DESCRIPTIONS, regionalEraCont
 import { themeForEra } from '../theme/era';
 import { formatYear, formatBattleDate, cleanCasualtyText, cleanProseText } from '../lib/format';
 import CloseButton from './CloseButton';
+import { resolveMediaFor } from '../data/media';
+import type { MediaEntry } from '../data/media';
+
+const KIND_LABEL: Record<MediaEntry['kind'], string> = {
+  film: 'Film',
+  series: 'Series',
+  book: 'Book',
+  documentary: 'Doc',
+};
 
 interface BattlePanelProps {
   battle: Battle;
@@ -541,6 +550,36 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
           </div>
         )}
 
+        {(() => {
+          const media = resolveMediaFor({ war: battle.war, battleId: battle.id, max: 8 });
+          if (media.length === 0) return null;
+          return (
+            <div className="border-t border-slate-800/80 pt-6 mb-6">
+              <SectionHeading theme={theme}>Watch &amp; read</SectionHeading>
+              <ul className="space-y-3">
+                {media.map((m, i) => (
+                  <li key={`${m.title}-${m.year}-${i}`}>
+                    {m.url ? (
+                      <a
+                        href={m.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block rounded-lg bg-slate-800/40 border border-slate-700/30 p-3 hover:border-slate-600/60 transition-colors"
+                      >
+                        <MediaRow m={m} accent={theme.accent} />
+                      </a>
+                    ) : (
+                      <div className="rounded-lg bg-slate-800/40 border border-slate-700/30 p-3">
+                        <MediaRow m={m} accent={theme.accent} />
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })()}
+
         {groupedRefs.size > 0 && (
           <div className="border-t border-slate-800/80 pt-6">
             <SectionHeading theme={theme}>Further reading</SectionHeading>
@@ -601,5 +640,30 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
         )}
       </div>
     </div>
+  );
+}
+
+// MediaRow renders one Watch & Read entry inside the BattlePanel dossier.
+function MediaRow({ m, accent }: { m: MediaEntry; accent: string }) {
+  return (
+    <>
+      <div className="flex items-baseline justify-between gap-3 mb-1">
+        <div className="flex items-baseline gap-2 min-w-0 flex-1">
+          <span className="text-[14px] text-white font-semibold leading-snug truncate" style={{ fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif" }}>
+            {m.title}
+          </span>
+          <span className="text-[10px] text-slate-500 tabular-nums flex-shrink-0">{m.year}</span>
+        </div>
+        <span
+          className="text-[9px] uppercase tracking-[0.20em] font-semibold flex-shrink-0"
+          style={{ color: accent }}
+        >
+          {KIND_LABEL[m.kind]}
+        </span>
+      </div>
+      <div className="text-[11.5px] text-slate-400 leading-snug">
+        <span className="text-slate-300">{m.creator}</span> · {m.blurb}
+      </div>
+    </>
   );
 }

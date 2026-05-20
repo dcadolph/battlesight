@@ -54,20 +54,29 @@ export const OWNER_COLORS: Record<string, string> = {
   'italy': '#16732b',
   'vichy': '#a16207',
   // Soviet sphere reads as bright Red Army red. Modern Russia keeps a
-  // darker blood red so the two eras don't look identical when adjacent.
+  // deep blood red — visually distinct from Ukrainian blue and from the
+  // Soviet bright red so all three can sit on the same map without
+  // confusion.
   'ussr': '#dc2626',
-  'russia': '#a5121b',
-  'ukraine': '#0c5fdb',
+  'russia': '#b91c1c',
+  'ukraine': '#1d4ed8',
   // Western Allies palette: each gets a different cool tone so France,
   // UK, and the US stay distinguishable when they're side-by-side on
   // the map (e.g. occupied Germany 1945).
+  // Western Allies palette — each cool tone is offset enough that you can
+  // see UK, US, Canada/Australia, Free French, and India as separate
+  // territories on the same map. India gets a warm orange so it reads as
+  // the Raj on the Asian rim rather than blending with the Commonwealth.
   'us': '#1d4ed8',
-  'uk': '#1e3a8a',
+  'uk': '#3b5fa8',
   'canada': '#0ea5e9',
-  'australia': '#06b6d4',
-  'new-zealand': '#67e8f9',
-  'france': '#3b82f6',
-  'french-empire': '#6366f1',
+  'australia': '#0891b2',
+  'new-zealand': '#06b6d4',
+  'commonwealth': '#0891b2',
+  'india': '#ea580c',
+  'south-africa': '#15803d',
+  'france': '#6366f1',
+  'french-empire': '#818cf8',
   'china-roc': '#1e40af',
   'china-prc': '#b91c1c',
   'china': '#0891b2',
@@ -136,6 +145,20 @@ export const OWNER_COLORS: Record<string, string> = {
   'rus': '#15532f',
   'cuba-spain': '#ca8a04',
   'us-puerto-rico': '#1d4ed8',
+  // Ancient and medieval iconic colors. Persian deep purple matches the
+  // historical association (Tyrian-style royal purple), Greek slate-blue
+  // reads as the Aegean / Athenian world, Roman crimson against Carthage
+  // royal purple gives the Punic Wars their iconic colour clash, and so
+  // on. Kept as separate OWNER_COLORS keys so snapshot maps can reach
+  // for them directly without going through faction-palette.
+  'persian-purple': '#7c3aed',
+  'greek-slate': '#475569',
+  'roman-crimson': '#b91c1c',
+  'carthage-purple': '#6b21a8',
+  'south-korea-blue': '#1d4ed8',
+  'prussian-blue': '#1e2a4a',
+  'hamas': '#0f1116',
+  'hezbollah': '#0f1116',
 };
 
 export const TERRITORY: WarTerritory[] = [
@@ -148,7 +171,9 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'nazi-germany': ['Germany', 'Austria', 'Czechia', 'Slovakia'],
           'ussr': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan'],
-          'uk': ['United Kingdom', 'India', 'Egypt', 'Sudan', 'Kenya', 'Tanzania', 'Uganda', 'Nigeria', 'Ghana', 'South Africa', 'Malaysia', 'Myanmar'],
+          'uk': ['United Kingdom', 'Egypt', 'Sudan', 'Kenya', 'Tanzania', 'Uganda', 'Nigeria', 'Ghana', 'Malaysia', 'Myanmar'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
           'france': ['France', 'Algeria', 'Tunisia', 'Morocco', 'Mali', 'Niger', 'Chad', 'Senegal', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia'],
           'poland': ['Poland'],
           'italy': ['Italy', 'Albania', 'Libya', 'Eritrea', 'Ethiopia', 'Somalia'],
@@ -162,7 +187,12 @@ export const TERRITORY: WarTerritory[] = [
           'nazi-germany': ['Germany', 'Austria', 'Czechia', 'Slovakia', 'Poland', 'Netherlands', 'Belgium', 'Luxembourg', 'Denmark', 'Norway'],
           'vichy': ['France', 'Algeria', 'Tunisia', 'Morocco', 'Mali', 'Niger', 'Chad', 'Senegal', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia'],
           'ussr': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan'],
-          'uk': ['United Kingdom', 'India', 'Egypt', 'Sudan', 'Kenya', 'Tanzania', 'Uganda', 'Nigeria', 'Ghana', 'South Africa', 'Malaysia', 'Myanmar', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom', 'Egypt', 'Sudan', 'Kenya', 'Tanzania', 'Uganda', 'Nigeria', 'Ghana', 'Malaysia', 'Myanmar'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'italy': ['Italy', 'Albania', 'Libya', 'Eritrea', 'Ethiopia', 'Somalia'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea'],
         },
@@ -174,7 +204,12 @@ export const TERRITORY: WarTerritory[] = [
           'nazi-germany': ['Germany', 'Austria', 'Czechia', 'Slovakia', 'Poland', 'Netherlands', 'Belgium', 'Luxembourg', 'Denmark', 'Norway', 'Yugoslavia', 'Serbia', 'Croatia', 'Bosnia and Herzegovina', 'Slovenia', 'Macedonia', 'Greece', 'Belarus', 'Lithuania', 'Latvia', 'Estonia'],
           'vichy': ['France', 'Algeria', 'Tunisia', 'Morocco', 'Mali', 'Niger', 'Chad', 'Senegal', 'Madagascar'],
           'ussr': ['Russia', 'Ukraine', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan'],
-          'uk': ['United Kingdom', 'India', 'Egypt', 'Sudan', 'Kenya', 'Tanzania', 'Uganda', 'Nigeria', 'Ghana', 'South Africa', 'Malaysia', 'Myanmar', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom', 'Egypt', 'Sudan', 'Kenya', 'Tanzania', 'Uganda', 'Nigeria', 'Ghana', 'Malaysia', 'Myanmar'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'italy': ['Italy', 'Albania', 'Libya', 'Eritrea', 'Ethiopia', 'Somalia'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea', 'Vietnam', 'Laos', 'Cambodia'],
         },
@@ -185,7 +220,12 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'nazi-germany': ['Germany', 'Austria', 'Czechia', 'Slovakia', 'Poland', 'Netherlands', 'Belgium', 'Luxembourg', 'Denmark', 'Norway', 'France', 'Yugoslavia', 'Serbia', 'Croatia', 'Bosnia and Herzegovina', 'Slovenia', 'Macedonia', 'Greece', 'Belarus', 'Lithuania', 'Latvia', 'Estonia', 'Ukraine', 'Moldova', 'Libya', 'Tunisia'],
           'ussr': ['Russia', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan'],
-          'uk': ['United Kingdom', 'India', 'Egypt', 'Sudan', 'Kenya', 'Tanzania', 'Uganda', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom', 'Egypt', 'Sudan', 'Kenya', 'Tanzania', 'Uganda', 'Nigeria', 'Ghana'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'us': ['United States'],
           'italy': ['Italy', 'Albania', 'Eritrea', 'Ethiopia', 'Somalia'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea', 'Vietnam', 'Laos', 'Cambodia', 'Myanmar', 'Thailand', 'Malaysia', 'Indonesia', 'Philippines', 'Papua New Guinea'],
@@ -197,7 +237,12 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'nazi-germany': ['Germany', 'Austria', 'Czechia', 'Slovakia', 'Poland', 'Netherlands', 'Belgium', 'Luxembourg', 'Denmark', 'Norway', 'France', 'Yugoslavia', 'Serbia', 'Croatia', 'Bosnia and Herzegovina', 'Slovenia', 'Greece', 'Belarus', 'Lithuania', 'Latvia', 'Estonia', 'Italy'],
           'ussr': ['Russia', 'Ukraine', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan'],
-          'uk': ['United Kingdom', 'India', 'Egypt', 'Libya', 'Tunisia', 'Sudan', 'Kenya', 'Tanzania', 'Nigeria', 'South Africa', 'Canada', 'Australia', 'New Zealand', 'Myanmar'],
+          'uk': ['United Kingdom', 'Egypt', 'Libya', 'Tunisia', 'Sudan', 'Kenya', 'Tanzania', 'Nigeria', 'Myanmar'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'us': ['United States'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea', 'Vietnam', 'Laos', 'Cambodia', 'Thailand', 'Malaysia', 'Indonesia', 'Philippines'],
         },
@@ -208,7 +253,12 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'nazi-germany': ['Germany', 'Austria', 'Czechia', 'Slovakia', 'Poland', 'Netherlands', 'Belgium', 'Denmark', 'Norway', 'Yugoslavia', 'Croatia', 'Bosnia and Herzegovina', 'Slovenia', 'Greece', 'Hungary', 'Italy'],
           'ussr': ['Russia', 'Belarus', 'Ukraine', 'Moldova', 'Lithuania', 'Latvia', 'Estonia', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan'],
-          'uk': ['United Kingdom', 'France', 'India', 'Egypt', 'Libya', 'Sudan', 'Kenya', 'Tanzania', 'Nigeria', 'South Africa', 'Canada', 'Australia', 'New Zealand', 'Myanmar'],
+          'uk': ['United Kingdom', 'France', 'Egypt', 'Libya', 'Sudan', 'Kenya', 'Tanzania', 'Nigeria', 'Myanmar'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'us': ['United States', 'Philippines'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea', 'Vietnam', 'Laos', 'Cambodia', 'Thailand', 'Malaysia', 'Indonesia'],
         },
@@ -218,7 +268,12 @@ export const TERRITORY: WarTerritory[] = [
         label: 'May 1945: Victory in Europe',
         control: {
           'ussr': ['Russia', 'Belarus', 'Ukraine', 'Moldova', 'Lithuania', 'Latvia', 'Estonia', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan', 'Poland', 'Czechia', 'Slovakia', 'Hungary', 'Romania', 'Bulgaria', 'Yugoslavia', 'Serbia', 'Croatia', 'Bosnia and Herzegovina', 'Slovenia', 'Macedonia', 'Germany', 'Austria'],
-          'uk': ['United Kingdom', 'France', 'Italy', 'Netherlands', 'Belgium', 'Denmark', 'Norway', 'Greece', 'India', 'Egypt', 'Libya', 'Sudan', 'Kenya', 'Tanzania', 'Nigeria', 'South Africa', 'Canada', 'Australia', 'New Zealand', 'Myanmar'],
+          'uk': ['United Kingdom', 'France', 'Italy', 'Netherlands', 'Belgium', 'Denmark', 'Norway', 'Greece', 'Egypt', 'Libya', 'Sudan', 'Kenya', 'Tanzania', 'Nigeria', 'Myanmar'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'us': ['United States', 'Philippines', 'Germany', 'Austria'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea', 'Vietnam', 'Laos', 'Cambodia', 'Thailand', 'Malaysia', 'Indonesia'],
         },
@@ -229,7 +284,12 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'us': ['United States', 'Japan', 'South Korea', 'Philippines'],
           'ussr': ['Russia', 'Belarus', 'Ukraine', 'Moldova', 'Lithuania', 'Latvia', 'Estonia', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan', 'Poland', 'Czechia', 'Slovakia', 'Hungary', 'Romania', 'Bulgaria', 'Yugoslavia', 'Serbia', 'Croatia', 'Bosnia and Herzegovina', 'Slovenia', 'Macedonia', 'North Korea'],
-          'uk': ['United Kingdom', 'France', 'Italy', 'Netherlands', 'Belgium', 'Denmark', 'Norway', 'Greece', 'India', 'Egypt', 'Libya', 'Sudan', 'Kenya', 'Tanzania', 'Nigeria', 'South Africa', 'Canada', 'Australia', 'New Zealand', 'Myanmar', 'Malaysia'],
+          'uk': ['United Kingdom', 'France', 'Italy', 'Netherlands', 'Belgium', 'Denmark', 'Norway', 'Greece', 'Egypt', 'Libya', 'Sudan', 'Kenya', 'Tanzania', 'Nigeria', 'Myanmar', 'Malaysia'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'china-roc': ['China', 'Taiwan'],
         },
       },
@@ -244,6 +304,8 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'russia': ['Russia', 'Belarus'],
           'ukraine': ['Ukraine'],
+          'us': ['United States'],
+          'uk': ['United Kingdom'],
         },
       },
       {
@@ -252,6 +314,10 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'russia': ['Russia', 'Belarus'],
           'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'australia': ['Australia'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
         },
       },
       {
@@ -260,6 +326,22 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'russia': ['Russia', 'Belarus'],
           'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'australia': ['Australia'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
+        },
+      },
+      {
+        year: 2022.85,
+        label: 'November 2022: Kherson liberated',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'australia': ['Australia'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
         },
       },
       {
@@ -268,6 +350,10 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'russia': ['Russia', 'Belarus'],
           'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'australia': ['Australia'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
         },
       },
       {
@@ -276,6 +362,22 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'russia': ['Russia', 'Belarus'],
           'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'australia': ['Australia'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
+        },
+      },
+      {
+        year: 2024.62,
+        label: 'August 2024: Ukraine launches Kursk incursion',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'australia': ['Australia'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
         },
       },
     ],
@@ -292,7 +394,12 @@ export const TERRITORY: WarTerritory[] = [
           'ottoman': ['Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Yemen'],
           'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan'],
           'france': ['France', 'Belgium', 'Algeria', 'Tunisia', 'Morocco', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia', 'Senegal', 'Mali', 'Niger', 'Chad'],
-          'uk': ['United Kingdom', 'Ireland', 'India', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom', 'Ireland', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'serbia': ['Serbia', 'Montenegro'],
         },
       },
@@ -306,7 +413,12 @@ export const TERRITORY: WarTerritory[] = [
           'bulgaria': ['Bulgaria'],
           'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan'],
           'france': ['France', 'Belgium', 'Algeria', 'Tunisia', 'Morocco', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia', 'Senegal', 'Mali', 'Niger', 'Chad'],
-          'uk': ['United Kingdom', 'Ireland', 'India', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom', 'Ireland', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'italy': ['Italy', 'Libya', 'Eritrea', 'Somalia'],
           'serbia': ['Serbia', 'Montenegro'],
         },
@@ -321,7 +433,12 @@ export const TERRITORY: WarTerritory[] = [
           'bulgaria': ['Bulgaria'],
           'russia': ['Russia', 'Ukraine', 'Estonia', 'Finland', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan'],
           'france': ['France', 'Algeria', 'Tunisia', 'Morocco', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia', 'Senegal', 'Mali', 'Niger', 'Chad'],
-          'uk': ['United Kingdom', 'Ireland', 'India', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom', 'Ireland', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'italy': ['Italy', 'Libya', 'Eritrea', 'Somalia'],
           'romania': ['Romania'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea'],
@@ -337,7 +454,12 @@ export const TERRITORY: WarTerritory[] = [
           'bulgaria': ['Bulgaria'],
           'russia': ['Russia', 'Ukraine', 'Estonia', 'Finland', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan'],
           'france': ['France', 'Algeria', 'Tunisia', 'Morocco', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia', 'Senegal', 'Mali', 'Niger', 'Chad'],
-          'uk': ['United Kingdom', 'Ireland', 'India', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom', 'Ireland', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'italy': ['Italy', 'Libya', 'Eritrea', 'Somalia'],
           'us': ['United States'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea'],
@@ -347,7 +469,12 @@ export const TERRITORY: WarTerritory[] = [
         year: 1918.9,
         label: 'November 1918: Armistice, Central Powers collapse',
         control: {
-          'uk': ['United Kingdom', 'Ireland', 'India', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'South Africa', 'Canada', 'Australia', 'New Zealand', 'Iraq', 'Israel', 'Jordan'],
+          'uk': ['United Kingdom', 'Ireland', 'Egypt', 'Sudan', 'Kenya', 'Nigeria', 'Ghana', 'Iraq', 'Israel', 'Jordan'],
+          'india': ['India'],
+          'south-africa': ['South Africa'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'france': ['France', 'Belgium', 'Algeria', 'Tunisia', 'Morocco', 'Madagascar', 'Vietnam', 'Laos', 'Cambodia', 'Senegal', 'Mali', 'Niger', 'Chad', 'Syria', 'Lebanon'],
           'us': ['United States'],
           'italy': ['Italy', 'Libya', 'Eritrea', 'Somalia'],
@@ -374,7 +501,10 @@ export const TERRITORY: WarTerritory[] = [
           'prussia': ['Germany'],
           'austria': ['Austria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Italy'],
           'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan'],
-          'uk': ['United Kingdom', 'Ireland', 'India', 'Canada', 'Australia'],
+          'uk': ['United Kingdom', 'Ireland'],
+          'india': ['India'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
           'spain': ['Spain', 'Mexico', 'Cuba', 'Colombia', 'Peru', 'Argentina', 'Bolivia', 'Chile', 'Venezuela', 'Ecuador', 'Philippines'],
           'portugal': ['Portugal', 'Brazil', 'Angola', 'Mozambique'],
           'ottoman': ['Turkey', 'Egypt', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Greece', 'Bulgaria', 'Romania', 'Serbia', 'Bosnia and Herzegovina'],
@@ -390,7 +520,10 @@ export const TERRITORY: WarTerritory[] = [
           'austria': ['Austria', 'Hungary', 'Czechia', 'Slovakia'],
           'prussia': ['Poland'],
           'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Finland'],
-          'uk': ['United Kingdom', 'Ireland', 'India', 'Canada', 'Australia'],
+          'uk': ['United Kingdom', 'Ireland'],
+          'india': ['India'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
           'portugal': ['Portugal', 'Brazil', 'Angola', 'Mozambique'],
           'ottoman': ['Turkey', 'Egypt', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Greece', 'Bulgaria', 'Romania', 'Serbia'],
           'finland': ['Sweden'],
@@ -403,7 +536,10 @@ export const TERRITORY: WarTerritory[] = [
           'french-empire': ['France', 'Belgium', 'Netherlands', 'Luxembourg', 'Switzerland', 'Germany', 'Italy', 'Spain', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina', 'Poland', 'Lithuania', 'Belarus'],
           'austria': ['Austria', 'Hungary', 'Czechia', 'Slovakia'],
           'russia': ['Russia', 'Ukraine', 'Estonia', 'Latvia', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Finland'],
-          'uk': ['United Kingdom', 'Ireland', 'India', 'Canada', 'Australia', 'Portugal'],
+          'uk': ['United Kingdom', 'Ireland', 'Portugal'],
+          'india': ['India'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
           'ottoman': ['Turkey', 'Egypt', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Greece', 'Bulgaria', 'Romania', 'Serbia'],
           'finland': ['Sweden'],
         },
@@ -416,7 +552,10 @@ export const TERRITORY: WarTerritory[] = [
           'prussia': ['Germany', 'Poland'],
           'austria': ['Austria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina'],
           'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Finland'],
-          'uk': ['United Kingdom', 'Ireland', 'India', 'Canada', 'Australia'],
+          'uk': ['United Kingdom', 'Ireland'],
+          'india': ['India'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
           'spain': ['Spain', 'Mexico', 'Cuba', 'Colombia', 'Peru', 'Argentina', 'Bolivia', 'Chile', 'Venezuela', 'Ecuador', 'Philippines'],
           'portugal': ['Portugal', 'Brazil', 'Angola', 'Mozambique'],
           'ottoman': ['Turkey', 'Egypt', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Greece', 'Bulgaria', 'Romania', 'Serbia'],
@@ -431,7 +570,10 @@ export const TERRITORY: WarTerritory[] = [
           'prussia': ['Germany', 'Poland'],
           'austria': ['Austria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Bosnia and Herzegovina', 'Italy'],
           'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Finland'],
-          'uk': ['United Kingdom', 'Ireland', 'India', 'Canada', 'Australia', 'Belgium', 'Netherlands', 'Luxembourg'],
+          'uk': ['United Kingdom', 'Ireland', 'Belgium', 'Netherlands', 'Luxembourg'],
+          'india': ['India'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
           'spain': ['Spain', 'Mexico', 'Cuba', 'Colombia', 'Peru', 'Argentina', 'Bolivia', 'Chile', 'Venezuela', 'Ecuador', 'Philippines'],
           'portugal': ['Portugal', 'Brazil', 'Angola', 'Mozambique'],
           'ottoman': ['Turkey', 'Egypt', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Iraq', 'Saudi Arabia', 'Greece', 'Bulgaria', 'Romania', 'Serbia'],
@@ -451,7 +593,10 @@ export const TERRITORY: WarTerritory[] = [
           'south-korea': ['South Korea'],
           'china-prc': ['China'],
           'us': ['United States'],
-          'uk': ['United Kingdom', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'ussr': ['Russia'],
         },
       },
@@ -463,7 +608,10 @@ export const TERRITORY: WarTerritory[] = [
           'south-korea': ['South Korea'],
           'china-prc': ['China'],
           'us': ['United States'],
-          'uk': ['United Kingdom', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'ussr': ['Russia'],
         },
       },
@@ -474,7 +622,10 @@ export const TERRITORY: WarTerritory[] = [
           'un-coalition': ['North Korea', 'South Korea'],
           'china-prc': ['China'],
           'us': ['United States'],
-          'uk': ['United Kingdom', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'ussr': ['Russia'],
         },
       },
@@ -486,7 +637,10 @@ export const TERRITORY: WarTerritory[] = [
           'south-korea': ['South Korea'],
           'china-prc': ['China'],
           'us': ['United States'],
-          'uk': ['United Kingdom', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'ussr': ['Russia'],
         },
       },
@@ -498,7 +652,10 @@ export const TERRITORY: WarTerritory[] = [
           'south-korea': ['South Korea'],
           'china-prc': ['China'],
           'us': ['United States'],
-          'uk': ['United Kingdom', 'Canada', 'Australia', 'New Zealand'],
+          'uk': ['United Kingdom'],
+          'canada': ['Canada'],
+          'australia': ['Australia'],
+          'new-zealand': ['New Zealand'],
           'ussr': ['Russia'],
         },
       },
@@ -980,7 +1137,8 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'us': ['United States'],
           'mexico': ['Mexico'],
-          'uk': ['Canada'],
+          'uk': [],
+          'canada': ['Canada'],
           'spain': ['Spain', 'Cuba', 'Puerto Rico', 'Philippines'],
         },
       },
@@ -1137,6 +1295,685 @@ export const TERRITORY: WarTerritory[] = [
       },
     ],
   },
+  {
+    war: 'Wars of Alexander the Great',
+    snapshots: [
+      {
+        year: -336,
+        label: '336 BC: Alexander inherits Macedon',
+        control: {
+          'greek-slate': ['Greece', 'Macedonia', 'Bulgaria', 'Albania'],
+          'persian-purple': ['Iran', 'Iraq', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Egypt', 'Libya', 'Turkey', 'Saudi Arabia', 'Afghanistan', 'Pakistan'],
+        },
+      },
+      {
+        year: -333,
+        label: '333 BC: Issus — Persia routed at the Cilician Gates',
+        control: {
+          'greek-slate': ['Greece', 'Macedonia', 'Bulgaria', 'Albania', 'Turkey'],
+          'persian-purple': ['Iran', 'Iraq', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Egypt', 'Libya', 'Saudi Arabia', 'Afghanistan', 'Pakistan'],
+        },
+      },
+      {
+        year: -331,
+        label: '331 BC: Gaugamela — the Persian Empire breaks',
+        control: {
+          'greek-slate': ['Greece', 'Macedonia', 'Bulgaria', 'Albania', 'Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Egypt', 'Libya', 'Iraq'],
+          'persian-purple': ['Iran', 'Saudi Arabia', 'Afghanistan', 'Pakistan'],
+        },
+      },
+      {
+        year: -326,
+        label: '326 BC: Hydaspes — Alexander reaches the Indus',
+        control: {
+          'greek-slate': ['Greece', 'Macedonia', 'Bulgaria', 'Albania', 'Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Egypt', 'Libya', 'Iraq', 'Iran', 'Saudi Arabia', 'Afghanistan', 'Pakistan'],
+        },
+      },
+      {
+        year: -323,
+        label: '323 BC: Alexander dies at Babylon, empire at peak',
+        control: {
+          'greek-slate': ['Greece', 'Macedonia', 'Bulgaria', 'Albania', 'Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Egypt', 'Libya', 'Iraq', 'Iran', 'Saudi Arabia', 'Afghanistan', 'Pakistan'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Greco-Persian Wars',
+    snapshots: [
+      {
+        year: -499,
+        label: '499 BC: Ionian Revolt',
+        control: {
+          'persian-purple': ['Iran', 'Iraq', 'Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Egypt', 'Libya', 'Saudi Arabia', 'Afghanistan', 'Pakistan'],
+          'greek-slate': ['Greece', 'Albania', 'Macedonia', 'Bulgaria'],
+        },
+      },
+      {
+        year: -490,
+        label: '490 BC: Marathon — Athens repels the first invasion',
+        control: {
+          'persian-purple': ['Iran', 'Iraq', 'Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Egypt', 'Libya', 'Saudi Arabia', 'Afghanistan', 'Pakistan'],
+          'greek-slate': ['Greece', 'Albania', 'Macedonia', 'Bulgaria'],
+        },
+      },
+      {
+        year: -480,
+        label: '480 BC: Thermopylae, Salamis — second invasion broken',
+        control: {
+          'persian-purple': ['Iran', 'Iraq', 'Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Egypt', 'Libya', 'Saudi Arabia', 'Afghanistan', 'Pakistan'],
+          'greek-slate': ['Greece', 'Albania', 'Macedonia', 'Bulgaria'],
+        },
+      },
+      {
+        year: -449,
+        label: '449 BC: Peace of Callias — Persia abandons the Aegean',
+        control: {
+          'persian-purple': ['Iran', 'Iraq', 'Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan', 'Egypt', 'Libya', 'Saudi Arabia', 'Afghanistan', 'Pakistan'],
+          'greek-slate': ['Greece', 'Albania', 'Macedonia', 'Bulgaria'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Second Punic War',
+    snapshots: [
+      {
+        year: -218,
+        label: '218 BC: Hannibal crosses the Alps',
+        control: {
+          'roman-crimson': ['Italy', 'France', 'Spain', 'Portugal'],
+          'carthage-purple': ['Tunisia', 'Algeria', 'Morocco', 'Libya'],
+        },
+      },
+      {
+        year: -216,
+        label: '216 BC: Cannae — Rome at the brink',
+        control: {
+          'roman-crimson': ['France', 'Spain', 'Portugal'],
+          'carthage-purple': ['Tunisia', 'Algeria', 'Morocco', 'Libya', 'Italy'],
+        },
+      },
+      {
+        year: -211,
+        label: '211 BC: Roman recovery, Spain contested',
+        control: {
+          'roman-crimson': ['Italy', 'France'],
+          'carthage-purple': ['Tunisia', 'Algeria', 'Morocco', 'Libya', 'Spain', 'Portugal'],
+        },
+      },
+      {
+        year: -202,
+        label: '202 BC: Zama — Carthage broken',
+        control: {
+          'roman-crimson': ['Italy', 'France', 'Spain', 'Portugal'],
+          'carthage-purple': ['Tunisia', 'Algeria', 'Morocco', 'Libya'],
+        },
+      },
+    ],
+  },
+  {
+    war: "Thirty Years' War",
+    snapshots: [
+      {
+        year: 1618,
+        label: '1618: Defenestration of Prague',
+        control: {
+          'habsburg-spain': ['Spain', 'Portugal', 'Belgium', 'Netherlands', 'Italy', 'Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia'],
+          'prussian-blue': ['Germany'],
+          'kingdom-france-bourbon': ['France'],
+          'sweden-empire': ['Sweden', 'Norway', 'Finland', 'Estonia', 'Latvia'],
+          'denmark-norway': ['Denmark'],
+          'ottoman-burgundy': ['Turkey', 'Bulgaria', 'Romania', 'Serbia', 'Greece', 'Albania'],
+        },
+      },
+      {
+        year: 1630,
+        label: '1630: Gustavus Adolphus lands at Peenemünde',
+        control: {
+          'habsburg-spain': ['Spain', 'Portugal', 'Belgium', 'Italy', 'Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia'],
+          'prussian-blue': ['Germany'],
+          'kingdom-france-bourbon': ['France'],
+          'sweden-empire': ['Sweden', 'Norway', 'Finland', 'Estonia', 'Latvia'],
+          'denmark-norway': ['Denmark'],
+          'dutch-republic': ['Netherlands'],
+        },
+      },
+      {
+        year: 1645,
+        label: '1645: France and Sweden push Habsburgs back',
+        control: {
+          'habsburg-spain': ['Spain', 'Portugal', 'Italy', 'Austria', 'Czechia', 'Slovakia', 'Hungary'],
+          'prussian-blue': ['Germany'],
+          'kingdom-france-bourbon': ['France', 'Belgium'],
+          'sweden-empire': ['Sweden', 'Norway', 'Finland', 'Estonia', 'Latvia'],
+          'dutch-republic': ['Netherlands'],
+        },
+      },
+      {
+        year: 1648,
+        label: '1648: Peace of Westphalia',
+        control: {
+          'habsburg-spain': ['Spain', 'Portugal', 'Italy', 'Austria', 'Czechia', 'Slovakia', 'Hungary'],
+          'prussian-blue': ['Germany'],
+          'kingdom-france-bourbon': ['France', 'Belgium'],
+          'sweden-empire': ['Sweden', 'Norway', 'Finland'],
+          'dutch-republic': ['Netherlands'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Russian invasion of Ukraine',
+    snapshots: [
+      {
+        year: 2022.16,
+        label: 'February 24 2022: Full-scale invasion',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
+        },
+      },
+      {
+        year: 2022.7,
+        label: 'September 2022: Kharkiv counter-offensive',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
+        },
+      },
+      {
+        year: 2024.62,
+        label: 'August 2024: Ukraine breaches into Kursk Oblast',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Iran-Israel direct strikes 2024',
+    snapshots: [
+      {
+        year: 2024.3,
+        label: 'April 2024: Iran fires 300 drones and missiles at Israel',
+        control: {
+          'persian-purple': ['Iran', 'Iraq', 'Syria'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Jordan'],
+          'south-korea-blue': ['Israel'],
+        },
+      },
+      {
+        year: 2024.78,
+        label: 'October 2024: Israel strikes deep into Iran',
+        control: {
+          'persian-purple': ['Iran', 'Iraq', 'Syria'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Jordan'],
+          'south-korea-blue': ['Israel'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Gaza war',
+    snapshots: [
+      {
+        year: 2023.78,
+        label: 'October 7 2023: Hamas attack, Israeli response begins',
+        control: {
+          'hamas': ['Palestine'],
+          'south-korea-blue': ['Israel'],
+          'persian-purple': ['Iran', 'Lebanon', 'Syria'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Egypt', 'Jordan'],
+        },
+      },
+      {
+        year: 2024.5,
+        label: 'Mid-2024: Rafah operation, regional escalation',
+        control: {
+          'hamas': ['Palestine'],
+          'south-korea-blue': ['Israel'],
+          'persian-purple': ['Iran', 'Lebanon', 'Syria'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Egypt', 'Jordan'],
+        },
+      },
+      {
+        year: 2025.1,
+        label: 'January 2025: First-phase ceasefire',
+        control: {
+          'hamas': ['Palestine'],
+          'south-korea-blue': ['Israel'],
+          'persian-purple': ['Iran', 'Lebanon', 'Syria'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Egypt', 'Jordan'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Israel-Hezbollah conflict 2024',
+    snapshots: [
+      {
+        year: 2024.7,
+        label: 'September 2024: Pager attacks, leadership decapitated',
+        control: {
+          'persian-purple': ['Iran', 'Lebanon', 'Syria'],
+          'us': ['United States'],
+          'uk': ['United Kingdom'],
+          'south-korea-blue': ['Israel'],
+        },
+      },
+      {
+        year: 2024.9,
+        label: 'November 2024: Ground incursion, ceasefire',
+        control: {
+          'persian-purple': ['Iran', 'Lebanon', 'Syria'],
+          'us': ['United States'],
+          'uk': ['United Kingdom'],
+          'south-korea-blue': ['Israel'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Soviet–Afghan War',
+    snapshots: [
+      {
+        year: 1979.92,
+        label: 'December 1979: Soviet invasion',
+        control: {
+          'ussr': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan', 'Afghanistan'],
+          'taliban': ['Pakistan'],
+          'us': ['United States'],
+          'china-prc': ['China'],
+        },
+      },
+      {
+        year: 1986,
+        label: '1986: Stinger missiles arrive with the mujahideen',
+        control: {
+          'ussr': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan', 'Afghanistan'],
+          'taliban': ['Pakistan'],
+          'us': ['United States'],
+          'china-prc': ['China'],
+        },
+      },
+      {
+        year: 1989.13,
+        label: 'February 1989: Last Soviet column crosses the Friendship Bridge',
+        control: {
+          'ussr': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan'],
+          'afghan-government': ['Afghanistan'],
+          'taliban': ['Pakistan'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'War of the Spanish Succession',
+    snapshots: [
+      {
+        year: 1701,
+        label: '1701: Bourbon Philip V crowned in Madrid',
+        control: {
+          'kingdom-france-bourbon': ['France', 'Spain', 'Portugal'],
+          'habsburg-spain': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia', 'Italy'],
+          'british-empire': ['United Kingdom', 'Ireland'],
+          'dutch-republic': ['Netherlands', 'Belgium', 'Luxembourg'],
+          'prussian-blue': ['Germany'],
+        },
+      },
+      {
+        year: 1704,
+        label: '1704: Blenheim — Marlborough breaks the French line',
+        control: {
+          'kingdom-france-bourbon': ['France', 'Spain', 'Portugal'],
+          'habsburg-spain': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia', 'Italy'],
+          'british-empire': ['United Kingdom', 'Ireland'],
+          'dutch-republic': ['Netherlands', 'Belgium', 'Luxembourg'],
+          'prussian-blue': ['Germany'],
+        },
+      },
+      {
+        year: 1713.5,
+        label: '1713: Treaty of Utrecht — Bourbon Spain, no union',
+        control: {
+          'kingdom-france-bourbon': ['France', 'Spain'],
+          'habsburg-spain': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia', 'Italy', 'Belgium'],
+          'british-empire': ['United Kingdom', 'Ireland', 'Portugal'],
+          'dutch-republic': ['Netherlands', 'Luxembourg'],
+          'prussian-blue': ['Germany'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Mahdist War',
+    snapshots: [
+      {
+        year: 1881,
+        label: '1881: The Mahdi declares jihad against Anglo-Egyptian rule',
+        control: {
+          'british-empire': ['United Kingdom', 'Egypt', 'South Africa', 'Kenya', 'India'],
+          'mongol': ['Sudan'],
+          'ottoman-burgundy': ['Turkey'],
+        },
+      },
+      {
+        year: 1885,
+        label: '1885: Fall of Khartoum — Gordon killed',
+        control: {
+          'british-empire': ['United Kingdom', 'Egypt', 'South Africa', 'Kenya', 'India'],
+          'mongol': ['Sudan'],
+          'ottoman-burgundy': ['Turkey'],
+        },
+      },
+      {
+        year: 1898.7,
+        label: '1898: Omdurman — Kitchener reconquers the Sudan',
+        control: {
+          'british-empire': ['United Kingdom', 'Egypt', 'Sudan', 'South Africa', 'Kenya', 'India'],
+          'ottoman-burgundy': ['Turkey'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Algerian War',
+    snapshots: [
+      {
+        year: 1954.84,
+        label: 'November 1954: FLN insurgency opens',
+        control: {
+          'french-empire': ['France', 'Algeria', 'Tunisia', 'Morocco'],
+          'us': ['United States'],
+          'uk': ['United Kingdom'],
+        },
+      },
+      {
+        year: 1957.5,
+        label: '1957: Battle of Algiers, paras crush the urban network',
+        control: {
+          'french-empire': ['France', 'Algeria', 'Tunisia', 'Morocco'],
+          'us': ['United States'],
+          'uk': ['United Kingdom'],
+        },
+      },
+      {
+        year: 1962.5,
+        label: 'July 1962: Évian Accords, Algerian independence',
+        control: {
+          'french-empire': ['France', 'Tunisia', 'Morocco'],
+          'mongol': ['Algeria'],
+          'us': ['United States'],
+          'uk': ['United Kingdom'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Norman conquest of England',
+    snapshots: [
+      {
+        year: 1066.3,
+        label: 'January 1066: Edward dies, Harold crowned',
+        control: {
+          'kingdom-england': ['United Kingdom', 'Ireland'],
+          'kingdom-france-bourbon': ['France'],
+          'sweden-empire': ['Norway', 'Denmark', 'Sweden'],
+        },
+      },
+      {
+        year: 1066.82,
+        label: 'October 14 1066: Hastings — Harold killed, William advances on London',
+        control: {
+          'kingdom-france-bourbon': ['United Kingdom', 'France'],
+          'kingdom-england': ['Ireland'],
+          'sweden-empire': ['Norway', 'Denmark', 'Sweden'],
+        },
+      },
+      {
+        year: 1071,
+        label: '1071: Hereward the Wake defeated, conquest complete',
+        control: {
+          'kingdom-france-bourbon': ['United Kingdom', 'France'],
+          'kingdom-england': ['Ireland'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Russian Civil War',
+    snapshots: [
+      {
+        year: 1918,
+        label: '1918: Reds vs Whites, Allied Intervention lands at Murmansk',
+        control: {
+          'ussr': ['Russia', 'Belarus', 'Ukraine'],
+          'uk': ['United Kingdom'],
+          'us': ['United States'],
+          'french-empire': ['France'],
+          'imperial-japan': ['Japan'],
+          'imperial-germany': ['Germany'],
+        },
+      },
+      {
+        year: 1920,
+        label: '1920: Red Army drives Whites from Crimea, war winds down',
+        control: {
+          'ussr': ['Russia', 'Belarus', 'Ukraine'],
+          'uk': ['United Kingdom'],
+          'us': ['United States'],
+          'french-empire': ['France'],
+          'imperial-japan': ['Japan'],
+        },
+      },
+      {
+        year: 1922,
+        label: '1922: Vladivostok — last Whites evacuate, USSR proclaimed',
+        control: {
+          'ussr': ['Russia', 'Belarus', 'Ukraine', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Boxer Rebellion',
+    snapshots: [
+      {
+        year: 1900.5,
+        label: 'Summer 1900: Eight-Nation Alliance lands at Tianjin',
+        control: {
+          'china-roc': ['China'],
+          'imperial-japan': ['Japan'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Mongolia'],
+          'us': ['United States'],
+          'uk': ['United Kingdom'],
+          'french-empire': ['France'],
+          'imperial-germany': ['Germany'],
+          'austria': ['Austria'],
+          'italy': ['Italy'],
+        },
+      },
+      {
+        year: 1901.7,
+        label: 'September 1901: Boxer Protocol, indemnity imposed',
+        control: {
+          'china-roc': ['China'],
+          'imperial-japan': ['Japan'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Mongolia'],
+          'us': ['United States'],
+          'uk': ['United Kingdom'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Italian Wars',
+    snapshots: [
+      {
+        year: 1494,
+        label: '1494: Charles VIII of France invades Italy',
+        control: {
+          'kingdom-france-bourbon': ['France'],
+          'habsburg-spain': ['Spain', 'Belgium', 'Netherlands', 'Austria'],
+          'italy': ['Italy'],
+          'ottoman-burgundy': ['Turkey', 'Greece', 'Bulgaria'],
+        },
+      },
+      {
+        year: 1525,
+        label: 'February 1525: Pavia — France crushed, Francis I captured',
+        control: {
+          'kingdom-france-bourbon': ['France'],
+          'habsburg-spain': ['Spain', 'Belgium', 'Netherlands', 'Austria', 'Italy'],
+          'ottoman-burgundy': ['Turkey', 'Greece', 'Bulgaria'],
+        },
+      },
+      {
+        year: 1559,
+        label: '1559: Peace of Cateau-Cambrésis ends the wars',
+        control: {
+          'kingdom-france-bourbon': ['France'],
+          'habsburg-spain': ['Spain', 'Belgium', 'Netherlands', 'Austria', 'Italy'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Wars of Italian Unification',
+    snapshots: [
+      {
+        year: 1848,
+        label: '1848: Year of Revolutions — Piedmont declares war on Austria',
+        control: {
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia', 'Italy'],
+          'kingdom-france-bourbon': ['France'],
+          'spain': ['Spain'],
+        },
+      },
+      {
+        year: 1861,
+        label: '1861: Kingdom of Italy proclaimed',
+        control: {
+          'italy': ['Italy'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia'],
+          'kingdom-france-bourbon': ['France'],
+        },
+      },
+      {
+        year: 1871,
+        label: '1871: Rome captured, unification complete',
+        control: {
+          'italy': ['Italy'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Slovenia', 'Croatia'],
+          'french-empire': ['France'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Roman conquest of Britain',
+    snapshots: [
+      {
+        year: 43,
+        label: '43 AD: Aulus Plautius lands in Kent',
+        control: {
+          'roman-crimson': ['Italy', 'France', 'Spain', 'Portugal', 'Belgium', 'Netherlands'],
+          'mongol': ['United Kingdom'],
+        },
+      },
+      {
+        year: 60,
+        label: '60 AD: Boudica rises against Rome',
+        control: {
+          'roman-crimson': ['Italy', 'France', 'Spain', 'Portugal', 'Belgium', 'Netherlands', 'United Kingdom'],
+        },
+      },
+      {
+        year: 122,
+        label: '122 AD: Hadrian\'s Wall — Rome accepts a fixed northern frontier',
+        control: {
+          'roman-crimson': ['Italy', 'France', 'Spain', 'Portugal', 'Belgium', 'Netherlands', 'United Kingdom'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Gallic Wars',
+    snapshots: [
+      {
+        year: -58,
+        label: '58 BC: Caesar accepts the Helvetii alliance request',
+        control: {
+          'roman-crimson': ['Italy', 'Greece', 'Spain', 'Portugal', 'Turkey', 'Syria'],
+          'mongol': ['France', 'Belgium', 'Switzerland', 'Luxembourg'],
+        },
+      },
+      {
+        year: -52,
+        label: '52 BC: Alesia — Vercingetorix surrenders',
+        control: {
+          'roman-crimson': ['Italy', 'Greece', 'Spain', 'Portugal', 'Turkey', 'Syria', 'France', 'Belgium', 'Switzerland', 'Luxembourg'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'First Punic War',
+    snapshots: [
+      {
+        year: -264,
+        label: '264 BC: Romans land in Sicily',
+        control: {
+          'roman-crimson': ['Italy'],
+          'carthage-purple': ['Tunisia', 'Algeria', 'Morocco', 'Libya', 'Spain'],
+        },
+      },
+      {
+        year: -241,
+        label: '241 BC: Aegates Islands — Carthage cedes Sicily',
+        control: {
+          'roman-crimson': ['Italy'],
+          'carthage-purple': ['Tunisia', 'Algeria', 'Morocco', 'Libya', 'Spain'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Anglo-Zulu War',
+    snapshots: [
+      {
+        year: 1879.0,
+        label: 'January 1879: British column crosses the Buffalo River',
+        control: {
+          'british-empire': ['United Kingdom', 'South Africa'],
+          'mongol': ['Eswatini', 'Lesotho'],
+        },
+      },
+      {
+        year: 1879.6,
+        label: 'July 1879: Ulundi — Zulu kingdom dissolved',
+        control: {
+          'british-empire': ['United Kingdom', 'South Africa', 'Eswatini', 'Lesotho'],
+        },
+      },
+    ],
+  },
 ];
 
 // OWNER_LABELS gives each owner key a short human-readable label for the
@@ -1222,6 +2059,17 @@ export const OWNER_LABELS: Record<string, string> = {
   'rus': 'Russian forces',
   'cuba-spain': 'Spanish Cuba',
   'us-puerto-rico': 'US-held Puerto Rico',
+  'persian-purple': 'Persian sphere',
+  'greek-slate': 'Hellenic states',
+  'roman-crimson': 'Rome',
+  'carthage-purple': 'Carthage',
+  'south-korea-blue': 'Western-aligned',
+  'prussian-blue': 'Prussia',
+  'hamas': 'Hamas',
+  'hezbollah': 'Hezbollah',
+  'commonwealth': 'Commonwealth',
+  'india': 'British India',
+  'south-africa': 'South Africa',
 };
 
 // findSnapshot returns the territory snapshot in effect for a given war

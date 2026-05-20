@@ -5,6 +5,8 @@ import { themeForYear } from '../theme/era';
 import { canonBelligerentKey, canonBelligerentLabel } from '../lib/country';
 import { findSnapshot, buildCountryColorMap, TERRITORY } from '../data/territory-snapshots';
 import WarSummaryCard from './WarSummaryCard';
+import { resolveMediaFor } from '../data/media';
+import type { MediaEntry } from '../data/media';
 import WarCinematicOverlay from './WarCinematicOverlay';
 import CloseButton from './CloseButton';
 import { usePauseOnHidden } from '../hooks/usePauseOnHidden';
@@ -97,6 +99,102 @@ function formatCasualtyCompact(n: number): string {
 
 type WarSort = 'casualties' | 'battles' | 'alpha' | 'chrono' | 'country';
 
+// MEDIA_ICON renders a small kind-specific glyph next to each media row.
+function MediaKindIcon({ kind }: { kind: MediaEntry['kind'] }) {
+  if (kind === 'film') {
+    return (
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+        <rect x="2" y="3" width="12" height="10" rx="1" />
+        <path d="M5 3v10M11 3v10M2 6h3M2 10h3M11 6h3M11 10h3" />
+      </svg>
+    );
+  }
+  if (kind === 'series') {
+    return (
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+        <rect x="1.5" y="3.5" width="13" height="8" rx="1" />
+        <path d="M6 13.5h4" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (kind === 'documentary') {
+    return (
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+        <circle cx="8" cy="8" r="6.2" />
+        <path d="M2 8h12M8 2c2.5 2.5 2.5 9.5 0 12M8 2c-2.5 2.5-2.5 9.5 0 12" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+      <path d="M3 2.5h7a2 2 0 0 1 2 2v9l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V4.5a2 2 0 0 1 2-2z" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// MediaShelf renders a "Watch & Read" group of curated film, series, book,
+// and documentary links keyed to the current battle and its war.
+function MediaShelf({ warName, battleId }: { warName: string; battleId?: string }) {
+  const items = resolveMediaFor({ war: warName, battleId, max: 8 });
+  if (items.length === 0) return null;
+  const kindLabel: Record<MediaEntry['kind'], string> = {
+    film: 'Film',
+    series: 'Series',
+    book: 'Book',
+    documentary: 'Doc',
+  };
+  return (
+    <div className="mt-3 rounded-xl border border-slate-800/60 bg-slate-900/30 px-4 py-3.5">
+      <div className="flex items-baseline justify-between mb-2.5">
+        <div className="text-[9px] font-semibold uppercase tracking-[0.32em] text-amber-300/80">
+          Watch &amp; Read
+        </div>
+        <div className="text-[9px] uppercase tracking-[0.22em] text-slate-500">
+          {items.length} pick{items.length === 1 ? '' : 's'}
+        </div>
+      </div>
+      <ul className="space-y-2.5">
+        {items.map((m, i) => {
+          const wrapper = (children: React.ReactNode) =>
+            m.url ? (
+              <a
+                href={m.url}
+                target="_blank"
+                rel="noreferrer"
+                className="block hover:bg-white/[0.025] -mx-1.5 px-1.5 py-0.5 rounded transition-colors"
+              >
+                {children}
+              </a>
+            ) : (
+              <div className="px-1.5 py-0.5">{children}</div>
+            );
+          return (
+            <li key={`${m.title}-${m.year}-${i}`} className="text-[12px] leading-relaxed">
+              {wrapper(
+                <>
+                  <div className="flex items-baseline gap-2">
+                    <span className="flex-shrink-0 inline-flex items-center justify-center w-[16px] h-[16px] rounded text-slate-300/85" aria-hidden="true">
+                      <MediaKindIcon kind={m.kind} />
+                    </span>
+                    <span className="text-slate-100 font-semibold">{m.title}</span>
+                    <span className="text-slate-500 text-[10.5px] flex-shrink-0">{m.year}</span>
+                    <span className="ml-auto text-[8.5px] uppercase tracking-[0.22em] text-slate-500 flex-shrink-0">
+                      {kindLabel[m.kind]}
+                    </span>
+                  </div>
+                  <div className="ml-[24px] text-[11px] text-slate-400 leading-snug">
+                    {m.creator} — {m.blurb}
+                  </div>
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 interface BattleGroup {
   battles: Battle[];
   year: number;
@@ -126,6 +224,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   const [warSort, setWarSort] = useState<WarSort>('casualties');
   const [selectedWar, setSelectedWar] = useState(initialWar || '');
   const [battles, setBattles] = useState<Battle[]>([]);
+  const [battlesLoading, setBattlesLoading] = useState(false);
   const [groupIndex, setGroupIndex] = useState(0);
   const [subIndex, setSubIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -153,6 +252,8 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   }, [battles, cinematic]);
   const [speed, setSpeed] = useState(4000);
   const [detail, setDetail] = useState<Battle | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [warSummaryLoading, setWarSummaryLoading] = useState(false);
   // cinematicStage drives the full-screen war overlay: an opening title
   // card before the first battle plays, the playthrough itself, then a
   // closing aftermath card. The existing per-battle playback loop runs
@@ -216,30 +317,21 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         onWarCountries(matchedWar?.countries?.length ? matchedWar.countries : (inherited ?? []));
       }
     }
-    if (!selectedWar) { setBattles([]); onBattlesLoaded(null); return; }
+    if (!selectedWar) { setBattles([]); setBattlesLoading(false); onBattlesLoaded(null); return; }
+    setBattlesLoading(true);
     fetch(`/api/battles?war=${encodeURIComponent(selectedWar)}&limit=2000`)
       .then((r) => r.json())
       .then((d) => {
-        // The backend now orders by (year, date_start) so any consumer of
-        // the battles API receives chronological order. Trust it; do not
-        // re-sort here.
         const b: Battle[] = d.battles || [];
         setBattles(b);
         setGroupIndex(0);
         setSubIndex(0);
         setPlaying(false);
         setDetail(null);
-        // Paint every real battle of the war on the globe. The user
-        // explicitly does not want history rewritten by a curation
-        // filter: if an engagement happened, its dot belongs on the map
-        // even when its dossier is thin. Visual hierarchy (pillar
-        // altitude scales with casualties, indexed-tier markers dim by
-        // 0.7×) already steers the eye toward iconic battles without
-        // erasing the long tail. The cinematic still picks its own
-        // grade subset for the auto-played sequence.
         onBattlesLoaded(b);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setBattlesLoading(false));
   }, [selectedWar, onBattlesLoaded, onWarSelected, onWarCountries, wars]);
 
   // Toggling cinematic on/off re-shapes the playable groups (different set
@@ -274,12 +366,15 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // WarSummaryCard uses; keeping a local copy lets the overlay render its
   // closing aftermath card without waiting on a child re-render.
   useEffect(() => {
-    if (!selectedWar) { setWarSummary(null); return; }
+    if (!selectedWar) { setWarSummary(null); setWarSummaryLoading(false); return; }
     let cancelled = false;
+    setWarSummaryLoading(true);
+    setWarSummary(null);
     fetch(`/api/wars/summary?name=${encodeURIComponent(selectedWar)}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((s) => { if (!cancelled && s) setWarSummary(s); })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setWarSummaryLoading(false); });
     return () => { cancelled = true; };
   }, [selectedWar]);
 
@@ -484,7 +579,13 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
 
   const focusBattle = useCallback((battle: Battle) => {
     onBattleFocus(battle);
-    fetch(`/api/battles/${battle.id}`).then((r) => r.json()).then(setDetail).catch(() => setDetail(battle));
+    setDetailLoading(true);
+    setDetail(null);
+    fetch(`/api/battles/${battle.id}`)
+      .then((r) => r.json())
+      .then((d) => setDetail(d))
+      .catch(() => setDetail(battle))
+      .finally(() => setDetailLoading(false));
   }, [onBattleFocus]);
 
   const goTo = useCallback((gi: number, si: number = 0) => {
@@ -539,8 +640,8 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       // longest hand-crafted replays (Stalingrad: 10 phases, 83s) don't
       // get cut off when onEnded somehow fails to propagate.
       if (battle?.hasReplay) fullDwellMs = 120000;
-      else if (battle?.hasSchematic) fullDwellMs = 22000;
-      else fullDwellMs = 14000;
+      else if (battle?.hasSchematic) fullDwellMs = 14000;
+      else fullDwellMs = 7500;
     } else if (group.concurrent && subIndex < group.battles.length - 1) {
       fullDwellMs = Math.max(speed / 2, 1500);
     } else {
@@ -880,41 +981,49 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   if (!selectedWar) {
     return (
       <div
-        className="fixed inset-0 z-30 flex items-center justify-center bg-black/45 backdrop-blur-sm p-6"
+        className="fixed inset-0 z-30 flex items-center justify-center bg-black/55 backdrop-blur-sm p-6"
         onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
-        <div className="w-[480px] max-w-[92vw] bg-[#0f1019]/95 border border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[78vh]">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/60 flex-shrink-0">
-            <h3 className="text-xs font-semibold text-white tracking-wide uppercase">Choose a war</h3>
+        <div className="w-[620px] max-w-[94vw] bg-[#0a0c14]/97 border border-slate-800/80 rounded-2xl shadow-2xl flex flex-col max-h-[82vh]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/70 flex-shrink-0">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.32em] text-amber-200/90 mb-1">
+                The Atlas of War
+              </div>
+              <h3 className="text-[20px] font-semibold text-white tracking-tight" style={{ fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif" }}>
+                Choose a conflict
+              </h3>
+            </div>
             <CloseButton onClick={onClose} label="Back to the globe (Esc)" />
           </div>
-          <div className="p-4 overflow-y-auto flex-1">
+          <div className="px-6 pt-4 pb-2 flex-shrink-0 border-b border-slate-800/40">
             <input
               type="text"
               value={warSearch}
               onChange={(e) => setWarSearch(e.target.value)}
-              placeholder="Find a war..."
-              className="w-full h-9 px-3 mb-2 bg-[#1e2030] border border-slate-600/40 rounded-lg text-[13px] text-white placeholder-slate-500 focus:outline-none focus:border-blue-400/60"
+              placeholder="Search wars..."
+              className="w-full h-10 px-3 bg-transparent border border-slate-700/50 rounded-lg text-[13px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-300/40 transition-colors"
             />
-            <div className="flex gap-1 mb-2 flex-wrap">
+            <div className="flex items-baseline gap-4 mt-3 flex-wrap">
               {([
                 ['casualties', 'Bloodiest'],
-                ['battles', 'Most Battles'],
-                ['chrono', 'Oldest First'],
-                ['alpha', 'A-Z'],
-                ['country', 'By Country'],
+                ['battles', 'Most battles'],
+                ['chrono', 'Oldest first'],
+                ['alpha', 'A → Z'],
+                ['country', 'By country'],
               ] as const).map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setWarSort(key)}
-                  className={`h-6 px-2 rounded text-[10px] font-medium transition-colors ${
-                    warSort === key
-                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                      : 'bg-[#1e2030] text-slate-500 border border-slate-700/30 hover:text-slate-300'
-                  }`}
+                  className="text-[10px] font-semibold uppercase tracking-[0.28em] transition-colors focus:outline-none"
+                  style={{
+                    color: warSort === key ? '#fbbf24' : '#94a3b8',
+                  }}
                 >{label}</button>
               ))}
             </div>
+          </div>
+          <div className="p-4 overflow-y-auto flex-1">
             <div className="space-y-0.5 pr-1">
               {filteredWars.map((row) => {
                 if (row.kind === 'country') {
@@ -959,15 +1068,14 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                         : 'pl-7 pr-3 py-1.5 text-slate-400 text-[12px]'
                     }`}
                   >
-                    {/* Era stripe on the leading edge gives each row a
-                        quick chromatic signal of when in history it sits. */}
+                    {/* Era stripe on the leading edge — kept narrow and
+                        muted so it reads as a chronological hint, not a
+                        rainbow column. */}
                     {warSort !== 'country' && (
                       <span
                         aria-hidden="true"
-                        className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r"
-                        style={{
-                          background: `linear-gradient(180deg, ${stripeColor}cc 0%, ${stripeColor}55 100%)`,
-                        }}
+                        className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r"
+                        style={{ background: `${stripeColor}55` }}
                       />
                     )}
                     <div className="flex justify-between items-center gap-3">
@@ -989,28 +1097,18 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                           : `${showVal}`}
                       </span>
                     </div>
-                    {chipCountries.length > 0 && (
-                      <div className="mt-1 flex flex-wrap gap-1 items-center">
-                        {chipCountries.map((c) => (
-                          <span
-                            key={c}
-                            className="text-[9.5px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-full font-medium"
-                            style={{
-                              background: `${stripeColor}1a`,
-                              color: `${stripeColor}`,
-                              border: `1px solid ${stripeColor}33`,
-                            }}
-                          >
-                            {c}
-                          </span>
-                        ))}
-                        {w.countries && w.countries.length > 2 && (
-                          <span className="text-[9.5px] text-slate-600 tracking-wide">
-                            +{w.countries.length - 2}
+                    {(chipCountries.length > 0 || w.minYear !== 0) && (
+                      <div className="mt-0.5 flex items-baseline gap-2 text-[10px] text-slate-500 tracking-wide">
+                        {chipCountries.length > 0 && (
+                          <span className="truncate">
+                            {chipCountries.join(' · ')}
+                            {w.countries && w.countries.length > chipCountries.length && (
+                              <span className="text-slate-600 ml-1">+{w.countries.length - chipCountries.length}</span>
+                            )}
                           </span>
                         )}
                         {w.minYear !== 0 && (
-                          <span className="ml-auto text-[9.5px] text-slate-600 tabular-nums">
+                          <span className="ml-auto text-slate-600 tabular-nums flex-shrink-0">
                             from {formatYear(w.minYear)}
                           </span>
                         )}
@@ -1044,14 +1142,19 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           {selectedWar}
         </h3>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-[10px] text-slate-500">{battles.length}</span>
+          {!battlesLoading && battles.length > 0 && (
+            <span className="text-[10px] text-slate-500 tabular-nums">{battles.length}</span>
+          )}
           <CloseButton onClick={onClose} label="Back to the globe (Esc)" />
         </div>
       </div>
 
       <div className="p-4 overflow-y-auto flex-1">
         {currentBattle && (
-          <div className="mb-3">
+          <div className="mb-3 rounded-xl border border-slate-800/60 bg-slate-900/30 px-4 py-3.5">
+            <div className="text-[9px] font-semibold uppercase tracking-[0.32em] text-amber-300/80 mb-1.5">
+              About this battle
+            </div>
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ERA_COLORS[currentBattle.era] || '#fff' }} />
               <span className="text-[15px] font-semibold text-white">{currentBattle.name}</span>
@@ -1072,117 +1175,151 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
               </div>
             )}
 
+            {detail?.victor && (
+              <div className="mt-2 mb-2.5 flex items-baseline gap-2 text-[11.5px]">
+                <span className="text-[9px] uppercase tracking-[0.28em] text-slate-500">Victor</span>
+                <span className="text-slate-100 font-medium">{detail.victor}</span>
+              </div>
+            )}
             {detail?.summary && (
-              <p className="text-[12px] text-slate-300 leading-relaxed">{detail.summary}</p>
+              <div className="mt-3">
+                <div className="text-[9px] uppercase tracking-[0.28em] text-slate-500 mb-1">What happened</div>
+                <p className="text-[12.5px] text-slate-200/95 leading-relaxed">{detail.summary}</p>
+              </div>
             )}
             {detail?.significance && (
-              <p className="text-[12px] text-slate-400 leading-relaxed italic mt-2">{detail.significance}</p>
+              <div className="mt-3">
+                <div className="text-[9px] uppercase tracking-[0.28em] text-slate-500 mb-1">Why this battle mattered</div>
+                <p className="text-[12.5px] text-slate-300 leading-relaxed italic">{detail.significance}</p>
+              </div>
             )}
           </div>
         )}
 
-        {/* PRIMARY action. Full cinematic: opens an overture title card,
-            auto-plays each iconic battle (replay overlay where one exists),
-            closes on the war's aftermath card. This is the only "watch" mode
-            and is named so a first-time visitor immediately knows what it
-            does. The hairline subtitle clarifies scope to remove the
-            "play what?" ambiguity the older two-button stack created. */}
-        {(() => {
-          const totalBattles = groups.reduce((s, g) => s + g.battles.length, 0);
-          if (totalBattles < 2) return null;
-          return (
-            <button
-              onClick={() => {
-                setCinematic(true);
-                setCinematicStage('overture');
-                setGroupIndex(0);
-                setSubIndex(0);
-                setPlaying(false);
-              }}
-              className="w-full mb-4 group relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500/[0.22] via-blue-500/[0.08] to-transparent hover:from-blue-500/[0.32] hover:via-blue-500/[0.14] transition-all duration-300 px-4 py-3.5 text-left flex items-center gap-3.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40"
-              style={{ border: '1px solid rgba(96,165,250,0.42)', boxShadow: '0 6px 24px -10px rgba(96,165,250,0.35)' }}
-              title="Auto-plays the full war: opening title, each iconic battle in sequence with its phase replay, closing aftermath."
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-400/20 ring-1 ring-blue-300/50 group-hover:bg-blue-400/30 group-hover:ring-blue-200/70 transition-colors flex-shrink-0">
-                <svg width="12" height="14" viewBox="0 0 11 13" fill="currentColor" className="ml-0.5 text-blue-100">
-                  <path d="M0.5 0.93v11.14a.5.5 0 0 0 .77.42l9.07-5.57a.5.5 0 0 0 0-.84L1.27.51A.5.5 0 0 0 .5.93z" />
+        {/* Loading skeleton with explicit "Loading…" label so the pane never
+            reads as dead during the fetch. Two pulsing rows hint at the
+            shape that's about to land + a verbal cue removes any "did the
+            app die?" ambiguity. */}
+        {battlesLoading && battles.length === 0 && (
+          <div className="mb-4 rounded-xl border border-slate-800/60 bg-slate-900/40 px-4 py-5">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="h-9 w-9 rounded-full bg-blue-500/15 flex items-center justify-center ring-1 ring-blue-400/30">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="text-blue-300 animate-spin" style={{ animationDuration: '1.6s' }}>
+                  <path d="M21 12a9 9 0 11-6.219-8.56" strokeLinecap="round" />
                 </svg>
               </span>
-              <span className="flex-1 min-w-0">
-                <span className="block text-[14.5px] font-semibold text-white leading-tight tracking-tight">
-                  Play the war
+              <div className="flex-1 min-w-0">
+                <div className="text-[12px] font-semibold text-slate-200 tracking-wide">
+                  Loading battles…
+                </div>
+                <div className="text-[10.5px] text-slate-500 mt-0.5">
+                  Fetching the campaign and aligning the timeline
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2.5">
+              <div className="h-3 w-3/4 rounded bg-slate-800/70 animate-pulse" />
+              <div className="h-2 w-1/2 rounded bg-slate-800/50 animate-pulse" />
+              <div className="h-2 w-2/3 rounded bg-slate-800/40 animate-pulse" />
+            </div>
+          </div>
+        )}
+
+        {/* Unified transport. One card carrying the hero "Play the war"
+            launcher on top and a single thin transport row beneath it. The
+            two used to be stacked into two competing visual blocks, which
+            the user called out as cluttered. Now they share a single
+            container with a hairline divider; the eye reads "watch" first
+            and "browse" as a refinement of the same control surface. */}
+        {!battlesLoading && groups.length > 0 && (() => {
+          const totalBattles = groups.reduce((s, g) => s + g.battles.length, 0);
+          return (
+            <div className="mb-4 rounded-xl overflow-hidden border border-blue-400/30 bg-gradient-to-br from-blue-500/[0.10] to-transparent">
+              {totalBattles >= 2 && (
+                <button
+                  onClick={() => {
+                    setCinematic(true);
+                    setCinematicStage('overture');
+                    setGroupIndex(0);
+                    setSubIndex(0);
+                    setPlaying(false);
+                  }}
+                  className="w-full group relative px-4 py-3.5 text-left flex items-center gap-3.5 hover:bg-blue-500/[0.08] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400/40"
+                  title="Auto-plays the full war end-to-end with phase replays."
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-400/20 ring-1 ring-blue-300/50 group-hover:bg-blue-400/30 group-hover:ring-blue-200/70 transition-colors flex-shrink-0">
+                    <svg width="12" height="14" viewBox="0 0 11 13" fill="currentColor" className="ml-0.5 text-blue-100">
+                      <path d="M0.5 0.93v11.14a.5.5 0 0 0 .77.42l9.07-5.57a.5.5 0 0 0 0-.84L1.27.51A.5.5 0 0 0 .5.93z" />
+                    </svg>
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-[14.5px] font-semibold text-white leading-tight tracking-tight">
+                      Play the war
+                    </span>
+                    <span className="block text-[10.5px] text-slate-300/85 mt-1 leading-tight">
+                      Auto-cinematic · {totalBattles} battles · phase replays
+                    </span>
+                  </span>
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300/70 group-hover:text-blue-200 flex-shrink-0">
+                    <path d="M4 2 L8 6 L4 10" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Transport row. Prev / play-step / next + scrubber + counter +
+                  speed. Single 32px-tall strip below the hero so the entire
+                  control surface reads as one card, not two stacked blocks. */}
+              <div className={`flex items-center gap-2 px-3 py-2 ${totalBattles >= 2 ? 'border-t border-blue-400/15 bg-slate-950/30' : ''}`}>
+                <button onClick={() => goTo(groupIndex - 1)} disabled={groupIndex === 0}
+                  className="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700/60 hover:text-white disabled:opacity-25 disabled:hover:bg-transparent transition-colors"
+                  title="Previous battle"
+                  aria-label="Previous battle">
+                  <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
+                    <path d="M7.5 1.5L3 5.5l4.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <button onClick={() => setPlaying(!playing)}
+                  className="h-7 w-7 flex items-center justify-center rounded-full bg-slate-700/60 text-slate-100 ring-1 ring-slate-600/50 hover:bg-slate-600/70 hover:ring-slate-400/70 transition-colors"
+                  title={playing ? 'Pause' : 'Step through the list'}
+                  aria-label={playing ? 'Pause' : 'Step through the list'}>
+                  {playing ? (
+                    <svg width="9" height="9" viewBox="0 0 11 11" fill="currentColor">
+                      <rect x="1.5" y="1" width="2.5" height="9" rx="0.8" />
+                      <rect x="7" y="1" width="2.5" height="9" rx="0.8" />
+                    </svg>
+                  ) : (
+                    <svg width="9" height="11" viewBox="0 0 11 13" fill="currentColor" className="ml-0.5">
+                      <path d="M0.5 0.93v11.14a.5.5 0 0 0 .77.42l9.07-5.57a.5.5 0 0 0 0-.84L1.27.51A.5.5 0 0 0 .5.93z" />
+                    </svg>
+                  )}
+                </button>
+                <button onClick={() => goTo(groupIndex + 1)} disabled={groupIndex >= groups.length - 1}
+                  className="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700/60 hover:text-white disabled:opacity-25 disabled:hover:bg-transparent transition-colors"
+                  title="Next battle"
+                  aria-label="Next battle">
+                  <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
+                    <path d="M3.5 1.5L8 5.5l-4.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <input type="range" min={0} max={Math.max(0, groups.length - 1)} value={groupIndex}
+                  onChange={(e) => { setPlaying(false); goTo(parseInt(e.target.value)); }}
+                  className="flex-1 accent-blue-400 h-1 bg-slate-800/60 rounded-full appearance-none cursor-pointer mx-1"
+                  aria-label="Scrub through battles" />
+                <span className="text-[10px] text-slate-500 tabular-nums flex-shrink-0">
+                  {totalIdx + 1}/{totalBattles}
                 </span>
-                <span className="block text-[10.5px] text-slate-300/85 mt-1 leading-tight">
-                  Auto-cinematic · {totalBattles} iconic battles · with replays
-                </span>
-              </span>
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300/70 group-hover:text-blue-200 flex-shrink-0">
-                <path d="M4 2 L8 6 L4 10" />
-              </svg>
-            </button>
+                <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}
+                  className="bg-transparent border border-slate-700/40 rounded px-1.5 py-0.5 text-[10px] text-slate-400 hover:border-slate-500/60 focus:outline-none focus:ring-1 focus:ring-blue-400/40 transition-colors"
+                  title="Auto-step pace">
+                  <option value={6000}>Slow</option>
+                  <option value={4000}>Normal</option>
+                  <option value={2500}>Fast</option>
+                  <option value={1200}>Rapid</option>
+                </select>
+              </div>
+            </div>
           );
         })()}
-
-        {/* SECONDARY group: manual browse. Heading + thin divider make the
-            shift in scope explicit so the user reads "this is for
-            browsing one battle at a time inside the pane, not for watching
-            the war end-to-end." The play here advances the right pane
-            without opening a replay overlay. */}
-        <div className="mb-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[9px] uppercase tracking-[0.32em] text-slate-500 font-semibold">
-              Browse by battle
-            </span>
-            <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}
-              className="bg-slate-800/50 border border-slate-700/40 rounded-md px-2 py-0.5 text-[10px] text-slate-400 hover:border-slate-500/60 focus:outline-none focus:ring-1 focus:ring-blue-400/40 transition-colors"
-              title="How fast the pane advances when auto-stepping is on">
-              <option value={6000}>Slow</option>
-              <option value={4000}>Normal</option>
-              <option value={2500}>Fast</option>
-              <option value={1200}>Rapid</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => goTo(groupIndex - 1)} disabled={groupIndex === 0}
-              className="h-7 w-7 flex items-center justify-center rounded-full bg-slate-800/60 text-slate-400 ring-1 ring-slate-700/50 hover:bg-slate-700/70 hover:text-white hover:ring-slate-500/60 disabled:opacity-20 disabled:hover:bg-slate-800/60 disabled:hover:ring-slate-700/50 transition-all"
-              title="Previous battle"
-              aria-label="Previous battle">
-              <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
-                <path d="M7.5 1.5L3 5.5l4.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            <button onClick={() => setPlaying(!playing)}
-              className="h-7 w-7 flex items-center justify-center rounded-full bg-slate-700/70 text-slate-200 ring-1 ring-slate-600/60 hover:bg-slate-600/70 hover:text-white hover:ring-slate-400/70 transition-all"
-              title={playing ? 'Pause auto-step' : 'Auto-step through the list (no replay overlay)'}
-              aria-label={playing ? 'Pause auto-step' : 'Auto-step through the list'}>
-              {playing ? (
-                <svg width="9" height="9" viewBox="0 0 11 11" fill="currentColor">
-                  <rect x="1.5" y="1" width="2.5" height="9" rx="0.8" />
-                  <rect x="7" y="1" width="2.5" height="9" rx="0.8" />
-                </svg>
-              ) : (
-                <svg width="9" height="11" viewBox="0 0 11 13" fill="currentColor" className="ml-0.5">
-                  <path d="M0.5 0.93v11.14a.5.5 0 0 0 .77.42l9.07-5.57a.5.5 0 0 0 0-.84L1.27.51A.5.5 0 0 0 .5.93z" />
-                </svg>
-              )}
-            </button>
-            <button onClick={() => goTo(groupIndex + 1)} disabled={groupIndex >= groups.length - 1}
-              className="h-7 w-7 flex items-center justify-center rounded-full bg-slate-800/60 text-slate-400 ring-1 ring-slate-700/50 hover:bg-slate-700/70 hover:text-white hover:ring-slate-500/60 disabled:opacity-20 disabled:hover:bg-slate-800/60 disabled:hover:ring-slate-700/50 transition-all"
-              title="Next battle"
-              aria-label="Next battle">
-              <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
-                <path d="M3.5 1.5L8 5.5l-4.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            <span className="text-[10px] text-slate-500 tabular-nums ml-1 w-12">
-              {totalIdx + 1}/{groups.reduce((s, g) => s + g.battles.length, 0)}
-            </span>
-            <input type="range" min={0} max={Math.max(0, groups.length - 1)} value={groupIndex}
-              onChange={(e) => { setPlaying(false); goTo(parseInt(e.target.value)); }}
-              className="flex-1 accent-blue-500 h-1 bg-slate-800 rounded-full appearance-none cursor-pointer"
-              aria-label="Scrub through battles" />
-          </div>
-        </div>
 
         {/* How-it-ended card. Always visible while browsing a war so the
             outcome and stats are an anchor for the user. Auto-emphasized
@@ -1199,6 +1336,15 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
             const battle = battles.find((b) => b.id === id);
             if (battle) focusBattle(battle);
           }}
+        />
+
+        {/* Watch & Read — curated film, book, and series links keyed to the
+            current battle and its parent war. Battle-scoped entries appear
+            first; falls through to war-scoped when no battle-specific match
+            exists. Hidden entirely when there is nothing to recommend. */}
+        <MediaShelf
+          warName={selectedWar}
+          battleId={currentBattle?.id}
         />
       </div>
       {/* Cinematic full-screen overlay. Mounted via portal-style fixed

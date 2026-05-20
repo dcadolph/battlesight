@@ -66,7 +66,7 @@ export interface Palette {
 
 const PALETTE: Record<ColorKey, Palette> = {
   // World War II.
-  'nazi-black': { primary: '#1f1f1f', glow: 'rgba(31,31,31,0.55)' },
+  'nazi-black': { primary: '#6b5d2e', glow: 'rgba(107,93,46,0.55)' },
   'soviet-red': { primary: '#dc2626', glow: 'rgba(220,38,38,0.40)' },
   'imperial-japan': { primary: '#9b1c1c', glow: 'rgba(155,28,28,0.45)' },
   'fascist-italy': { primary: '#16732b', glow: 'rgba(22,115,43,0.45)' },
@@ -135,8 +135,12 @@ export function detectColorKey(name: string): ColorKey | null {
   // Soviet and Eastern Bloc.
   if (/(soviet|red army|\bussr\b|stalin|warsaw pact)/.test(s)) return 'soviet-red';
 
-  // ISIS / extremist.
-  if (/(\bisis\b|\bisil\b|daesh|al[\- ]qaeda|islamic state|taliban|mujahid)/.test(s)) {
+  // ISIS / extremist / insurgent. Includes the Iraq-era insurgent names
+  // (Zarqawi network, AQI, Mahdi Army, Sunni resistance) so Second
+  // Fallujah etc. don't accidentally render insurgents in the same blue
+  // as US forces. Catches generic "insurgents" / "resistance" / "militants"
+  // labels too so curators don't have to spell out every group name.
+  if (/(\bisis\b|\bisil\b|daesh|al[\- ]qaeda|\baqi\b|zarqawi|mahdi army|islamic state|taliban|mujahid|insurgent|resistance(?!.*fr\.?)|militants?|jihadi|hamas|hezbollah|houthi|boko[\- ]haram|al[\- ]shabaab|wagner)/.test(s)) {
     return 'isis-black';
   }
 

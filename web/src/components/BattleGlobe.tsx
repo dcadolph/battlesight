@@ -310,6 +310,66 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     return () => clearInterval(id);
   }, [ignitionRings.length]);
 
+  // Selection-driven ignition burst + campaign-trace arc. Every time the user
+  // (or cinematic) lands on a new battle, emit a ring on the new location so
+  // even tooltip-only entries get a satisfying flash. When a previous battle
+  // existed, also draw a fading arc from there to here — that arc IS the
+  // movement story for the war: "the campaign moved from there to here."
+  const lastSelectedRef = useRef<{ id: string; lat: number; lng: number } | null>(null);
+  const [traceArcs, setTraceArcs] = useState<Array<{ id: string; startLat: number; startLng: number; endLat: number; endLng: number; color: string; expires: number }>>([]);
+  useEffect(() => {
+    if (!selectedBattle) {
+      lastSelectedRef.current = null;
+      return;
+    }
+    const prev = lastSelectedRef.current;
+    if (prev?.id === selectedBattle.id) return;
+    const tNow = performance.now();
+    const color = ERA_COLORS[selectedBattle.era] || '#fbbf24';
+    setIgnitionRings((existing) => {
+      const alive = existing.filter((r) => r.expires > tNow);
+      return [
+        ...alive,
+        { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-${tNow}`, kind: 'ignition' as const, color, expires: tNow + 2600 },
+      ];
+    });
+    if (prev) {
+      // Distance check — skip arcs spanning more than half the globe (rare
+      // jumps between distant theaters look like noise, not narrative).
+      const dLat = selectedBattle.lat - prev.lat;
+      const dLng = ((selectedBattle.lng - prev.lng + 540) % 360) - 180;
+      const angular = Math.sqrt(dLat * dLat + dLng * dLng);
+      if (angular > 1) {
+        setTraceArcs((arcs) => {
+          const alive = arcs.filter((a) => a.expires > tNow);
+          return [
+            ...alive,
+            {
+              id: `trace-${selectedBattle.id}-${tNow}`,
+              startLat: prev.lat,
+              startLng: prev.lng,
+              endLat: selectedBattle.lat,
+              endLng: selectedBattle.lng,
+              color,
+              expires: tNow + 4000,
+            },
+          ];
+        });
+      }
+    }
+    lastSelectedRef.current = { id: selectedBattle.id, lat: selectedBattle.lat, lng: selectedBattle.lng };
+  }, [selectedBattle]);
+
+  // Sweep expired trace arcs.
+  useEffect(() => {
+    if (traceArcs.length === 0) return;
+    const id = setInterval(() => {
+      const tNow = performance.now();
+      setTraceArcs((arcs) => arcs.filter((a) => a.expires > tNow));
+    }, 400);
+    return () => clearInterval(id);
+  }, [traceArcs.length]);
+
   // Territory-flip pulses: when the war cinematic crosses a snapshot
   // boundary and a country's owner changes color, emit a brief ring at
   // that country's centroid so the user catches the flip even when the
@@ -784,8 +844,8 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       globeImageUrl={HI_RES_EARTH}
       bumpImageUrl={TOPOLOGY_BUMP}
       backgroundImageUrl={NIGHT_SKY}
-      atmosphereColor={atmosphereColor || '#7ab9ff'}
-      atmosphereAltitude={0.15}
+      atmosphereColor={atmosphereColor || '#8cc6ff'}
+      atmosphereAltitude={0.18}
       pointsData={visibleBattles}
       pointLat="lat"
       pointLng="lng"
@@ -826,32 +886,43 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
         }
         return (t: number) => hexToRgba(base, 0.7 * (1 - t));
       }}
-      ringMaxRadius={3.2}
-      ringPropagationSpeed={1.8}
-      ringRepeatPeriod={1900}
-      ringAltitude={0.005}
+      ringMaxRadius={4.2}
+      ringPropagationSpeed={2.4}
+      ringRepeatPeriod={1400}
+      ringAltitude={0.006}
+      arcsData={traceArcs}
+      arcStartLat={(d: object) => (d as { startLat: number }).startLat}
+      arcStartLng={(d: object) => (d as { startLng: number }).startLng}
+      arcEndLat={(d: object) => (d as { endLat: number }).endLat}
+      arcEndLng={(d: object) => (d as { endLng: number }).endLng}
+      arcColor={(d: object) => {
+        const a = d as { color: string };
+        return [`${a.color}f0`, `${a.color}30`];
+      }}
+      arcAltitudeAutoScale={0.5}
+      arcStroke={0.45}
+      arcDashLength={0.35}
+      arcDashGap={0.18}
+      arcDashAnimateTime={1600}
+      arcsTransitionDuration={0}
       polygonsData={highlightedCountry}
       polygonCapColor={(feat: object) => {
-        if (!hasWarShading) return 'rgba(59,130,246,0.08)';
+        if (!hasWarShading) return 'rgba(59,130,246,0.10)';
         const c = colorFor(feat);
-        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 0.68);
+        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 0.50);
       }}
-      polygonSideColor={(feat: object) => {
-        if (!hasWarShading) return 'rgba(59,130,246,0.15)';
-        const c = colorFor(feat);
-        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 0.88);
-      }}
+      polygonSideColor={() => 'rgba(0,0,0,0)'}
       polygonStrokeColor={(feat: object) => {
-        if (!hasWarShading) return 'rgba(59,130,246,0.4)';
+        if (!hasWarShading) return 'rgba(59,130,246,0.35)';
         const c = colorFor(feat);
-        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 1.0);
+        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 0.55);
       }}
       polygonAltitude={(feat: object) => {
-        if (!hasWarShading) return 0.005;
+        if (!hasWarShading) return 0.0015;
         const c = colorFor(feat);
-        return c === '__neutral__' ? 0.0005 : 0.022;
+        return c === '__neutral__' ? 0.0005 : 0.0035;
       }}
-      polygonsTransitionDuration={1200}
+      polygonsTransitionDuration={600}
       polygonLabel={polygonLabel}
     />
     </div>

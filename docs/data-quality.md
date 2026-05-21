@@ -3,11 +3,11 @@
 BattleSight runs three tiers of trust. The badge in the UI tells you
 which one you're looking at.
 
-| Tier | Source | What to trust |
+| Tier&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Source | What to trust |
 |---|---|---|
-| Reconstructed | Hand-built phase replay + curated dossier | Narration, sides, outcome, references. Treat as primary. |
-| Documented | Curated JSON or Wikipedia infobox enrichment | Sides, war, casualty estimate, coordinates. Read the sources. |
-| Indexed | Wikidata pointer only | A starting point. Follow the Wikipedia link. |
+| Reconstructed&nbsp;&nbsp; | Hand-built phase replay + curated dossier | Narration, sides, outcome, references. Treat as primary. |
+| Documented&nbsp;&nbsp;&nbsp;&nbsp; | Curated JSON or Wikipedia infobox enrichment | Sides, war, casualty estimate, coordinates. Read the sources. |
+| Indexed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Wikidata pointer only | A starting point. Follow the Wikipedia link. |
 
 The default filter is **Documented and above**. The Reconstructed
 filter shrinks the dataset to battles with a hand-built phase replay

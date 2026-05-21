@@ -1369,14 +1369,6 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                     <path d="M3.5 1.5L8 5.5l-4.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}
-                  className="bg-transparent border border-slate-700/40 rounded px-1.5 py-0.5 text-[10px] text-slate-400 hover:border-slate-500/60 focus:outline-none focus:ring-1 focus:ring-blue-400/40 transition-colors"
-                  title="Auto-step pace">
-                  <option value={6000}>Slow</option>
-                  <option value={4000}>Normal</option>
-                  <option value={2500}>Fast</option>
-                  <option value={1200}>Rapid</option>
-                </select>
               </div>
             </div>
           );

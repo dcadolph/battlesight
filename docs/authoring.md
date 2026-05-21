@@ -51,47 +51,47 @@ chapter card timestamp.
 
 ### Replay fields
 
-| Field | Type | Required | Meaning |
+| Field&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `title` | string | yes | Headline shown in the top bar and chapter card. |
-| `intro` | string | yes | One-line elevator pitch shown on hover. |
-| `factionA` | string | yes | Display name of side A (e.g. "Allies"). |
-| `factionB` | string | yes | Display name of side B. |
-| `factionC` | string | no | Optional third belligerent. |
-| `aggressor` | `'a' \| 'b' \| 'c'` | no | Which side opened hostilities. Used for legacy color swap. |
-| `factionAColorKey` | ColorKey | no | Explicit palette override for side A. See [faction-palette.md](#faction-colors). |
-| `factionBColorKey` | ColorKey | no | Explicit palette override for side B. |
-| `aspectRatio` | number | no | Tactical map width:height. Default `1.6`. |
-| `extentLngDeg` / `extentLatDeg` | number | no | Globe view geographic extent in degrees. Default 3°. |
-| `phases` | Phase[] | yes | 4-10 phases. |
-| `schematic` | boolean | no | Auto-generated flag. Set `true` only for importer-built replays. |
+| `title`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | yes | Headline shown in the top bar and chapter card. |
+| `intro`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | yes | One-line elevator pitch shown on hover. |
+| `factionA`&nbsp;&nbsp;&nbsp;&nbsp; | string | yes | Display name of side A (e.g. "Allies"). |
+| `factionB`&nbsp;&nbsp;&nbsp;&nbsp; | string | yes | Display name of side B. |
+| `factionC`&nbsp;&nbsp;&nbsp;&nbsp; | string | no | Optional third belligerent. |
+| `aggressor`&nbsp;&nbsp;&nbsp; | `'a' \| 'b' \| 'c'` | no | Which side opened hostilities. Used for legacy color swap. |
+| `factionAColorKey`&nbsp;&nbsp; | ColorKey | no | Explicit palette override for side A. See [faction-palette.md](#faction-colors). |
+| `factionBColorKey`&nbsp;&nbsp; | ColorKey | no | Explicit palette override for side B. |
+| `aspectRatio`&nbsp;&nbsp; | number | no | Tactical map width:height. Default `1.6`. |
+| `extentLngDeg` / `extentLatDeg`&nbsp;&nbsp; | number | no | Globe view geographic extent in degrees. Default 3°. |
+| `phases`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Phase[] | yes | 4-10 phases. |
+| `schematic`&nbsp;&nbsp;&nbsp; | boolean | no | Auto-generated flag. Set `true` only for importer-built replays. |
 
 ### Phase fields
 
-| Field | Type | Meaning |
+| Field&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Type | Meaning |
 | --- | --- | --- |
-| `index` | int | 0-based phase index. |
-| `title` | string | Chapter card headline. |
-| `narration` | string | Side-panel prose for this phase. 1-3 sentences. |
-| `timeMarker` | string | Date or time period chip ("10 May 1940"). |
-| `durationMs` | int | Phase dwell in ms. Default 5500. |
-| `units` | Unit[] | Static unit positions at this phase. |
-| `movements` | Movement[] | Animated arrows fired during this phase. |
-| `terrain` | Terrain[] | Optional terrain shapes (rivers, hills, forts). |
-| `annotations` | Annotation[] | Free-floating text labels. |
-| `focus` | FocusRect | Optional camera zoom on tactical map. |
-| `cameraLat` / `cameraLng` / `cameraAltitude` / `cameraTweenMs` | number | Optional camera choreography on globe. |
-| `controlRegions` | ControlRegion[] | Per-phase territorial polygons (for territory flips inside one battle). |
+| `index`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | int | 0-based phase index. |
+| `title`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | Chapter card headline. |
+| `narration`&nbsp;&nbsp;&nbsp; | string | Side-panel prose for this phase. 1-3 sentences. |
+| `timeMarker`&nbsp;&nbsp; | string | Date or time period chip ("10 May 1940"). |
+| `durationMs`&nbsp;&nbsp; | int | Phase dwell in ms. Default 5500. |
+| `units`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Unit[] | Static unit positions at this phase. |
+| `movements`&nbsp;&nbsp;&nbsp; | Movement[] | Animated arrows fired during this phase. |
+| `terrain`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Terrain[] | Optional terrain shapes (rivers, hills, forts). |
+| `annotations`&nbsp;&nbsp; | Annotation[] | Free-floating text labels. |
+| `focus`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | FocusRect | Optional camera zoom on tactical map. |
+| `cameraLat` / `cameraLng` / `cameraAltitude` / `cameraTweenMs`&nbsp;&nbsp; | number | Optional camera choreography on globe. |
+| `controlRegions`&nbsp;&nbsp; | ControlRegion[] | Per-phase territorial polygons (for territory flips inside one battle). |
 
 ### Movement kinds
 
-| Kind | Visual treatment |
+| Kind&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Visual treatment |
 | --- | --- |
-| `advance` | Default. Solid sweep with march flow. |
-| `charge` | Thicker stroke, faster trace, brighter impact. |
-| `flank` | Heavily curved arc. |
-| `retreat` / `withdrawal` | Dashed stroke, slower somber march. |
-| `rout` | Dashed broken stroke, fastest dimmer march. |
+| `advance`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default. Solid sweep with march flow. |
+| `charge`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Thicker stroke, faster trace, brighter impact. |
+| `flank`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Heavily curved arc. |
+| `retreat` / `withdrawal`&nbsp;&nbsp; | Dashed stroke, slower somber march. |
+| `rout`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Dashed broken stroke, fastest dimmer march. |
 
 ## War narratives
 
@@ -113,18 +113,18 @@ canonical war name (matching `battles.war`).
 }
 ```
 
-| Field | Type | Meaning |
+| Field&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Type | Meaning |
 | --- | --- | --- |
-| `outcome` | string | One-sentence "how it ended." |
-| `aftermath` | string | One-paragraph consequences. |
-| `keyTerms` | string | Treaty / surrender / armistice name. |
-| `notable` | string[] | 1-3 notable outcomes. |
-| `humanDeaths` | int | Curated total deaths (civilians + military + famine + genocide). Preferred over the battle-sum casualties. |
-| `startYear` | int | Curated start year. Overrides the earliest battle year for display. |
-| `endYear` | int | Curated end year. |
-| `parent` | string | Parent war name (e.g. "World War II" for theater entries). Empty for top-level wars. |
+| `outcome`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | One-sentence "how it ended." |
+| `aftermath`&nbsp;&nbsp;&nbsp; | string | One-paragraph consequences. |
+| `keyTerms`&nbsp;&nbsp;&nbsp;&nbsp; | string | Treaty / surrender / armistice name. |
+| `notable`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string[] | 1-3 notable outcomes. |
+| `humanDeaths`&nbsp;&nbsp; | int | Curated total deaths (civilians + military + famine + genocide). Preferred over the battle-sum casualties. |
+| `startYear`&nbsp;&nbsp;&nbsp; | int | Curated start year. Overrides the earliest battle year for display. |
+| `endYear`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | int | Curated end year. |
+| `parent`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | Parent war name (e.g. "World War II" for theater entries). Empty for top-level wars. |
 
-`humanDeaths` is authoritative when present — the UI shows it directly
+`humanDeaths` is authoritative when present. the UI shows it directly
 and the rolled-up war total uses it instead of summing children. This
 is how WW2 reads 75M (including the Holocaust and famine) rather than
 the catalog-derived ~20M battle-only sum.
@@ -133,7 +133,7 @@ the catalog-derived ~20M battle-only sum.
 
 Territory snapshots live in TypeScript:
 `web/src/data/territory-snapshots.ts`. Each war has a list of dated
-snapshots; each snapshot is a map of owner key → list of country names.
+snapshots. each snapshot is a map of owner key → list of country names.
 
 ```ts
 {
@@ -166,32 +166,32 @@ Add new keys to both maps when introducing a new faction.
 The faction palette lives in `web/src/data/faction-palette.ts`. Iconic
 faction colors are keyed by `ColorKey`:
 
-| Key | Hex | Use for |
+| Key&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Hex | Use for |
 | --- | --- | --- |
-| `nazi-black` | `#1f1f1f` | Nazi factions (in arrows; territory uses feldgrau) |
-| `soviet-red` | `#dc2626` | USSR / Red Army |
-| `imperial-japan` | `#9b1c1c` | Imperial Japanese forces |
-| `fascist-italy` | `#16732b` | Mussolini's Italy |
-| `us-blue` | `#1d4ed8` | US modern |
-| `royal-navy` | `#1e3a8a` | UK / Commonwealth |
-| `union-blue` | `#1e3a8a` | ACW Union |
-| `confederate-gray` | `#6b7280` | ACW Confederate |
-| `roman-crimson` | `#b91c1c` | Romans |
-| `carthage-purple` | `#6b21a8` | Carthage |
-| `mongol-amber` | `#b45309` | Mongols |
-| ... | ... | (See faction-palette.ts for the full list.) |
+| `nazi-black`&nbsp;&nbsp; | `#1f1f1f` | Nazi factions (in arrows. territory uses feldgrau) |
+| `soviet-red`&nbsp;&nbsp; | `#dc2626` | USSR / Red Army |
+| `imperial-japan`&nbsp;&nbsp; | `#9b1c1c` | Imperial Japanese forces |
+| `fascist-italy`&nbsp;&nbsp; | `#16732b` | Mussolini's Italy |
+| `us-blue`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `#1d4ed8` | US modern |
+| `royal-navy`&nbsp;&nbsp; | `#1e3a8a` | UK / Commonwealth |
+| `union-blue`&nbsp;&nbsp; | `#1e3a8a` | ACW Union |
+| `confederate-gray`&nbsp;&nbsp; | `#6b7280` | ACW Confederate |
+| `roman-crimson`&nbsp;&nbsp; | `#b91c1c` | Romans |
+| `carthage-purple`&nbsp;&nbsp; | `#6b21a8` | Carthage |
+| `mongol-amber`&nbsp;&nbsp; | `#b45309` | Mongols |
+| ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | ... | (See faction-palette.ts for the full list.) |
 
 Auto-detection runs against the side display string. To override,
 set `factionAColorKey` or `factionBColorKey` on the replay entry.
 
 ## Quality tiers
 
-| Tier | Source | What it looks like |
+| Tier&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Source | What it looks like |
 | --- | --- | --- |
-| **S** | Hand-authored phase replay + verified facts | "Tactical reconstruction" badge, full cinematic |
-| **A** | Hand-verified facts, schematic replay | "Schematic replay" amber badge |
-| **B** | Imported, plausible metadata | Dossier-only, never auto-cinematic |
-| **C** | Imported with thin / broken metadata | Search-only |
+| **S**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Hand-authored phase replay + verified facts | "Tactical reconstruction" badge, full cinematic |
+| **A**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Hand-verified facts, schematic replay | "Schematic replay" amber badge |
+| **B**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Imported, plausible metadata | Dossier-only, never auto-cinematic |
+| **C**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Imported with thin / broken metadata | Search-only |
 
 The cinematic plays only S. Promote a battle from A → S by writing a
 phase replay for it.

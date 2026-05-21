@@ -32,24 +32,24 @@ The path to "perfect" is hand-curation of the top wars. See
 
 Three numbers can be in play:
 
-- `casualties` — sum of every battle's parsed casualty string. Often
+- `casualties`. sum of every battle's parsed casualty string. Often
   undercounts (civilians, famine, genocide aren't in battle records).
-- `humanDeaths` — curator-authored total including civilians. This is
+- `humanDeaths`. curator-authored total including civilians. This is
   what the war card shows when present.
-- Wikipedia's prose total — what you usually see when you search.
+- Wikipedia's prose total. what you usually see when you search.
 
 When the curated `humanDeaths` is set, that's the displayed number.
 Wikipedia's number is usually within the same ballpark. When
-`humanDeaths` isn't set, the battle-sum is shown — and that can be
+`humanDeaths` isn't set, the battle-sum is shown. and that can be
 way smaller than reality.
 </details>
 
 <details>
 <summary>How current is the catalog?</summary>
 
-Wikidata is live — the snapshot is current at import time. Re-run
+Wikidata is live. the snapshot is current at import time. Re-run
 `go run ./cmd/import -all` to refresh. Most curated narratives are
-manually updated; check `data/wars.json` git history.
+manually updated. check `data/wars.json` git history.
 </details>
 
 ## Cinematic
@@ -66,7 +66,7 @@ the dossier instead, or contribute a phase replay (see
 <details>
 <summary>Cinematic froze on a battle. Now what?</summary>
 
-Manual Next / Previous buttons sit on every cinematic outro card; tap
+Manual Next / Previous buttons sit on every cinematic outro card. tap
 Next to push forward. The freeze is usually a paused inner replay that
 the war timer can't recover from. If you can reproduce it, file an
 issue with the war name and battle name.
@@ -75,10 +75,10 @@ issue with the war name and battle name.
 <details>
 <summary>Why does the globe shading sometimes flicker between battles?</summary>
 
-Most likely it doesn't anymore — there's a snapshot dedupe that stops
+Most likely it doesn't anymore. there's a snapshot dedupe that stops
 the polygon transition from restarting when two consecutive battles
 share the same snapshot window. If you still see flicker, it means
-two battles in the same year are in different snapshots; the curator
+two battles in the same year are in different snapshots. the curator
 needs to add a snapshot at the right calendar boundary.
 </details>
 
@@ -86,9 +86,9 @@ needs to add a snapshot at the right calendar boundary.
 <summary>Why is Wehrmacht shaded olive-green (feldgrau) on the territory map but black on the arrows?</summary>
 
 Different layers, different purposes. Territory shading reads at the
-campaign scale — feldgrau is the Wehrmacht's actual uniform color and
+campaign scale. feldgrau is the Wehrmacht's actual uniform color and
 distinguishes German-held territory from Soviet red on the same map.
-Arrows read at the tactical scale — SS-black is iconic and pairs
+Arrows read at the tactical scale. SS-black is iconic and pairs
 cleanly with Allied colors.
 </details>
 
@@ -100,18 +100,18 @@ cleanly with Allied colors.
 Long campaign paths (Barbarossa, Bagration) can leave gaps in the
 dashed march layer. There's now a thin solid spine under the marching
 dashes that's always visible. If the spine isn't showing, your browser
-might have dropped the trace animation — try a hard refresh.
+might have dropped the trace animation. try a hard refresh.
 </details>
 
 <details>
 <summary>Why does the cinematic never advance to the next battle?</summary>
 
 See "Cinematic froze" above. If the manual Next button is also dead,
-something's broken — file an issue.
+something's broken. file an issue.
 </details>
 
 <details>
-<summary>The arrowhead and the line look mismatched in size — bug?</summary>
+<summary>The arrowhead and the line look mismatched in size. bug?</summary>
 
 The chevron arrowhead scales with stroke width but the relationship
 isn't 1:1 by design. The chevron should always look "weighty" enough
@@ -156,7 +156,7 @@ will tell you. Kill the holder, restart.
 <summary>How do I run on a different port?</summary>
 
 `-port 9090` or `BATTLESIGHT_PORT=9090`. The Vite dev server's API
-proxy points at `:8080` by default; update `web/vite.config.ts` to
+proxy points at `:8080` by default. update `web/vite.config.ts` to
 match.
 </details>
 
@@ -165,6 +165,6 @@ match.
 
 The frontend builds to a static bundle (`make web-build`), but the
 backend is a long-running HTTP server with a SQLite database. Deploy
-the binary anywhere Go runs; serve the static bundle from any web
+the binary anywhere Go runs. serve the static bundle from any web
 host pointed at the API.
 </details>

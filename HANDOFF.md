@@ -2,7 +2,7 @@
 
 You are picking up an in-progress polish push on BattleSight, an interactive
 visual encyclopedia of battles and wars. The owner is dialing the product
-toward "world renowned quality" — every surface needs to read tight, every
+toward "world renowned quality". every surface needs to read tight, every
 piece of data needs to be trustworthy, every animation needs intent. He has
 been frustrated with the agent he handed off from, so do not over-promise,
 do not hedge, and ship work that holds up to a glance from a stranger.
@@ -14,8 +14,8 @@ Repository: `/Users/douglasadolph/src/dcadolph/battlesight/`. Web app is in
 Style preferences live in `/Users/douglasadolph/Downloads/aboutme.md` (his
 cross-project handoff). The cinematic style guide is in §5 of that doc.
 Project-specific memory is at
-`/Users/douglasadolph/.claude/projects/-Users-douglasadolph-src-dcadolph-battlesight/memory/`
-— read `MEMORY.md` for the index.
+`/Users/douglasadolph/.claude/projects/-Users-douglasadolph-src-dcadolph-battlesight/memory/`.
+Read `MEMORY.md` for the index.
 
 ---
 
@@ -35,7 +35,7 @@ backend code changes (war / phase JSON files hot-reload automatically).
 
 ### Data quality
 - Era taxonomy split: `modern` (1946-2025) → `cold-war` (1946-1991) +
-  `contemporary` (1991+). DB migrated in place; legacy `modern` alias
+  `contemporary` (1991+). DB migrated in place. legacy `modern` alias
   preserved in TS so any stray row still renders sanely.
 - 1,971 + 1,889 + 14 side-name rows cleaned of wikitext residue
   (`{{plainlist`, `{{ubl`, `[[`, `]]`, `20px|`, `border|`, doubled words,
@@ -53,7 +53,7 @@ backend code changes (war / phase JSON files hot-reload automatically).
   - Vietnam War, Korean War, Iraq War, Gulf War, War in Afghanistan
     (2001-2021), Syrian Civil War, Russia-Ukraine War, Second Sino-Japanese
     War, Russian Civil War, Mexican-American War, Hundred Years' War.
-- wars.json: 147 prose fields scrubbed of wikitext; duplicate "Syrian
+- wars.json: 147 prose fields scrubbed of wikitext. duplicate "Syrian
   civil war" entry consolidated into the canonical "Syrian Civil War"
   with accurate 2024 fall-of-Damascus narrative.
 - battles.json stubs dropped for IDs now curated (`zama-202bc`,
@@ -75,7 +75,7 @@ backend code changes (war / phase JSON files hot-reload automatically).
   sweep missed).
 - `canonBelligerentKey` and `canonBelligerentLabel` in
   `web/src/lib/country.ts`: rule-based alias table mapping freeform side
-  names to publication-grade canonical labels. Rule order matters — USSR
+  names to publication-grade canonical labels. Rule order matters. USSR
   precedes us-union so "Soviet Union" doesn't get tagged as Civil War
   Union. KEEP THIS ORDER.
 - `WarPlayback.tsx` cinematicSides: frequency-ranked, junk-filtered,
@@ -84,10 +84,10 @@ backend code changes (war / phase JSON files hot-reload automatically).
   stat.
 - `WarCinematicOverlay.tsx` overture + aftermath: single era pill
   eyebrow, large title, three-stat strip (Span / Battles / Belligerents
-  on overture; Years / Battles / Lives lost on aftermath), belligerent
+  on overture. Years / Battles / Lives lost on aftermath), belligerent
   chip strip, era-themed bloom and hairline. Buttons: "Play the war" /
   "Skip the overture" / "Back to the globe". Reveals staggered via
-  `wc-rise` keyframes; all gated by `usePrefersReducedMotion`.
+  `wc-rise` keyframes. all gated by `usePrefersReducedMotion`.
 - `BattleReplay.tsx` outro: redesigned, era-themed, "Replay from start"
   + "Back to the story" buttons.
 - `TransportScrubber` (inside BattleReplay): YouTube-style track with
@@ -117,25 +117,25 @@ same file.
 
 ## What's broken / pending (start here)
 
-### CRITICAL — user-visible regressions to chase
+### CRITICAL. user-visible regressions to chase
 1. **WW2 overture still cramped on small viewports.** Buttons can overlap
    the belligerent chip row when the viewport is narrow. Last screenshot
    showed "Play the war" sitting at the same y as the chip strip on a
    tall but narrow window. Probably needs explicit `min-height` on the
    overture body or stronger spacing rhythm.
 2. **Belligerents stat now shows the real count** (e.g. WW2 should read
-   in the tens). Verify on hard-refresh; if the cell still shows "5",
-   `cinematicSidesTotal` plumbing in `WarPlayback.tsx` is broken — that
+   in the tens). Verify on hard-refresh. if the cell still shows "5",
+   `cinematicSidesTotal` plumbing in `WarPlayback.tsx` is broken. that
    was the most recent edit and could be the bug.
 3. **WW2 belligerent line** must now read "Nazi Germany · Japan · United
    States · United Kingdom · Soviet Union" (or close). The rule-order
-   fix in `web/src/lib/country.ts` made this work; verify it sticks
+   fix in `web/src/lib/country.ts` made this work. verify it sticks
    across refresh.
 
 ### Pending tasks (task list IDs are tracked in the session, but the
 plain English version):
 
-- **#79 territory shading time-shift** — finish wiring. Steps:
+- **#79 territory shading time-shift**. finish wiring. Steps:
   a. Add `warCountryColors?: Record<string, string>` prop to BattleGlobe.
   b. In the polygon styling memo, prefer that map over `warAccent` when
      present.
@@ -145,17 +145,17 @@ plain English version):
   d. Show a small "as of <snapshot.label>" caption near the war HUD
      during playback.
 
-- **#80 ship 15+ more curated battles** — start with Moscow 1941, Crete
+- **#80 ship 15+ more curated battles**. start with Moscow 1941, Crete
   1941, Tarawa 1943, Saipan 1944, Philippine Sea 1944, Easter Offensive
   1972, Saigon 1975, Tobruk 1941-42, Anzio 1944, Pusan Perimeter 1950,
   Mukden 1905, Adwa 1896, Solferino 1859, Königgrätz 1866, Tenochtitlan
   1521, Mohács 1526, Bosworth Field 1485, Talas 751, Issus 333 BC,
   Sevastopol 1854-55. Template: `data/curated/cannae-216bc.json`. After
   each batch run `go run ./cmd/import -json data/battles.json -validate`
-  to catch typos; then real import with the same command minus
+  to catch typos. then real import with the same command minus
   -validate.
 
-- **Phase duration audit** done — 271 phases in 49 curated replays all
+- **Phase duration audit** done. 271 phases in 49 curated replays all
   within the 5-11s cinematic-guide window.
 
 - **prefers-reduced-motion** done globally + in `BattleReplay`. The
@@ -164,7 +164,7 @@ plain English version):
 - **YouTube scrubber** done in BattleReplay. May want to backport the
   same pattern to GlobeReplay / WarPlayback HUD if there's appetite.
 
-- **Globe sharpness** — texture-tuning runtime hook caused a WebGL
+- **Globe sharpness**. texture-tuning runtime hook caused a WebGL
   context-loss crash in three.js. Hook is removed. The path forward is
   to swap `public/textures/earth-blue-marble-5k.jpg` for an 8K or 10K
   NASA Blue Marble file (current is 5400x2700 at 2.2 MB; 10800x5400 is
@@ -174,13 +174,13 @@ plain English version):
 - **Data quality remaining items** flagged by the audit subagent that
   ran in this session:
   - 2,047 battles with `lat=0, lng=0` sentinel (unknown coords). Need
-    geocoding pass; not yet started.
+    geocoding pass. not yet started.
   - 1,155 battles with empty / "0" date strings. Need date enrichment
     from Wikipedia infobox or curation.
   - 618 casualty fields with bare numbers and no unit. Either leave or
     auto-prefix with "~".
   - 11 doubled side-name patterns that the v2 sweep may have caught
-    most of; re-audit.
+    most of. re-audit.
 
 ---
 
@@ -189,7 +189,7 @@ plain English version):
 ### Hard rules from the owner (from aboutme.md, paraphrased)
 - **No em-dashes, no semicolons, no sentence-breaking hyphens** in
   user-facing prose. Memory entry `feedback_no_em_dashes.md` flagged
-  this on a Berlin narration. The DB cleaner enforces it; if you write
+  this on a Berlin narration. The DB cleaner enforces it. if you write
   new curated prose, follow suit.
 - **Cinematic style** (memory entry `feedback_cinematic_style.md`):
   5-11s scenes, one accent per cinematic, staggered reveals,
@@ -199,9 +199,9 @@ plain English version):
 - **No British spellings** in code or docs.
 - **No names** in commits, code, or comments.
 - **No `--no-verify`** on git operations.
-- **Prefer the stdlib** in Go; never write custom utilities when the
+- **Prefer the stdlib** in Go. never write custom utilities when the
   stdlib has them.
-- **No backwards-compat shims** — this is pre-launch software.
+- **No backwards-compat shims**. this is pre-launch software.
 - **No directory listings** in markdown docs.
 - **Confirm before any destructive op** (push, force push, reset
   --hard, rm -rf, dropping db tables, etc.).
@@ -221,7 +221,7 @@ plain English version):
 - Tracked small-caps eyebrows: `text-[10px] uppercase
   tracking-[0.36em-0.5em]` in the accent colour.
 - Buttons match `h-12 px-7 rounded-full` with the era serif (`fontFamily:
-  theme.titleFont`) — see `BattleReplay` outro buttons for the canonical
+  theme.titleFont`). see `BattleReplay` outro buttons for the canonical
   example.
 
 ---
@@ -230,10 +230,10 @@ plain English version):
 
 1. Hard-refresh `http://localhost:5173`.
 2. Click into the war timeline / list, pick World War II.
-3. Hit "Watch the campaign" — the overture should mount.
+3. Hit "Watch the campaign". the overture should mount.
 4. Verify:
    - Single "WORLD WAR II" era pill at top (no "A WAR BEGINS" eyebrow
-     anymore — was redundant).
+     anymore. was redundant).
    - Title "World War II" in serif at the centre.
    - Three stats: Span 1939-1945, Battles ~680, Belligerents in the
      tens (NOT 5).
@@ -278,7 +278,7 @@ Era keys: `ancient`, `medieval`, `early-modern`, `napoleonic`,
 `contemporary`. Year ranges in `internal/importer/validate.go`.
 
 If a stub with the same ID exists in `data/battles.json` (the Wikidata
-bulk file), drop it first — the importer would otherwise reject a
+bulk file), drop it first. the importer would otherwise reject a
 duplicate. Python one-liner pattern:
 ```python
 import json
@@ -302,9 +302,9 @@ go run ./cmd/import -json data/battles.json
 
 He is direct and time-poor. Drop the apologies, drop the preambles, ship
 work. One-sentence status updates. End with what's next, not what was
-done. He will tell you when the work is wrong; until then, just keep
-moving. He has explicitly said performance is degrading on this push —
-that means: stop hedging, stop iterating on the same surface twice
+done. He will tell you when the work is wrong. until then, just keep
+moving. He has explicitly said performance is degrading on this push.
+That means stop hedging, stop iterating on the same surface twice
 without verifying, do bigger sweeps, surface problems before he sees
 them, and write the work end-to-end before declaring done.
 
@@ -317,8 +317,8 @@ them, and write the work end-to-end before declaring done.
    if the user-visible regressions from the screenshot are resolved.
 3. If yes: pick up task #79 (territory time-shift wiring) and #80
    (curated battles).
-4. If no: open devtools console; the most likely failure is something I
-   wired wrong in the most recent two edits — country.ts rule order, or
+4. If no: open devtools console. the most likely failure is something I
+   wired wrong in the most recent two edits. country.ts rule order, or
    the sidesTotal prop wiring.
 5. Run `cd web && npx tsc --noEmit` before committing anything.
 

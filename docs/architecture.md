@@ -39,13 +39,13 @@ touch TypeScript.
 
 ## Storage layer
 
-| Source | Lives in | Owned by | Schema |
+| Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Lives in | Owned by | Schema |
 | --- | --- | --- | --- |
-| Battles | `data/battlesight.db` (SQLite) | The importer pipeline | `battles`, `battle_sides`, `battle_references` |
-| Phase replays | `data/phases.json` | Curators | [Replay schema](api.md#replay-schema) |
-| War narratives | `data/wars.json` | Curators | [WarNarrative schema](api.md#war-narrative-schema) |
-| Territory snapshots | `web/src/data/territory-snapshots.ts` | Curators | [TerritorySnapshot type](../web/src/data/territory-snapshots.ts) |
-| Faction palette | `web/src/data/faction-palette.ts` | Frontend devs | [ColorKey enum](../web/src/data/faction-palette.ts) |
+| Battles&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `data/battlesight.db` (SQLite) | The importer pipeline | `battles`, `battle_sides`, `battle_references` |
+| Phase replays&nbsp;&nbsp; | `data/phases.json` | Curators | [Replay schema](api.md#replay-schema) |
+| War narratives&nbsp;&nbsp; | `data/wars.json` | Curators | [WarNarrative schema](api.md#war-narrative-schema) |
+| Territory snapshots&nbsp;&nbsp; | `web/src/data/territory-snapshots.ts` | Curators | [TerritorySnapshot type](../web/src/data/territory-snapshots.ts) |
+| Faction palette&nbsp;&nbsp; | `web/src/data/faction-palette.ts` | Frontend devs | [ColorKey enum](../web/src/data/faction-palette.ts) |
 
 The SQLite database is gitignored (~80 MB). The JSON sidecars are
 checked in.
@@ -56,12 +56,12 @@ The Go server is one binary: `cmd/battlesight`. It opens the SQLite
 catalog, loads the curated JSON sidecars at boot, watches them for
 changes, and serves the HTTP API.
 
-| Package | Purpose |
+| Package&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Purpose |
 | --- | --- |
-| `internal/battles` | Battle / war query + aggregation. Roll-up logic for parent-child wars. |
-| `internal/importer` | Wikidata SPARQL pull, Wikipedia enrichment, infobox parsing, cleansing, validation. |
-| `internal/server` | HTTP routing, CORS, hot-reload wiring. |
-| `internal/quality` | Standalone CLI for catalog quality reports (broken sides, year=0 stubs, missing coords). |
+| `internal/battles`&nbsp;&nbsp; | Battle / war query + aggregation. Roll-up logic for parent-child wars. |
+| `internal/importer`&nbsp;&nbsp; | Wikidata SPARQL pull, Wikipedia enrichment, infobox parsing, cleansing, validation. |
+| `internal/server`&nbsp;&nbsp; | HTTP routing, CORS, hot-reload wiring. |
+| `internal/quality`&nbsp;&nbsp; | Standalone CLI for catalog quality reports (broken sides, year=0 stubs, missing coords). |
 
 ## Frontend
 
@@ -69,23 +69,23 @@ The React app is one Vite bundle. Tailwind for layout, custom CSS for
 the cinematic keyframes, `react-globe.gl` for the 3D globe, custom SVG
 for the tactical map.
 
-| Path | Purpose |
+| Path&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Purpose |
 | --- | --- |
-| `web/src/App.tsx` | Top-level state + routing for the war list, dossier, replays, history sweep. |
-| `web/src/components/BattleGlobe.tsx` | The 3D globe. Points, rings, polygon shading, focus rings. |
-| `web/src/components/WarPlayback.tsx` | War list, cinematic auto-step, dwell timer, territory effect. |
-| `web/src/components/replay/BattleReplay.tsx` | Per-battle replay overlay. Wraps the globe or tactical view. |
-| `web/src/components/replay/GlobeReplay.tsx` | Globe view of one battle: arrows, units, impact flashes. |
-| `web/src/components/replay/TacticalMap.tsx` | Schematic SVG view of one battle: terrain, unit blocks, movement curves. |
-| `web/src/data/faction-palette.ts` | Iconic faction color keys + auto-detect from side names. |
-| `web/src/data/territory-snapshots.ts` | Per-war country-level control snapshots over time. |
+| `web/src/App.tsx`&nbsp;&nbsp; | Top-level state + routing for the war list, dossier, replays, history sweep. |
+| `web/src/components/BattleGlobe.tsx`&nbsp;&nbsp; | The 3D globe. Points, rings, polygon shading, focus rings. |
+| `web/src/components/WarPlayback.tsx`&nbsp;&nbsp; | War list, cinematic auto-step, dwell timer, territory effect. |
+| `web/src/components/replay/BattleReplay.tsx`&nbsp;&nbsp; | Per-battle replay overlay. Wraps the globe or tactical view. |
+| `web/src/components/replay/GlobeReplay.tsx`&nbsp;&nbsp; | Globe view of one battle: arrows, units, impact flashes. |
+| `web/src/components/replay/TacticalMap.tsx`&nbsp;&nbsp; | Schematic SVG view of one battle: terrain, unit blocks, movement curves. |
+| `web/src/data/faction-palette.ts`&nbsp;&nbsp; | Iconic faction color keys + auto-detect from side names. |
+| `web/src/data/territory-snapshots.ts`&nbsp;&nbsp; | Per-war country-level control snapshots over time. |
 
 ## Hot-reload
 
 The server polls `phases.json` and `wars.json` once per second. When the
 mtime advances, the registry reloads under a write lock. Parse errors
 log and keep the previous version. Save the file, reload the browser,
-see the change — no server restart.
+see the change. no server restart.
 
 Vite handles the frontend hot-reload separately.
 
@@ -104,5 +104,5 @@ Vite handles the frontend hot-reload separately.
    - On `ended`, calls `onEnded` after the outro pause.
    - WarPlayback's tick-advance effect closes the replay and advances to the next battle.
 
-Each step is independently observable; the cinematic stalls have been
+Each step is independently observable. the cinematic stalls have been
 debugged by inspecting which step in this chain didn't fire.

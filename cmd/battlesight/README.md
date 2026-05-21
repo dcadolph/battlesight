@@ -24,43 +24,43 @@ Hit `http://localhost:8080/api/battles/stats` to verify the API is up.
 
 ## Commands Overview
 
-`battlesight` is a single long-running HTTP server — there are no
+`battlesight` is a single long-running HTTP server. there are no
 subcommands. Configuration is via flags and environment variables.
 
-| Resource | Path | Purpose |
+| Resource&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Path | Purpose |
 | --- | --- | --- |
-| Stats | `GET /api/battles/stats` | Era / war / battle-type counts; war list with rolled totals. |
-| Battles | `GET /api/battles` | Paginated battle list with filters. |
-| Battle | `GET /api/battles/{id}` | Single battle dossier. |
-| Replay | `GET /api/battles/{id}/replay` | Phase replay JSON. |
-| Search | `GET /api/battles/search` | Full-text search. |
-| War summary | `GET /api/wars/{name}/summary` | Computed + curated war card. |
-| Health | `GET /api/health` | Liveness probe (returns `{"status":"ok"}`). |
+| Stats&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/battles/stats` | Era / war / battle-type counts. war list with rolled totals. |
+| Battles&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/battles` | Paginated battle list with filters. |
+| Battle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/battles/{id}` | Single battle dossier. |
+| Replay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/battles/{id}/replay` | Phase replay JSON. |
+| Search&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/battles/search` | Full-text search. |
+| War summary&nbsp;&nbsp;&nbsp; | `GET /api/wars/{name}/summary` | Computed + curated war card. |
+| Health&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/health` | Liveness probe (returns `{"status":"ok"}`). |
 
 Full schema in [docs/api.md](../../docs/api.md).
 
 ## Global Flags
 
-| Flag | Type | Default | Meaning |
+| Flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `-port` | int | `8080` | TCP port the HTTP server binds to. |
-| `-db` | string | `data/battlesight.db` | Path to the SQLite catalog. Created if missing. WAL mode is enabled at first open. |
-| `-seed` | string | `data/battles.json` | JSON file to seed the database from when it's empty. Pass `""` to skip seeding. |
-| `-phases` | string | `data/phases.json` | Hand-crafted phase replays. Watched for changes (1s poll). Pass `""` to disable replays. |
-| `-wars` | string | `data/wars.json` | Curated war narratives + casualty totals + hierarchy. Watched for changes (1s poll). Pass `""` to disable. |
+| `-port`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | int | `8080` | TCP port the HTTP server binds to. |
+| `-db`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | `data/battlesight.db` | Path to the SQLite catalog. Created if missing. WAL mode is enabled at first open. |
+| `-seed`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | `data/battles.json` | JSON file to seed the database from when it's empty. Pass `""` to skip seeding. |
+| `-phases`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | `data/phases.json` | Hand-crafted phase replays. Watched for changes (1s poll). Pass `""` to disable replays. |
+| `-wars`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | `data/wars.json` | Curated war narratives + casualty totals + hierarchy. Watched for changes (1s poll). Pass `""` to disable. |
 
 ## Environment Variables
 
 All flags can be set via environment variables using the `BATTLESIGHT_`
 prefix. Dashes become underscores.
 
-| Variable | Equivalent flag |
+| Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Equivalent flag |
 | --- | --- |
-| `BATTLESIGHT_PORT` | `-port` |
-| `BATTLESIGHT_DB` | `-db` |
-| `BATTLESIGHT_SEED` | `-seed` |
-| `BATTLESIGHT_PHASES` | `-phases` |
-| `BATTLESIGHT_WARS` | `-wars` |
+| `BATTLESIGHT_PORT`&nbsp;&nbsp; | `-port` |
+| `BATTLESIGHT_DB`&nbsp;&nbsp; | `-db` |
+| `BATTLESIGHT_SEED`&nbsp;&nbsp; | `-seed` |
+| `BATTLESIGHT_PHASES`&nbsp;&nbsp; | `-phases` |
+| `BATTLESIGHT_WARS`&nbsp;&nbsp; | `-wars` |
 
 Flag values take precedence over environment values.
 
@@ -73,7 +73,7 @@ Curators can edit, save, and reload the browser to see changes without
 restarting.
 
 Schema validation runs on every reload. Parse errors are logged but do
-not crash the server — the previous valid version stays loaded.
+not crash the server. the previous valid version stays loaded.
 
 ## Health
 
@@ -98,21 +98,21 @@ HTTP status:
 
 ## Exit Codes
 
-| Code | Meaning |
+| Code&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Meaning |
 | --- | --- |
-| `0` | Graceful shutdown (SIGINT / SIGTERM). |
-| `1` | Failed to open or migrate the SQLite database. |
-| `2` | Failed to load `phases.json` or `wars.json` and they were declared required. |
-| `3` | Port already in use or bind failed. |
+| `0`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Graceful shutdown (SIGINT / SIGTERM). |
+| `1`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Failed to open or migrate the SQLite database. |
+| `2`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Failed to load `phases.json` or `wars.json` and they were declared required. |
+| `3`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Port already in use or bind failed. |
 
 ## FAQ
 
 <details>
-<summary>The server logs say "loaded 0 battle replays" — why?</summary>
+<summary>The server logs say "loaded 0 battle replays". why?</summary>
 
 `data/phases.json` is missing, empty, or in the wrong path. Pass
 `-phases /path/to/phases.json` or place the file at the default location.
-The server runs fine without replays; only the cinematic and the
+The server runs fine without replays. only the cinematic and the
 "Watch the battle" affordance go quiet.
 </details>
 
@@ -120,9 +120,9 @@ The server runs fine without replays; only the cinematic and the
 <summary>I edited phases.json and the change didn't appear. Why?</summary>
 
 Two reasons. (a) The hot-reload poller only sees changes the filesystem
-reports — some editors write to a temp file and rename atomically. Try
+reports. some editors write to a temp file and rename atomically. Try
 saving directly to the file. (b) Schema parse failed and the previous
-version stayed loaded; check the server log for `wars hot-reload failed`
+version stayed loaded. check the server log for `wars hot-reload failed`
 or `phases hot-reload failed`.
 </details>
 
@@ -130,7 +130,7 @@ or `phases hot-reload failed`.
 <summary>How do I run the API on a different port?</summary>
 
 `-port 9090` or `BATTLESIGHT_PORT=9090`. The frontend's Vite proxy
-points at `:8080` by default — change `web/vite.config.ts` to match if
+points at `:8080` by default. change `web/vite.config.ts` to match if
 you move the backend.
 </details>
 

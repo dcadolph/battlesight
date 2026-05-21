@@ -11,7 +11,7 @@
 > **⚠ Before you start:** the importer hits Wikidata's public SPARQL
 > endpoint and Wikipedia's REST API. A full pull is ~10-15 minutes the
 > first time and uses ~80 MB of disk cache in `data/.wikicache/`.
-> Subsequent runs are fast because of the cache; pass `-network=false`
+> Subsequent runs are fast because of the cache. pass `-network=false`
 > to refuse new network calls entirely.
 
 ## Quick Start
@@ -33,46 +33,46 @@ The importer is a pipeline of independent stages. Each stage idempotently
 updates the rows it owns. You can run a single stage or chain them with
 `-all`.
 
-| Stage | Flag | What it does |
+| Stage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Flag | What it does |
 | --- | --- | --- |
-| Wikidata pull | `-wikidata` | SPARQL query for all entities of type `military operation` with coordinates. Inserts/updates `battles` rows. |
-| Wikipedia enrichment | `-enrich` | Fetches REST API summary for each battle. Populates `wikipedia_title`, `wikipedia_extract`. |
-| Infobox parse | `-infobox` | Pulls the Wikipedia article wikitext, parses the `{{Infobox military conflict}}` template, populates `sides`, `commanders`, `casualties`, `strength`. |
-| Significance | `-significance` | Mines the "Aftermath" / "Legacy" sections for prose; stores in `significance` column. |
-| References | `-references` | Extracts citation URLs into `battle_references` (one row per source). |
-| Wars enrichment | `-wars` | For every war with ≥3 battles, fetches a Wikipedia summary and writes `outcome` / `aftermath` / `keyTerms` into `data/wars.json`. |
-| Curated JSON seed | `-json <path>` | Insert/update from a hand-curated JSON file. Used for editorial overrides. |
-| Validate only | `-validate` | Parses every curated file (phases.json, wars.json, territory snapshots) and exits non-zero on any error. CI uses this. |
+| Wikidata pull&nbsp;&nbsp; | `-wikidata` | SPARQL query for all entities of type `military operation` with coordinates. Inserts/updates `battles` rows. |
+| Wikipedia enrichment&nbsp;&nbsp; | `-enrich` | Fetches REST API summary for each battle. Populates `wikipedia_title`, `wikipedia_extract`. |
+| Infobox parse&nbsp;&nbsp; | `-infobox` | Pulls the Wikipedia article wikitext, parses the `{{Infobox military conflict}}` template, populates `sides`, `commanders`, `casualties`, `strength`. |
+| Significance&nbsp;&nbsp; | `-significance` | Mines the "Aftermath" / "Legacy" sections for prose. stores in `significance` column. |
+| References&nbsp;&nbsp;&nbsp;&nbsp; | `-references` | Extracts citation URLs into `battle_references` (one row per source). |
+| Wars enrichment&nbsp;&nbsp; | `-wars` | For every war with ≥3 battles, fetches a Wikipedia summary and writes `outcome` / `aftermath` / `keyTerms` into `data/wars.json`. |
+| Curated JSON seed&nbsp;&nbsp; | `-json <path>` | Insert/update from a hand-curated JSON file. Used for editorial overrides. |
+| Validate only&nbsp;&nbsp; | `-validate` | Parses every curated file (phases.json, wars.json, territory snapshots) and exits non-zero on any error. CI uses this. |
 
 The `-all` flag chains: `-wikidata -enrich -infobox -significance -references -wars`.
 
 ## Global Flags
 
-| Flag | Type | Default | Meaning |
+| Flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `-db` | string | `data/battlesight.db` | Path to the SQLite catalog. Created if missing. |
-| `-json` | string | `""` | Optional curated battles JSON file to merge in. |
-| `-wars-file` | string | `data/wars.json` | Output path for `-wars` enrichment. |
-| `-network` | bool | `true` | Allow Wikipedia/Wikidata HTTP calls. Set `=false` to use only the on-disk cache. |
-| `-all` | bool | `false` | Run all import and enrichment steps. |
-| `-validate` | bool | `false` | Validate curated JSON without writing to the DB. Mutually exclusive with all other stages. |
+| `-db`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | `data/battlesight.db` | Path to the SQLite catalog. Created if missing. |
+| `-json`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | `""` | Optional curated battles JSON file to merge in. |
+| `-wars-file`&nbsp;&nbsp; | string | `data/wars.json` | Output path for `-wars` enrichment. |
+| `-network`&nbsp;&nbsp;&nbsp;&nbsp; | bool | `true` | Allow Wikipedia/Wikidata HTTP calls. Set `=false` to use only the on-disk cache. |
+| `-all`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | bool | `false` | Run all import and enrichment steps. |
+| `-validate`&nbsp;&nbsp;&nbsp; | bool | `false` | Validate curated JSON without writing to the DB. Mutually exclusive with all other stages. |
 
 ## Per-Command Flags
 
-| Flag | Type | Meaning |
+| Flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Type | Meaning |
 | --- | --- | --- |
-| `-wikidata` | bool | Run the Wikidata SPARQL pull stage. |
-| `-enrich` | bool | Run the Wikipedia summary enrichment stage. |
-| `-infobox` | bool | Run the Wikipedia infobox parse stage. |
-| `-significance` | bool | Run the significance / aftermath text mining stage. |
-| `-references` | bool | Run the citation extraction stage. |
-| `-wars` | bool | Run the wars.json enrichment stage. |
+| `-wikidata`&nbsp;&nbsp;&nbsp; | bool | Run the Wikidata SPARQL pull stage. |
+| `-enrich`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | bool | Run the Wikipedia summary enrichment stage. |
+| `-infobox`&nbsp;&nbsp;&nbsp;&nbsp; | bool | Run the Wikipedia infobox parse stage. |
+| `-significance`&nbsp;&nbsp; | bool | Run the significance / aftermath text mining stage. |
+| `-references`&nbsp;&nbsp; | bool | Run the citation extraction stage. |
+| `-wars`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | bool | Run the wars.json enrichment stage. |
 
 ## Cache
 
 The Wikipedia/Wikidata cache lives at `data/.wikicache/`. Each upstream
 response is keyed by URL and stored verbatim. The cache is the reason
-re-running the importer is fast — and it's gitignored, so don't worry
+re-running the importer is fast. and it's gitignored, so don't worry
 about size locally. Delete the directory to force a full re-fetch.
 
 ## Output
@@ -88,13 +88,13 @@ Each stage logs a one-line summary on completion:
 
 ## Exit Codes
 
-| Code | Meaning |
+| Code&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Meaning |
 | --- | --- |
-| `0` | Success. |
-| `1` | Database open / migration failure. |
-| `2` | Validation failed (`-validate` mode). |
-| `3` | Network refused or unreachable and no cache hit (`-network=false` with empty cache). |
-| `4` | Curated JSON parse error. |
+| `0`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Success. |
+| `1`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Database open / migration failure. |
+| `2`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Validation failed (`-validate` mode). |
+| `3`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Network refused or unreachable and no cache hit (`-network=false` with empty cache). |
+| `4`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Curated JSON parse error. |
 
 ## FAQ
 
@@ -103,12 +103,12 @@ Each stage logs a one-line summary on completion:
 
 Wikidata is updated continuously by editors. The SPARQL query runs
 against the live endpoint so the snapshot is current at run time. Cache
-the result if you need reproducibility — the on-disk cache makes
+the result if you need reproducibility. the on-disk cache makes
 subsequent runs deterministic until the cache is cleared.
 </details>
 
 <details>
-<summary>I see "broken sides" in the catalog — what are those?</summary>
+<summary>I see "broken sides" in the catalog. what are those?</summary>
 
 When the Wikipedia infobox parser can't fully resolve a template
 parameter (`|combatant2 = {{flagicon|...}} ...`), it leaves a fragment

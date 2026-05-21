@@ -1,6 +1,6 @@
 # Territory snapshots
 
-How the per-war country-level shading works — and how to curate new wars.
+How the per-war country-level shading works. and how to curate new wars.
 
 ## Index
 
@@ -54,23 +54,23 @@ mode") so the post-war ownership remains visible.
 Owner keys map to colors via `OWNER_COLORS` and labels via
 `OWNER_LABELS`. Both live in `territory-snapshots.ts`.
 
-| Key | Color | Used by |
+| Key&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Color | Used by |
 | --- | --- | --- |
-| `nazi-germany` | feldgrau `#6b5d2e` | WW2 |
-| `ussr` | bright red `#dc2626` | WW2 |
-| `imperial-japan` | blood crimson `#9b1c1c` | WW2, Russo-Japanese, Second Sino-Japanese |
-| `italy` | fascist green `#16732b` | WW2 |
-| `vichy` | mustard `#a16207` | WW2 (occupied France) |
-| `us` | US blue `#1d4ed8` | WW2, Korean, Vietnam, Iraq, Afghanistan |
-| `uk` | navy `#1e3a8a` | WW1, WW2, Crimean, Falklands, War of 1812 |
-| `france` | cobalt `#3b82f6` | French Rev Wars, Napoleonic, WW1 |
-| `mongol` | amber `#b45309` | Mongol invasions |
-| `crusader` | gold `#eab308` | Crusades |
-| `saracen` | dark green `#15803d` | Crusades |
-| ... | ... | (See `OWNER_COLORS` for the full list.) |
+| `nazi-germany`&nbsp;&nbsp; | feldgrau `#6b5d2e` | WW2 |
+| `ussr`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | bright red `#dc2626` | WW2 |
+| `imperial-japan`&nbsp;&nbsp; | blood crimson `#9b1c1c` | WW2, Russo-Japanese, Second Sino-Japanese |
+| `italy`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | fascist green `#16732b` | WW2 |
+| `vichy`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | mustard `#a16207` | WW2 (occupied France) |
+| `us`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | US blue `#1d4ed8` | WW2, Korean, Vietnam, Iraq, Afghanistan |
+| `uk`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | navy `#1e3a8a` | WW1, WW2, Crimean, Falklands, War of 1812 |
+| `france`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | cobalt `#3b82f6` | French Rev Wars, Napoleonic, WW1 |
+| `mongol`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | amber `#b45309` | Mongol invasions |
+| `crusader`&nbsp;&nbsp;&nbsp;&nbsp; | gold `#eab308` | Crusades |
+| `saracen`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | dark green `#15803d` | Crusades |
+| ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | ... | (See `OWNER_COLORS` for the full list.) |
 
 Picking a color: avoid neighbors. Nazi feldgrau is olive, Soviet bright
-red, Vichy mustard — three distinct hues so the European map at peak
+red, Vichy mustard. three distinct hues so the European map at peak
 1942 occupation reads as three competing forces, not one mottled blob.
 
 ## Authoring a new war
@@ -90,9 +90,9 @@ red, Vichy mustard — three distinct hues so the European map at peak
 4. Country names must match `world-atlas` TopoJSON
    `properties.name`. Common pitfalls:
 
-   - "United States" vs "United States of America" — aliased.
-   - "Korea" — TopoJSON has separate "South Korea" and "North Korea".
-   - "Czech Republic" — TopoJSON uses "Czechia".
+   - "United States" vs "United States of America". aliased.
+   - "Korea". TopoJSON has separate "South Korea" and "North Korea".
+   - "Czech Republic". TopoJSON uses "Czechia".
 
    Aliases live in `COUNTRY_NAME_ALIASES`; add new ones there.
 
@@ -107,7 +107,7 @@ red, Vichy mustard — three distinct hues so the European map at peak
 
 - **Country-polygon resolution only.** No sub-national borders (US
   states, German Länder, French departments). So the American Civil
-  War can't shade Union vs Confederate territory — the US is one
+  War can't shade Union vs Confederate territory. the US is one
   polygon. Same problem for the Spanish Civil War, Russian Civil War,
   Chinese Civil War.
 

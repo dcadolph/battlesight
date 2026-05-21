@@ -6,7 +6,7 @@
 
 <p align="center">
   <em>Status: pre-release. Data quality is uneven and the catalog is being curated.
-  Visuals and replays are iterating fast — expect breaking changes on every commit.</em>
+  Visuals and replays are iterating fast. expect breaking changes on every commit.</em>
 </p>
 
 ---
@@ -17,19 +17,19 @@ BattleSight is an interactive visual encyclopedia of human conflict from
 3000 BC to today, rendered as a 3D globe with hand-crafted phase replays
 of the iconic battles and an auto-stepping war cinematic that walks you
 through any conflict end to end. The catalog covers about 12,000 battles
-imported from Wikipedia and Wikidata; a curated layer on top adds
+imported from Wikipedia and Wikidata. a curated layer on top adds
 narrative, phase replays, territory snapshots, and war casualty totals
 that include civilians, famine, and genocide.
 
-| Capability | Description |
+| Capability&nbsp;&nbsp;&nbsp;&nbsp; | Description |
 | --- | --- |
-| **Cinematic war playback** | Auto-steps through every hand-crafted battle in a war in chronological order with intercut chapter cards. Plays only the curated tier so the experience never breaks on a stub. |
-| **Phase replays** | Hand-authored 4-7 scene tactical reconstructions for the iconic battles, with unit positions, movement arrows, terrain, and timed narration. |
-| **Territory tides** | Per-war country-level control snapshots that paint the globe as the playhead crosses each calendar boundary. Watch Axis territory expand across Europe in 1940-42 and recede in 1943-45. |
-| **Faction palette** | Iconic color identities for major factions: Wehrmacht in feldgrau, Soviets in red, Imperial Japan in blood crimson, Confederates in gray vs Union navy, ISIS in black, etc. Auto-detected from side names with explicit overrides where it matters. |
-| **War aggregation** | Wars roll up curated human-deaths totals (civilians + military + famine + genocide) into a single number you can sort by. Theaters and campaigns nest under their parent war. |
-| **Globe view + tactical view** | Same replay rendered two ways: cinematic globe with real geography for the campaign sweep, schematic SVG for the surveyed tactical layout. |
-| **Hot-reload curation** | Edit `data/phases.json` or `data/wars.json` and the running server picks the change up without a restart. |
+| **Cinematic war playback**&nbsp;&nbsp; | Auto-steps through every hand-crafted battle in a war in chronological order with intercut chapter cards. Plays only the curated tier so the experience never breaks on a stub. |
+| **Phase replays**&nbsp;&nbsp; | Hand-authored 4-7 scene tactical reconstructions for the iconic battles, with unit positions, movement arrows, terrain, and timed narration. |
+| **Territory tides**&nbsp;&nbsp; | Per-war country-level control snapshots that paint the globe as the playhead crosses each calendar boundary. Watch Axis territory expand across Europe in 1940-42 and recede in 1943-45. |
+| **Faction palette**&nbsp;&nbsp; | Iconic color identities for major factions: Wehrmacht in feldgrau, Soviets in red, Imperial Japan in blood crimson, Confederates in gray vs Union navy, ISIS in black, etc. Auto-detected from side names with explicit overrides where it matters. |
+| **War aggregation**&nbsp;&nbsp; | Wars roll up curated human-deaths totals (civilians + military + famine + genocide) into a single number you can sort by. Theaters and campaigns nest under their parent war. |
+| **Globe view + tactical view**&nbsp;&nbsp; | Same replay rendered two ways: cinematic globe with real geography for the campaign sweep, schematic SVG for the surveyed tactical layout. |
+| **Hot-reload curation**&nbsp;&nbsp; | Edit `data/phases.json` or `data/wars.json` and the running server picks the change up without a restart. |
 
 ## The Gap We're Closing
 
@@ -44,8 +44,8 @@ Documentaries do the opposite. They build a 90-minute story arc for
 can't compare wars or drill into a specific battle.
 
 BattleSight sits between the two. The catalog has the *breadth* of
-Wikipedia; the curated layer on top has the *fidelity* of a Ken Burns
-script — for every war, eventually. We are not there yet. We are
+Wikipedia. the curated layer on top has the *fidelity* of a Ken Burns
+script. for every war, eventually. We are not there yet. We are
 building toward it.
 
 ## Index
@@ -93,12 +93,12 @@ make quality        # produce data-quality report
 Every battle in the catalog falls into one of four tiers. The cinematic
 plays only the curated tier so the experience is consistent.
 
-| Tier | Description | Surfaces in |
+| Tier&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description | Surfaces in |
 | --- | --- | --- |
-| **S — Curated** | Hand-authored phase replay + verified facts + curated narrative. ~143 entries today. | Cinematic, dossier, search, war card |
-| **A — Verified** | Hand-verified facts (sides, dates, coordinates, casualties) but auto-generated schematic replay. ~200 entries. | Dossier, search, war card |
-| **B — Imported** | Wikidata/Wikipedia import with plausible metadata. Most of the catalog. | Search, war card |
-| **C — Stub** | Imported with thin or partial metadata (year=0, no coordinates, broken sides parse). | Search only |
+| **S. Curated**&nbsp;&nbsp; | Hand-authored phase replay + verified facts + curated narrative. ~143 entries today. | Cinematic, dossier, search, war card |
+| **A. Verified**&nbsp;&nbsp; | Hand-verified facts (sides, dates, coordinates, casualties) but auto-generated schematic replay. ~200 entries. | Dossier, search, war card |
+| **B. Imported**&nbsp;&nbsp; | Wikidata/Wikipedia import with plausible metadata. Most of the catalog. | Search, war card |
+| **C. Stub**&nbsp;&nbsp;&nbsp; | Imported with thin or partial metadata (year=0, no coordinates, broken sides parse). | Search only |
 
 The cinematic filter is `tier === S`. The full catalog stays searchable.
 
@@ -181,40 +181,40 @@ has `"parent": "World War II"`). Hot-reload applies on the next poll.
 The full API is documented in [docs/api.md](docs/api.md). The endpoints
 you need most:
 
-| Method | Path | Purpose |
+| Method&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/battles/stats` | Era / war / battle-type aggregations; powers the war list. |
-| `GET` | `/api/battles?war=...` | Battles in a war, ordered by date. |
-| `GET` | `/api/battles/search?q=...` | Full-text search across names, sides, and commanders. |
-| `GET` | `/api/battles/{id}` | Single battle dossier. |
-| `GET` | `/api/battles/{id}/replay` | Phase replay for the battle. |
-| `GET` | `/api/wars/{name}/summary` | War summary card with curated narrative + computed stats. |
+| `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/stats` | Era / war / battle-type aggregations. powers the war list. |
+| `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles?war=...` | Battles in a war, ordered by date. |
+| `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/search?q=...` | Full-text search across names, sides, and commanders. |
+| `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/{id}` | Single battle dossier. |
+| `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/{id}/replay` | Phase replay for the battle. |
+| `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/wars/{name}/summary` | War summary card with curated narrative + computed stats. |
 
 ## Keyboard shortcuts
 
-| Key | Action |
+| Key&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Action |
 | --- | --- |
-| `Space` | Toggle replay playback |
-| `Esc` | Close the current overlay |
-| `→` / `←` | Step replay forward / back one phase |
-| `/` | Focus the search bar |
-| `?` | Toggle the help sheet |
+| `Space`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Toggle replay playback |
+| `Esc`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Close the current overlay |
+| `→` / `←`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Step replay forward / back one phase |
+| `/`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Focus the search bar |
+| `?`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Toggle the help sheet |
 
 Full list and URL-hash deep links: [docs/usage.md](docs/usage.md).
 
 ## Docs
 
-- [docs/architecture.md](docs/architecture.md) — how the stack fits together
-- [docs/authoring.md](docs/authoring.md) — phase replays, war narratives, territory snapshots
-- [docs/cinematic.md](docs/cinematic.md) — war cinematic engine, advance logic, controls
-- [docs/territory-snapshots.md](docs/territory-snapshots.md) — country-level shading model
-- [docs/api.md](docs/api.md) — HTTP API + JSON schemas
-- [docs/usage.md](docs/usage.md) — URL hash routing + keyboard shortcuts
-- [docs/data-quality.md](docs/data-quality.md) — trust filters and curation tiers
-- [docs/faq.md](docs/faq.md) — the questions that come up most often
-- [cmd/battlesight/README.md](cmd/battlesight/README.md) — server flags and operations
-- [cmd/import/README.md](cmd/import/README.md) — importer pipeline reference
-- [DATA_SOURCES.md](DATA_SOURCES.md) — upstream data sources and licenses
+- [docs/architecture.md](docs/architecture.md). how the stack fits together
+- [docs/authoring.md](docs/authoring.md). phase replays, war narratives, territory snapshots
+- [docs/cinematic.md](docs/cinematic.md). war cinematic engine, advance logic, controls
+- [docs/territory-snapshots.md](docs/territory-snapshots.md). country-level shading model
+- [docs/api.md](docs/api.md). HTTP API + JSON schemas
+- [docs/usage.md](docs/usage.md). URL hash routing + keyboard shortcuts
+- [docs/data-quality.md](docs/data-quality.md). trust filters and curation tiers
+- [docs/faq.md](docs/faq.md). the questions that come up most often
+- [cmd/battlesight/README.md](cmd/battlesight/README.md). server flags and operations
+- [cmd/import/README.md](cmd/import/README.md). importer pipeline reference
+- [DATA_SOURCES.md](DATA_SOURCES.md). upstream data sources and licenses
 
 ## License
 

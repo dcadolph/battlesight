@@ -14,12 +14,12 @@ The Share button in the battle panel copies a deep link to the clipboard.
 
 ## Keyboard
 
-| Key | Action |
+| Key&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Action |
 |---|---|
-| `/` | Focus the search box |
-| `Esc` | Close panel, dismiss intro, exit replay |
-| `Space` | Play or pause the replay |
-| `←` `→` | Previous or next replay phase |
+| `/`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Focus the search box |
+| `Esc`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Close panel, dismiss intro, exit replay |
+| `Space`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Play or pause the replay |
+| `←` `→`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Previous or next replay phase |
 
 ## Modes
 

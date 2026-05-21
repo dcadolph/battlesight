@@ -1,6 +1,6 @@
 # Cinematic mode
 
-How the war cinematic actually plays — the timing, the advance logic,
+How the war cinematic actually plays. the timing, the advance logic,
 the failure modes, and the controls.
 
 ## Index
@@ -42,7 +42,7 @@ for groupIndex in 0..groups.length:
 ```
 
 The cinematic-grade filter picks the battles. By default this is
-`b.hasReplay && !b.hasSchematic` — hand-crafted phase replays only.
+`b.hasReplay && !b.hasSchematic`. hand-crafted phase replays only.
 Falls back to the full battle list when the filter would yield fewer
 than 3 entries.
 
@@ -56,7 +56,7 @@ country-coloring.
 
 The polygon transition tweens between snapshots over ~1200ms. A
 territory-flip ring pulse fires at the centroid of every country that
-changed hands across the snapshot boundary — so you can see Germany's
+changed hands across the snapshot boundary. so you can see Germany's
 black ring expanding east across Poland, then France, then the Low
 Countries.
 
@@ -66,29 +66,29 @@ a new war.
 
 ## Controls
 
-| Control | Where | What it does |
+| Control&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Where | What it does |
 | --- | --- | --- |
-| Play / Pause | Bottom-left of WarPlayback | Toggles the auto-step loop. |
-| Scrubber | Bottom strip | Jump to any battle in the campaign. |
-| `Next battle` button | Cinematic outro card | Force-advance to the next battle. |
-| `Previous` button | Cinematic outro card | Step back one battle. |
-| `→` / `←` | Keyboard | Next / Previous battle (in cinematic mode). |
-| `Esc` | Keyboard | Close the replay overlay. |
-| `Space` | Keyboard | Toggle pause — disabled in cinematic mode to prevent foot-gun pause-on-Stalingrad. |
+| Play / Pause&nbsp;&nbsp; | Bottom-left of WarPlayback | Toggles the auto-step loop. |
+| Scrubber&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Bottom strip | Jump to any battle in the campaign. |
+| `Next battle` button&nbsp;&nbsp; | Cinematic outro card | Force-advance to the next battle. |
+| `Previous` button&nbsp;&nbsp; | Cinematic outro card | Step back one battle. |
+| `→` / `←`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Keyboard | Next / Previous battle (in cinematic mode). |
+| `Esc`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Keyboard | Close the replay overlay. |
+| `Space`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Keyboard | Toggle pause. disabled in cinematic mode to prevent foot-gun pause-on-Stalingrad. |
 
 ## Stalls and how we recover
 
 A "stall" is when the user reaches a battle's outro card and the
 cinematic doesn't advance. We have three guard layers:
 
-1. **`onEnded` callback (primary)** — `BattleReplay` fires this 2.4s
+1. **`onEnded` callback (primary)**. `BattleReplay` fires this 2.4s
    after the last phase lands. Drives the next-battle handoff at the
    right moment regardless of the dwell budget.
-2. **Wall-clock dwell timer (backstop)** — `WarPlayback` arms a 120s
+2. **Wall-clock dwell timer (backstop)**. `WarPlayback` arms a 120s
    timeout at the start of each cinematic battle. If `onEnded` never
    fires (broken phases, JS error, etc.), this catches the campaign
    and advances anyway.
-3. **Manual Next / Previous buttons** — visible on every cinematic
+3. **Manual Next / Previous buttons**. visible on every cinematic
    outro card. The user always has agency.
 
 The advance handler is a shared code path. All three layers funnel
@@ -106,12 +106,12 @@ Add a console log inside the tick-advance effect to trace.
 
 ## Glossary
 
-| Term | Definition |
+| Term&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Definition |
 | --- | --- |
-| **Phase replay** | A 4-10 scene tactical reconstruction of one battle, with narration. |
-| **Phase** | One scene of a replay. ~6-8s by default. |
-| **Snapshot** | Per-war, dated country-control state. Drives globe shading. |
-| **Owner key** | Identifier in a snapshot's `control` map. Maps to a color in `OWNER_COLORS`. |
-| **Cinematic-grade** | Battles that pass the cinematic filter (currently `hasReplay && !hasSchematic`). |
-| **Tier** | Quality level (S/A/B/C). Drives surface decisions. |
-| **Faction** | Side in a replay: `a`, `b`, or `c`. Display name lives in `factionA/B/C` on the Replay object. |
+| **Phase replay**&nbsp;&nbsp; | A 4-10 scene tactical reconstruction of one battle, with narration. |
+| **Phase**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | One scene of a replay. ~6-8s by default. |
+| **Snapshot**&nbsp;&nbsp; | Per-war, dated country-control state. Drives globe shading. |
+| **Owner key**&nbsp;&nbsp; | Identifier in a snapshot's `control` map. Maps to a color in `OWNER_COLORS`. |
+| **Cinematic-grade**&nbsp;&nbsp; | Battles that pass the cinematic filter (currently `hasReplay && !hasSchematic`). |
+| **Tier**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Quality level (S/A/B/C). Drives surface decisions. |
+| **Faction**&nbsp;&nbsp;&nbsp; | Side in a replay: `a`, `b`, or `c`. Display name lives in `factionA/B/C` on the Replay object. |

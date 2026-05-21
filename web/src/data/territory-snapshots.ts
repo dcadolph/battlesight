@@ -87,6 +87,15 @@ export const OWNER_COLORS: Record<string, string> = {
   'ottoman': '#9f1239',
   'turkey': '#06b6d4',
   'syria': '#7c3aed',
+  'iraq': '#c026d3',
+  'iran': '#7c3aed',
+  'sweden': '#facc15',
+  'paraguay': '#9333ea',
+  'brazil': '#0d9488',
+  'uruguay': '#fbbf24',
+  'argentina-alt': '#9333ea',
+  'persia': '#7e22ce',
+  'punjab': '#ea580c',
   'isis': '#0f1116',
   'hts': '#475569',
   'us-union': '#2563eb',
@@ -299,7 +308,11 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Russia-Ukraine War',
+    // Duplicate snapshot block — original Russo-Ukrainian War above carries
+    // the real data. Kept for the older 'Russia-Ukraine War' key just in
+    // case any legacy data still references that spelling, but contains
+    // identical control maps. Safe to remove if no battles ever map here.
+    war: 'War in Donbas (2014–2022)',
     snapshots: [
       {
         year: 2014.2,
@@ -1132,7 +1145,7 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Mexican–American War',
+    war: 'Mexican-American War',
     snapshots: [
       {
         year: 1846.4,
@@ -1467,7 +1480,13 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Russian invasion of Ukraine',
+    // Aliased under both names so battles tagged "Russo-Ukrainian War" (the
+    // DB-canonical name, 204 battles) AND "Russian invasion of Ukraine" (9
+    // battles) both surface the same territory shading. The previous keying
+    // left the 204-battle bucket with NO snapshot match → no colored
+    // territory → polygons fell back to the generic blue stub, which
+    // rendered both Russia and Ukraine as the same blue tint.
+    war: 'Russo-Ukrainian War',
     snapshots: [
       {
         year: 2022.16,
@@ -1530,7 +1549,7 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Gaza war',
+    war: 'Israel–Hamas war',
     snapshots: [
       {
         year: 2023.78,
@@ -1826,7 +1845,7 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Italian Wars',
+    war: 'Italian War of 1521–1526',
     snapshots: [
       {
         year: 1494,
@@ -1858,7 +1877,7 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Wars of Italian Unification',
+    war: 'Second Italian War of Independence',
     snapshots: [
       {
         year: 1848,
@@ -1973,6 +1992,917 @@ export const TERRITORY: WarTerritory[] = [
         label: 'July 1879: Ulundi — Zulu kingdom dissolved',
         control: {
           'british-empire': ['United Kingdom', 'South Africa', 'Eswatini', 'Lesotho'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'American Civil War',
+    snapshots: [
+      {
+        year: 1861.3,
+        label: 'April 1861: Secession crisis',
+        control: {
+          'us-union': ['United States'],
+          'us-confederacy': [
+            'South Carolina', 'Mississippi', 'Florida', 'Alabama', 'Georgia',
+            'Louisiana', 'Texas', 'Virginia', 'Arkansas', 'Tennessee', 'North Carolina',
+          ],
+        },
+      },
+    ],
+  },
+  {
+    war: 'American Revolutionary War',
+    snapshots: [
+      {
+        year: 1776.5,
+        label: 'July 1776: Declaration of Independence',
+        control: {
+          'continental-army': ['United States'],
+          'british-empire': ['United Kingdom', 'Canada'],
+          'france': ['France'],
+          'spain': ['Spain'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Second Boer War',
+    snapshots: [
+      {
+        year: 1899.8,
+        label: 'October 1899: War declared',
+        control: {
+          'british-empire': ['United Kingdom', 'India', 'Australia', 'New Zealand', 'Canada'],
+          'us-confederacy': ['South Africa', 'Eswatini', 'Lesotho'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Gulf War',
+    snapshots: [
+      {
+        year: 1991.1,
+        label: 'January 1991: Operation Desert Storm',
+        control: {
+          'us': ['United States', 'United Kingdom', 'France', 'Canada', 'Italy', 'Spain', 'Netherlands', 'Belgium', 'Denmark', 'Norway', 'Greece'],
+          'un-coalition': ['Saudi Arabia', 'Kuwait', 'Egypt', 'Syria', 'United Arab Emirates', 'Qatar', 'Bahrain', 'Oman'],
+          'iraq': ['Iraq'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Hundred Years\' War',
+    snapshots: [
+      {
+        year: 1429.3,
+        label: 'April 1429: Joan of Arc and the Siege of Orléans',
+        control: {
+          'continental-army': ['France'],
+          'british-empire': ['United Kingdom'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Wars of the Roses',
+    snapshots: [
+      {
+        year: 1471.4,
+        label: 'May 1471: Battle of Tewkesbury',
+        control: {
+          'redcoat-red': ['United Kingdom'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Crimean War',
+    snapshots: [
+      {
+        year: 1854.6,
+        label: 'September 1854: Allied landing in the Crimea',
+        control: {
+          'ottoman': ['Turkey'],
+          'us': ['United Kingdom', 'France', 'Italy'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Vietnam War',
+    snapshots: [
+      {
+        year: 1965.5,
+        label: 'July 1965: US ground escalation',
+        control: {
+          'north-vietnam': ['Vietnam'],
+          'us': ['United States', 'Australia', 'New Zealand', 'Thailand', 'Philippines', 'South Korea'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Iran–Iraq War',
+    snapshots: [
+      {
+        year: 1980.9,
+        label: 'September 1980: Iraqi invasion',
+        control: {
+          'iraq': ['Iraq'],
+          'iran': ['Iran'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Korean War',
+    // Korean War already has snapshots above (line 593). Skip — leaving
+    // here as a placeholder if curators want sub-phase entries later.
+    snapshots: [],
+  },
+  {
+    war: 'Eighty Years\' War',
+    snapshots: [
+      {
+        year: 1581.5,
+        label: 'July 1581: Act of Abjuration',
+        control: {
+          'continental-army': ['Netherlands'],
+          'spain': ['Spain', 'Belgium', 'Luxembourg', 'Portugal'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Thirty Years\' War',
+    snapshots: [
+      {
+        year: 1631.5,
+        label: 'September 1631: Battle of Breitenfeld',
+        control: {
+          'sweden': ['Sweden', 'Finland', 'Norway'],
+          'continental-army': ['Netherlands'],
+          'nazi-germany': ['Austria', 'Czechia', 'Hungary'],
+          'spain': ['Spain'],
+          'france': ['France'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Seven Years\' War',
+    snapshots: [
+      {
+        year: 1759.8,
+        label: '1759: Annus Mirabilis',
+        control: {
+          'british-empire': ['United Kingdom', 'India', 'Canada'],
+          'continental-army': ['United States'],
+          'france': ['France', 'Algeria'],
+          'spain': ['Spain', 'Mexico'],
+          'prussia': ['Germany'],
+          'austria': ['Austria', 'Hungary', 'Czechia'],
+          'russia': ['Russia', 'Ukraine', 'Belarus'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Reconquista',
+    snapshots: [
+      {
+        year: 1492.0,
+        label: 'January 1492: Surrender of Granada',
+        control: {
+          'spain': ['Spain'],
+          'portugal': ['Portugal'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Great Northern War',
+    snapshots: [
+      {
+        year: 1709.5,
+        label: 'July 1709: Battle of Poltava',
+        control: {
+          'sweden': ['Sweden', 'Finland', 'Norway', 'Estonia', 'Latvia'],
+          'russia': ['Russia', 'Ukraine', 'Belarus'],
+          'denmark': ['Denmark'],
+          'poland': ['Poland', 'Lithuania'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'War of the Austrian Succession',
+    snapshots: [
+      {
+        year: 1745.5,
+        label: '1745: War in full swing',
+        control: {
+          'austria': ['Austria', 'Czechia', 'Hungary', 'Slovakia', 'Croatia'],
+          'prussia': ['Germany'],
+          'france': ['France', 'Belgium'],
+          'british-empire': ['United Kingdom'],
+          'spain': ['Spain'],
+          'russia': ['Russia', 'Belarus', 'Ukraine'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Sengoku period',
+    snapshots: [
+      {
+        year: 1582.5,
+        label: '1582: Honnō-ji Incident',
+        control: {
+          'japan': ['Japan'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Peninsular War',
+    snapshots: [
+      {
+        year: 1812.5,
+        label: 'July 1812: Battle of Salamanca',
+        control: {
+          'nazi-germany': ['Spain', 'Portugal'],
+          'british-empire': ['United Kingdom'],
+          'continental-army': ['France'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Franco-Prussian War',
+    snapshots: [
+      {
+        year: 1870.7,
+        label: 'September 1870: Sedan and the Siege of Paris',
+        control: {
+          'prussia': ['Germany'],
+          'france': ['France', 'Algeria'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Austro-Prussian War',
+    snapshots: [
+      {
+        year: 1866.5,
+        label: 'July 1866: Battle of Königgrätz',
+        control: {
+          'prussia': ['Germany'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary'],
+          'italy': ['Italy'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Great Turkish War',
+    snapshots: [
+      {
+        year: 1683.7,
+        label: 'September 1683: Battle of Vienna',
+        control: {
+          'ottoman': ['Turkey', 'Bulgaria', 'Greece', 'Albania', 'Serbia', 'Bosnia and Herzegovina', 'Macedonia'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Croatia'],
+          'poland': ['Poland', 'Lithuania'],
+          'russia': ['Russia', 'Ukraine', 'Belarus'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'War of the Spanish Succession',
+    // already in earlier snapshots; leaving as placeholder
+    snapshots: [],
+  },
+  {
+    war: 'First English Civil War',
+    snapshots: [
+      {
+        year: 1645.5,
+        label: 'June 1645: Battle of Naseby',
+        control: {
+          'continental-army': ['United Kingdom'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'War of the Sixth Coalition',
+    snapshots: [
+      {
+        year: 1813.7,
+        label: 'October 1813: Battle of Leipzig',
+        control: {
+          'continental-army': ['France', 'Belgium', 'Netherlands', 'Luxembourg'],
+          'prussia': ['Germany'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Poland'],
+          'british-empire': ['United Kingdom'],
+          'sweden': ['Sweden', 'Norway'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'War of the Fifth Coalition',
+    snapshots: [
+      {
+        year: 1809.5,
+        label: 'July 1809: Battle of Wagram',
+        control: {
+          'continental-army': ['France', 'Belgium', 'Netherlands', 'Italy', 'Spain'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary', 'Croatia'],
+          'british-empire': ['United Kingdom'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'First Balkan War',
+    snapshots: [
+      {
+        year: 1912.9,
+        label: 'November 1912: Bulgarian advance on Constantinople',
+        control: {
+          'ottoman': ['Turkey'],
+          'bulgaria': ['Bulgaria'],
+          'serbia': ['Serbia', 'Macedonia', 'Kosovo'],
+          'greece': ['Greece'],
+          'us-confederacy': ['Montenegro'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Paraguayan War',
+    snapshots: [
+      {
+        year: 1866.5,
+        label: '1866: Triple Alliance offensive',
+        control: {
+          'paraguay': ['Paraguay'],
+          'brazil': ['Brazil'],
+          'argentina': ['Argentina'],
+          'uruguay': ['Uruguay'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Spanish Civil War',
+    snapshots: [
+      {
+        year: 1937.5,
+        label: '1937: Nationalist consolidation',
+        control: {
+          'nazi-germany': ['Spain'],
+          'portugal': ['Portugal'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Italian War of 1521–1526',
+    snapshots: [
+      {
+        year: 1525.2,
+        label: 'February 1525: Battle of Pavia',
+        control: {
+          'continental-army': ['France'],
+          'spain': ['Spain'],
+          'nazi-germany': ['Austria', 'Czechia', 'Germany', 'Hungary'],
+          'italy': ['Italy'],
+          'british-empire': ['United Kingdom'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'January Uprising',
+    snapshots: [
+      {
+        year: 1863.5,
+        label: '1863: Polish national uprising',
+        control: {
+          'russia': ['Russia', 'Belarus', 'Ukraine'],
+          'poland': ['Poland', 'Lithuania', 'Latvia'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Hungarian Revolution of 1848',
+    snapshots: [
+      {
+        year: 1849.4,
+        label: 'April 1849: Declaration of Independence',
+        control: {
+          'continental-army': ['Hungary'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Croatia', 'Slovenia'],
+          'russia': ['Russia', 'Belarus', 'Ukraine'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Franco-Dutch War',
+    snapshots: [
+      {
+        year: 1672.5,
+        label: '1672 Year of Disaster',
+        control: {
+          'continental-army': ['France'],
+          'us-confederacy': ['Netherlands'],
+          'british-empire': ['United Kingdom'],
+          'spain': ['Spain', 'Belgium'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Russo-Turkish War (1768–1774)',
+    snapshots: [
+      {
+        year: 1770.5,
+        label: '1770: Battle of Chesma',
+        control: {
+          'russia': ['Russia', 'Ukraine', 'Belarus'],
+          'ottoman': ['Turkey', 'Bulgaria', 'Romania', 'Greece', 'Albania'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'French and Indian War',
+    snapshots: [
+      {
+        year: 1759.5,
+        label: '1759: Plains of Abraham',
+        control: {
+          'british-empire': ['United Kingdom'],
+          'continental-army': ['United States'],
+          'france': ['France', 'Canada'],
+          'spain': ['Spain'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Syrian civil war',
+    snapshots: [
+      {
+        year: 2015.5,
+        label: '2015: Russian intervention',
+        control: {
+          'syria': ['Syria'],
+          'isis': ['Iraq'],
+          'russia': ['Russia'],
+          'turkey': ['Turkey'],
+          'iran': ['Iran'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'First Sino-Japanese War',
+    snapshots: [
+      {
+        year: 1894.7,
+        label: 'September 1894: Battle of Pyongyang',
+        control: {
+          'japan': ['Japan', 'Taiwan'],
+          'china-roc': ['China'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Russo-Turkish War (1877–1878)',
+    snapshots: [
+      {
+        year: 1877.7,
+        label: 'September 1877: Siege of Plevna',
+        control: {
+          'russia': ['Russia', 'Ukraine', 'Belarus'],
+          'ottoman': ['Turkey', 'Bulgaria', 'Romania', 'Albania', 'Macedonia', 'Bosnia and Herzegovina'],
+          'serbia': ['Serbia'],
+          'us-confederacy': ['Montenegro'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'War in the Vendée',
+    snapshots: [
+      {
+        year: 1793.8,
+        label: '1793: Catholic and Royal Army',
+        control: {
+          'continental-army': ['France'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Wars of Scottish Independence',
+    snapshots: [
+      {
+        year: 1314.5,
+        label: 'June 1314: Bannockburn',
+        control: {
+          'continental-army': ['United Kingdom'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Hussite Wars',
+    snapshots: [
+      {
+        year: 1426.5,
+        label: '1426: Hussite ascendancy',
+        control: {
+          'continental-army': ['Czechia', 'Slovakia'],
+          'nazi-germany': ['Austria', 'Germany', 'Hungary'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'French invasion of Russia',
+    snapshots: [
+      {
+        year: 1812.6,
+        label: 'September 1812: Battle of Borodino',
+        control: {
+          'continental-army': ['France', 'Belgium', 'Netherlands', 'Italy', 'Switzerland', 'Germany', 'Austria'],
+          'russia': ['Russia', 'Belarus', 'Ukraine', 'Lithuania', 'Estonia', 'Latvia'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Philippine Revolution',
+    snapshots: [
+      {
+        year: 1898.6,
+        label: 'June 1898: Declaration of Independence',
+        control: {
+          'continental-army': ['Philippines'],
+          'spain': ['Spain'],
+          'us': ['United States'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Russo-Turkish War (1787–1792)',
+    snapshots: [
+      {
+        year: 1790.5,
+        label: '1790: Russian breakthrough',
+        control: {
+          'russia': ['Russia', 'Ukraine', 'Belarus'],
+          'ottoman': ['Turkey', 'Bulgaria', 'Romania', 'Greece', 'Albania'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Finnish War',
+    snapshots: [
+      {
+        year: 1808.9,
+        label: '1808: Russian conquest of Finland',
+        control: {
+          'russia': ['Russia'],
+          'sweden': ['Sweden', 'Finland', 'Norway'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Viking invasions of England',
+    snapshots: [
+      {
+        year: 1013.9,
+        label: '1013: Sweyn Forkbeard\'s conquest',
+        control: {
+          'continental-army': ['United Kingdom'],
+          'denmark': ['Denmark', 'Sweden', 'Norway'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Invasion of Poland',
+    snapshots: [
+      {
+        year: 1939.75,
+        label: 'September 1939',
+        control: {
+          'nazi-germany': ['Germany', 'Czechia', 'Slovakia', 'Austria'],
+          'ussr': ['Russia', 'Belarus', 'Ukraine'],
+          'poland': ['Poland'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Indian Rebellion of 1857',
+    snapshots: [
+      {
+        year: 1857.6,
+        label: '1857: Sepoy Mutiny',
+        control: {
+          'british-empire': ['United Kingdom', 'India', 'Pakistan', 'Bangladesh'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Arab–Byzantine wars',
+    snapshots: [
+      {
+        year: 636.7,
+        label: 'August 636: Battle of Yarmouk',
+        control: {
+          'saracen': ['Saudi Arabia', 'Iraq', 'Jordan', 'Yemen', 'Oman'],
+          'byzantine': ['Turkey', 'Greece', 'Syria', 'Lebanon', 'Israel', 'Palestine', 'Egypt'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Peloponnesian War',
+    snapshots: [
+      {
+        year: -415,
+        label: '415 BC: Sicilian Expedition',
+        control: {
+          'continental-army': ['Greece'],
+          'persia': ['Turkey'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Wars of the Diadochi',
+    snapshots: [
+      {
+        year: -301,
+        label: '301 BC: Battle of Ipsus',
+        control: {
+          'persia': ['Iran', 'Iraq', 'Turkey', 'Syria', 'Lebanon', 'Israel', 'Jordan'],
+          'continental-army': ['Greece', 'Albania', 'Macedonia'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Wars at the end of the Han dynasty',
+    snapshots: [
+      {
+        year: 208.7,
+        label: '208 AD: Red Cliffs',
+        control: {
+          'china-roc': ['China'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Mexican War of Independence',
+    snapshots: [
+      {
+        year: 1820.5,
+        label: '1820: Insurgent consolidation',
+        control: {
+          'spain': ['Mexico'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Second French intervention in Mexico',
+    snapshots: [
+      {
+        year: 1864.5,
+        label: '1864: Maximilian crowned',
+        control: {
+          'continental-army': ['France'],
+          'nazi-germany': ['Mexico'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Philippine–American War',
+    snapshots: [
+      {
+        year: 1899.5,
+        label: '1899: US-Filipino conflict',
+        control: {
+          'us': ['United States'],
+          'continental-army': ['Philippines'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Polish–Soviet War',
+    snapshots: [
+      {
+        year: 1920.6,
+        label: 'August 1920: Battle of Warsaw',
+        control: {
+          'poland': ['Poland', 'Lithuania'],
+          'russia': ['Russia', 'Belarus', 'Ukraine'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Italo-Turkish War',
+    snapshots: [
+      {
+        year: 1911.9,
+        label: '1911: Italian invasion of Libya',
+        control: {
+          'italy': ['Italy'],
+          'ottoman': ['Turkey', 'Libya'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Hundred Days',
+    snapshots: [
+      {
+        year: 1815.5,
+        label: 'June 1815: Waterloo campaign',
+        control: {
+          'continental-army': ['France'],
+          'british-empire': ['United Kingdom'],
+          'prussia': ['Germany'],
+          'austria': ['Austria', 'Czechia', 'Slovakia', 'Hungary'],
+          'russia': ['Russia', 'Ukraine', 'Belarus'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Chinese Civil War',
+    snapshots: [
+      {
+        year: 1949.5,
+        label: '1949: Communist victory',
+        control: {
+          'china-prc': ['China'],
+          'china-roc': ['Taiwan'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'American Indian Wars',
+    snapshots: [
+      {
+        year: 1876.5,
+        label: '1876: Plains War',
+        control: {
+          'us': ['United States'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'First Anglo-Dutch War',
+    snapshots: [
+      {
+        year: 1653.5,
+        label: '1653: Naval war',
+        control: {
+          'british-empire': ['United Kingdom'],
+          'us-confederacy': ['Netherlands'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Sri Lankan Civil War',
+    snapshots: [
+      {
+        year: 2009.2,
+        label: 'May 2009: Government victory',
+        control: {
+          'continental-army': ['Sri Lanka'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Genpei War',
+    snapshots: [
+      {
+        year: 1185.3,
+        label: 'April 1185: Battle of Dan-no-ura',
+        control: {
+          'japan': ['Japan'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'First Opium War',
+    snapshots: [
+      {
+        year: 1841.5,
+        label: '1841: British naval dominance',
+        control: {
+          'british-empire': ['United Kingdom'],
+          'china-roc': ['China'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Croatian War of Independence',
+    snapshots: [
+      {
+        year: 1995.8,
+        label: 'August 1995: Operation Storm',
+        control: {
+          'continental-army': ['Croatia'],
+          'us-confederacy': ['Serbia', 'Bosnia and Herzegovina', 'Montenegro'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Mexican Revolution',
+    snapshots: [
+      {
+        year: 1914.5,
+        label: '1914: Constitutionalist victory',
+        control: {
+          'continental-army': ['Mexico'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Byzantine–Bulgarian wars',
+    snapshots: [
+      {
+        year: 1014.7,
+        label: 'July 1014: Battle of Kleidion',
+        control: {
+          'byzantine': ['Turkey', 'Greece', 'Cyprus'],
+          'bulgaria': ['Bulgaria', 'Macedonia', 'Serbia'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Mughal–Sikh Wars',
+    snapshots: [
+      {
+        year: 1710.5,
+        label: '1710: Banda Singh\'s uprising',
+        control: {
+          'nazi-germany': ['India', 'Pakistan', 'Bangladesh', 'Afghanistan'],
+          'continental-army': ['Punjab'],
+        },
+      },
+    ],
+  },
+  {
+    war: 'Khmelnytsky Uprising',
+    snapshots: [
+      {
+        year: 1648.7,
+        label: '1648: Cossack rebellion',
+        control: {
+          'poland': ['Poland', 'Lithuania', 'Belarus'],
+          'continental-army': ['Ukraine'],
         },
       },
     ],

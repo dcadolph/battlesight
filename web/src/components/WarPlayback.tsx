@@ -239,16 +239,39 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   const groups = useMemo<BattleGroup[]>(() => {
     if (battles.length === 0) return [];
     if (!cinematic) return groupConcurrentBattles(battles);
-    // Cinematic-grade is now strictly hand-crafted phase replays only.
-    // Verified-but-no-replay and schematic auto-replays are excluded so the
-    // war cinematic plays exclusively through the curated set instead of
-    // surfacing obscure naval convoy stubs and misclassified battles the
-    // importer dropped in. Falls back to the full list only when no
-    // hand-crafted replays exist for the war, so smaller wars without
-    // curation coverage still have a playable cinematic.
-    const cinematicGrade = battles.filter((b) => b.hasReplay && !b.hasSchematic);
-    const usable = cinematicGrade.length >= 3 ? cinematicGrade : battles;
-    return groupConcurrentBattles(usable);
+    // Cinematic playlist composition:
+    //   1. ALL hand-crafted phase replays (get the full deep-dive treatment).
+    //   2. ALL schematic-eligible battles (have sides data, get the short
+    //      auto-replay).
+    //   3. Up to 80 long-tail tooltip-only battles, sampled by even spacing
+    //      across the war's timeline so the user sees movement through the
+    //      whole war rather than just the 24-battle marquee highlight reel.
+    // Result: WW2 goes from 24 cinematic battles to ~120-180 (still under an
+    // hour of run time given short dwells on the schematic + tooltip tiers).
+    const replays = battles.filter((b) => b.hasReplay);
+    const schematics = battles.filter((b) => !b.hasReplay && b.hasSchematic);
+    const tooltipOnly = battles.filter((b) => !b.hasReplay && !b.hasSchematic);
+    // Cap each tier so even WW2 (~600 schematic battles) stays under an
+    // hour of runtime. Sampling is by even chronological spacing so the
+    // cinematic walks the whole war rather than clustering at the start.
+    function sampleEvenly<T>(arr: T[], cap: number): T[] {
+      if (arr.length <= cap) return arr;
+      const step = arr.length / cap;
+      const out: T[] = [];
+      for (let i = 0; i < cap; i++) out.push(arr[Math.floor(i * step)]);
+      return out;
+    }
+    // Caps tuned so the heaviest case (WW2) stays around 50 min total at
+    // the new 25-second schematic dwell. Increasing these further makes the
+    // run too long for a single watch session.
+    const sampledSchematics = sampleEvenly(schematics, 60);
+    const sampledTooltips = sampleEvenly(tooltipOnly, 40);
+    // Merge + re-sort chronologically so the cinematic walks the timeline.
+    const merged = [...replays, ...sampledSchematics, ...sampledTooltips].sort((a, b) => {
+      if (a.year !== b.year) return a.year - b.year;
+      return (a.date || '').localeCompare(b.date || '');
+    });
+    return groupConcurrentBattles(merged.length >= 3 ? merged : battles);
   }, [battles, cinematic]);
   const [speed, setSpeed] = useState(4000);
   const [detail, setDetail] = useState<Battle | null>(null);
@@ -663,9 +686,22 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       // BattleReplay actually finishes its phases. Generous so even the
       // longest hand-crafted replays (Stalingrad: 10 phases, 83s) don't
       // get cut off when onEnded somehow fails to propagate.
+      // Tiered dwells for the broader cinematic playlist. These are BACKSTOPS
+      // — replay-bearing battles advance when BattleReplay's onEnded fires
+      // after its full phase set + outro. The dwell only triggers if onEnded
+      // somehow doesn't propagate.
+      //   - hasReplay: 120s backstop (real dwell 30-90s from curated phases).
+      //   - hasSchematic: 25s backstop (3 auto-generated phases × 5.5s each
+      //     + 1.2s cinematic outro = ~18s real, with margin for the trace
+      //     arc + arrival to settle). Earlier 9s dwell cut schematics short
+      //     at the deployment phase — user saw the same opening over and
+      //     over because every schematic battle started fresh at phase 0
+      //     before the next ones could play.
+      //   - tooltip-only: 4s — no replay; just the ignition burst, focus
+      //     rings, and trace arc to the next battle.
       if (battle?.hasReplay) fullDwellMs = 120000;
       else if (battle?.hasSchematic) fullDwellMs = 14000;
-      else fullDwellMs = 7500;
+      else fullDwellMs = 4000;
     } else if (group.concurrent && subIndex < group.battles.length - 1) {
       fullDwellMs = Math.max(speed / 2, 1500);
     } else {
@@ -1257,85 +1293,82 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           </div>
         )}
 
-        {/* Unified transport. One card carrying the hero "Play the war"
-            launcher on top and a single thin transport row beneath it. */}
+        {/* Hero: "Play the war" — the ONE big play button. Owns the full
+            cinematic flow. Separated visually from the secondary "browse
+            one battle at a time" controls below so the two never compete. */}
+        {initialPaneLoaded && groups.length > 0 && (() => {
+          const totalBattles = groups.reduce((s, g) => s + g.battles.length, 0);
+          if (totalBattles < 2) return null;
+          return (
+            <button
+              onClick={() => {
+                setCinematic(true);
+                setCinematicStage('overture');
+                setGroupIndex(0);
+                setSubIndex(0);
+                setPlaying(false);
+              }}
+              className="w-full mb-4 group relative px-4 py-3.5 text-left flex items-center gap-3.5 rounded-xl overflow-hidden border border-blue-400/40 bg-gradient-to-br from-blue-500/[0.16] via-blue-500/[0.06] to-transparent hover:from-blue-500/[0.24] hover:via-blue-500/[0.10] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40"
+              style={{ boxShadow: '0 8px 28px -12px rgba(96,165,250,0.40)' }}
+              title="Auto-plays the full war end-to-end with phase replays."
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-400/25 ring-1 ring-blue-300/60 group-hover:bg-blue-400/35 group-hover:ring-blue-200/80 transition-colors flex-shrink-0">
+                <svg width="13" height="15" viewBox="0 0 11 13" fill="currentColor" className="ml-0.5 text-blue-100">
+                  <path d="M0.5 0.93v11.14a.5.5 0 0 0 .77.42l9.07-5.57a.5.5 0 0 0 0-.84L1.27.51A.5.5 0 0 0 .5.93z" />
+                </svg>
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-[15px] font-semibold text-white leading-tight tracking-tight">
+                  Play the war
+                </span>
+                <span className="block text-[10.5px] text-slate-300/85 mt-1 leading-tight">
+                  Auto-cinematic · {totalBattles} battles · phase replays
+                </span>
+              </span>
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300/80 group-hover:text-blue-200 flex-shrink-0">
+                <path d="M4 2 L8 6 L4 10" />
+              </svg>
+            </button>
+          );
+        })()}
+
+        {/* Secondary: browse one battle at a time. Prev / next / scrubber
+            only — NO play button. The hero above is the sole "play" entry
+            point, so this row reads unambiguously as "manual stepping
+            through individual battles" instead of competing with it. */}
         {initialPaneLoaded && groups.length > 0 && (() => {
           const totalBattles = groups.reduce((s, g) => s + g.battles.length, 0);
           return (
-            <div className="mb-4 rounded-xl overflow-hidden border border-blue-400/30 bg-gradient-to-br from-blue-500/[0.10] to-transparent">
-              {totalBattles >= 2 && (
-                <button
-                  onClick={() => {
-                    setCinematic(true);
-                    setCinematicStage('overture');
-                    setGroupIndex(0);
-                    setSubIndex(0);
-                    setPlaying(false);
-                  }}
-                  className="w-full group relative px-4 py-3.5 text-left flex items-center gap-3.5 hover:bg-blue-500/[0.08] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400/40"
-                  title="Auto-plays the full war end-to-end with phase replays."
-                >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-400/20 ring-1 ring-blue-300/50 group-hover:bg-blue-400/30 group-hover:ring-blue-200/70 transition-colors flex-shrink-0">
-                    <svg width="12" height="14" viewBox="0 0 11 13" fill="currentColor" className="ml-0.5 text-blue-100">
-                      <path d="M0.5 0.93v11.14a.5.5 0 0 0 .77.42l9.07-5.57a.5.5 0 0 0 0-.84L1.27.51A.5.5 0 0 0 .5.93z" />
-                    </svg>
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <span className="block text-[14.5px] font-semibold text-white leading-tight tracking-tight">
-                      Play the war
-                    </span>
-                    <span className="block text-[10.5px] text-slate-300/85 mt-1 leading-tight">
-                      Auto-cinematic · {totalBattles} battles · phase replays
-                    </span>
-                  </span>
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300/70 group-hover:text-blue-200 flex-shrink-0">
-                    <path d="M4 2 L8 6 L4 10" />
-                  </svg>
-                </button>
-              )}
-
-              {/* Transport row. Prev / play-step / next + scrubber + counter +
-                  speed. Single 32px-tall strip below the hero so the entire
-                  control surface reads as one card, not two stacked blocks. */}
-              <div className={`flex items-center gap-2 px-3 py-2 ${totalBattles >= 2 ? 'border-t border-blue-400/15 bg-slate-950/30' : ''}`}>
+            <div className="mb-4 rounded-xl border border-slate-800/60 bg-slate-900/30 px-3 py-2.5">
+              <div className="flex items-baseline justify-between mb-1.5 px-1">
+                <span className="text-[9px] font-semibold uppercase tracking-[0.30em] text-slate-500">
+                  Browse battle by battle
+                </span>
+                <span className="text-[9.5px] text-slate-500 tabular-nums">
+                  {totalIdx + 1} of {totalBattles}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
                 <button onClick={() => goTo(groupIndex - 1)} disabled={groupIndex === 0}
-                  className="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700/60 hover:text-white disabled:opacity-25 disabled:hover:bg-transparent transition-colors"
+                  className="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700/60 hover:text-white disabled:opacity-25 disabled:hover:bg-transparent transition-colors flex-shrink-0"
                   title="Previous battle"
                   aria-label="Previous battle">
                   <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
                     <path d="M7.5 1.5L3 5.5l4.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <button onClick={() => setPlaying(!playing)}
-                  className="h-7 w-7 flex items-center justify-center rounded-full bg-slate-700/60 text-slate-100 ring-1 ring-slate-600/50 hover:bg-slate-600/70 hover:ring-slate-400/70 transition-colors"
-                  title={playing ? 'Pause' : 'Step through the list'}
-                  aria-label={playing ? 'Pause' : 'Step through the list'}>
-                  {playing ? (
-                    <svg width="9" height="9" viewBox="0 0 11 11" fill="currentColor">
-                      <rect x="1.5" y="1" width="2.5" height="9" rx="0.8" />
-                      <rect x="7" y="1" width="2.5" height="9" rx="0.8" />
-                    </svg>
-                  ) : (
-                    <svg width="9" height="11" viewBox="0 0 11 13" fill="currentColor" className="ml-0.5">
-                      <path d="M0.5 0.93v11.14a.5.5 0 0 0 .77.42l9.07-5.57a.5.5 0 0 0 0-.84L1.27.51A.5.5 0 0 0 .5.93z" />
-                    </svg>
-                  )}
-                </button>
+                <input type="range" min={0} max={Math.max(0, groups.length - 1)} value={groupIndex}
+                  onChange={(e) => { setPlaying(false); goTo(parseInt(e.target.value)); }}
+                  className="flex-1 accent-slate-400 h-1 bg-slate-800/60 rounded-full appearance-none cursor-pointer"
+                  aria-label="Scrub through battles" />
                 <button onClick={() => goTo(groupIndex + 1)} disabled={groupIndex >= groups.length - 1}
-                  className="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700/60 hover:text-white disabled:opacity-25 disabled:hover:bg-transparent transition-colors"
+                  className="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700/60 hover:text-white disabled:opacity-25 disabled:hover:bg-transparent transition-colors flex-shrink-0"
                   title="Next battle"
                   aria-label="Next battle">
                   <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
                     <path d="M3.5 1.5L8 5.5l-4.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <input type="range" min={0} max={Math.max(0, groups.length - 1)} value={groupIndex}
-                  onChange={(e) => { setPlaying(false); goTo(parseInt(e.target.value)); }}
-                  className="flex-1 accent-blue-400 h-1 bg-slate-800/60 rounded-full appearance-none cursor-pointer mx-1"
-                  aria-label="Scrub through battles" />
-                <span className="text-[10px] text-slate-500 tabular-nums flex-shrink-0">
-                  {totalIdx + 1}/{totalBattles}
-                </span>
                 <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}
                   className="bg-transparent border border-slate-700/40 rounded px-1.5 py-0.5 text-[10px] text-slate-400 hover:border-slate-500/60 focus:outline-none focus:ring-1 focus:ring-blue-400/40 transition-colors"
                   title="Auto-step pace">

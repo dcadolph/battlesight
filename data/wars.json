@@ -1644,15 +1644,6 @@
     "endYear": 1821,
     "parent": ""
   },
-  "Mexican–American War": {
-    "aftermath": "Altered territories\nupright=1.35|The Mexican Cession, shown in red, and the later Gadsden Purchase, shown in yellow",
-    "humanDeaths": 25000,
-    "startYear": 1846,
-    "endYear": 1848,
-    "parent": "",
-    "outcome": "US victory; Mexico cedes Alta California, New Mexico, and Texan border claims.",
-    "keyTerms": "Treaty of Guadalupe Hidalgo (February 2, 1848)"
-  },
   "Middle Eastern theatre of World War I": {
     "outcome": "Allied victory",
     "aftermath": "On 30 October 1918, the Armistice of Mudros was signed aboard in Mudros port on the island of Lemnos between the Ottoman Empire and the Triple Entente. Ottoman operations in the active combat theatres ceased.",
@@ -2113,11 +2104,6 @@
     "outcome": "Russian victory; Treaty of Turkmenchay (1828) cedes Iranian Armenia and the Erivan Khanate.",
     "keyTerms": "Treaty of Turkmenchay (February 21, 1828)"
   },
-  "Russo-Swedish War (1656–1658)": {
-    "keyTerms": "Treaty of Cardis (June 21, 1661)",
-    "outcome": "Status quo ante bellum; Treaty of Valiesar (1658) and Treaty of Cardis (1661).",
-    "aftermath": "Two years of war during the Second Northern War in which Russia attempted unsuccessfully to seize Swedish Livonia. The treaty held until Peter the Great's Great Northern War four decades later."
-  },
   "Russo-Swedish War (1788–1790)": {
     "aftermath": "Memorial of the Battle of Uttismalm erected in Utti, Finland (1931)\nThe Russo-Swedish War of 1788–1790 was, overall, mostly insignificant for the parties involved. Catherine II regarded the war against her Swedish cousin as a substantial distraction, as her land troops were tied up in the war against Turkey, and she was likewise concerned with revolutionary events unfolding in the Polish–Lithuanian Commonwealth (the Constitution of 3 May 1791) and in France (the French Revolution). The Swedish attack foiled the Russian plans of sending its navy into the Mediterranean Sea to support its forces fighting the Ottomans, as it was needed to protect the capital, Saint Petersburg.",
     "outcome": "Inconclusive; Treaty of Värälä (1790) restores status quo ante bellum.",
@@ -2444,15 +2430,6 @@
     "outcome": "US victory; Cuba, Puerto Rico, Guam, and the Philippines transfer from Spain.",
     "keyTerms": "Treaty of Paris (December 10, 1898)"
   },
-  "Sri Lankan civil war": {
-    "outcome": "Sri Lankan government victory",
-    "aftermath": "Political solution\nAfter the complete military defeat of the LTTE, President Mahinda Rajapaksa announced that the government was committed to a political solution, and for this purpose action would be taken based on the 13th Amendment to the Constitution. The pro-LTTE political party Tamil National Alliance (TNA), also the largest political group representing Sri Lankan Tamil community, dropped its demand for a separate state, in favour of a federal solution. In 2011, there were bilateral talks between President Rajapaksa's UPFA government and the TNA, on a viable political solution and devolution of power.",
-    "keyTerms": "Death of Velupillai Prabhakaran (May 18, 2009)",
-    "humanDeaths": 100000,
-    "startYear": 1983,
-    "endYear": 2009,
-    "parent": ""
-  },
   "Swabian War": {
     "outcome": "Swiss victory, Peace of Basel",
     "keyTerms": "Treaty of Basel (September 22, 1499)",
@@ -2479,22 +2456,6 @@
     "startYear": 1707,
     "endYear": 1709,
     "parent": "Great Northern War"
-  },
-  "Syrian Civil War": {
-    "outcome": "Opposition victory. The Assad regime fell to a lightning offensive in December 2024 after thirteen years of war.",
-    "aftermath": "Bashar al-Assad fled Damascus on 8 December 2024 as opposition columns entered the capital. Mohammad Ghazi al-Jalali, the outgoing prime minister, agreed to lead a caretaker government before transferring power to Mohammed al-Bashir of the Syrian Salvation Government two days later. Sednaya prison was opened and thousands of political prisoners freed. Roughly 500,000 had died over the war's thirteen years. about half the prewar population displaced, more than six million as refugees abroad. Russia's hold on Tartus and Khmeimim ended, and Iran's land corridor through Syria collapsed.",
-    "keyTerms": "December 2024 fall of Damascus. Transitional administration in place through March 2025.",
-    "notable": [
-      "Russian intervention reverses the war (September 2015)",
-      "Battle of Aleppo and the loss of the eastern districts (2016)",
-      "Chemical weapons attacks on Khan Shaykhun (2017) and Douma (2018)",
-      "Turkish operations against the SDF in northern Syria (Olive Branch 2018, Peace Spring 2019)",
-      "Lightning opposition offensive captures Aleppo, Hama, Homs, Damascus (Nov-Dec 2024)"
-    ],
-    "humanDeaths": 600000,
-    "startYear": 2011,
-    "endYear": 0,
-    "parent": ""
   },
   "Taiping Rebellion": {
     "outcome": "Qing victory. The Heavenly Kingdom is crushed at Nanjing in 1864 after fourteen years of war.",
@@ -2957,11 +2918,6 @@
     "aftermath": "After Ukraine had fully retaken Kyiv Oblast, its military began to mop up pockets of isolated Russian troops who had been left behind in the retreat. The Institute for the Study of War assessed that these remnant groups did not offer organized resistance. The Institute for the Study of War also said that some of the Russian units that were pulled back to Belarus and western Russia would \"remain combat ineffective for a protracted period\".",
     "keyTerms": "Russian withdrawal from Kyiv axis (March-April 2022)"
   },
-  "transition from Sui to Tang": {
-    "outcome": "China united by the Tang dynasty",
-    "keyTerms": "Xuanwu Gate Incident (July 2, 626)",
-    "aftermath": "A nine-year civil war (618-626) that produced the Tang dynasty. Li Yuan's rebellion against the Sui captured Chang'an in 618; the consolidation under his son Li Shimin (Emperor Taizong) produced the early Tang golden age."
-  },
   "Mongol invasions": {
     "humanDeaths": 40000000,
     "startYear": 1206,
@@ -2997,15 +2953,6 @@
     "outcome": "British victory; Treaty of Vereeniging (1902) absorbs Boer republics into the British Empire.",
     "aftermath": "See Second Anglo-Boer War.",
     "keyTerms": "Treaty of Vereeniging (1902)"
-  },
-  "North African Campaign": {
-    "humanDeaths": 1000000,
-    "startYear": 1940,
-    "endYear": 1943,
-    "parent": "World War II",
-    "outcome": "Allied victory; Axis forces in Tunisia surrender May 13, 1943.",
-    "aftermath": "Three years of desert war from Libya to the Tunisian coast — Rommel's Afrika Korps, the British 8th Army, Operation Torch. The campaign closed the Mediterranean as an Axis lake, secured Suez, and gave the Allies the launching pad for the invasion of Sicily.",
-    "keyTerms": "Tunisian Surrender (May 13, 1943)"
   },
   "Italian Campaign (World War II)": {
     "humanDeaths": 700000,
@@ -3070,15 +3017,6 @@
     "aftermath": "Five years of war that ended with the Khmer Rouge taking Phnom Penh days before the fall of Saigon. The genocide that followed (1.5–2 million Cambodian dead) is treated as a separate event from this war.",
     "keyTerms": "Fall of Phnom Penh (April 17, 1975)"
   },
-  "Hundred Years War": {
-    "humanDeaths": 3500000,
-    "startYear": 1337,
-    "endYear": 1453,
-    "parent": "",
-    "outcome": "French victory. England retains Calais alone until 1558.",
-    "aftermath": "See Hundred Years' War (canonical entry).",
-    "keyTerms": "Battle of Castillon (1453)"
-  },
   "Sengoku period": {
     "humanDeaths": 1000000,
     "startYear": 1467,
@@ -3097,15 +3035,6 @@
     "aftermath": "A decade of civil war and political violence ended Porfirio Díaz's thirty-year dictatorship and produced the constitution and one-party system that ruled Mexico into the 1990s. Two million dead; massive demographic disruption, agrarian land reform, and the emergence of the modern Mexican state.",
     "keyTerms": "Constitution of 1917"
   },
-  "Polish-Soviet War": {
-    "humanDeaths": 100000,
-    "startYear": 1919,
-    "endYear": 1921,
-    "parent": "",
-    "outcome": "Polish victory; Treaty of Riga (1921) fixes border east of the Curzon Line.",
-    "aftermath": "See Polish–Soviet War — canonical entry.",
-    "keyTerms": "Treaty of Riga (March 18, 1921)"
-  },
   "First Italian War": {
     "humanDeaths": 80000,
     "startYear": 1494,
@@ -3114,15 +3043,6 @@
     "outcome": "French expulsion from Italy by 1498; status quo ante bellum.",
     "aftermath": "Charles VIII's invasion of Italy in 1494, the conquest of Naples, the formation of the League of Venice, and the French withdrawal. Five decades of Italian Wars followed.",
     "keyTerms": "Battle of Fornovo (July 6, 1495)"
-  },
-  "Italian Wars": {
-    "humanDeaths": 500000,
-    "startYear": 1494,
-    "endYear": 1559,
-    "parent": "",
-    "outcome": "Habsburg victory; Peace of Cateau-Cambrésis (1559) confirms Spanish dominance of Italy.",
-    "aftermath": "Sixty-five years of war that began with Charles VIII's invasion of Italy in 1494 and ended with Spain dominant from Naples to Milan. The wars produced the modern military profession — the Spanish tercio, the Italian fortification school — and bankrupted both Spain and France.",
-    "keyTerms": "Peace of Cateau-Cambrésis (April 3, 1559)"
   },
   "Wars of the Roses": {
     "humanDeaths": 50000,
@@ -3168,15 +3088,6 @@
     "outcome": "Ongoing as of late 2025; Houthi de-facto control of the north, internationally recognised government in the south.",
     "aftermath": "A decade of war that has produced what the UN has repeatedly called the world's worst humanitarian crisis. 380,000 dead, mostly from war-induced famine and disease, in a war complicated by Saudi-Emirati-Iranian proxy involvement.",
     "keyTerms": "Stockholm Agreement (December 2018)"
-  },
-  "Yemeni civil war (2014–present)": {
-    "humanDeaths": 380000,
-    "startYear": 2014,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing.",
-    "aftermath": "See Yemeni Civil War — canonical entry.",
-    "keyTerms": "Stockholm Agreement (2018)"
   },
   "First Libyan Civil War": {
     "humanDeaths": 30000,
@@ -3403,15 +3314,6 @@
     "aftermath": "The first war over Kashmir, begun by Pakistani-supported tribal lashkars and ended by UN mediation. The Line of Control still divides Kashmir between India and Pakistan and remains the world's most-militarised border.",
     "keyTerms": "Karachi Agreement (July 27, 1949)"
   },
-  "Indo-Pakistani War of 1965": {
-    "humanDeaths": 7000,
-    "startYear": 1965,
-    "endYear": 1965,
-    "parent": "",
-    "outcome": "Stalemate; UN-brokered ceasefire and Tashkent Declaration (January 1966).",
-    "aftermath": "A seventeen-day war over Kashmir initiated by Pakistan's Operation Gibraltar infiltration. The largest tank battles fought anywhere since WWII (Asal Uttar, Chawinda) ended inconclusively. The Tashkent Declaration restored pre-war borders.",
-    "keyTerms": "Tashkent Declaration (January 10, 1966)"
-  },
   "Indo-Pakistani War of 1971": {
     "humanDeaths": 11000,
     "startYear": 1971,
@@ -3601,15 +3503,6 @@
     "aftermath": "Same as Franco-Spanish War (1635–59).",
     "keyTerms": "Treaty of the Pyrenees (1659)"
   },
-  "First Anglo-Maratha War": {
-    "humanDeaths": 30000,
-    "startYear": 1775,
-    "endYear": 1782,
-    "parent": "",
-    "outcome": "Inconclusive; Treaty of Salbai (1782) restores status quo ante bellum.",
-    "aftermath": "Seven years of war that confirmed Maratha sovereignty against East India Company encroachment but exhausted both sides. The treaty held until the Second Anglo-Maratha War a generation later.",
-    "keyTerms": "Treaty of Salbai (May 17, 1782)"
-  },
   "First Anglo-Afghan War": {
     "humanDeaths": 18000,
     "startYear": 1839,
@@ -3736,15 +3629,6 @@
     "aftermath": "Twenty-six years of war (602-628) that both sides survived but neither could recover from. Within a decade of the peace the Arab armies were across both their frontiers — taking Damascus 635, Ctesiphon 637, Egypt 639-642.",
     "keyTerms": "Battle of Nineveh (December 627); peace of 628"
   },
-  "Byzantine–Sassanid wars": {
-    "humanDeaths": 500000,
-    "startYear": 502,
-    "endYear": 628,
-    "parent": "",
-    "outcome": "Byzantine victory in 628 after centuries of intermittent war; Arab conquests follow.",
-    "aftermath": "Same arc as Persian-Roman wars and Roman-Sasanian War.",
-    "keyTerms": "Battle of Nineveh (627)"
-  },
   "Norman conquest of England": {
     "humanDeaths": 10000,
     "startYear": 1066,
@@ -3834,15 +3718,6 @@
     "outcome": "US dominance of Caribbean basin states by 1934.",
     "aftermath": "Three decades of US military interventions in Cuba, Haiti, Dominican Republic, Nicaragua, Honduras, and Mexico. The Marine Corps Small Wars Manual (1940) was the doctrinal legacy. FDR's Good Neighbor Policy ended the era in 1934.",
     "keyTerms": "Good Neighbor Policy (1933)"
-  },
-  "Spanish protectorate in Morocco": {
-    "humanDeaths": 50000,
-    "startYear": 1912,
-    "endYear": 1927,
-    "parent": "",
-    "outcome": "Spanish consolidation of the protectorate by 1927.",
-    "aftermath": "Fifteen years of Spanish colonial war in northern Morocco, including the Rif War and the catastrophic 1921 defeat at Annual. The combined Spanish-French offensive of 1925-1927 finally subdued the Rif Republic; Spanish Morocco lasted until 1956.",
-    "keyTerms": "End of the Rif War (May 1926)"
   },
   "Rif War": {
     "humanDeaths": 100000,
@@ -3979,15 +3854,6 @@
     "aftermath": "Operation Just Cause — a five-day US invasion to remove Manuel Noriega. The operation involved 27,000 US troops and produced the first combat use of the F-117 stealth fighter. Noriega was extradited to Florida and convicted of drug trafficking.",
     "keyTerms": "Operation Just Cause (December 20, 1989)"
   },
-  "Libyan civil war (2011)": {
-    "humanDeaths": 30000,
-    "startYear": 2011,
-    "endYear": 2011,
-    "parent": "",
-    "outcome": "NATO-backed rebel victory; Gaddafi killed October 20, 2011.",
-    "aftermath": "See Libyan Civil War.",
-    "keyTerms": "Death of Gaddafi (October 20, 2011)"
-  },
   "Libyan Crisis (2011–present)": {
     "humanDeaths": 30000,
     "startYear": 2011,
@@ -4004,7 +3870,14 @@
     "parent": "",
     "outcome": "Ongoing as of late 2025; Assad regime fell in December 2024 to HTS-led opposition.",
     "aftermath": "Fourteen years of war that began with anti-Assad protests in 2011 and ended with the lightning HTS offensive of late 2024. 600,000+ dead, half the population displaced, ISIS rise and fall, Russian/Iranian intervention, and the transformation of regional politics.",
-    "keyTerms": "Fall of Damascus (December 8, 2024)"
+    "keyTerms": "Fall of Damascus (December 8, 2024)",
+    "notable": [
+      "Russian intervention reverses the war (September 2015)",
+      "Battle of Aleppo and the loss of the eastern districts (2016)",
+      "Chemical weapons attacks on Khan Shaykhun (2017) and Douma (2018)",
+      "Turkish operations against the SDF in northern Syria (Olive Branch 2018, Peace Spring 2019)",
+      "Lightning opposition offensive captures Aleppo, Hama, Homs, Damascus (Nov-Dec 2024)"
+    ]
   },
   "Iraqi insurgency": {
     "humanDeaths": 300000,
@@ -4060,15 +3933,6 @@
     "aftermath": "See Boxer Rebellion — canonical entry.",
     "keyTerms": "Boxer Protocol (1901)"
   },
-  "Anglo-Spanish War (1727)": {
-    "humanDeaths": 5000,
-    "startYear": 1727,
-    "endYear": 1729,
-    "parent": "",
-    "outcome": "Inconclusive; Treaty of Seville (1729) restores status quo.",
-    "aftermath": "A two-year war over British commercial rights in the Spanish empire and the Spanish siege of Gibraltar. The treaty restored the asiento — the British slave-trade contract granted at Utrecht — until the next Anglo-Spanish war (1739).",
-    "keyTerms": "Treaty of Seville (November 9, 1729)"
-  },
   "Anglo-Spanish War (1761–1763)": {
     "humanDeaths": 8000,
     "startYear": 1761,
@@ -4095,15 +3959,6 @@
     "outcome": "Russian victory; Treaty of Adrianople (1829) confirms Greek autonomy and Russian gains.",
     "aftermath": "A year of war that helped finalise Greek independence and gave Russia the eastern Black Sea coast and the mouth of the Danube. The treaty also confirmed the Sultan's recognition of Serbian and Romanian autonomy.",
     "keyTerms": "Treaty of Adrianople (September 14, 1829)"
-  },
-  "War of the Seventh Coalition": {
-    "humanDeaths": 90000,
-    "startYear": 1815,
-    "endYear": 1815,
-    "parent": "Napoleonic Wars",
-    "outcome": "Coalition victory at Waterloo (June 18, 1815); Napoleon surrenders.",
-    "aftermath": "Hundred Days and Waterloo. Napoleon exiled to St. Helena; the Bourbons restored; the Congress of Vienna settlement preserved. The final defeat ended a quarter-century of European war.",
-    "keyTerms": "Battle of Waterloo (June 18, 1815); Second Treaty of Paris (November 1815)"
   },
   "French invasion of Russia": {
     "humanDeaths": 1000000,
@@ -4231,15 +4086,6 @@
     "aftermath": "Same arc as the Ming-Qing transition. The conquest absorbed the Ming bureaucracy wholesale but layered a Manchu military aristocracy on top, with the eight-banner system the institutional backbone of Qing power for a century and a half.",
     "keyTerms": "Qing entry into Beijing (1644)"
   },
-  "Mughal–Maratha wars": {
-    "humanDeaths": 1000000,
-    "startYear": 1680,
-    "endYear": 1707,
-    "parent": "",
-    "outcome": "Marathas survive Aurangzeb's 27-year campaign; Mughal exhaustion seeds 18th-century imperial decline.",
-    "aftermath": "Aurangzeb spent the second half of his reign in the Deccan trying to crush Shivaji's heirs. The Marathas held out, the Mughal treasury bled, and by 1707 the empire was overextended. Maratha expansion in the 18th century would fill the vacuum.",
-    "keyTerms": "Death of Aurangzeb in the Deccan (1707)"
-  },
   "Maratha Empire": {
     "humanDeaths": 1500000,
     "startYear": 1674,
@@ -4348,24 +4194,6 @@
     "aftermath": "Three and a half years of jungle war from the Japanese conquest of Burma in 1942 to the Allied liberation in 1945. Slim's 14th Army produced the longest fighting retreat in British military history followed by the largest land battle in the Pacific theatre at Imphal-Kohima.",
     "keyTerms": "Battle of Imphal-Kohima (March–July 1944)"
   },
-  "Mughal-Sikh Wars": {
-    "humanDeaths": 200000,
-    "startYear": 1606,
-    "endYear": 1716,
-    "parent": "",
-    "outcome": "Mixed; Mughal central authority broken by the early 18th century, Sikh Misls dominate Punjab by 1716.",
-    "aftermath": "A century of intermittent war during which the Sikh community evolved from religious order to political-military force. Banda Singh Bahadur's execution in 1716 punctuated the Mughal counter-offensive, but the Misl confederacy and ultimately Ranjit Singh's empire grew out of the same struggle.",
-    "keyTerms": "Execution of Banda Singh Bahadur (June 1716)"
-  },
-  "Jihadist insurgency in Burkina Faso": {
-    "humanDeaths": 24000,
-    "startYear": 2015,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing; multiple military coups (2022) reflect state collapse under jihadist pressure.",
-    "aftermath": "A decade of jihadist insurgency (JNIM, ISGS) that has displaced two million people and produced two coups in 2022 alone. Burkina Faso joined Mali and Niger in expelling French forces and shifted to Russian (Wagner/Africa Corps) security partnership.",
-    "keyTerms": "September 2022 coup"
-  },
   "Libyan Civil War": {
     "humanDeaths": 30000,
     "startYear": 2011,
@@ -4473,15 +4301,6 @@
     "outcome": "Polish-Lithuanian Commonwealth survived; Swedish gains rolled back by 1660.",
     "aftermath": "Five years of war (1655-1660) that wrecked the Commonwealth — depopulated by 30%, partitioned and reoccupied by Swedish, Russian, Brandenburger, and Transylvanian forces in turn. The Polish-Lithuanian gentry recovered nominal control but the wars opened the slow path to the partitions of the 1770s-1790s.",
     "keyTerms": "Treaty of Oliva (May 3, 1660)"
-  },
-  "Yemeni Civil War (2014–present)": {
-    "humanDeaths": 380000,
-    "startYear": 2014,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing.",
-    "aftermath": "See Yemeni Civil War — canonical entry.",
-    "keyTerms": "Stockholm Agreement (2018)"
   },
   "Civil wars of the Tetrarchy": {
     "humanDeaths": 100000,
@@ -4617,15 +4436,6 @@
     "outcome": "Russian victory; Imam Shamil surrenders 1859.",
     "aftermath": "See Caucasian War — canonical entry covering the broader 1817-1864 arc.",
     "keyTerms": "Surrender of Shamil (August 1859)"
-  },
-  "Myanmar civil war (2021–present)": {
-    "humanDeaths": 60000,
-    "startYear": 2021,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing as of late 2025.",
-    "aftermath": "A war between the State Administration Council military junta and the National Unity Government plus pre-existing ethnic armed organisations following the February 2021 coup. 60,000 dead, three million displaced, and the partial collapse of the military's territorial control in Rakhine, Chin, Kachin, and northern Shan states.",
-    "keyTerms": "February 2021 coup; Operation 1027 (October 2023)"
   },
   "Palatinate phase of the Thirty Years' War": {
     "humanDeaths": 200000,
@@ -4851,15 +4661,6 @@
     "outcome": "Inconclusive; 2020 ceasefire and ongoing transitional process.",
     "aftermath": "Six years of war between the Tripoli-based GNA/GNU and the LNA under Haftar. Foreign intervention (Russia, Turkey, UAE, Egypt) shaped the conflict; the 2020 ceasefire and the Berlin Conference framework produced a fragile transitional government.",
     "keyTerms": "October 2020 ceasefire"
-  },
-  "Somali Civil War": {
-    "humanDeaths": 500000,
-    "startYear": 1991,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing; the original 1991 civil war evolved into the War in Somalia after 2006.",
-    "aftermath": "Three decades of state collapse since the fall of Siad Barre in 1991. The war has produced perhaps 500,000 dead, the world's longest-standing collapsed state, and the piracy crisis off the Horn of Africa.",
-    "keyTerms": "Fall of Siad Barre (January 1991)"
   },
   "Spanish invasion of Portugal": {
     "humanDeaths": 6000,
@@ -5519,11 +5320,6 @@
     "aftermath": "Either the 1894-1895 first war (see First Sino-Japanese War) or the 1937-1945 second war (see Second Sino-Japanese War).",
     "keyTerms": "See specific entry"
   },
-  "Anglo-Spanish War": {
-    "outcome": "Stalemate; Treaty of London (1604) ends formal hostilities.",
-    "aftermath": "Two decades of war during which the Spanish Armada (1588) failed, Drake circumnavigated and burned Cadiz, and Elizabethan England rose to maritime contention. The Treaty of London ended the war with no clear winner but began the long Anglo-Spanish rivalry that defined the next two centuries.",
-    "keyTerms": "Spanish Armada (August 1588); Treaty of London (August 1604)"
-  },
   "Iran-Israel war 2024": {
     "outcome": "See Iran-Israel direct strikes 2024.",
     "aftermath": "Eight months of direct Iran-Israel exchanges including the April 2024 Iranian missile/drone barrage (Operation True Promise) and Israeli counterstrikes on Iranian air defences. The most significant direct state-on-state exchange in the Iran-Israel rivalry since 1979.",
@@ -5544,7 +5340,8 @@
     "keyTerms": "Execution of Banda Singh Bahadur (June 1716); Battle of Chappar Chiri (May 12, 1710)",
     "startYear": 1606,
     "endYear": 1799,
-    "humanDeaths": 100000
+    "humanDeaths": 100000,
+    "parent": ""
   },
   "Spanish American wars of independence": {
     "outcome": "Patriot victory across Spanish America; Spain retains only Cuba and Puerto Rico by 1825.",
@@ -5767,14 +5564,6 @@
     "endYear": -900,
     "humanDeaths": 50000
   },
-  "Assyrian conquest of Aram": {
-    "outcome": "Neo-Assyrian conquest of the Aramean kingdoms by Tiglath-Pileser III; Damascus falls 732 BC.",
-    "aftermath": "A century of Assyrian campaigns that destroyed the Aramean city-states of Syria and the northern Levant. The conquests produced the first true imperial structure in Mesopotamia and the deportation policies that scattered Aramean populations across the empire.",
-    "keyTerms": "Fall of Damascus (732 BC); Battle of Qarqar (853 BC)",
-    "startYear": -880,
-    "endYear": -732,
-    "humanDeaths": 100000
-  },
   "Sennacherib's campaign in the Levant": {
     "outcome": "Assyrian victory; Hezekiah pays tribute; Jerusalem spared.",
     "aftermath": "Sennacherib's 701 BC western campaign devastated 46 fortified cities of Judah; only Jerusalem held out. Biblical, Assyrian, and Greek accounts agree on the strategic outcome; the cause of the Assyrian withdrawal from Jerusalem remains debated.",
@@ -5798,14 +5587,6 @@
     "startYear": 1492,
     "endYear": 1976,
     "humanDeaths": 500000
-  },
-  "Roman conquest of Hispania": {
-    "outcome": "Roman victory; Hispania fully pacified under Augustus by 19 BC.",
-    "aftermath": "Two centuries of conquest from the Second Punic War to the Cantabrian Wars (19 BC). Hispania became a wealthy core province providing emperors (Trajan, Hadrian, Theodosius), grain, gold, and the philosopher Seneca.",
-    "keyTerms": "Numantine War (143-133 BC); Cantabrian Wars (29-19 BC)",
-    "startYear": -218,
-    "endYear": -19,
-    "humanDeaths": 300000
   },
   "Roman–Etruscan Wars": {
     "outcome": "Roman victory; Etruria absorbed by 264 BC.",
@@ -5853,5 +5634,530 @@
     "outcome": "Hittite expansion peaks under Suppiluliuma I and Muwatalli II; collapses in the Bronze Age Collapse.",
     "aftermath": "See Hittite Wars.",
     "keyTerms": "Battle of Kadesh (1274 BC)"
+  },
+  "North African campaign": {
+    "humanDeaths": 1000000,
+    "startYear": 1940,
+    "endYear": 1943,
+    "parent": "World War II",
+    "outcome": "Allied victory; Axis forces in Tunisia surrender May 13, 1943.",
+    "aftermath": "Three years of desert war from Libya to the Tunisian coast — Rommel's Afrika Korps, the British 8th Army, Operation Torch. The campaign closed the Mediterranean as an Axis lake, secured Suez, and gave the Allies the launching pad for the invasion of Sicily.",
+    "keyTerms": "Tunisian Surrender (May 13, 1943)"
+  },
+  "Indo-Pakistani war of 1965": {
+    "humanDeaths": 7000,
+    "startYear": 1965,
+    "endYear": 1965,
+    "parent": "",
+    "outcome": "Stalemate; UN-brokered ceasefire and Tashkent Declaration (January 1966).",
+    "aftermath": "A seventeen-day war over Kashmir initiated by Pakistan's Operation Gibraltar infiltration. The largest tank battles fought anywhere since WWII (Asal Uttar, Chawinda) ended inconclusively. The Tashkent Declaration restored pre-war borders.",
+    "keyTerms": "Tashkent Declaration (January 10, 1966)"
+  },
+  "Libyan Civil War (2011)": {
+    "humanDeaths": 30000,
+    "startYear": 2011,
+    "endYear": 2011,
+    "parent": "",
+    "outcome": "NATO-backed rebel victory; Gaddafi killed October 20, 2011.",
+    "aftermath": "See Libyan Civil War.",
+    "keyTerms": "Death of Gaddafi (October 20, 2011)"
+  },
+  "Mughal-Maratha Wars": {
+    "humanDeaths": 1000000,
+    "startYear": 1680,
+    "endYear": 1707,
+    "parent": "",
+    "outcome": "Marathas survive Aurangzeb's 27-year campaign; Mughal exhaustion seeds 18th-century imperial decline.",
+    "aftermath": "Aurangzeb spent the second half of his reign in the Deccan trying to crush Shivaji's heirs. The Marathas held out, the Mughal treasury bled, and by 1707 the empire was overextended. Maratha expansion in the 18th century would fill the vacuum.",
+    "keyTerms": "Death of Aurangzeb in the Deccan (1707)"
+  },
+  "Russo-Swedish War (1656–1661)": {
+    "keyTerms": "Treaty of Cardis (June 21, 1661)",
+    "outcome": "Status quo ante bellum; Treaty of Valiesar (1658) and Treaty of Cardis (1661).",
+    "aftermath": "Two years of war during the Second Northern War in which Russia attempted unsuccessfully to seize Swedish Livonia. The treaty held until Peter the Great's Great Northern War four decades later."
+  },
+  "Third Italian War": {
+    "humanDeaths": 500000,
+    "startYear": 1494,
+    "endYear": 1559,
+    "parent": "",
+    "outcome": "Habsburg victory; Peace of Cateau-Cambrésis (1559) confirms Spanish dominance of Italy.",
+    "aftermath": "Sixty-five years of war that began with Charles VIII's invasion of Italy in 1494 and ended with Spain dominant from Naples to Milan. The wars produced the modern military profession — the Spanish tercio, the Italian fortification school — and bankrupted both Spain and France.",
+    "keyTerms": "Peace of Cateau-Cambrésis (April 3, 1559)"
+  },
+  "Yemeni Crisis and the Yemeni Civil War (2014–present)": {
+    "humanDeaths": 380000,
+    "startYear": 2014,
+    "endYear": 0,
+    "parent": "",
+    "outcome": "Ongoing.",
+    "aftermath": "See Yemeni Civil War — canonical entry.",
+    "keyTerms": "Stockholm Agreement (2018)"
+  },
+  "Third Anglo-Maratha War": {
+    "humanDeaths": 30000,
+    "startYear": 1775,
+    "endYear": 1782,
+    "parent": "",
+    "outcome": "Inconclusive; Treaty of Salbai (1782) restores status quo ante bellum.",
+    "aftermath": "Seven years of war that confirmed Maratha sovereignty against East India Company encroachment but exhausted both sides. The treaty held until the Second Anglo-Maratha War a generation later.",
+    "keyTerms": "Treaty of Salbai (May 17, 1782)"
+  },
+  "Byzantine–Serbian wars": {
+    "humanDeaths": 500000,
+    "startYear": 502,
+    "endYear": 628,
+    "parent": "",
+    "outcome": "Byzantine victory in 628 after centuries of intermittent war; Arab conquests follow.",
+    "aftermath": "Same arc as Persian-Roman wars and Roman-Sasanian War.",
+    "keyTerms": "Battle of Nineveh (627)"
+  },
+  "French protectorate of Morocco": {
+    "humanDeaths": 50000,
+    "startYear": 1912,
+    "endYear": 1927,
+    "parent": "",
+    "outcome": "Spanish consolidation of the protectorate by 1927.",
+    "aftermath": "Fifteen years of Spanish colonial war in northern Morocco, including the Rif War and the catastrophic 1921 defeat at Annual. The combined Spanish-French offensive of 1925-1927 finally subdued the Rif Republic; Spanish Morocco lasted until 1956.",
+    "keyTerms": "End of the Rif War (May 1926)"
+  },
+  "Anglo-Spanish Wars": {
+    "humanDeaths": 5000,
+    "startYear": 1727,
+    "endYear": 1729,
+    "parent": "",
+    "outcome": "Inconclusive; Treaty of Seville (1729) restores status quo.",
+    "aftermath": "A two-year war over British commercial rights in the Spanish empire and the Spanish siege of Gibraltar. The treaty restored the asiento — the British slave-trade contract granted at Utrecht — until the next Anglo-Spanish war (1739).",
+    "keyTerms": "Treaty of Seville (November 9, 1729)"
+  },
+  "Waterloo campaign during the War of the Seventh Coalition": {
+    "humanDeaths": 90000,
+    "startYear": 1815,
+    "endYear": 1815,
+    "parent": "Napoleonic Wars",
+    "outcome": "Coalition victory at Waterloo (June 18, 1815); Napoleon surrenders.",
+    "aftermath": "Hundred Days and Waterloo. Napoleon exiled to St. Helena; the Bourbons restored; the Congress of Vienna settlement preserved. The final defeat ended a quarter-century of European war.",
+    "keyTerms": "Battle of Waterloo (June 18, 1815); Second Treaty of Paris (November 1815)"
+  },
+  "Islamist insurgency in Burkina Faso": {
+    "humanDeaths": 24000,
+    "startYear": 2015,
+    "endYear": 0,
+    "parent": "",
+    "outcome": "Ongoing; multiple military coups (2022) reflect state collapse under jihadist pressure.",
+    "aftermath": "A decade of jihadist insurgency (JNIM, ISGS) that has displaced two million people and produced two coups in 2022 alone. Burkina Faso joined Mali and Niger in expelling French forces and shifted to Russian (Wagner/Africa Corps) security partnership.",
+    "keyTerms": "September 2022 coup"
+  },
+  "Myanmar civil war (2021–present) and the Myanmar conflict": {
+    "humanDeaths": 60000,
+    "startYear": 2021,
+    "endYear": 0,
+    "parent": "",
+    "outcome": "Ongoing as of late 2025.",
+    "aftermath": "A war between the State Administration Council military junta and the National Unity Government plus pre-existing ethnic armed organisations following the February 2021 coup. 60,000 dead, three million displaced, and the partial collapse of the military's territorial control in Rakhine, Chin, Kachin, and northern Shan states.",
+    "keyTerms": "February 2021 coup; Operation 1027 (October 2023)"
+  },
+  "Somali Civil War (2009–present)": {
+    "humanDeaths": 500000,
+    "startYear": 1991,
+    "endYear": 0,
+    "parent": "",
+    "outcome": "Ongoing; the original 1991 civil war evolved into the War in Somalia after 2006.",
+    "aftermath": "Three decades of state collapse since the fall of Siad Barre in 1991. The war has produced perhaps 500,000 dead, the world's longest-standing collapsed state, and the piracy crisis off the Horn of Africa.",
+    "keyTerms": "Fall of Siad Barre (January 1991)"
+  },
+  "Assyrian conquest of Elam": {
+    "outcome": "Neo-Assyrian conquest of the Aramean kingdoms by Tiglath-Pileser III; Damascus falls 732 BC.",
+    "aftermath": "A century of Assyrian campaigns that destroyed the Aramean city-states of Syria and the northern Levant. The conquests produced the first true imperial structure in Mesopotamia and the deportation policies that scattered Aramean populations across the empire.",
+    "keyTerms": "Fall of Damascus (732 BC); Battle of Qarqar (853 BC)",
+    "startYear": -880,
+    "endYear": -732,
+    "humanDeaths": 100000
+  },
+  "Barcid conquest of Hispania": {
+    "outcome": "Roman victory; Hispania fully pacified under Augustus by 19 BC.",
+    "aftermath": "Two centuries of conquest from the Second Punic War to the Cantabrian Wars (19 BC). Hispania became a wealthy core province providing emperors (Trajan, Hadrian, Theodosius), grain, gold, and the philosopher Seneca.",
+    "keyTerms": "Numantine War (143-133 BC); Cantabrian Wars (29-19 BC)",
+    "startYear": -218,
+    "endYear": -19,
+    "humanDeaths": 300000
+  },
+  "First Anglo-Maratha War": {
+    "outcome": "Inconclusive; Treaty of Salbai (1782) restores status quo ante bellum.",
+    "aftermath": "Seven years of war that confirmed Maratha sovereignty against East India Company encroachment but exhausted both sides. The treaty held until the Second Anglo-Maratha War a generation later.",
+    "keyTerms": "Treaty of Salbai (May 17, 1782)",
+    "startYear": 1775,
+    "endYear": 1782,
+    "humanDeaths": 25000
+  },
+  "Byzantine–Sassanid wars": {
+    "outcome": "Series of Roman-Byzantine vs Sassanian Persian wars; final Byzantine victory under Heraclius (628), but both empires were exhausted, opening the door for the Muslim conquests.",
+    "aftermath": "Four centuries of intermittent war between the Romans/Byzantines and Sassanian Persia. The decisive 602-628 war under Heraclius (battles of Issus, Nineveh) ended in Byzantine triumph but devastation; both empires were broken when the Arab armies arrived in the 630s.",
+    "keyTerms": "Battle of Nineveh (December 12, 627); Eternal Peace (532)",
+    "startYear": 224,
+    "endYear": 628,
+    "humanDeaths": 1000000
+  },
+  "Italian Wars": {
+    "outcome": "Habsburg victory; Treaty of Cateau-Cambrésis (1559) confirms Spanish dominance in Italy.",
+    "aftermath": "Six decades of war (1494-1559) among France, Spain, the Holy Roman Empire, the Italian city-states, and the Papacy. The treaty cemented Habsburg Spanish hegemony in Italy for the next 150 years.",
+    "keyTerms": "Treaty of Cateau-Cambrésis (April 1559)",
+    "startYear": 1494,
+    "endYear": 1559,
+    "humanDeaths": 250000
+  },
+  "Assyrian conquest of Aram": {
+    "outcome": "Neo-Assyrian conquest of the Aramean kingdoms by Tiglath-Pileser III; Damascus falls 732 BC.",
+    "aftermath": "A century of Assyrian campaigns that destroyed the Aramean city-states of Syria and the northern Levant. The conquests produced the first true imperial structure in Mesopotamia.",
+    "keyTerms": "Fall of Damascus (732 BC); Battle of Qarqar (853 BC)",
+    "startYear": -880,
+    "endYear": -732,
+    "humanDeaths": 100000
+  },
+  "Roman conquest of Hispania": {
+    "outcome": "Roman victory; Hispania fully pacified under Augustus by 19 BC.",
+    "aftermath": "Two centuries of conquest from the Second Punic War to the Cantabrian Wars (19 BC). Hispania became a wealthy core province providing emperors (Trajan, Hadrian, Theodosius), grain, gold, and the philosopher Seneca.",
+    "keyTerms": "Numantine War (143-133 BC); Cantabrian Wars (29-19 BC)",
+    "startYear": -218,
+    "endYear": -19,
+    "humanDeaths": 300000
+  },
+  "Anglo-Spanish War (1727)": {
+    "outcome": "Inconclusive; Treaty of Seville (1729) restores status quo.",
+    "aftermath": "A two-year war over British commercial rights in the Spanish empire and the Spanish siege of Gibraltar. The treaty restored the asiento — the British slave-trade contract granted at Utrecht.",
+    "keyTerms": "Treaty of Seville (November 9, 1729)",
+    "startYear": 1727,
+    "endYear": 1729,
+    "humanDeaths": 5000
+  },
+  "Yemeni Civil War (2014–present)": {
+    "outcome": "Ongoing; Houthi-Saudi ceasefire (April 2022) holds intermittently.",
+    "aftermath": "A decade-long war between the Houthi movement and the internationally recognized government, with Saudi-led coalition intervention (2015) and Iranian Houthi support. Mass humanitarian crisis; 377,000+ killed by 2022.",
+    "keyTerms": "Houthi seizure of Sana'a (September 2014); Saudi-Houthi truce (April 2022)",
+    "startYear": 2014,
+    "humanDeaths": 377000
+  },
+  "Myanmar civil war (2021–present)": {
+    "outcome": "Ongoing; junta losing ground to NUG/PDF and ethnic resistance organizations.",
+    "aftermath": "Civil war triggered by the February 2021 military coup against the elected NLD government. National Unity Government (NUG) leads resistance with allied Peoples Defence Forces (PDF) and longstanding ethnic armed organizations. As of 2025 the junta has lost effective control of much of the country.",
+    "keyTerms": "Coup (February 1, 2021); 1027 Operation by Three Brotherhood Alliance (October 2023)",
+    "startYear": 2021,
+    "humanDeaths": 50000
+  },
+  "Spanish protectorate in Morocco": {
+    "outcome": "Spanish consolidation of the protectorate by 1927; ended with Moroccan independence (1956).",
+    "aftermath": "Spanish colonial rule in northern Morocco, including the Rif War. The 1925-27 Franco-Spanish offensive broke the Rif Republic. Spanish Morocco rejoined newly independent Morocco in 1956.",
+    "keyTerms": "End of the Rif War (May 1926); Moroccan independence (April 7, 1956)",
+    "startYear": 1912,
+    "endYear": 1956,
+    "humanDeaths": 30000
+  },
+  "Russo-Swedish War (1656–1658)": {
+    "outcome": "Status quo ante bellum; Treaty of Valiesar (1658) and Treaty of Cardis (1661).",
+    "aftermath": "Two years of war during the Second Northern War in which Russia attempted unsuccessfully to seize Swedish Livonia. The treaty held until Peter the Great's Great Northern War four decades later.",
+    "keyTerms": "Treaty of Cardis (June 21, 1661)",
+    "startYear": 1656,
+    "endYear": 1658,
+    "humanDeaths": 30000
+  },
+  "Jihadist insurgency in Burkina Faso": {
+    "outcome": "Ongoing; multiple military coups (2022) reflect state collapse under jihadist pressure.",
+    "aftermath": "A decade of jihadist insurgency (JNIM, ISGS) that has displaced two million people and produced two coups in 2022 alone. Burkina Faso joined Mali and Niger in expelling French forces and shifted to Russian (Wagner/Africa Corps) security partnership.",
+    "keyTerms": "September 2022 coup",
+    "startYear": 2015,
+    "humanDeaths": 50000
+  },
+  "War of the Seventh Coalition": {
+    "outcome": "Coalition victory at Waterloo (June 18, 1815); Napoleon abdicates and is exiled to Saint Helena.",
+    "aftermath": "Three-month campaign that ended the Hundred Days return of Napoleon. Wellington and Blücher's victory at Waterloo terminated the Napoleonic era.",
+    "keyTerms": "Battle of Waterloo (June 18, 1815); Second Treaty of Paris (November 20, 1815)",
+    "startYear": 1815,
+    "endYear": 1815,
+    "humanDeaths": 60000
+  },
+  "Polish-Ottoman wars": {
+    "outcome": "Inconclusive; Polish-Ottoman frontier stabilized at the Dniester River by the late 17th century.",
+    "aftermath": "Three centuries of intermittent war between the Polish-Lithuanian Commonwealth and the Ottoman Empire over the Ukrainian and Moldavian frontier. Polish victories at Khotyn (1621) and Vienna (1683) checked Ottoman northward expansion; the Treaty of Karlowitz (1699) cemented the frontier.",
+    "keyTerms": "Battle of Khotyn (1621); Battle of Vienna (September 12, 1683); Treaty of Karlowitz (January 26, 1699)",
+    "startYear": 1485,
+    "endYear": 1699,
+    "humanDeaths": 200000
+  },
+  "Viking expansion": {
+    "outcome": "Ended c. 1066 with the Norman Conquest of England; Viking world absorbed into Christian European order.",
+    "aftermath": "Three centuries (793-1066) of Norse raiding, trading, and settlement across the North Sea, Atlantic, Mediterranean, and Eastern European riverways. Founded Dublin, Iceland, Greenland, briefly Vinland; settled the Danelaw, Normandy, Rus' principalities, and Sicily. Christianization and the consolidation of European kingdoms ended the expansion phase.",
+    "keyTerms": "Lindisfarne raid (June 793); Battle of Stamford Bridge (September 25, 1066)",
+    "startYear": 793,
+    "endYear": 1066,
+    "humanDeaths": 500000
+  },
+  "Somali Civil War": {
+    "outcome": "Ongoing; transitional federal government since 2012, but al-Shabaab and clan factions still control significant territory.",
+    "aftermath": "Three and a half decades of war that began with the 1991 collapse of the Siad Barre regime. Includes the 1993 US/UN Operation Restore Hope and Battle of Mogadishu; the rise and ongoing insurgency of al-Shabaab; ATMIS/AMISOM peace-keeping operations. State authority remains contested.",
+    "keyTerms": "Battle of Mogadishu (October 3-4, 1993); Founding of Federal Government (2012)",
+    "startYear": 1991,
+    "humanDeaths": 500000
+  },
+  "Thousand Days' War": {
+    "outcome": "Conservative government victory; Treaty of Neerlandia (1902) and Treaty of Wisconsin (1902) end the conflict.",
+    "aftermath": "Three years of civil war between Colombia's Liberal and Conservative parties. The war devastated the country economically and contributed to the 1903 separation of Panama (which the US then supported to secure the canal route).",
+    "keyTerms": "Treaty of Wisconsin (November 21, 1902); Separation of Panama (November 3, 1903)",
+    "startYear": 1899,
+    "endYear": 1902,
+    "humanDeaths": 100000
+  },
+  "Ottoman-Portuguese conflicts": {
+    "outcome": "Stalemate; Portuguese hold Persian Gulf strongholds (Hormuz lost 1622), Ottomans dominate the Red Sea.",
+    "aftermath": "A century and a half of intermittent maritime war between the Ottoman Empire and Portugal across the Red Sea, Persian Gulf, and Indian Ocean. The Ottomans failed to dislodge Portugal from the Indian spice trade; Portuguese hold over Hormuz collapsed with Anglo-Persian assistance.",
+    "keyTerms": "Capture of Aden (1538); Fall of Hormuz (May 1622)",
+    "startYear": 1538,
+    "endYear": 1683,
+    "humanDeaths": 50000
+  },
+  "Ottoman-Mamluk Wars": {
+    "outcome": "Ottoman victory; Mamluk Sultanate destroyed and Egypt + Syria absorbed into the Ottoman Empire (1517).",
+    "aftermath": "Three years of decisive Ottoman victory under Selim I that ended the Mamluk Sultanate of Egypt — a state that had ruled Egypt since 1250. Cairo became an Ottoman provincial capital; the conquest gave the Ottomans control of the Hejaz and the holy cities of Mecca and Medina.",
+    "keyTerms": "Battle of Marj Dabiq (August 24, 1516); Battle of Ridaniya (January 22, 1517)",
+    "startYear": 1516,
+    "endYear": 1517,
+    "humanDeaths": 50000
+  },
+  "Social War": {
+    "outcome": "Roman victory; Italian allies (socii) granted Roman citizenship.",
+    "aftermath": "A three-year war (91-87 BC) in which Rome's Italian allies revolted to demand citizenship. The Romans crushed the revolt militarily but then granted nearly all the rebel demands, extending citizenship across Italy. The war directly precipitated Sulla's march on Rome and the civil wars that followed.",
+    "keyTerms": "Lex Julia (90 BC); Lex Plautia Papiria (89 BC)",
+    "startYear": -91,
+    "endYear": -87,
+    "humanDeaths": 300000
+  },
+  "Sinhalese-Portuguese War": {
+    "outcome": "Inconclusive; Dutch intervention in the 1640s drove the Portuguese from coastal Ceylon.",
+    "aftermath": "A century and a half of war between the Sinhalese kingdoms of Ceylon and the Portuguese Estado da Índia. Portuguese coastal control was finally broken by Dutch intervention; the interior remained the Kingdom of Kandy until the 1815 British conquest.",
+    "keyTerms": "Battle of Mulleriyawa (1562); Dutch capture of Colombo (May 1656)",
+    "startYear": 1527,
+    "endYear": 1656,
+    "humanDeaths": 50000
+  },
+  "Russo-Turkish Wars": {
+    "outcome": "Series of 12 wars from 1568 to 1918; net Russian victory and Ottoman territorial collapse.",
+    "aftermath": "See the specific wars (1768-1774, 1787-1792, 1806-1812, 1828-1829, 1853-1856 Crimean War, 1877-1878). The wars produced the modern Black Sea geopolitics, the independence of the Balkan states, and the long collapse of the Ottoman Empire.",
+    "keyTerms": "Treaty of San Stefano (March 3, 1878); Treaty of Küçük Kaynarca (July 21, 1774)",
+    "startYear": 1568,
+    "endYear": 1918,
+    "humanDeaths": 2000000
+  },
+  "Persian-Uzbek wars": {
+    "outcome": "Inconclusive; Khorasan stabilized as Safavid Persian territory by 1605.",
+    "aftermath": "A century of intermittent war between Safavid Persia and the Shaybanid Uzbeks over Khorasan and Transoxiana. Shah Abbas I's campaigns in the 1590s-1600s secured Khorasan for Persia.",
+    "keyTerms": "Battle of Pul-i Salar (1598)",
+    "startYear": 1500,
+    "endYear": 1605,
+    "humanDeaths": 100000
+  },
+  "Ottoman-Saudi War": {
+    "outcome": "Egyptian/Ottoman victory; First Saudi state destroyed (1818).",
+    "aftermath": "Seven years (1811-1818) of war by Egyptian forces under Muhammad Ali's son Ibrahim Pasha (on behalf of the Ottoman Sultan) against the First Saudi state and its Wahhabi religious movement. Ended with the destruction of the Saudi capital Diriyah and execution of the Saudi imam Abdullah bin Saud.",
+    "keyTerms": "Destruction of Diriyah (September 1818)",
+    "startYear": 1811,
+    "endYear": 1818,
+    "humanDeaths": 25000
+  },
+  "Illyrian Wars": {
+    "outcome": "Roman victory; Illyrian coast brought under Roman protection 219 BC.",
+    "aftermath": "Two short wars (229-228 BC, 219 BC) in which Rome suppressed Illyrian piracy along the Adriatic. The conquests gave Rome its first foothold in the Balkans, setting up the Macedonian Wars.",
+    "keyTerms": "Roman protectorate over Illyria (228 BC)",
+    "startYear": -229,
+    "endYear": -219,
+    "humanDeaths": 20000
+  },
+  "Wars of Italian Unification": {
+    "outcome": "Italy unified between 1859 and 1870; Rome the final addition.",
+    "aftermath": "See Italian unification — three wars (1848-49, 1859, 1866) plus Garibaldi's 1860 expedition and the 1870 capture of Rome.",
+    "keyTerms": "Capture of Rome (September 20, 1870)",
+    "startYear": 1848,
+    "endYear": 1870,
+    "humanDeaths": 60000
+  },
+  "Vandalic War": {
+    "outcome": "Byzantine victory; Vandal Kingdom of North Africa destroyed (534).",
+    "aftermath": "Belisarius's 533-534 expedition for Justinian destroyed the Vandal kingdom in eighteen months. The reconquered African provinces (Africa, Numidia, Mauretania) returned to Roman/Byzantine control and remained so until the Arab conquest a century later.",
+    "keyTerms": "Battle of Ad Decimum (September 533); Capture of Carthage (September 533)",
+    "startYear": 533,
+    "endYear": 534,
+    "humanDeaths": 30000
+  },
+  "War of Devolution": {
+    "outcome": "French victory; Treaty of Aix-la-Chapelle (1668).",
+    "aftermath": "Eleven-month war by Louis XIV against the Spanish Netherlands, exploiting an obscure inheritance claim. Limited French gains. The next Franco-Dutch War followed five years later.",
+    "keyTerms": "Treaty of Aix-la-Chapelle (May 2, 1668)",
+    "startYear": 1667,
+    "endYear": 1668,
+    "humanDeaths": 4000
+  },
+  "War of the Camisards": {
+    "outcome": "French royal victory; Protestant rebellion suppressed by 1710.",
+    "aftermath": "A seven-year Huguenot revolt in the Cévennes mountains of southern France against Louis XIV's religious persecution after the revocation of the Edict of Nantes. Crushed by Marshal Villars's combination of military force and selective amnesty.",
+    "keyTerms": "Treaty of Avignon (1704)",
+    "startYear": 1702,
+    "endYear": 1710,
+    "humanDeaths": 12000
+  },
+  "Tudor conquest of Ireland": {
+    "outcome": "English victory; Treaty of Mellifont (1603) and Flight of the Earls (1607).",
+    "aftermath": "A century of conquest from Henry VIII's assumption of the Irish kingship (1541) through the Nine Years' War (1594-1603). The conquest produced the Plantation of Ireland under James I — the demographic foundation of the next four centuries of Irish-British conflict.",
+    "keyTerms": "Treaty of Mellifont (March 30, 1603); Flight of the Earls (September 14, 1607)",
+    "startYear": 1529,
+    "endYear": 1603,
+    "humanDeaths": 100000
+  },
+  "Umayyad conquest of Sindh": {
+    "outcome": "Muslim victory; Muhammad bin Qasim captures Sindh (711-713).",
+    "aftermath": "Two-year Arab campaign that brought the lower Indus valley into the Umayyad Caliphate — the first Muslim foothold on the Indian subcontinent. Sindh remained nominally Muslim-ruled into the modern era and shaped subsequent Indo-Islamic civilisation.",
+    "keyTerms": "Battle of Aror (June 712)",
+    "startYear": 711,
+    "endYear": 713,
+    "humanDeaths": 20000
+  },
+  "Uruguayan Civil War": {
+    "outcome": "Colorado (Blanco) victory in the Guerra Grande; period of relative stability followed.",
+    "aftermath": "The Guerra Grande (1839-1851) — twelve years of war between the Colorado and Blanco parties that drew in Argentina (Rosas), Brazil, and Britain. Ended with Blanco surrender and the long Argentine intervention that produced modern Uruguay.",
+    "keyTerms": "Surrender of Oribe (October 8, 1851)",
+    "startYear": 1839,
+    "endYear": 1851,
+    "humanDeaths": 40000
+  },
+  "Victorio's War": {
+    "outcome": "US-Mexican victory; Victorio killed at Tres Castillos (October 1880).",
+    "aftermath": "A two-year war by the Chihenne Apache chief Victorio against US and Mexican forces in the Southwest borderlands. Victorio's death at Tres Castillos broke organised Chihenne resistance.",
+    "keyTerms": "Battle of Tres Castillos (October 1880)",
+    "startYear": 1879,
+    "endYear": 1881,
+    "humanDeaths": 1000
+  },
+  "Unification of Saudi Arabia": {
+    "outcome": "Saudi victory; Kingdom of Saudi Arabia proclaimed September 23, 1932.",
+    "aftermath": "Three decades of conquest by Ibn Saud, beginning with the 1902 capture of Riyadh and culminating in the 1932 unification of Hejaz, Nejd, and the eastern provinces into the Kingdom of Saudi Arabia.",
+    "keyTerms": "Capture of Riyadh (January 13, 1902); Kingdom proclaimed (September 23, 1932)",
+    "startYear": 1902,
+    "endYear": 1932,
+    "humanDeaths": 30000
+  },
+  "Unification of Hawaii": {
+    "outcome": "Kamehameha victory; Kingdom of Hawaii proclaimed 1810.",
+    "aftermath": "Two-decade conquest by Kamehameha of the island chiefdoms, completed peacefully in 1810 when Kauai accepted vassalage. The unified Kingdom of Hawaii lasted until the 1893 US-backed overthrow.",
+    "keyTerms": "Battle of Nuʻuanu (May 1795)",
+    "startYear": 1790,
+    "endYear": 1810,
+    "humanDeaths": 5000
+  },
+  "Wars of the Guelphs and Ghibellines": {
+    "outcome": "See Guelphs and Ghibellines — canonical entry.",
+    "aftermath": "See Guelphs and Ghibellines.",
+    "keyTerms": "Battle of Montaperti (September 4, 1260)"
+  },
+  "War of the Castilian Succession": {
+    "outcome": "Isabella I victory; Treaty of Alcáçovas (1479) recognises her crown of Castile.",
+    "aftermath": "Four years of war between Isabella of Castile and her niece Joanna la Beltraneja (backed by Portugal). Isabella's victory consolidated the Castilian-Aragonese union and produced the Catholic Monarchs.",
+    "keyTerms": "Treaty of Alcáçovas (September 4, 1479)",
+    "startYear": 1475,
+    "endYear": 1479,
+    "humanDeaths": 8000
+  },
+  "Yellowstone Expedition of 1873": {
+    "outcome": "US Army survey completed under heavy Sioux harassment.",
+    "aftermath": "Custer's 7th Cavalry-escorted survey for the Northern Pacific Railroad. Cited as a precipitating provocation for the Great Sioux War of 1876.",
+    "keyTerms": "Battle of Honsinger Bluff (August 1873)",
+    "startYear": 1873,
+    "endYear": 1873,
+    "humanDeaths": 50
+  },
+  "War against Sigismund": {
+    "outcome": "See Hussite Wars.",
+    "aftermath": "See Hussite Wars — Sigismund's coronation crusades against the Hussite Bohemians.",
+    "keyTerms": "Battle of Vítkov Hill (July 14, 1420)"
+  },
+  "Viking Invasions of Ireland": {
+    "outcome": "Inconclusive; Norse settled the coastal towns (Dublin, Wexford, Waterford, Cork, Limerick) but were defeated at Clontarf (1014).",
+    "aftermath": "Two centuries of Viking raiding and settlement in Ireland. The 1014 Battle of Clontarf is the conventional end-marker of large-scale Viking power in Ireland; the Norse coastal settlements survived as Hiberno-Norse trading towns.",
+    "keyTerms": "Battle of Clontarf (April 23, 1014)",
+    "startYear": 795,
+    "endYear": 1014,
+    "humanDeaths": 50000
+  },
+  "Wahhabi war": {
+    "outcome": "See Ottoman-Saudi War.",
+    "aftermath": "See Ottoman-Saudi War.",
+    "keyTerms": "Destruction of Diriyah (September 1818)"
+  },
+  "Wallachian Uprising of the Greek War of Independence": {
+    "outcome": "Ottoman victory; Tudor Vladimirescu killed (June 1821) and the uprising crushed.",
+    "aftermath": "A five-month Wallachian peasant uprising led by Tudor Vladimirescu, parallel to the Greek war but with different aims. Its suppression nonetheless contributed to the wider Ottoman destabilisation that produced Romanian autonomy at the Treaty of Adrianople (1829).",
+    "keyTerms": "Death of Vladimirescu (June 7, 1821)",
+    "startYear": 1821,
+    "endYear": 1821,
+    "humanDeaths": 8000
+  },
+  "War in Iraq": {
+    "outcome": "See Iraq War / War in Iraq (2013–2017) — see specific entries.",
+    "aftermath": "See specific Iraq War entries.",
+    "keyTerms": "See Iraq War entries"
+  },
+  "War in Somalia (2009-present)": {
+    "outcome": "Ongoing; al-Shabaab insurgency continues against the federal government.",
+    "aftermath": "See Somali Civil War.",
+    "keyTerms": "See Somali Civil War"
+  },
+  "War of the Polish Succession (1587-1588)": {
+    "outcome": "Sigismund III Vasa victory at Pitschen (1588); confirmed as king of Poland.",
+    "aftermath": "A brief contested election after Stephen Báthory's death. Maximilian III of Austria challenged Sigismund III Vasa's election; defeat at Pitschen (1588) ended his claim.",
+    "keyTerms": "Battle of Byczyna (January 24, 1588)",
+    "startYear": 1587,
+    "endYear": 1588,
+    "humanDeaths": 5000
+  },
+  "War of the Straits": {
+    "outcome": "Venetian victory; Treaty of Turin (1381).",
+    "aftermath": "A four-year war between Venice and Genoa for control of the Adriatic-Aegean trade routes. The Treaty of Turin confirmed Venice's long-term naval ascendancy in the eastern Mediterranean.",
+    "keyTerms": "Treaty of Turin (August 8, 1381)",
+    "startYear": 1378,
+    "endYear": 1381,
+    "humanDeaths": 10000
+  },
+  "Yemeni Civil War (2014–present) and the Saudi Arabian-led intervention in Yemen": {
+    "outcome": "See Yemeni Civil War.",
+    "aftermath": "See Yemeni Civil War (2014–present).",
+    "keyTerms": "Saudi-Houthi truce (April 2022)"
+  },
+  "Tunisian–Algerian War (1705)": {
+    "outcome": "Hussein I (Husainid dynasty) victory; consolidation of independent Beylik of Tunis.",
+    "aftermath": "A brief 1705 succession war that produced the Husainid dynasty of Tunis, which ruled until the French protectorate of 1881.",
+    "keyTerms": "Battle of Cap-Bon (1705)",
+    "startYear": 1705,
+    "endYear": 1705,
+    "humanDeaths": 3000
+  },
+  "United States Exploring Expedition": {
+    "outcome": "Naval exploration mission; minor clashes with Fijian and other Pacific islanders.",
+    "aftermath": "Charles Wilkes's 1838-42 US Navy exploration of the Pacific, Antarctic, and South America. Largely scientific; collected specimens that founded the Smithsonian collections.",
+    "keyTerms": "Wilkes Expedition (1838-1842)",
+    "startYear": 1838,
+    "endYear": 1842,
+    "humanDeaths": 50
+  },
+  "War between King Haakon the Good and the sons of Eirik Bloodaxe": {
+    "outcome": "Haakon's sons-of-Eirik victory at Fitjar (961); Haakon mortally wounded.",
+    "aftermath": "Three decades of intermittent succession war in 10th-century Norway between Haakon and Eirik's sons. Haakon's death gave the throne to Harald Greycloak, briefly, before the long Hákon Jarl regency that defined late-10th-century Norway.",
+    "keyTerms": "Battle of Fitjar (961)",
+    "startYear": 933,
+    "endYear": 961,
+    "humanDeaths": 4000
+  },
+  "War in the Vendée (Virée de Galerne)": {
+    "outcome": "Republican victory; Vendéean army destroyed at Savenay (December 1793).",
+    "aftermath": "The October-December 1793 march of the Vendéean Catholic and Royal Army across Brittany and Normandy, seeking British landings that never came. The march ended in annihilation at Savenay.",
+    "keyTerms": "Battle of Savenay (December 23, 1793)",
+    "startYear": 1793,
+    "endYear": 1793,
+    "humanDeaths": 25000
   }
 }

@@ -316,6 +316,12 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
   // existed, also draw a fading arc from there to here — that arc IS the
   // movement story for the war: "the campaign moved from there to here."
   const lastSelectedRef = useRef<{ id: string; lat: number; lng: number } | null>(null);
+  // suppressInitialBurstRef prevents the very first selection from firing
+  // the shock-wave/impact rings on page load. Without it, an URL-hash deep
+  // link or auto-featured battle on cold load would fire a flurry of rings
+  // before the user has even rendered the first frame — distracting and
+  // unwarranted. Flips false after the first selection arrives.
+  const suppressInitialBurstRef = useRef(true);
   const [traceArcs, setTraceArcs] = useState<Array<{ id: string; startLat: number; startLng: number; endLat: number; endLng: number; color: string; expires: number }>>([]);
   useEffect(() => {
     if (!selectedBattle) {
@@ -324,20 +330,31 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     }
     const prev = lastSelectedRef.current;
     if (prev?.id === selectedBattle.id) return;
+    // Hoist tNow + color to the function scope so the trace-arc block below
+    // can read them too. Previously they were scoped to the else branch and
+    // the trace-arc setter referenced an undefined tNow on the very first
+    // selection (when suppressInitialBurstRef is true), crashing BattleGlobe
+    // and rendering the whole app as a black screen.
     const tNow = performance.now();
     const color = ERA_COLORS[selectedBattle.era] || '#fbbf24';
-    setIgnitionRings((existing) => {
-      const alive = existing.filter((r) => r.expires > tNow);
-      // Triple-burst — white core ring + double era-colored shock wave.
-      // Multiple expanding rings staggered in expiry produce a deeper,
-      // more cinematic "this is the battle" thump than a single pulse.
-      return [
-        ...alive,
-        { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-core-${tNow}`, kind: 'ignition' as const, color: '#ffffff', expires: tNow + 1100 },
-        { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-a-${tNow}`, kind: 'ignition' as const, color, expires: tNow + 2400 },
-        { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-b-${tNow}`, kind: 'ignition' as const, color, expires: tNow + 3000 },
-      ];
-    });
+    if (suppressInitialBurstRef.current) {
+      suppressInitialBurstRef.current = false;
+    } else {
+      setIgnitionRings((existing) => {
+        const alive = existing.filter((r) => r.expires > tNow);
+        // Quad-burst impact moment — bright white core flash, two era-
+        // colored shock waves, and a slow trailing ripple. Staggered
+        // expiries produce a layered "collision" feel rather than one
+        // flat pulse.
+        return [
+          ...alive,
+          { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-core-${tNow}`, kind: 'ignition' as const, color: '#ffffff', expires: tNow + 900 },
+          { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-a-${tNow}`, kind: 'ignition' as const, color, expires: tNow + 2000 },
+          { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-b-${tNow}`, kind: 'ignition' as const, color, expires: tNow + 2800 },
+          { lat: selectedBattle.lat, lng: selectedBattle.lng, id: `sel-${selectedBattle.id}-c-${tNow}`, kind: 'ignition' as const, color, expires: tNow + 3600 },
+        ];
+      });
+    }
     if (prev) {
       // Distance check — skip arcs spanning more than half the globe (rare
       // jumps between distant theaters look like noise, not narrative).
@@ -374,6 +391,24 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     }, 400);
     return () => clearInterval(id);
   }, [traceArcs.length]);
+
+  // Hard-clear all transient ring/arc layers whenever EITHER the war context
+  // goes away (warCountryColors empty/undefined) OR no battle is selected.
+  // Both are signals that the user is back on the bare main globe and
+  // shouldn't see leftover rings or campaign-trace arcs from a previous
+  // cinematic. Also resets the initial-burst guard so the next selection
+  // lands cleanly.
+  useEffect(() => {
+    const noWar = !warCountryColors || Object.keys(warCountryColors).length === 0;
+    const noSelection = !selectedBattle;
+    if (noWar && noSelection) {
+      setIgnitionRings([]);
+      setTraceArcs([]);
+      setFlipRings([]);
+      suppressInitialBurstRef.current = true;
+      lastSelectedRef.current = null;
+    }
+  }, [warCountryColors, selectedBattle]);
 
   // Territory-flip pulses: when the war cinematic crosses a snapshot
   // boundary and a country's owner changes color, emit a brief ring at
@@ -477,9 +512,22 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     }
     const out: Feature<Geometry>[] = [];
     const colors = new Map<string, string>();
+    // Dedupe by NAME, not object reference. The previous reference-based
+    // Set let the same country slip in twice (once via selectedBattle's
+    // findCountry, again via the world-atlas iteration) because the two
+    // code paths produce different Feature object instances. Two polygons
+    // on the same country at the same altitude → GPU z-fighting and the
+    // checkerboard pattern the user reported on France during the cinematic.
+    const seenNames = new Set<string>();
     if (selectedBattle) {
       const match = findCountry(selectedBattle.lat, selectedBattle.lng, countries);
-      if (match) out.push(match);
+      if (match) {
+        const name = (match.properties as Record<string, string>)?.name?.toLowerCase() || '';
+        if (name && !seenNames.has(name)) {
+          out.push(match);
+          seenNames.add(name);
+        }
+      }
     }
     const wanted = new Map<string, string | null>();
     if (warCountries && warCountries.length > 0) {
@@ -497,17 +545,18 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       }
     }
     if (wanted.size > 0) {
-      const seen = new Set(out.map((f) => f));
-      // Include EVERY world-atlas country in the polygon set so react-
-      // globe.gl never has to mount/unmount features as snapshots change.
-      // Belligerent countries get their war color; everyone else gets the
-      // sentinel '__neutral__' which polygonCapColor renders fully
-      // transparent. This makes snapshot transitions a pure colour tween.
       for (const f of countries) {
         const name = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
         if (!name) continue;
-        if (seen.has(f)) continue;
+        if (seenNames.has(name)) {
+          // Already mounted via the selectedBattle path; just record its
+          // color so colorFor resolves it correctly.
+          const c = wanted.get(name);
+          colors.set(name, c || '__neutral__');
+          continue;
+        }
         out.push(f);
+        seenNames.add(name);
         const c = wanted.get(name);
         if (c) colors.set(name, c);
         else colors.set(name, '__neutral__');
@@ -923,22 +972,22 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       polygonCapColor={(feat: object) => {
         if (!hasWarShading) return 'rgba(59,130,246,0.14)';
         const c = colorFor(feat);
-        // High-opacity cap (0.82) so the faction color reads cleanly over
-        // the satellite Earth texture instead of getting muddied by it.
-        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 0.82);
+        // Non-belligerents get a faint neutral slate wash instead of pure
+        // transparent so the "whole earth is part of the picture" reads
+        // continuously — no patches of bare satellite texture between
+        // shaded countries. Belligerents punch through at 0.82 alpha.
+        if (c === '__neutral__') return 'rgba(48,56,72,0.22)';
+        return hexToRgba(c, 0.82);
       }}
       polygonSideColor={() => 'rgba(0,0,0,0)'}
       polygonStrokeColor={(feat: object) => {
         if (!hasWarShading) return 'rgba(59,130,246,0.55)';
         const c = colorFor(feat);
-        return c === '__neutral__' ? 'rgba(64,72,90,0.0)' : hexToRgba(c, 1.0);
+        if (c === '__neutral__') return 'rgba(80,90,108,0.32)';
+        return hexToRgba(c, 1.0);
       }}
-      polygonAltitude={(feat: object) => {
-        if (!hasWarShading) return 0.0018;
-        const c = colorFor(feat);
-        return c === '__neutral__' ? 0.0005 : 0.0055;
-      }}
-      polygonsTransitionDuration={700}
+      polygonAltitude={() => 0.002}
+      polygonsTransitionDuration={200}
       polygonLabel={polygonLabel}
     />
     </div>

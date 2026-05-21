@@ -11,6 +11,7 @@ import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
 import { cleanCasualtyText, cleanProseText, formatBattleDate } from '../../lib/format';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import CloseButton from '../CloseButton';
+import { findSnapshot, buildCountryColorMap } from '../../data/territory-snapshots';
 
 interface BattleReplayProps {
   battle: Battle;
@@ -88,7 +89,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     const current = replay.phases[phaseIdx];
     // Reduced-motion path: skip the dwell entirely. The user can still
     // step through with the scrubber if they want to read each phase.
-    const baseDur = current.durationMs ?? 5500;
+    // Auto-generated schematic replays get a faster per-phase tick (3.2s
+    // each instead of 5.5s) since their movements are minimal and lingering
+    // on a deployment-only phase reads as "stuck" — three of them ran 16.5s
+    // total at the default rate, which was longer than the schematic dwell
+    // backstop and produced the deployment-loop the user reported.
+    const baseDur = current.durationMs ?? (replay.schematic ? 3200 : 5500);
     const dur = prefersReducedMotion ? 0 : baseDur / speed;
     timerRef.current = setTimeout(() => {
       if (phaseIdx >= replay.phases.length - 1) {
@@ -439,7 +445,20 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 replay={replay}
                 phase={phase}
                 phaseIdx={phaseIdx}
-                warCountryColors={warCountryColors}
+                warCountryColors={(() => {
+                  // Prefer the live war-cinematic snapshot prop when WarPlayback
+                  // is driving the playhead. When the user opens a battle
+                  // directly (search, dot-click) there's no parent flow to set
+                  // it — in that case auto-resolve from the battle's war + year
+                  // so country territory still paints. The Invasion of Poland
+                  // 1939 case showed this gap: arrows fired but the map sat
+                  // unshaded because warCountryColors was undefined.
+                  if (warCountryColors) return warCountryColors;
+                  if (!battle.war) return undefined;
+                  const snap = findSnapshot(battle.war, battle.year || 0);
+                  if (!snap) return undefined;
+                  return buildCountryColorMap(snap);
+                })()}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

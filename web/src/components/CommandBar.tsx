@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 import { formatYear } from '../lib/format';
-import EyeLogo from './EyeLogo';
 
 interface NameCount { name: string; count: number; }
 interface StatsData {
@@ -66,6 +65,7 @@ export default function CommandBar({
   const [warResults, setWarResults] = useState<NameCount[]>([]);
   const [commanderCount, setCommanderCount] = useState<number>(0);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [panel, setPanel] = useState<'none' | 'filters'>('none');
   const [stats, setStats] = useState<StatsData | null>(null);
@@ -178,7 +178,7 @@ export default function CommandBar({
           <button
             type="button"
             onClick={onResetView}
-            className="leading-none hover:opacity-95 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 rounded-sm inline-flex items-baseline gap-1.5"
+            className="leading-none hover:opacity-95 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 rounded-sm"
             title="Back to the main globe"
             aria-label="Reset view: back to the main globe"
             style={{
@@ -189,21 +189,20 @@ export default function CommandBar({
               color: '#ffffff',
             }}
           >
-            <EyeLogo size={14} color="#60a5fa" />
             <span>Battle<span style={{ color: '#60a5fa' }}>Sight</span></span>
           </button>
         </div>
         <div
-          className="mt-1.5 text-[9.5px] tabular-nums leading-none"
-          style={{ letterSpacing: '0.32em', textTransform: 'uppercase' }}
+          className="mt-1.5 text-[9.5px] tabular-nums leading-none flex items-baseline gap-2"
+          style={{ letterSpacing: '0.14em', textTransform: 'uppercase' }}
         >
-          <span className="text-slate-500">{battleCount.toLocaleString()}</span>
-          <span className="text-slate-600 ml-1.5">Battles</span>
+          <span className="text-slate-400">{battleCount.toLocaleString()}</span>
+          <span className="text-slate-500">battles</span>
           {stats && stats.replayCount > 0 && (
             <>
-              <span className="text-slate-700 mx-2.5">/</span>
+              <span className="text-slate-700">·</span>
               <span style={{ color: '#60a5fa' }}>{stats.replayCount}</span>
-              <span className="text-slate-600 ml-1.5">Replays</span>
+              <span className="text-slate-500">replays</span>
             </>
           )}
         </div>
@@ -231,8 +230,11 @@ export default function CommandBar({
             value={query}
             onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            onFocus={() => (results.length > 0 || warResults.length > 0) && setSearchOpen(true)}
-            onBlur={() => setTimeout(() => setSearchOpen(false), 150)}
+            onFocus={() => {
+              setSearchFocused(true);
+              if (results.length > 0 || warResults.length > 0) setSearchOpen(true);
+            }}
+            onBlur={() => setTimeout(() => { setSearchOpen(false); setSearchFocused(false); }, 200)}
             placeholder="Search battles, wars, places…"
             className="w-full h-9 pl-9 pr-9 bg-[#0d0f17]/85 backdrop-blur-md border border-slate-700/40 rounded-md text-[12.5px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-300/50 focus:bg-[#11141e]/90 transition-colors"
             style={{ letterSpacing: '0.01em' }}
@@ -333,59 +335,31 @@ export default function CommandBar({
             No results
           </div>
         )}
-      </div>
 
-      {/* Mode tabs. Three primary modes (Explore / Wars / History) wrapped
-          in a single glass capsule. Active mode pops with a soft accent
-          fill and a tracked label; inactive modes hover to slate. SVG
-          glyphs disambiguate at a glance. The previous border-underline
-          treatment was functional but felt like a vanilla nav bar; this
-          reads as crafted chrome.
-          Vertical position is anchored to top-[126px] so it lands cleanly
-          below the search row (search at top-78 + h-9 ends at 114, then
-          a 12px gap). Earlier the rail sat at top-88 which collided with
-          the new search height and hid the rail entirely. */}
-      {/* Mode rail. Editorial chapter labels rather than SaaS-blue pills.
-          Each label sits inline with a tracked-caps treatment; the active
-          one carries a thin warm-amber underline that reads like a
-          newspaper-section accent. No bright fills, no rounded
-          baby-button shapes — the chrome is meant to disappear behind the
-          globe. */}
-      <div className="fixed top-[126px] left-6 z-30">
-        <div className="inline-flex items-baseline gap-5">
-          <ModeTab
-            label="Wars"
-            active={playbackActive}
-            onClick={onPlaybackOpen}
-          />
-          <ModeTab
-            label="History"
-            active={historyActive}
-            onClick={onHistoryPlay}
-            title="Play 3,500 years of history in 90 seconds"
-          />
-        </div>
-
-        {!playbackActive && (
-          <div className="flex items-baseline gap-4 mt-3">
+        {/* Filters chip — appears under the search input when the input is
+            focused OR when any filter is active. Keeps filters in their
+            natural workflow position (refine the search) instead of as a
+            sibling of Wars/History which open separate menus. */}
+        {!playbackActive && (searchFocused || hasFilters) && (
+          <div className="mt-2 flex items-baseline gap-3 pl-1">
             <button
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => setPanel(panel === 'filters' ? 'none' : 'filters')}
-              className="text-[10px] font-semibold uppercase tracking-[0.32em] transition-colors focus:outline-none"
-              style={{
-                color: panel === 'filters' || hasFilters ? '#fbbf24' : '#94a3b8',
-              }}
+              className="text-[10px] font-semibold uppercase tracking-[0.28em] transition-colors focus:outline-none inline-flex items-baseline gap-1"
+              style={{ color: panel === 'filters' || hasFilters ? '#fbbf24' : '#94a3b8' }}
             >
-              Filters
+              <span>Filters</span>
               {hasFilters && (
-                <span className="ml-1.5 tabular-nums text-[9px] font-bold" style={{ color: '#fbbf24' }}>
-                  · {[filters.era, filters.war, filters.battleType, filters.quality].filter(Boolean).length}
+                <span className="tabular-nums text-[9px] font-bold" style={{ color: '#fbbf24' }}>
+                  {[filters.era, filters.war, filters.battleType, filters.quality].filter(Boolean).length}
                 </span>
               )}
             </button>
             {hasFilters && (
               <button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => onFiltersChange({ era: '', war: '', battleType: '', quality: '' })}
-                className="text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-500 hover:text-rose-300 transition-colors focus:outline-none"
+                className="text-[9.5px] font-semibold uppercase tracking-[0.28em] text-slate-500 hover:text-rose-300 transition-colors focus:outline-none"
               >
                 Clear
               </button>
@@ -394,9 +368,32 @@ export default function CommandBar({
         )}
       </div>
 
+      {/* Mode rail — Wars / History only. Filters used to live here but felt
+          orphaned (Filters is an attribute of search/browse, not a top-level
+          mode like Wars/History which open separate UIs). Filters now lives
+          inline under the search input — appears on focus or when active —
+          which is the natural reading order: type a query, refine with
+          filters, see results. */}
+      <div className="fixed top-[126px] left-6 z-30">
+        <div className="inline-flex items-baseline gap-3.5">
+          <ModeTab
+            label="Wars"
+            active={playbackActive}
+            onClick={onPlaybackOpen}
+          />
+          <span className="text-slate-700 text-[9px] select-none" aria-hidden="true">·</span>
+          <ModeTab
+            label="History"
+            active={historyActive}
+            onClick={onHistoryPlay}
+            title="Play 3,500 years of history in 90 seconds"
+          />
+        </div>
+      </div>
+
       {/* Filter panel */}
       {!playbackActive && panel === 'filters' && stats && (
-        <div className="fixed top-[218px] left-6 z-30 w-64 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3">
+        <div className="fixed top-[156px] left-6 z-30 w-64 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3">
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-[10px] text-slate-600 uppercase tracking-wider">Tier</label>

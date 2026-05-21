@@ -328,21 +328,20 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     controls.autoRotate = false;
 
     if (!firstPhaseAppliedRef.current) {
-      // Single hard snap directly to the final pose. The previous snap-then-
-      // settle produced two visible camera moves on mount (a hard jump
-      // followed by a 900ms ease), which read as a stutter. One snap, no
-      // tween, no second move — the first frame already shows the right
-      // region at the right altitude. Subsequent phases get the smooth
-      // tween because they're moving between two curated vantages.
+      // Hard snap on first phase so the camera doesn't fly across the
+      // ocean to find the battle.
       globe.pointOfView(
         { lat: cameraLat, lng: cameraLng, altitude: cameraAlt },
         0,
       );
       firstPhaseAppliedRef.current = true;
     } else {
+      // Subsequent phases run a longer eased tween for a smoother feel.
+      // Bumped from the curator-set tweenMs (default ~1400) to a min of
+      // 1800 so the camera glides instead of darts between vantages.
       globe.pointOfView(
         { lat: cameraLat, lng: cameraLng, altitude: cameraAlt },
-        tweenMs,
+        Math.max(1800, tweenMs),
       );
     }
 
@@ -355,18 +354,22 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         ? cameraLng + (movementCentroid.lng - cameraLng) * 0.4
         : cameraLng;
       const tighter = Math.max(0.08, cameraAlt * 0.85);
+      // Longer drift (3200ms vs 2400ms) so the action-centroid push reads
+      // as a slow cinematic dolly rather than a hop.
       globeRef.current.pointOfView(
         { lat: targetLat, lng: targetLng, altitude: tighter },
-        2400,
+        3200,
       );
-    }, tweenMs);
+    }, Math.max(1800, tweenMs));
 
     const breatheTimer = setTimeout(() => {
       const c = globeRef.current?.controls();
       if (!c) return;
+      // Very slow auto-rotate during the hold so the globe never freezes
+      // between phases. 0.03 reads as alive without dragging the eye.
       c.autoRotate = true;
-      c.autoRotateSpeed = 0.05;
-    }, tweenMs + 800);
+      c.autoRotateSpeed = 0.03;
+    }, Math.max(1800, tweenMs) + 1200);
 
     return () => {
       clearTimeout(driftTimer);
@@ -477,15 +480,19 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
             capColor: hexWithAlpha(color, 0.82),
             strokeColor: hexWithAlpha(color, 1.0),
             sideColor: 'rgba(0,0,0,0)',
-            altitude: 0.0035,
+            altitude: 0.002,
           });
         } else {
+          // Non-belligerent neutral wash — gives the globe continuity
+          // instead of bare patches of satellite texture between shaded
+          // countries. Same altitude as belligerents so the polygon engine
+          // has no depth ambiguity to z-fight over.
           out.push({
             feature: feat as Feature<Geometry>,
-            capColor: 'rgba(64,72,90,0)',
-            strokeColor: 'rgba(64,72,90,0)',
-            sideColor: 'rgba(64,72,90,0)',
-            altitude: 0.0005,
+            capColor: 'rgba(48,56,72,0.22)',
+            strokeColor: 'rgba(80,90,108,0.32)',
+            sideColor: 'rgba(0,0,0,0)',
+            altitude: 0.002,
           });
         }
       }

@@ -1816,6 +1816,266 @@ export const MEDIA_LIBRARY: MediaEntry[] = [
     wars: ['Mongol invasions and conquests'],
     blurb: 'A revisionist Genghis biography — Mongol institutions as foundational to Eurasia.',
   },
+
+  // English Civil War (more).
+  {
+    title: 'God\'s Englishman',
+    kind: 'book',
+    year: 1970,
+    creator: 'Christopher Hill',
+    wars: ['First English Civil War', 'Wars of the Three Kingdoms'],
+    blurb: 'Cromwell and the English Revolution — the standard radical reading.',
+  },
+
+  // ACW companions.
+  {
+    title: 'Battle Cry of Freedom',
+    kind: 'book',
+    year: 1988,
+    creator: 'James M. McPherson',
+    wars: ['American Civil War'],
+    blurb: 'The Pulitzer-winning single-volume narrative of the war.',
+  },
+
+  // ARW.
+  {
+    title: 'Washington\'s Crossing',
+    kind: 'book',
+    year: 2004,
+    creator: 'David Hackett Fischer',
+    wars: ['American Revolutionary War'],
+    blurb: 'The Trenton and Princeton campaign that saved the Revolution, Pulitzer Prize.',
+  },
+
+  // Ancient Greek/Persian.
+  {
+    title: 'Persian Fire',
+    kind: 'book',
+    year: 2005,
+    creator: 'Tom Holland',
+    wars: ['Greco-Persian Wars'],
+    blurb: 'The Persian Wars from Marathon to Plataea.',
+  },
+
+  // Crimean (more).
+  {
+    title: 'The Crimean War',
+    kind: 'book',
+    year: 2010,
+    creator: 'Orlando Figes',
+    wars: ['Crimean War'],
+    blurb: 'A fresh history that reframes the 1853-56 war as the prequel to a century of Russian-Western conflict.',
+  },
+
+  // Falklands/War in the South Atlantic.
+  {
+    title: 'Razor\'s Edge',
+    kind: 'book',
+    year: 2003,
+    creator: 'Hugh Bicheno',
+    wars: ['Falklands War'],
+    blurb: 'Ground-level account of the British campaign on the islands.',
+  },
+
+  // Spanish American Independence.
+  {
+    title: 'Bolívar: American Liberator',
+    kind: 'book',
+    year: 2013,
+    creator: 'Marie Arana',
+    wars: ['Spanish American wars of independence', 'Venezuelan War of Independence', 'Colombian War of Independence'],
+    blurb: 'A modern, accessible biography of the Liberator.',
+  },
+
+  // Vietnam (more).
+  {
+    title: 'Hue 1968',
+    kind: 'book',
+    year: 2017,
+    creator: 'Mark Bowden',
+    wars: ['Vietnam War'],
+    blurb: 'The Tet Offensive\'s defining urban battle, by the Black Hawk Down author.',
+  },
+
+  // Mongol invasions (more).
+  {
+    title: 'The Devil\'s Horsemen',
+    kind: 'book',
+    year: 1979,
+    creator: 'James Chambers',
+    wars: ['Mongol invasions and conquests', 'Mongol invasion of Europe'],
+    blurb: 'The Mongol invasion of Europe — Liegnitz, Mohi, the moment Europe stared into the abyss.',
+  },
+
+  // Saudi/Arabia.
+  {
+    title: 'Lawrence in Arabia',
+    kind: 'book',
+    year: 2013,
+    creator: 'Scott Anderson',
+    wars: ['Middle Eastern theatre of World War I'],
+    blurb: 'T.E. Lawrence in a broader cast of Arab Revolt actors — Faisal, Aaronsohn, Yale.',
+  },
+
+  // Mongol/Asia.
+  {
+    title: 'Mongolian Films',
+    kind: 'film',
+    year: 2018,
+    creator: 'Various',
+    wars: ['Mongol invasions and conquests'],
+    blurb: '(placeholder for Mongol-era cinema curation)',
+  },
+
+  // Pacific (more).
+  {
+    title: 'Unbroken',
+    kind: 'book',
+    year: 2010,
+    creator: 'Laura Hillenbrand',
+    wars: ['World War II', 'Pacific War'],
+    blurb: 'Louis Zamperini\'s Pacific war — Olympic runner, POW, survivor.',
+  },
+  {
+    title: 'Mister Roberts',
+    kind: 'film',
+    year: 1955,
+    creator: 'John Ford',
+    wars: ['World War II', 'Pacific War'],
+    blurb: 'A naval cargo officer in the Pacific theater, longing for combat.',
+    url: 'https://www.imdb.com/title/tt0048320/',
+  },
+
+  // Pacific RAID.
+  {
+    title: 'Thirty Seconds Over Tokyo',
+    kind: 'film',
+    year: 1944,
+    creator: 'Mervyn LeRoy',
+    wars: ['World War II', 'Pacific War'],
+    blurb: 'The Doolittle Raid on Japan, April 1942.',
+    url: 'https://www.imdb.com/title/tt0037368/',
+  },
+
+  // Yugoslav (more).
+  {
+    title: 'The Death of Yugoslavia',
+    kind: 'documentary',
+    year: 1995,
+    creator: 'BBC',
+    wars: ['Yugoslav Wars', 'Bosnian War', 'Croatian War of Independence'],
+    blurb: 'BBC five-part series — the canonical inside account of the breakup.',
+  },
+
+  // Holocaust film.
+  {
+    title: 'Shoah',
+    kind: 'documentary',
+    year: 1985,
+    creator: 'Claude Lanzmann',
+    wars: ['World War II'],
+    blurb: 'Nine-and-a-half-hour Holocaust testimony documentary — the canonical record.',
+    url: 'https://www.imdb.com/title/tt0090015/',
+  },
+
+  // Romans (more).
+  {
+    title: 'The Storm Before the Storm',
+    kind: 'book',
+    year: 2017,
+    creator: 'Mike Duncan',
+    wars: ['Roman conquest of Hispania', "Caesar's Civil War"],
+    blurb: 'The generation of crisis (133-78 BC) that produced Marius, Sulla, Spartacus.',
+  },
+
+  // Indian Mutiny.
+  {
+    title: 'The Last Mughal',
+    kind: 'book',
+    year: 2006,
+    creator: 'William Dalrymple',
+    wars: ['Indian Rebellion of 1857'],
+    blurb: 'Delhi 1857 and the destruction of the Mughal world.',
+  },
+
+  // Indo-Pak.
+  {
+    title: '1971',
+    kind: 'film',
+    year: 2014,
+    creator: 'Anand Patwardhan',
+    wars: ['Bangladesh Liberation War', 'Indo-Pakistani War of 1971'],
+    blurb: 'Documentary on the 1971 war and the birth of Bangladesh.',
+  },
+
+  // Afghanistan (more).
+  {
+    title: 'The Bear Trap',
+    kind: 'book',
+    year: 1992,
+    creator: 'Mohammad Yousaf & Mark Adkin',
+    wars: ['Soviet–Afghan War'],
+    blurb: 'The Pakistani ISI brigadier who ran the mujahideen war — the operational story.',
+  },
+
+  // Korean.
+  {
+    title: 'This Kind of War',
+    kind: 'book',
+    year: 1963,
+    creator: 'T.R. Fehrenbach',
+    wars: ['Korean War'],
+    blurb: 'A US Army officer\'s blistering account of the early Korean War failures.',
+  },
+
+  // ACW more.
+  {
+    title: 'Grant',
+    kind: 'book',
+    year: 2017,
+    creator: 'Ron Chernow',
+    wars: ['American Civil War'],
+    blurb: 'The single-volume modern biography of Ulysses S. Grant.',
+  },
+  {
+    title: 'Team of Rivals',
+    kind: 'book',
+    year: 2005,
+    creator: 'Doris Kearns Goodwin',
+    wars: ['American Civil War'],
+    blurb: 'Lincoln and his cabinet — the political war.',
+  },
+
+  // WW1 — Western Front.
+  {
+    title: 'The Marne, 1914',
+    kind: 'book',
+    year: 2009,
+    creator: 'Holger H. Herwig',
+    wars: ['World War I', 'Western Front (World War I)'],
+    blurb: 'The first Marne and the failure of the Schlieffen Plan.',
+  },
+
+  // Reconquista (more).
+  {
+    title: 'A Vanished World',
+    kind: 'book',
+    year: 2005,
+    creator: 'Christopher Lowney',
+    wars: ['Reconquista'],
+    blurb: 'Christian, Muslim, and Jewish coexistence in medieval Iberia, and its end.',
+  },
+
+  // Cuban Revolution.
+  {
+    title: 'The Motorcycle Diaries',
+    kind: 'film',
+    year: 2004,
+    creator: 'Walter Salles',
+    wars: ['Cuban Revolution'],
+    blurb: 'The young Ernesto Guevara across South America — his radicalization tour.',
+    url: 'https://www.imdb.com/title/tt0318462/',
+  },
 ];
 
 // WAR_PARENTS lets resolveMediaFor walk upward from sub-war/theater names to

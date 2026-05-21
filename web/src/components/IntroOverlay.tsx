@@ -3,7 +3,6 @@ import type { Battle } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 import { themeForEra } from '../theme/era';
 import { formatYear } from '../lib/format';
-import EyeLogo from './EyeLogo';
 import CloseButton from './CloseButton';
 
 interface IntroOverlayProps {
@@ -118,7 +117,6 @@ export default function IntroOverlay({ featured, onDismiss, onStart }: IntroOver
       {/* Title block — sits high so the era ticker has room below. */}
       <div className="relative w-full max-w-[720px] text-center" style={{ animation: 'intro-block-in 900ms cubic-bezier(.2,.65,.25,1) both' }}>
         <div className="inline-flex items-center gap-3 mb-4" style={{ color: '#fff' }}>
-          <EyeLogo size={28} color={beatColor} />
           <h1
             className="leading-[1.0] tracking-tight"
             style={{

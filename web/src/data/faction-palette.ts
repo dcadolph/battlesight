@@ -81,7 +81,7 @@ const PALETTE: Record<ColorKey, Palette> = {
   'north-vietnam-red': { primary: '#dc2626', glow: 'rgba(220,38,38,0.40)' },
   'south-vietnam-blue': { primary: '#1d4ed8', glow: 'rgba(29,78,216,0.40)' },
   'isis-black': { primary: '#0f1116', glow: 'rgba(15,17,22,0.55)' },
-  'ukraine-blue': { primary: '#0c5fdb', glow: 'rgba(12,95,219,0.40)' },
+  'ukraine-blue': { primary: '#facc15', glow: 'rgba(250,204,21,0.45)' },
   'russia-modern-red': { primary: '#a5121b', glow: 'rgba(165,18,27,0.45)' },
   // American Civil War.
   'union-blue': { primary: '#1e3a8a', glow: 'rgba(30,58,138,0.45)' },

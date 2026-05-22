@@ -3,41 +3,11 @@ import Globe from 'react-globe.gl';
 import type { GlobeMethods } from 'react-globe.gl';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS } from '../types/battle';
-import { feature } from 'topojson-client';
-import type { Topology } from 'topojson-specification';
-import type { FeatureCollection, Feature, Geometry, Position } from 'geojson';
+import type { Feature, Geometry, Position } from 'geojson';
 import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../data/cities';
-import { OWNER_COLORS, OWNER_LABELS } from '../data/territory-snapshots';
+import { OWNER_LABELS } from '../data/territory-snapshots';
+import { loadWorldCountries, worldCountriesCache } from '../data/world-countries';
 import { formatNumberWithCommas } from '../lib/format';
-
-// featureCentroid returns the [lat, lng] vertex-average of a country polygon
-// or multipolygon feature. Used to anchor faction badge labels at a sensible
-// "middle" of each shaded territory cluster. Not a geographic centroid (no
-// area weighting) — vertex average is fine for label placement.
-function featureCentroid(feat: Feature<Geometry>): [number, number] | null {
-  const g = feat.geometry as Geometry;
-  let lngSum = 0;
-  let latSum = 0;
-  let n = 0;
-  const visitRing = (ring: Position[]) => {
-    for (const [lng, lat] of ring) {
-      lngSum += lng;
-      latSum += lat;
-      n++;
-    }
-  };
-  if (g.type === 'Polygon') {
-    for (const ring of g.coordinates) visitRing(ring as Position[]);
-  } else if (g.type === 'MultiPolygon') {
-    for (const poly of g.coordinates) {
-      for (const ring of poly) visitRing(ring as Position[]);
-    }
-  } else {
-    return null;
-  }
-  if (n === 0) return null;
-  return [latSum / n, lngSum / n];
-}
 
 interface BattleGlobeProps {
   battles: Battle[];
@@ -67,6 +37,12 @@ interface BattleGlobeProps {
   // takes effect ("June 1944: D-Day, Bagration"). Drives a HUD overlay so
   // the user reads the campaign beat as a labeled stage.
   territoryLabel?: string;
+  // warFactionAnchors lists one anchor country per controlling power in
+  // the active snapshot. Drives the editorial typography label layer so
+  // each bloc shows its faction name in small-caps over its mainland (the
+  // way Britannica and Map Men style historical atlases) instead of an
+  // averaged centroid that lands "FRANCE" over Sudan.
+  warFactionAnchors?: Array<{ faction: string; anchor: string }>;
 }
 
 // COUNTRY_NAME_ALIASES maps our canonical country labels to the names used
@@ -82,7 +58,55 @@ const COUNTRY_NAME_ALIASES: Record<string, string[]> = {
   Palestine: ['Palestine'],
 };
 
-const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json';
+// largestPolygonCentroid returns the [lat, lng] vertex-average of the
+// LARGEST ring inside a MultiPolygon feature (by perimeter, a fast proxy
+// for area). Used to anchor faction labels on the country's mainland —
+// not the geographic mean of every island, overseas department, and
+// colony, which is what put "FRANCE" on Sudan and "UNITED KINGDOM" on
+// Saudi Arabia in the earlier per-country label pass.
+function largestPolygonCentroid(feat: Feature<Geometry>): [number, number] | null {
+  const g = feat.geometry as Geometry;
+  const ringSize = (ring: Position[]): number => {
+    let sum = 0;
+    for (let i = 1; i < ring.length; i++) {
+      const dx = ring[i][0] - ring[i - 1][0];
+      const dy = ring[i][1] - ring[i - 1][1];
+      sum += Math.hypot(dx, dy);
+    }
+    return sum;
+  };
+  const ringCentroid = (ring: Position[]): [number, number] => {
+    let sx = 0;
+    let sy = 0;
+    let n = 0;
+    for (const [lng, lat] of ring) {
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        sx += lng;
+        sy += lat;
+        n++;
+      }
+    }
+    return n > 0 ? [sy / n, sx / n] : [NaN, NaN];
+  };
+  if (g.type === 'Polygon') {
+    return ringCentroid(g.coordinates[0] as Position[]);
+  }
+  if (g.type === 'MultiPolygon') {
+    let bestRing: Position[] | null = null;
+    let bestSize = -1;
+    for (const poly of g.coordinates) {
+      const outer = poly[0] as Position[];
+      const sz = ringSize(outer);
+      if (sz > bestSize) {
+        bestSize = sz;
+        bestRing = outer;
+      }
+    }
+    if (!bestRing) return null;
+    return ringCentroid(bestRing);
+  }
+  return null;
+}
 
 function pointInPolygon(lat: number, lng: number, coords: Position[][]): boolean {
   for (const ring of coords) {
@@ -204,20 +228,6 @@ function darkenHex(hex: string, factor: number): string {
   return `#${pad(r)}${pad(g)}${pad(b)}`;
 }
 
-// midpoint returns the geographic midpoint between two points, handling
-// antimeridian wrap so a Pearl Harbor → Doolittle Raid pair midpoints in the
-// Pacific rather than over Africa. Latitude is a simple average; longitude
-// chooses the shorter great-arc path.
-function midpoint(a: { lat: number; lng: number }, b: { lat: number; lng: number }): { lat: number; lng: number } {
-  let dlng = b.lng - a.lng;
-  if (dlng > 180) dlng -= 360;
-  if (dlng < -180) dlng += 360;
-  let midLng = a.lng + dlng / 2;
-  if (midLng > 180) midLng -= 360;
-  if (midLng < -180) midLng += 360;
-  return { lat: (a.lat + b.lat) / 2, lng: midLng };
-}
-
 // arcDistance is a cheap surrogate for great-circle distance in degrees,
 // using haversine on a unit sphere. Returns 0–180. Good enough to scale
 // camera altitude on the war-playback flythrough without pulling in a real
@@ -248,10 +258,10 @@ function battleMagnitude(b: Battle): number {
   return Math.max(0, Math.min(1, (v - 2) / 4));
 }
 
-export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, territoryLabel }: BattleGlobeProps) {
+export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, territoryLabel, warFactionAnchors }: BattleGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
-  const [countries, setCountries] = useState<Feature<Geometry>[]>([]);
+  const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
 
   // visibleBattles filters to the active year window and drops anything
   // without usable geography. An exact 0 on either axis is treated as the
@@ -520,13 +530,19 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
   const rings = useMemo(() => [...replayRings, ...ignitionRings, ...flipRings, ...focusRings], [replayRings, ignitionRings, flipRings, focusRings]);
 
   useEffect(() => {
-    fetch(COUNTRIES_URL)
-      .then((r) => r.json())
-      .then((topo: Topology) => {
-        const fc = feature(topo, topo.objects.countries) as FeatureCollection;
-        setCountries(fc.features);
-      })
+    // Synchronously read the shared cache when it is already hot — most
+    // mounts after the first hit this fast path and paint polygons on the
+    // first frame. Otherwise wait on the in-flight parse promise.
+    const cached = worldCountriesCache();
+    if (cached) {
+      setCountries(cached);
+      return;
+    }
+    let cancelled = false;
+    loadWorldCountries()
+      .then((feats) => { if (!cancelled) setCountries(feats); })
       .catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   // featureColors maps each polygon feature shown on the globe to the
@@ -595,60 +611,7 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     return { highlightedCountry: out, featureColors: colors };
   }, [selectedBattle, countries, warCountries, warCountryColors]);
 
-  // Reverse-lookup for color → owner key. Built once. When two owners
-  // share the same color (e.g. multiple Allied factions in red), the
-  // first-defined entry wins — which is consistent enough for badge text.
-  const colorToOwnerRef = useRef<Map<string, string>>(new Map());
-  if (colorToOwnerRef.current.size === 0) {
-    for (const [owner, color] of Object.entries(OWNER_COLORS)) {
-      if (!colorToOwnerRef.current.has(color)) {
-        colorToOwnerRef.current.set(color, owner);
-      }
-    }
-  }
-
-  // factionBadges renders one centered chip per faction in the active
-  // snapshot. Centroid is the polygon's vertex-average, picked once per
-  // war (no per-country chips — the label sits at the cluster centroid of
-  // each owner's territory). Reads as "this red bloc is Nazi Germany" at
-  // a glance instead of just a wash of color.
-  const factionBadges = useMemo(() => {
-    if (!warCountryColors || Object.keys(warCountryColors).length === 0) return [];
-    if (countries.length === 0) return [];
-    // Group countries by owner key.
-    const ownerToCountries = new Map<string, string[]>();
-    for (const [country, color] of Object.entries(warCountryColors)) {
-      const owner = colorToOwnerRef.current.get(color) ?? color;
-      if (!ownerToCountries.has(owner)) ownerToCountries.set(owner, []);
-      ownerToCountries.get(owner)!.push(country);
-    }
-    const out: Array<{ lat: number; lng: number; text: string; color: string; size: number }> = [];
-    for (const [owner, ownerCountries] of ownerToCountries.entries()) {
-      const label = OWNER_LABELS[owner] || owner;
-      const color = OWNER_COLORS[owner] || warCountryColors[ownerCountries[0]] || '#ffffff';
-      // Find polygon features for these countries and average their centroids.
-      const centroids: Array<[number, number]> = [];
-      for (const countryName of ownerCountries) {
-        const target = countryName.toLowerCase();
-        const feat = countries.find((f) => {
-          const n = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
-          return n === target;
-        });
-        if (!feat) continue;
-        const c = featureCentroid(feat);
-        if (c) centroids.push(c);
-      }
-      if (centroids.length === 0) continue;
-      const avgLat = centroids.reduce((s, [lt]) => s + lt, 0) / centroids.length;
-      const avgLng = centroids.reduce((s, [, ln]) => s + ln, 0) / centroids.length;
-      // Size scales with number of countries the faction controls.
-      const size = Math.min(1.6, 0.7 + centroids.length * 0.08);
-      out.push({ lat: avgLat, lng: avgLng, text: label.toUpperCase(), color, size });
-    }
-    return out;
-  }, [warCountryColors, countries]);
-
-  // hasWarShading determines whether the polygon overlay should render in the
+// hasWarShading determines whether the polygon overlay should render in the
   // multi-country war palette (accented, brighter borders) or in the single-
   // country battle-context palette (faint blue). We pick by checking whether
   // a war is currently active.
@@ -663,6 +626,30 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     const name = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
     return featureColors.get(name) || warShadeColor;
   }, [featureColors, warShadeColor]);
+
+  // factionLabels renders one editorial name per controlling power at the
+  // mainland centroid of its anchor country — small-caps, wide-tracked,
+  // semi-transparent white, with a subtle drop shadow for legibility on
+  // colored shading. Britannica / Map-Men atlas style. No emoji, no
+  // clip-art, no flag glyph; the typography itself carries identity.
+  const factionLabels = useMemo(() => {
+    if (!warFactionAnchors || warFactionAnchors.length === 0) return [];
+    if (countries.length === 0) return [];
+    const out: Array<{ lat: number; lng: number; text: string; faction: string }> = [];
+    for (const { faction, anchor } of warFactionAnchors) {
+      const label = OWNER_LABELS[faction] || faction.replace(/-/g, ' ');
+      const target = anchor.toLowerCase();
+      const feat = countries.find((f) => {
+        const n = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
+        return n === target;
+      });
+      if (!feat) continue;
+      const c = largestPolygonCentroid(feat);
+      if (!c || !Number.isFinite(c[0]) || !Number.isFinite(c[1])) continue;
+      out.push({ lat: c[0], lng: c[1], text: label.toUpperCase(), faction });
+    }
+    return out;
+  }, [warFactionAnchors, countries]);
 
   useEffect(() => {
     const handleResize = () => setDimensions({ width: window.innerWidth, height: window.innerHeight });
@@ -707,16 +694,18 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     el.addEventListener('wheel', stopRotation);
     el.addEventListener('touchstart', stopRotation);
 
-    // Cold-open cinematography: snap to a high oblique vantage instantly,
-    // then ease into the resting frame over a few seconds. The "tilt" is
-    // implicit because the destination lat differs from the start lat, so
-    // the camera pitches as it descends. Auto-rotate is paused during the
-    // intro so the move reads as a directed shot rather than two motions
-    // competing for the eye.
+    // Cold-open cinematography: land directly on a continental vantage
+    // centered over Central Europe. The earlier opener parked the camera
+    // off the West African coast at 12N -8E (Atlantic Ocean, looks like a
+    // blank blue sphere) and then eased to the Mediterranean at 32N 14E
+    // (also mostly ocean in frame). Both reads as "the app starts in the
+    // damn ocean" before any content shows up. Now we open on land — 48N
+    // 16E is roughly Vienna/Central Europe, where the densest historical
+    // battle clusters live — with a gentle settle to the resting frame.
     controls.autoRotate = false;
-    globe.pointOfView({ lat: 12, lng: -8, altitude: 3.4 });
+    globe.pointOfView({ lat: 48, lng: 16, altitude: 2.6 });
     const introTimer = setTimeout(() => {
-      globe.pointOfView({ lat: 32, lng: 14, altitude: 2.15 }, 3400);
+      globe.pointOfView({ lat: 42, lng: 22, altitude: 2.05 }, 2800);
     }, 220);
     const resumeRotateTimer = setTimeout(() => {
       if (!selectedBattleRef.current) controls.autoRotate = true;
@@ -750,36 +739,18 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     const prev = previousBattleRef.current;
     previousBattleRef.current = selectedBattle;
 
-    if (!prev || prev.id === selectedBattle.id) {
-      // First selection (or a re-selection of the same battle). Single
-      // smooth descent to the target. No midpoint, nothing to lift over.
-      globe.pointOfView(
-        { lat: selectedBattle.lat, lng: selectedBattle.lng, altitude: 1.1 },
-        1500,
-      );
-      return;
-    }
-
-    // Two-step cinematic move: rise to the midpoint of prev and next at an
-    // altitude that frames both, then drop into next. The lift altitude
-    // scales with the great-arc distance so a near-neighbor jump barely
-    // pulls back while a hop across continents really shows the journey.
-    const mid = midpoint(prev, selectedBattle);
-    const arcDeg = arcDistance(prev, selectedBattle);
-    const liftAlt = Math.max(1.6, Math.min(2.8, 0.9 + arcDeg / 30));
-
+    // Single smooth pan to the new battle. The earlier two-step
+    // lift-and-drop was meant to feel like a fly-over but read as the
+    // camera "jumping around" between battles. A direct great-arc glide
+    // at a moderate duration feels intentional and lands cleanly.
+    // Altitude stays constant across the move (no zoom-out lift) so the
+    // shaded territories stay visible throughout.
+    const arcDeg = prev ? arcDistance(prev, selectedBattle) : 0;
+    const tweenMs = prev ? Math.max(1600, Math.min(2800, 1000 + arcDeg * 12)) : 1500;
     globe.pointOfView(
-      { lat: mid.lat, lng: mid.lng, altitude: liftAlt },
-      900,
+      { lat: selectedBattle.lat, lng: selectedBattle.lng, altitude: 1.1 },
+      tweenMs,
     );
-    const settle = setTimeout(() => {
-      if (!globeRef.current) return;
-      globeRef.current.pointOfView(
-        { lat: selectedBattle.lat, lng: selectedBattle.lng, altitude: 1.1 },
-        1100,
-      );
-    }, 950);
-    return () => clearTimeout(settle);
   }, [selectedBattle]);
 
   // Frame-the-war camera move. When the visible battle set narrows to a
@@ -1055,32 +1026,45 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       polygonCapColor={(feat: object) => {
         if (!hasWarShading) return 'rgba(59,130,246,0.14)';
         const c = colorFor(feat);
-        // Non-belligerents get a faint neutral slate wash instead of pure
-        // transparent so the "whole earth is part of the picture" reads
-        // continuously — no patches of bare satellite texture between
-        // shaded countries. Belligerents punch through at 0.82 alpha.
-        if (c === '__neutral__') return 'rgba(48,56,72,0.22)';
-        return hexToRgba(c, 0.82);
+        // Non-belligerents get a heavier neutral slate wash so the "whole
+        // earth is part of the picture" reads continuously instead of
+        // patchy half-shading. Belligerents punch through at 0.94 alpha
+        // for editorial-illustration weight.
+        if (c === '__neutral__') return 'rgba(48,56,72,0.36)';
+        return hexToRgba(c, 0.94);
       }}
       polygonSideColor={() => 'rgba(0,0,0,0)'}
       polygonStrokeColor={(feat: object) => {
         if (!hasWarShading) return 'rgba(59,130,246,0.55)';
         const c = colorFor(feat);
-        if (c === '__neutral__') return 'rgba(80,90,108,0.32)';
+        if (c === '__neutral__') return 'rgba(95,108,128,0.48)';
         return hexToRgba(c, 1.0);
       }}
       polygonAltitude={() => 0.002}
-      polygonsTransitionDuration={0}
-      labelsData={factionBadges}
-      labelLat={(d: object) => (d as { lat: number }).lat}
-      labelLng={(d: object) => (d as { lng: number }).lng}
-      labelText={(d: object) => (d as { text: string }).text}
-      labelColor={(d: object) => (d as { color: string }).color}
-      labelSize={(d: object) => (d as { size: number }).size}
-      labelAltitude={0.012}
-      labelResolution={3}
-      labelIncludeDot={false}
+      polygonsTransitionDuration={650}
       polygonLabel={polygonLabel}
+      htmlElementsData={factionLabels}
+      htmlLat={(d: object) => (d as { lat: number }).lat}
+      htmlLng={(d: object) => (d as { lng: number }).lng}
+      htmlAltitude={0.014}
+      htmlElement={(d: object) => {
+        const m = d as { text: string; faction: string };
+        const el = document.createElement('div');
+        el.style.cssText = [
+          'pointer-events:none',
+          'transform:translate(-50%,-50%)',
+          'font-family:Georgia,"Times New Roman",serif',
+          'font-weight:700',
+          'font-size:13px',
+          'letter-spacing:0.28em',
+          'color:rgba(255,255,255,0.96)',
+          'text-shadow:0 1px 3px rgba(0,0,0,0.98),0 0 8px rgba(0,0,0,0.8),0 0 16px rgba(0,0,0,0.4)',
+          'white-space:nowrap',
+          'user-select:none',
+        ].join(';');
+        el.textContent = m.text;
+        return el;
+      }}
     />
     </div>
   );

@@ -90,6 +90,12 @@ export default function App() {
   // the faction legend in the corner that maps color to label, so the user
   // can read which side controls which territory without guessing.
   const [territoryFactions, setTerritoryFactions] = useState<string[]>([]);
+  // factionAnchors pairs each controlling power with its anchor country
+  // (Germany for nazi-germany, Russia for ussr, etc.). BattleGlobe uses
+  // these to place one identity glyph per faction on the mainland centroid
+  // of its anchor — the cinematic equivalent of stamping the Reich symbol
+  // on Berlin and the Soviet symbol on Moscow.
+  const [factionAnchors, setFactionAnchors] = useState<Array<{ faction: string; anchor: string }>>([]);
   // commanderQuery powers the CommanderPanel attribution view. Set from a
   // click on a commander chip in BattlePanel; cleared on close.
   const [commanderQuery, setCommanderQuery] = useState<string>('');
@@ -269,6 +275,7 @@ export default function App() {
           setWarCountryColors(null);
           setTerritoryLabel(null);
           setTerritoryFactions([]);
+          setFactionAnchors([]);
           return;
         }
         setSelectedBattle(null);
@@ -315,6 +322,7 @@ export default function App() {
     setWarCountryColors(null);
     setTerritoryLabel(null);
     setTerritoryFactions([]);
+    setFactionAnchors([]);
   }, []);
 
   const handleWatchReplay = useCallback(() => {
@@ -367,10 +375,16 @@ export default function App() {
   // Stable identity keeps WarPlayback's effect dependency list from
   // tearing down and re-arming on every App render.
   const handleWarTerritory = useCallback(
-    (colors: Record<string, string> | null, label: string | null, factions: string[]) => {
+    (
+      colors: Record<string, string> | null,
+      label: string | null,
+      factions: string[],
+      anchors: Array<{ faction: string; anchor: string }>,
+    ) => {
       setWarCountryColors(colors);
       setTerritoryLabel(label);
       setTerritoryFactions(factions);
+      setFactionAnchors(anchors);
     },
     [],
   );
@@ -533,6 +547,7 @@ export default function App() {
     setWarCountryColors(null);
     setTerritoryLabel(null);
     setTerritoryFactions([]);
+    setFactionAnchors([]);
   }, []);
 
   // handleHistoryScrub moves the playhead to an explicit year and rewrites
@@ -797,6 +812,7 @@ export default function App() {
         warAccent={activeTheme.accent}
         warCountryColors={warCountryColors ?? undefined}
         territoryLabel={territoryLabel ?? undefined}
+        warFactionAnchors={factionAnchors}
       />
 
       {/* Era legend chip. Visible while the user is browsing the globe.

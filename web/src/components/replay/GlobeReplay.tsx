@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Globe from 'react-globe.gl';
 import type { GlobeMethods } from 'react-globe.gl';
-import { feature } from 'topojson-client';
-import type { Topology } from 'topojson-specification';
-import type { Feature, FeatureCollection, Geometry, Position } from 'geojson';
+import type { Feature, Geometry, Position } from 'geojson';
 
 import type { Battle } from '../../types/battle';
 import type { Phase, Replay, Faction, ControlRegion, PaletteContext } from '../../types/replay';
 import { factionColorFor } from '../../types/replay';
 import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../../data/cities';
+import { loadWorldCountries, worldCountriesCache } from '../../data/world-countries';
 import { themeForEra } from '../../theme/era';
 import { playImpact } from '../../audio/sound';
 
@@ -29,8 +28,6 @@ interface GlobeReplayProps {
 // space. 3° is about 330 km wide, a campaign / operational scale wide enough
 // that arrows traverse visible geography.
 const DEFAULT_EXTENT_DEG = 3.0;
-
-const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json';
 
 // COUNTRY_NAME_ALIASES maps territory-snapshot country labels to the long
 // names the world-atlas topology uses. Kept in sync with the equivalent
@@ -246,7 +243,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
-  const [countries, setCountries] = useState<Feature<Geometry>[]>([]);
+  const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
   const [arrows, setArrows] = useState<ProjectedArrow[]>([]);
   const [units, setUnits] = useState<ProjectedUnit[]>([]);
 
@@ -261,14 +258,13 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
   }, []);
 
   useEffect(() => {
-    fetch(COUNTRIES_URL)
-      .then((r) => r.json())
-      .then((topo: Topology) => {
-        const fc = feature(topo, topo.objects.countries) as FeatureCollection;
-        setCountries(fc.features);
-      })
+    if (countries.length > 0) return;
+    let cancelled = false;
+    loadWorldCountries()
+      .then((feats) => { if (!cancelled) setCountries(feats); })
       .catch(() => {});
-  }, []);
+    return () => { cancelled = true; };
+  }, [countries.length]);
 
   const highlightedCountry = useMemo(() => {
     if (countries.length === 0) return [];
@@ -286,8 +282,17 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
   // fraction of the viewport instead of looking like short flicks against
   // a wide-open continent.
   const defaultAltitude = Math.max(0.12, Math.min(0.55, extentLngDeg / 12));
-  const cameraLat = phase.cameraLat ?? battle.lat;
-  const cameraLng = phase.cameraLng ?? battle.lng;
+  // Guard against (0, 0) and other origin-near garbage coordinates. A battle
+  // with `lat: 0, lng: 0` is bad data, not a real location. Snapping the
+  // camera there parks the user in the Gulf of Guinea staring at open ocean.
+  // Fall back to a neutral mid-latitude European vantage so the polygons
+  // still have something to frame.
+  const battleCoordsValid = Number.isFinite(battle.lat) && Number.isFinite(battle.lng)
+    && (Math.abs(battle.lat) + Math.abs(battle.lng)) > 0.5;
+  const safeBattleLat = battleCoordsValid ? battle.lat : 30;
+  const safeBattleLng = battleCoordsValid ? battle.lng : 10;
+  const cameraLat = phase.cameraLat ?? safeBattleLat;
+  const cameraLng = phase.cameraLng ?? safeBattleLng;
   const cameraAlt = phase.cameraAltitude ?? defaultAltitude;
   const tweenMs = phase.cameraTweenMs ?? 1400;
 
@@ -313,13 +318,17 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     return { lat: latSum / n, lng: lngSum / n };
   }, [phase, battle.lat, battle.lng, extentLatDeg, extentLngDeg, replay.aspectRatio]);
 
-  // Camera choreography per phase. The first phase of any battle snaps the
-  // camera straight to the target longitude with a slightly-pulled-back
-  // altitude — this kills the "globe starts on the Atlantic, slowly flies to
-  // Europe" awkwardness that made replays feel like they were buffering. The
-  // tween then settles in to the desired vantage. Subsequent phases run the
-  // full eased tween because they're moving from one curated vantage to the
-  // next.
+  // Camera choreography. Three distinct moves:
+  //   - Initial mount of GlobeReplay: instant snap so the user lands on the
+  //     battle frame instead of watching the camera fly in from Null Island
+  //     (react-globe.gl's default vantage).
+  //   - First phase of a NEW battle inside the same cinematic session:
+  //     smooth eased tween from the previous battle's vantage to the new
+  //     one. Hard-snapping here is what made the war cinematic feel like
+  //     a slideshow.
+  //   - Subsequent phases inside the same battle: long eased tween between
+  //     curated phase vantages.
+  const initialMountRef = useRef(true);
   const firstPhaseAppliedRef = useRef(false);
   useEffect(() => {
     if (!globeRef.current) return;
@@ -327,22 +336,29 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     const controls = globe.controls();
     controls.autoRotate = false;
 
-    if (!firstPhaseAppliedRef.current) {
-      // Hard snap on first phase so the camera doesn't fly across the
-      // ocean to find the battle.
-      globe.pointOfView(
-        { lat: cameraLat, lng: cameraLng, altitude: cameraAlt },
-        0,
-      );
+    // Compute the actual primary-tween duration so the drift can wait for
+    // it. The drift used to fire at Math.max(1800, tweenMs), which on a
+    // 2400ms inter-battle tween fired at 1800ms — 600ms BEFORE the primary
+    // tween landed. Two overlapping tweens fighting for the camera is the
+    // jitter the user was seeing between battles. Track the real duration
+    // and start the drift only after the camera has settled.
+    let primaryMs: number;
+    if (initialMountRef.current) {
+      primaryMs = 0;
+      globe.pointOfView({ lat: cameraLat, lng: cameraLng, altitude: cameraAlt }, 0);
+      initialMountRef.current = false;
+      firstPhaseAppliedRef.current = true;
+    } else if (!firstPhaseAppliedRef.current) {
+      // First phase of a fresh battle (battle.id just changed). Smooth
+      // eased fly across whatever distance separates the prior vantage
+      // from the new one. 2400ms reads as deliberate cinematography.
+      primaryMs = 2400;
+      globe.pointOfView({ lat: cameraLat, lng: cameraLng, altitude: cameraAlt }, primaryMs);
       firstPhaseAppliedRef.current = true;
     } else {
       // Subsequent phases run a longer eased tween for a smoother feel.
-      // Bumped from the curator-set tweenMs (default ~1400) to a min of
-      // 1800 so the camera glides instead of darts between vantages.
-      globe.pointOfView(
-        { lat: cameraLat, lng: cameraLng, altitude: cameraAlt },
-        Math.max(1800, tweenMs),
-      );
+      primaryMs = Math.max(1800, tweenMs);
+      globe.pointOfView({ lat: cameraLat, lng: cameraLng, altitude: cameraAlt }, primaryMs);
     }
 
     const driftTimer = setTimeout(() => {
@@ -354,13 +370,11 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         ? cameraLng + (movementCentroid.lng - cameraLng) * 0.4
         : cameraLng;
       const tighter = Math.max(0.08, cameraAlt * 0.85);
-      // Longer drift (3200ms vs 2400ms) so the action-centroid push reads
-      // as a slow cinematic dolly rather than a hop.
       globeRef.current.pointOfView(
         { lat: targetLat, lng: targetLng, altitude: tighter },
         3200,
       );
-    }, Math.max(1800, tweenMs));
+    }, primaryMs + 200);
 
     const breatheTimer = setTimeout(() => {
       const c = globeRef.current?.controls();
@@ -475,9 +489,12 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         if (!name) continue;
         const color = colorByName[name];
         if (color) {
+          // Belligerent shading punched up to 0.94 alpha so the territories
+          // read with editorial-illustration weight, not satellite-photo
+          // wash. Stroke at full alpha gives a crisp border.
           out.push({
             feature: feat as Feature<Geometry>,
-            capColor: hexWithAlpha(color, 0.82),
+            capColor: hexWithAlpha(color, 0.94),
             strokeColor: hexWithAlpha(color, 1.0),
             sideColor: 'rgba(0,0,0,0)',
             altitude: 0.002,
@@ -485,12 +502,12 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         } else {
           // Non-belligerent neutral wash — gives the globe continuity
           // instead of bare patches of satellite texture between shaded
-          // countries. Same altitude as belligerents so the polygon engine
-          // has no depth ambiguity to z-fight over.
+          // countries. Slightly heavier alpha so the "whole world is part
+          // of the picture" reads instead of patchy half-shading.
           out.push({
             feature: feat as Feature<Geometry>,
-            capColor: 'rgba(48,56,72,0.22)',
-            strokeColor: 'rgba(80,90,108,0.32)',
+            capColor: 'rgba(48,56,72,0.36)',
+            strokeColor: 'rgba(95,108,128,0.48)',
             sideColor: 'rgba(0,0,0,0)',
             altitude: 0.002,
           });

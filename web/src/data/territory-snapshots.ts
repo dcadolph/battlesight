@@ -14,6 +14,15 @@
 // Owner keys match canonBelligerentKey values so the colour table below
 // can stay aligned with the rest of the app's identity system.
 
+// Bloc is the high-level coalition the user sees on the map. The
+// editorial Britannica/Map-Men style is "red side vs blue side", with a
+// third color reserved for major three-way conflicts (Cold War triads,
+// Three Kingdoms, etc.) and a grey wash for neutrals. Faction-specific
+// colors (OWNER_COLORS) only matter when a snapshot does NOT specify a
+// bloc per faction — the bloc map collapses 60 different palette entries
+// into the four core "what side are you on" reads.
+export type Bloc = 'A' | 'B' | 'C' | 'neutral';
+
 export interface TerritorySnapshot {
   // year is the decimal year (e.g. 1939.7 ≈ September 1939) the snapshot
   // takes effect. Snapshots are applied as "current as of this year or
@@ -24,6 +33,12 @@ export interface TerritorySnapshot {
   // control maps an owner key to the list of present-day country names
   // that owner held at this snapshot.
   control: Record<string, string[]>;
+  // bloc optionally assigns each owner to a high-level coalition for
+  // editorial color simplification. When present, the bloc → BLOC_COLORS
+  // mapping wins over OWNER_COLORS so the map reads as "red vs blue"
+  // instead of a dozen competing faction shades. Faction identity is
+  // still preserved through the on-globe typography label layer.
+  bloc?: Record<string, Bloc>;
 }
 
 export interface WarTerritory {
@@ -50,18 +65,19 @@ export const OWNER_COLORS: Record<string, string> = {
   // Curated palette: avoid greens (which blend with forested land) and
   // saturated mid-blues (which blend with ocean). Every shade below was
   // chosen to read clearly against the satellite-style Earth texture.
-  'nazi-germany': '#a16207',
+  // Nazi Germany gets the bright Nazi-banner red so the WW2 cinematic
+  // reads as "red Reich" at a glance. The Soviet sphere takes a deep
+  // crimson so red Reich and red USSR sit side by side on the 1941
+  // Eastern Front map without merging into one blob. The faction symbol
+  // layer (Iron Cross vs. hammer-and-sickle) seals the distinction.
+  'nazi-germany': '#dc2626',
   'imperial-germany': '#854d0e',
   'germany': '#a16207',
-  'japan': '#dc2626',
+  'japan': '#b91c1c',
   'italy': '#ec4899',
   'vichy': '#fb923c',
-  // Soviet sphere reads as bright Red Army red. Modern Russia keeps a
-  // deep blood red — visually distinct from Ukrainian blue and from the
-  // Soviet bright red so all three can sit on the same map without
-  // confusion.
-  'ussr': '#dc2626',
-  'russia': '#b91c1c',
+  'ussr': '#7f1d1d',
+  'russia': '#7f1d1d',
   'ukraine': '#facc15',
   // Western Allies palette: each gets a different cool tone so France,
   // UK, and the US stay distinguishable when they're side-by-side on
@@ -78,8 +94,8 @@ export const OWNER_COLORS: Record<string, string> = {
   'commonwealth': '#22d3ee',
   'india': '#ea580c',
   'south-africa': '#d97706',
-  'france': '#6366f1',
-  'french-empire': '#818cf8',
+  'france': '#1d4ed8',
+  'french-empire': '#3b82f6',
   'china-roc': '#0ea5e9',
   'china-prc': '#b91c1c',
   'china': '#fb7185',
@@ -191,6 +207,11 @@ export const TERRITORY: WarTerritory[] = [
           'italy': ['Italy', 'Albania', 'Libya', 'Eritrea', 'Ethiopia', 'Somalia'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea'],
         },
+        bloc: {
+          'nazi-germany': 'A', 'italy': 'A',
+          'uk': 'B', 'india': 'B', 'south-africa': 'B', 'france': 'B', 'poland': 'B',
+          'ussr': 'neutral', 'japan': 'neutral',
+        },
       },
       {
         year: 1940.5,
@@ -207,6 +228,11 @@ export const TERRITORY: WarTerritory[] = [
           'new-zealand': ['New Zealand'],
           'italy': ['Italy', 'Albania', 'Libya', 'Eritrea', 'Ethiopia', 'Somalia'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea'],
+        },
+        bloc: {
+          'nazi-germany': 'A', 'vichy': 'A', 'italy': 'A',
+          'uk': 'B', 'india': 'B', 'south-africa': 'B', 'canada': 'B', 'australia': 'B', 'new-zealand': 'B',
+          'ussr': 'neutral', 'japan': 'neutral',
         },
       },
       {
@@ -225,6 +251,10 @@ export const TERRITORY: WarTerritory[] = [
           'italy': ['Italy', 'Albania', 'Libya', 'Eritrea', 'Ethiopia', 'Somalia'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea', 'Vietnam', 'Laos', 'Cambodia'],
         },
+        bloc: {
+          'nazi-germany': 'A', 'vichy': 'A', 'italy': 'A', 'japan': 'A',
+          'uk': 'B', 'india': 'B', 'south-africa': 'B', 'canada': 'B', 'australia': 'B', 'new-zealand': 'B', 'ussr': 'B',
+        },
       },
       {
         year: 1942.7,
@@ -242,6 +272,10 @@ export const TERRITORY: WarTerritory[] = [
           'italy': ['Italy', 'Albania', 'Eritrea', 'Ethiopia', 'Somalia'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea', 'Vietnam', 'Laos', 'Cambodia', 'Myanmar', 'Thailand', 'Malaysia', 'Indonesia', 'Philippines', 'Papua New Guinea'],
         },
+        bloc: {
+          'nazi-germany': 'A', 'italy': 'A', 'japan': 'A',
+          'uk': 'B', 'india': 'B', 'south-africa': 'B', 'canada': 'B', 'australia': 'B', 'new-zealand': 'B', 'ussr': 'B', 'us': 'B',
+        },
       },
       {
         year: 1943.7,
@@ -257,6 +291,10 @@ export const TERRITORY: WarTerritory[] = [
           'new-zealand': ['New Zealand'],
           'us': ['United States'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea', 'Vietnam', 'Laos', 'Cambodia', 'Thailand', 'Malaysia', 'Indonesia', 'Philippines'],
+        },
+        bloc: {
+          'nazi-germany': 'A', 'japan': 'A',
+          'uk': 'B', 'india': 'B', 'south-africa': 'B', 'canada': 'B', 'australia': 'B', 'new-zealand': 'B', 'ussr': 'B', 'us': 'B',
         },
       },
       {
@@ -274,6 +312,10 @@ export const TERRITORY: WarTerritory[] = [
           'us': ['United States', 'Philippines'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea', 'Vietnam', 'Laos', 'Cambodia', 'Thailand', 'Malaysia', 'Indonesia'],
         },
+        bloc: {
+          'nazi-germany': 'A', 'japan': 'A',
+          'uk': 'B', 'india': 'B', 'south-africa': 'B', 'canada': 'B', 'australia': 'B', 'new-zealand': 'B', 'ussr': 'B', 'us': 'B',
+        },
       },
       {
         year: 1945.4,
@@ -289,6 +331,10 @@ export const TERRITORY: WarTerritory[] = [
           'us': ['United States', 'Philippines', 'Germany', 'Austria'],
           'japan': ['Japan', 'Taiwan', 'North Korea', 'South Korea', 'Vietnam', 'Laos', 'Cambodia', 'Thailand', 'Malaysia', 'Indonesia'],
         },
+        bloc: {
+          'japan': 'A',
+          'uk': 'B', 'india': 'B', 'south-africa': 'B', 'canada': 'B', 'australia': 'B', 'new-zealand': 'B', 'ussr': 'B', 'us': 'B',
+        },
       },
       {
         year: 1945.7,
@@ -303,6 +349,9 @@ export const TERRITORY: WarTerritory[] = [
           'australia': ['Australia'],
           'new-zealand': ['New Zealand'],
           'china-roc': ['China', 'Taiwan'],
+        },
+        bloc: {
+          'us': 'B', 'ussr': 'B', 'uk': 'B', 'india': 'B', 'south-africa': 'B', 'canada': 'B', 'australia': 'B', 'new-zealand': 'B', 'china-roc': 'B',
         },
       },
     ],
@@ -3028,13 +3077,35 @@ export function findSnapshot(war: string, decimalYear: number): TerritorySnapsho
   return entry.snapshots[0];
 }
 
+// BLOC_COLORS is the editorial two/three-color palette that drives the
+// "red vs blue, with grey neutrals" treatment when a snapshot specifies
+// bloc assignments. Saturated enough to read against satellite imagery,
+// distinct enough that a colorblind viewer can still tell them apart.
+export const BLOC_COLORS: Record<Bloc, string> = {
+  A: '#dc2626', // Axis / aggressor / red side
+  B: '#1d4ed8', // Allies / coalition / blue side
+  C: '#eab308', // third party (Three Kingdoms, Cold War triads, etc.)
+  neutral: '#475569', // grey wash for non-belligerent territory in view
+};
+
 // buildCountryColorMap converts a snapshot's owner-centric control map
-// into the country-centric form BattleGlobe needs ({ "France": "#dc2626"
-// }), using OWNER_COLORS to look up each owner's accent.
+// into the country-centric form BattleGlobe needs ({ "France": "#1d4ed8"
+// }). When the snapshot specifies a bloc map (red-side / blue-side
+// / third-side / neutral), the bloc color wins so the globe reads as a
+// two-color Britannica-style atlas instead of a riot of faction shades.
+// Without a bloc map, falls back to per-faction OWNER_COLORS so older
+// snapshots keep their existing identity-rich palette.
 export function buildCountryColorMap(snapshot: TerritorySnapshot): Record<string, string> {
   const out: Record<string, string> = {};
+  const blocMap = snapshot.bloc;
   for (const [owner, countries] of Object.entries(snapshot.control)) {
-    const color = OWNER_COLORS[owner] || '#64748b';
+    let color: string;
+    if (blocMap) {
+      const bloc = blocMap[owner] ?? 'neutral';
+      color = BLOC_COLORS[bloc];
+    } else {
+      color = OWNER_COLORS[owner] || '#64748b';
+    }
     for (const c of countries) {
       out[c] = color;
     }

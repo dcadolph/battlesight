@@ -42,6 +42,7 @@ interface WarPlaybackProps {
     colors: Record<string, string> | null,
     label: string | null,
     factions: string[],
+    anchors: Array<{ faction: string; anchor: string }>,
   ) => void;
   // initialWar optionally pre-selects a war on mount so an external action
   // (search-bar war click, deep link, etc.) can open WarPlayback already
@@ -1001,10 +1002,18 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // back to its idle state.
   useEffect(() => {
     if (!onWarTerritory) return;
+    // anchorsFor returns one { faction, anchor } per controller in a
+    // snapshot. The anchor is the first country listed in the control
+    // array, which by convention is the faction's home country (Germany
+    // for nazi-germany, Russia for ussr, United Kingdom for uk, etc.).
+    const anchorsFor = (control: Record<string, string[]>) =>
+      Object.entries(control)
+        .filter(([, list]) => list.length > 0)
+        .map(([faction, list]) => ({ faction, anchor: list[0] }));
     if (!selectedWar) {
       if (lastSnapshotKeyRef.current !== '') {
         lastSnapshotKeyRef.current = '';
-        onWarTerritory(null, null, []);
+        onWarTerritory(null, null, [], []);
       }
       return;
     }
@@ -1017,7 +1026,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         const key = `${selectedWar}|aftermath|${finalSnap.year}`;
         if (lastSnapshotKeyRef.current !== key) {
           lastSnapshotKeyRef.current = key;
-          onWarTerritory(buildCountryColorMap(finalSnap), finalSnap.label, Object.keys(finalSnap.control));
+          onWarTerritory(buildCountryColorMap(finalSnap), finalSnap.label, Object.keys(finalSnap.control), anchorsFor(finalSnap.control));
         }
         return;
       }
@@ -1032,9 +1041,9 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       if (lastSnapshotKeyRef.current === key) return;
       lastSnapshotKeyRef.current = key;
       if (fallback) {
-        onWarTerritory(buildCountryColorMap(fallback), fallback.label, Object.keys(fallback.control));
+        onWarTerritory(buildCountryColorMap(fallback), fallback.label, Object.keys(fallback.control), anchorsFor(fallback.control));
       } else {
-        onWarTerritory(null, null, []);
+        onWarTerritory(null, null, [], []);
       }
       return;
     }
@@ -1043,7 +1052,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       const key = `${selectedWar}|nosnap`;
       if (lastSnapshotKeyRef.current === key) return;
       lastSnapshotKeyRef.current = key;
-      onWarTerritory(null, null, []);
+      onWarTerritory(null, null, [], []);
       return;
     }
     // Snapshot dedupe: every advance whose year falls into the same snapshot
@@ -1052,7 +1061,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     const key = `${selectedWar}|${snap.year}`;
     if (lastSnapshotKeyRef.current === key) return;
     lastSnapshotKeyRef.current = key;
-    onWarTerritory(buildCountryColorMap(snap), snap.label, Object.keys(snap.control));
+    onWarTerritory(buildCountryColorMap(snap), snap.label, Object.keys(snap.control), anchorsFor(snap.control));
   }, [selectedWar, currentBattle, onWarTerritory, cinematicStage]);
 
   // Two distinct shells: a centered modal while the user is browsing the war

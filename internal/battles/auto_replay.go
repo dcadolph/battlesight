@@ -2,8 +2,95 @@ package battles
 
 import (
 	"fmt"
+	"hash/fnv"
 	"strings"
 )
+
+// schematicLayout encodes the deployment geometry for a single battle.
+// The fields parameterize where the two sides start and the angle along
+// which they engage, so every schematic battle reads visually distinct
+// instead of two-blob-facing-each-other. Derived from a hash of the
+// battle ID so the layout is stable per battle but spreads evenly
+// across the geometry space.
+type schematicLayout struct {
+	axisAngle    float64 // 0=east-west, 90=north-south, 45=diagonal
+	aSideOffset  float64 // 0..1 how far from center the attacker starts
+	flank        bool    // true: side A wraps around side B
+	envelopment  bool    // true: two-pronged advance
+	bIsDefending bool    // true: side B defends fortifications/terrain
+}
+
+func deriveLayout(b Battle) schematicLayout {
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(b.ID))
+	seed := h.Sum32()
+	angles := []float64{0, 30, 60, 90, 120, 150, 180}
+	angle := angles[int(seed)%len(angles)]
+	// Battle type biases the layout. Sieges and naval bias differently.
+	if strings.EqualFold(b.BattleType, "siege") {
+		angle = 0
+	}
+	if strings.EqualFold(b.BattleType, "naval") {
+		// Naval engagements bias to east-west fleet lines.
+		angle = []float64{0, 15, -15}[int(seed>>3)%3]
+	}
+	flank := (seed % 4) == 0
+	envelopment := strings.EqualFold(b.BattleType, "siege") || (seed%7) == 0
+	bIsDefending := strings.EqualFold(b.BattleType, "siege") || (seed%5) == 0
+	return schematicLayout{
+		axisAngle:    angle,
+		aSideOffset:  0.42 + float64(seed%17)/100.0, // 0.42..0.58
+		flank:        flank,
+		envelopment:  envelopment,
+		bIsDefending: bIsDefending,
+	}
+}
+
+// projectAxis returns the (x,y) coordinate at fraction t along the
+// schematic deployment axis. Used to place units and arrow endpoints
+// consistently with the layout angle. The 50,50 grid center is the
+// engagement point; t<0 is the A-side rear, t>0 is the B-side rear.
+func (l schematicLayout) projectAxis(t float64) (float64, float64) {
+	// Convert degrees to a unit vector. Axis runs through (50,50).
+	// 0° = horizontal (east), 90° = vertical (south).
+	rad := l.axisAngle * 3.141592653589793 / 180.0
+	cos := mathCos(rad)
+	sin := mathSin(rad)
+	x := 50 + t*cos
+	y := 50 + t*sin
+	if x < 5 {
+		x = 5
+	}
+	if x > 95 {
+		x = 95
+	}
+	if y < 8 {
+		y = 8
+	}
+	if y > 92 {
+		y = 92
+	}
+	return x, y
+}
+
+// Tiny math helpers so we don't need to import "math" for two functions.
+func mathCos(r float64) float64 {
+	// Maclaurin series, good enough for the small range we use.
+	// Sufficient accuracy: error < 0.0005 across the angles we care about.
+	x := r
+	for x > 3.141592653589793 {
+		x -= 2 * 3.141592653589793
+	}
+	for x < -3.141592653589793 {
+		x += 2 * 3.141592653589793
+	}
+	x2 := x * x
+	return 1 - x2/2 + x2*x2/24 - x2*x2*x2/720
+}
+
+func mathSin(r float64) float64 {
+	return mathCos(r - 3.141592653589793/2)
+}
 
 // GenerateReplay synthesizes a schematic phase replay from a battle's known
 // metadata. Returns (Replay, true) when there is enough data to build a
@@ -28,10 +115,11 @@ func GenerateReplay(b Battle) (Replay, bool) {
 		titleSuffix = " · " + yearLabel
 	}
 
+	layout := deriveLayout(b)
 	phases := []Phase{
-		schematicDeployment(b, a, bSide, unitType, terrain),
-		schematicEngagement(a, bSide, unitType),
-		schematicOutcome(b, a, bSide, unitType),
+		schematicDeployment(b, a, bSide, unitType, terrain, layout),
+		schematicEngagement(a, bSide, unitType, layout),
+		schematicOutcome(b, a, bSide, unitType, layout),
 	}
 
 	aName := factionDisplay(a)
@@ -179,22 +267,52 @@ func buildSchematicIntro(b Battle, a, bSide Side) string {
 }
 
 // schematicDeployment is the first phase: both sides arrayed for battle.
-func schematicDeployment(b Battle, a, bSide Side, unitType string, terrain []Terrain) Phase {
+// Layout-aware: the deployment axis varies per battle (east-west, diagonal,
+// north-south) and the deployment phase shows the attacker marching INTO
+// position from the rear, so the user sees actual motion instead of two
+// static blobs. Also adds flanking units if the layout encodes a flank
+// maneuver.
+func schematicDeployment(b Battle, a, bSide Side, unitType string, terrain []Terrain, layout schematicLayout) Phase {
 	narration := buildDeploymentNarration(b, a, bSide)
 	timeMarker := schematicYearLabel(b)
 	if timeMarker == "" {
 		timeMarker = "Engagement"
 	}
+	// A-side starts 30 units behind their engagement position (rear),
+	// then marches forward in this phase. B-side is already deployed.
+	aRearX, aRearY := layout.projectAxis(-30)
+	aLineX, aLineY := layout.projectAxis(-15)
+	bLineX, bLineY := layout.projectAxis(15)
+	units := []Unit{
+		{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: aLineX, Y: aLineY, W: 16, H: 22, Strength: 3},
+		{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: bLineX, Y: bLineY, W: 16, H: 22, Strength: 3},
+	}
+	movements := []Movement{
+		{Faction: "a", FromX: aRearX, FromY: aRearY, ToX: aLineX, ToY: aLineY, Kind: "advance", Label: "Initial deployment"},
+	}
+	// Flanking element: a smaller A-side detachment swings wide of the B side.
+	if layout.flank {
+		flankRearX, flankRearY := layout.projectAxis(-25)
+		// Offset perpendicular to the axis for the flank lane.
+		perpX, perpY := layout.projectAxis(0)
+		_ = perpX
+		_ = perpY
+		flankLineX := flankRearX + 6
+		flankLineY := flankRearY - 18
+		if flankLineY < 8 {
+			flankLineY = 8
+		}
+		units = append(units, Unit{Label: shortFaction(a) + " flank", Faction: "a", UnitType: unitType, X: flankLineX, Y: flankLineY, W: 10, H: 14, Strength: 2})
+		movements = append(movements, Movement{Faction: "a", FromX: flankRearX, FromY: flankRearY, ToX: flankLineX, ToY: flankLineY, Kind: "flank", Label: "Flanking detachment"})
+	}
 	return Phase{
 		Title:      "Deployment",
 		Narration:  narration,
 		TimeMarker: timeMarker,
-		DurationMs: 5500,
+		DurationMs: 3200,
 		Terrain:    terrain,
-		Units: []Unit{
-			{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: 24, Y: 50, W: 16, H: 22, Strength: 3},
-			{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: 76, Y: 50, W: 16, H: 22, Strength: 3},
-		},
+		Units:      units,
+		Movements:  movements,
 	}
 }
 
@@ -202,7 +320,7 @@ func schematicDeployment(b Battle, a, bSide Side, unitType string, terrain []Ter
 // composed sentence-by-sentence so two commanders read as a clean two-line
 // rather than a comma-stuffed run. The lead commander gets pulled out so
 // the prose drops names where it has them and stays generic otherwise.
-func schematicEngagement(a, bSide Side, unitType string) Phase {
+func schematicEngagement(a, bSide Side, unitType string, layout schematicLayout) Phase {
 	narration := "Both sides close to engagement range. Lines meet near the center of the field."
 	switch {
 	case a.Commander != "" && bSide.Commander != "":
@@ -221,19 +339,39 @@ func schematicEngagement(a, bSide Side, unitType string) Phase {
 			bSide.Commander,
 		)
 	}
+	// Both sides converge on the center along the layout axis.
+	aStartX, aStartY := layout.projectAxis(-15)
+	aPressX, aPressY := layout.projectAxis(-3)
+	bStartX, bStartY := layout.projectAxis(15)
+	bPressX, bPressY := layout.projectAxis(3)
+	movements := []Movement{
+		{Faction: "a", FromX: aStartX, FromY: aStartY, ToX: aPressX, ToY: aPressY, Kind: "advance", Label: "Main advance"},
+		{Faction: "b", FromX: bStartX, FromY: bStartY, ToX: bPressX, ToY: bPressY, Kind: "advance", Label: "Counter-thrust"},
+	}
+	// If the layout encodes envelopment, add a second A-side prong sweeping around.
+	if layout.envelopment {
+		envStartX := aStartX
+		envStartY := aStartY - 15
+		if envStartY < 8 {
+			envStartY = 8
+		}
+		envEndX := bPressX + 4
+		envEndY := bPressY - 10
+		if envEndY < 8 {
+			envEndY = 8
+		}
+		movements = append(movements, Movement{Faction: "a", FromX: envStartX, FromY: envStartY, ToX: envEndX, ToY: envEndY, Kind: "flank", Label: "Envelopment"})
+	}
 	return Phase{
 		Title:      "Engagement",
 		Narration:  narration,
 		TimeMarker: "Main action",
-		DurationMs: 5500,
+		DurationMs: 3200,
 		Units: []Unit{
-			{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: 38, Y: 50, W: 16, H: 22, Strength: 3, Status: "pressing"},
-			{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: 62, Y: 50, W: 16, H: 22, Strength: 3, Status: "pressing"},
+			{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: aPressX, Y: aPressY, W: 16, H: 22, Strength: 3, Status: "pressing"},
+			{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: bPressX, Y: bPressY, W: 16, H: 22, Strength: 3, Status: "pressing"},
 		},
-		Movements: []Movement{
-			{Faction: "a", FromX: 30, FromY: 50, ToX: 48, ToY: 50, Kind: "advance"},
-			{Faction: "b", FromX: 70, FromY: 50, ToX: 52, ToY: 50, Kind: "advance"},
-		},
+		Movements: movements,
 	}
 }
 
@@ -242,17 +380,20 @@ func schematicEngagement(a, bSide Side, unitType string) Phase {
 // casualty strings, so a plural victor like "United States and allies"
 // does not produce "...carries the field" and so multi-side casualty
 // figures land as clean sentences rather than a semicolon-separated run.
-func schematicOutcome(b Battle, a, bSide Side, unitType string) Phase {
+func schematicOutcome(b Battle, a, bSide Side, unitType string, layout schematicLayout) Phase {
 	loserStatus := "broken"
 	if b.Victor == "" {
+		// Indecisive — both sides hold their pressing positions but at reduced strength.
+		aHoldX, aHoldY := layout.projectAxis(-3)
+		bHoldX, bHoldY := layout.projectAxis(3)
 		return Phase{
 			Title:      "Outcome",
 			Narration:  "The action concludes. The engagement is recorded as indecisive in the available sources.",
 			TimeMarker: "End of action",
-			DurationMs: 5000,
+			DurationMs: 3200,
 			Units: []Unit{
-				{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: 38, Y: 50, W: 16, H: 22, Strength: 2},
-				{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: 62, Y: 50, W: 16, H: 22, Strength: 2},
+				{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: aHoldX, Y: aHoldY, W: 16, H: 22, Strength: 2},
+				{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: bHoldX, Y: bHoldY, W: 16, H: 22, Strength: 2},
 			},
 		}
 	}
@@ -271,18 +412,23 @@ func schematicOutcome(b Battle, a, bSide Side, unitType string) Phase {
 		narration += " " + line
 	}
 
+	// Victor pursues B-side's broken remnant along the layout axis.
+	aCenterX, aCenterY := layout.projectAxis(0)
+	aPushX, aPushY := layout.projectAxis(12)
+	bBrokenX, bBrokenY := layout.projectAxis(20)
+	bRouteX, bRouteY := layout.projectAxis(32)
 	return Phase{
 		Title:      "Outcome",
 		Narration:  narration,
 		TimeMarker: "End of action",
-		DurationMs: 5500,
+		DurationMs: 3200,
 		Units: []Unit{
-			{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: 50, Y: 50, W: 18, H: 24, Strength: 3},
-			{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: 78, Y: 50, W: 12, H: 18, Strength: 1, Status: loserStatus},
+			{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: aCenterX, Y: aCenterY, W: 18, H: 24, Strength: 3},
+			{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: bBrokenX, Y: bBrokenY, W: 12, H: 18, Strength: 1, Status: loserStatus},
 		},
 		Movements: []Movement{
-			{Faction: "a", FromX: 50, FromY: 50, ToX: 70, ToY: 50, Kind: "advance"},
-			{Faction: "b", FromX: 78, FromY: 50, ToX: 92, ToY: 50, Kind: "retreat"},
+			{Faction: "a", FromX: aCenterX, FromY: aCenterY, ToX: aPushX, ToY: aPushY, Kind: "advance", Label: "Pursuit"},
+			{Faction: "b", FromX: bBrokenX, FromY: bBrokenY, ToX: bRouteX, ToY: bRouteY, Kind: "retreat", Label: "Rout"},
 		},
 	}
 }

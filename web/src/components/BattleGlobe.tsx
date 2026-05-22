@@ -7,7 +7,37 @@ import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import type { FeatureCollection, Feature, Geometry, Position } from 'geojson';
 import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../data/cities';
+import { OWNER_COLORS, OWNER_LABELS } from '../data/territory-snapshots';
 import { formatNumberWithCommas } from '../lib/format';
+
+// featureCentroid returns the [lat, lng] vertex-average of a country polygon
+// or multipolygon feature. Used to anchor faction badge labels at a sensible
+// "middle" of each shaded territory cluster. Not a geographic centroid (no
+// area weighting) — vertex average is fine for label placement.
+function featureCentroid(feat: Feature<Geometry>): [number, number] | null {
+  const g = feat.geometry as Geometry;
+  let lngSum = 0;
+  let latSum = 0;
+  let n = 0;
+  const visitRing = (ring: Position[]) => {
+    for (const [lng, lat] of ring) {
+      lngSum += lng;
+      latSum += lat;
+      n++;
+    }
+  };
+  if (g.type === 'Polygon') {
+    for (const ring of g.coordinates) visitRing(ring as Position[]);
+  } else if (g.type === 'MultiPolygon') {
+    for (const poly of g.coordinates) {
+      for (const ring of poly) visitRing(ring as Position[]);
+    }
+  } else {
+    return null;
+  }
+  if (n === 0) return null;
+  return [latSum / n, lngSum / n];
+}
 
 interface BattleGlobeProps {
   battles: Battle[];
@@ -565,6 +595,59 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     return { highlightedCountry: out, featureColors: colors };
   }, [selectedBattle, countries, warCountries, warCountryColors]);
 
+  // Reverse-lookup for color → owner key. Built once. When two owners
+  // share the same color (e.g. multiple Allied factions in red), the
+  // first-defined entry wins — which is consistent enough for badge text.
+  const colorToOwnerRef = useRef<Map<string, string>>(new Map());
+  if (colorToOwnerRef.current.size === 0) {
+    for (const [owner, color] of Object.entries(OWNER_COLORS)) {
+      if (!colorToOwnerRef.current.has(color)) {
+        colorToOwnerRef.current.set(color, owner);
+      }
+    }
+  }
+
+  // factionBadges renders one centered chip per faction in the active
+  // snapshot. Centroid is the polygon's vertex-average, picked once per
+  // war (no per-country chips — the label sits at the cluster centroid of
+  // each owner's territory). Reads as "this red bloc is Nazi Germany" at
+  // a glance instead of just a wash of color.
+  const factionBadges = useMemo(() => {
+    if (!warCountryColors || Object.keys(warCountryColors).length === 0) return [];
+    if (countries.length === 0) return [];
+    // Group countries by owner key.
+    const ownerToCountries = new Map<string, string[]>();
+    for (const [country, color] of Object.entries(warCountryColors)) {
+      const owner = colorToOwnerRef.current.get(color) ?? color;
+      if (!ownerToCountries.has(owner)) ownerToCountries.set(owner, []);
+      ownerToCountries.get(owner)!.push(country);
+    }
+    const out: Array<{ lat: number; lng: number; text: string; color: string; size: number }> = [];
+    for (const [owner, ownerCountries] of ownerToCountries.entries()) {
+      const label = OWNER_LABELS[owner] || owner;
+      const color = OWNER_COLORS[owner] || warCountryColors[ownerCountries[0]] || '#ffffff';
+      // Find polygon features for these countries and average their centroids.
+      const centroids: Array<[number, number]> = [];
+      for (const countryName of ownerCountries) {
+        const target = countryName.toLowerCase();
+        const feat = countries.find((f) => {
+          const n = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
+          return n === target;
+        });
+        if (!feat) continue;
+        const c = featureCentroid(feat);
+        if (c) centroids.push(c);
+      }
+      if (centroids.length === 0) continue;
+      const avgLat = centroids.reduce((s, [lt]) => s + lt, 0) / centroids.length;
+      const avgLng = centroids.reduce((s, [, ln]) => s + ln, 0) / centroids.length;
+      // Size scales with number of countries the faction controls.
+      const size = Math.min(1.6, 0.7 + centroids.length * 0.08);
+      out.push({ lat: avgLat, lng: avgLng, text: label.toUpperCase(), color, size });
+    }
+    return out;
+  }, [warCountryColors, countries]);
+
   // hasWarShading determines whether the polygon overlay should render in the
   // multi-country war palette (accented, brighter borders) or in the single-
   // country battle-context palette (faint blue). We pick by checking whether
@@ -988,6 +1071,15 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       }}
       polygonAltitude={() => 0.002}
       polygonsTransitionDuration={200}
+      labelsData={factionBadges}
+      labelLat={(d: object) => (d as { lat: number }).lat}
+      labelLng={(d: object) => (d as { lng: number }).lng}
+      labelText={(d: object) => (d as { text: string }).text}
+      labelColor={(d: object) => (d as { color: string }).color}
+      labelSize={(d: object) => (d as { size: number }).size}
+      labelAltitude={0.012}
+      labelResolution={3}
+      labelIncludeDot={false}
       polygonLabel={polygonLabel}
     />
     </div>

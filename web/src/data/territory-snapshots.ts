@@ -3041,3 +3041,16 @@ export function buildCountryColorMap(snapshot: TerritorySnapshot): Record<string
   }
   return out;
 }
+
+// buildCountryOwnerMap returns the country → owner-key map for the
+// snapshot. Used to look up the human-readable OWNER_LABEL when painting
+// a faction badge on top of each shaded country polygon.
+export function buildCountryOwnerMap(snapshot: TerritorySnapshot): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [owner, countries] of Object.entries(snapshot.control)) {
+    for (const c of countries) {
+      out[c] = owner;
+    }
+  }
+  return out;
+}

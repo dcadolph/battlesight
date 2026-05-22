@@ -1070,7 +1070,7 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
         return hexToRgba(c, 1.0);
       }}
       polygonAltitude={() => 0.002}
-      polygonsTransitionDuration={200}
+      polygonsTransitionDuration={0}
       labelsData={factionBadges}
       labelLat={(d: object) => (d as { lat: number }).lat}
       labelLng={(d: object) => (d as { lng: number }).lng}

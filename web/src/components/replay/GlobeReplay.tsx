@@ -852,13 +852,13 @@ function ArrowVector({ phaseIdx, arrow, paletteCtx }: ArrowVectorProps) {
       <path
         d={path}
         stroke={color}
-        strokeWidth={Math.max(1.4, stroke * 0.7)}
+        strokeWidth={Math.max(2.0, stroke * 0.95)}
         fill="none"
         strokeLinecap="round"
         markerEnd={`url(#${markerId})`}
         style={{
           opacity: 0,
-          strokeDasharray: `${Math.max(8, stroke * 2.4)} ${Math.max(10, stroke * 3)}`,
+          strokeDasharray: `${Math.max(12, stroke * 3.5)} ${Math.max(8, stroke * 2.2)}`,
           ['--march' as string]: `${-period}px`,
           animation: `arrow-march-in 220ms ${marchDelay}ms ease-out forwards, march ${marchSpeed * 1.25}ms ${marchDelay}ms linear infinite`,
         }}

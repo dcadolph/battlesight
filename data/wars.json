@@ -6159,5 +6159,29 @@
     "startYear": 1793,
     "endYear": 1793,
     "humanDeaths": 25000
+  },
+  "Italian invasion of Albania": {
+    "outcome": "Italian victory; Albania annexed into the Kingdom of Italy as Italian Albania, April 1939.",
+    "aftermath": "Mussolini's five-day campaign deposed King Zog I and absorbed Albania into the Italian crown. Albania served as the launch base for the Italian invasion of Greece a year later. King Zog fled to Greece and eventually London. Albania was liberated by communist partisans under Enver Hoxha in November 1944.",
+    "keyTerms": "Italian landing at Durrës (April 7, 1939); Annexation proclamation (April 12, 1939)",
+    "startYear": 1939,
+    "endYear": 1939,
+    "humanDeaths": 750
+  },
+  "Sudeten Crisis": {
+    "outcome": "Munich Agreement (September 30, 1938) cedes the Sudetenland to Nazi Germany without Czechoslovak consent.",
+    "aftermath": "Hitler's third diplomatic victory of 1938 after the Anschluss and the Czech border crisis. The Sudetenland was annexed in October 1938, the rump Czechoslovakia broken up in March 1939 when German forces entered Prague. Chamberlain's 'peace for our time' became the byword for failed appeasement.",
+    "keyTerms": "Munich Agreement (September 30, 1938); German occupation of Czechoslovakia (March 15, 1939)",
+    "startYear": 1938,
+    "endYear": 1939,
+    "humanDeaths": 500
+  },
+  "Anschluss": {
+    "outcome": "Nazi Germany annexes Austria, March 12, 1938.",
+    "aftermath": "German troops crossed into Austria unopposed on March 12, 1938; the union (Anschluss) was declared the next day. Austria became Ostmark, then Alpine and Danube Reichsgaue. The international response was mostly acquiescence, emboldening Hitler's subsequent demands.",
+    "keyTerms": "Anschluss proclamation (March 12, 1938)",
+    "startYear": 1938,
+    "endYear": 1938,
+    "humanDeaths": 0
   }
 }

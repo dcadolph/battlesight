@@ -619,16 +619,37 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     return keys.size;
   }, [battles]);
 
+  // detailCacheRef holds per-battle dossier data fetched on demand. Once a
+  // battle's detail is in the cache, subsequent focusBattle calls hit it
+  // synchronously — no network, no loading flash, no per-step latency.
+  // Cleared when the war changes (different battle set, different IDs).
+  const detailCacheRef = useRef<Map<string, Battle>>(new Map());
+
+  // Clear the dossier cache whenever the war changes — the battle ID set
+  // is different and the old cache is no longer relevant.
+  useEffect(() => {
+    detailCacheRef.current = new Map();
+  }, [selectedWar]);
+
   const focusBattle = useCallback((battle: Battle) => {
     onBattleFocus(battle);
+    const cached = detailCacheRef.current.get(battle.id);
+    if (cached) {
+      setDetail(cached);
+      setDetailLoading(false);
+      return;
+    }
     setDetailLoading(true);
     setDetail(null);
     fetch(`/api/battles/${battle.id}`)
       .then((r) => r.json())
-      .then((d) => setDetail(d))
+      .then((d) => {
+        detailCacheRef.current.set(battle.id, d);
+        setDetail(d);
+      })
       .catch(() => setDetail(battle))
       .finally(() => setDetailLoading(false));
-  }, [onBattleFocus]);
+  }, [onBattleFocus, selectedWar]);
 
   const goTo = useCallback((gi: number, si: number = 0) => {
     if (gi < 0 || gi >= groups.length) return;

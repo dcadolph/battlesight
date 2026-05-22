@@ -103,6 +103,14 @@ func GenerateReplay(b Battle) (Replay, bool) {
 	if len(b.Sides) == 0 {
 		return Replay{}, false
 	}
+	// Skip schematic generation when fewer than two real sides have a
+	// usable name. A schematic with "Side B" placeholder shows the engine
+	// failed to identify the second belligerent and produces a misleading
+	// "attack against an unknown defender" arrow set — worse than just
+	// showing the dossier without a replay.
+	if len(b.Sides) < 2 || strings.TrimSpace(b.Sides[0].Name) == "" || strings.TrimSpace(b.Sides[1].Name) == "" {
+		return Replay{}, false
+	}
 
 	a, bSide := orderSides(b)
 	unitType := unitTypeForBattle(b)

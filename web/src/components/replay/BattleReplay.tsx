@@ -252,7 +252,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         /* The marching layer carries the arrowhead and fades in only after
            the trace has landed. */
         @keyframes arrow-march-in {
-          to { opacity: 0.55; }
+          to { opacity: 0.92; }
         }
         /* Marching dashes that run continuously along an arrow after the
            trace lands. Offsets the dash pattern by one period so the eye
@@ -277,7 +277,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         /* Wider outer halo: lower opacity, fatter blur, gives the line
            cinematic volume. */
         @keyframes arrow-halo-in {
-          to { stroke-opacity: 0.22; }
+          to { stroke-opacity: 0.45; }
         }
         /* Atmospheric volume: huge soft glow ring behind every arrow, fades
            in slow and lingers low so the front of advance keeps a luminous

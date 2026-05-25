@@ -96,6 +96,11 @@ export default function App() {
   // of its anchor — the cinematic equivalent of stamping the Reich symbol
   // on Berlin and the Soviet symbol on Moscow.
   const [factionAnchors, setFactionAnchors] = useState<Array<{ faction: string; anchor: string }>>([]);
+  // snapshotYear pins the historical year the active territory snapshot
+  // represents. Used to gate national-flag overlays so the right banner
+  // shows for the era (Nazi swastika 1933-1945, USSR hammer-and-sickle
+  // 1922-1991, etc.) rather than the modern country flag.
+  const [snapshotYear, setSnapshotYear] = useState<number | null>(null);
   // commanderQuery powers the CommanderPanel attribution view. Set from a
   // click on a commander chip in BattlePanel; cleared on close.
   const [commanderQuery, setCommanderQuery] = useState<string>('');
@@ -276,6 +281,7 @@ export default function App() {
           setTerritoryLabel(null);
           setTerritoryFactions([]);
           setFactionAnchors([]);
+          setSnapshotYear(null);
           return;
         }
         setSelectedBattle(null);
@@ -323,6 +329,7 @@ export default function App() {
     setTerritoryLabel(null);
     setTerritoryFactions([]);
     setFactionAnchors([]);
+    setSnapshotYear(null);
   }, []);
 
   const handleWatchReplay = useCallback(() => {
@@ -380,11 +387,13 @@ export default function App() {
       label: string | null,
       factions: string[],
       anchors: Array<{ faction: string; anchor: string }>,
+      year: number | null,
     ) => {
       setWarCountryColors(colors);
       setTerritoryLabel(label);
       setTerritoryFactions(factions);
       setFactionAnchors(anchors);
+      setSnapshotYear(year);
     },
     [],
   );
@@ -548,6 +557,7 @@ export default function App() {
     setTerritoryLabel(null);
     setTerritoryFactions([]);
     setFactionAnchors([]);
+    setSnapshotYear(null);
   }, []);
 
   // handleHistoryScrub moves the playhead to an explicit year and rewrites
@@ -813,6 +823,7 @@ export default function App() {
         warCountryColors={warCountryColors ?? undefined}
         territoryLabel={territoryLabel ?? undefined}
         warFactionAnchors={factionAnchors}
+        warSnapshotYear={snapshotYear ?? undefined}
       />
 
       {/* Era legend chip. Visible while the user is browsing the globe.
@@ -996,10 +1007,12 @@ export default function App() {
           onClose={handleCloseReplay}
           cinematicMode={replayCinematic}
           onEnded={replayCinematic ? handleCinematicBattleEnded : undefined}
-          outroPauseMs={replayCinematic ? 1200 : 2400}
+          outroPauseMs={replayCinematic ? 400 : 2400}
           onAdvanceNext={replayCinematic ? handleCinematicBattleEnded : undefined}
           onAdvancePrev={replayCinematic ? handleCinematicAdvancePrev : undefined}
           warCountryColors={warCountryColors ?? undefined}
+          warFactionAnchors={factionAnchors.length > 0 ? factionAnchors : undefined}
+          warSnapshotYear={snapshotYear ?? undefined}
         />
       )}
 

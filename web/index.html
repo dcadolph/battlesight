@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Preload the 2.3MB Earth texture so the browser starts the download
+         in parallel with the JS bundle parse. By the time Three.js asks for
+         it, the bytes are already in cache and GPU upload starts
+         immediately — eliminates the "globe takes forever to load" cold
+         path that the texture fetch was contributing to. -->
+    <link rel="preload" as="image" href="/textures/earth-blue-marble-5k.jpg" />
+    <link rel="preload" as="image" href="https://flagcdn.com/h60/gb.png" crossorigin />
+    <link rel="preload" as="image" href="https://flagcdn.com/h60/us.png" crossorigin />
+    <link rel="preload" as="image" href="https://flagcdn.com/h60/fr.png" crossorigin />
     <title>BattleSight</title>
   </head>
   <body>

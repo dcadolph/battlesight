@@ -6,6 +6,7 @@ import { ERA_COLORS } from '../types/battle';
 import type { Feature, Geometry, Position } from 'geojson';
 import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../data/cities';
 import { OWNER_LABELS } from '../data/territory-snapshots';
+import { flagForFaction } from '../data/faction-flags';
 import { loadWorldCountries, worldCountriesCache } from '../data/world-countries';
 import { formatNumberWithCommas } from '../lib/format';
 
@@ -43,6 +44,11 @@ interface BattleGlobeProps {
   // way Britannica and Map Men style historical atlases) instead of an
   // averaged centroid that lands "FRANCE" over Sudan.
   warFactionAnchors?: Array<{ faction: string; anchor: string }>;
+  // warSnapshotYear is the historical year of the active territory
+  // snapshot. Period-gates the national-flag overlay so the right banner
+  // shows for the era (Nazi swastika 1933-1945, USSR hammer-and-sickle
+  // 1922-1991) rather than the modern country flag.
+  warSnapshotYear?: number;
 }
 
 // COUNTRY_NAME_ALIASES maps our canonical country labels to the names used
@@ -258,7 +264,7 @@ function battleMagnitude(b: Battle): number {
   return Math.max(0, Math.min(1, (v - 2) / 4));
 }
 
-export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, territoryLabel, warFactionAnchors }: BattleGlobeProps) {
+export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, territoryLabel, warFactionAnchors, warSnapshotYear }: BattleGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
@@ -627,15 +633,18 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
     return featureColors.get(name) || warShadeColor;
   }, [featureColors, warShadeColor]);
 
-  // factionLabels renders one editorial name per controlling power at the
-  // mainland centroid of its anchor country — small-caps, wide-tracked,
-  // semi-transparent white, with a subtle drop shadow for legibility on
-  // colored shading. Britannica / Map-Men atlas style. No emoji, no
-  // clip-art, no flag glyph; the typography itself carries identity.
+  // factionLabels renders one editorial faction tag per controlling power
+  // at the mainland centroid of its anchor country. The tag is a small
+  // period-accurate flag (Nazi banner for Reich, hammer-sickle for USSR,
+  // modern country flag for present-day belligerents) stacked above the
+  // faction name in editorial small-caps. Period gating means the Soviet
+  // flag stops at 1991, the Nazi banner at 1945, etc. When no flag asset
+  // exists for the era, the typography stands alone.
   const factionLabels = useMemo(() => {
     if (!warFactionAnchors || warFactionAnchors.length === 0) return [];
     if (countries.length === 0) return [];
-    const out: Array<{ lat: number; lng: number; text: string; faction: string }> = [];
+    const year = warSnapshotYear ?? new Date().getFullYear();
+    const out: Array<{ lat: number; lng: number; text: string; flag: string | null; faction: string }> = [];
     for (const { faction, anchor } of warFactionAnchors) {
       const label = OWNER_LABELS[faction] || faction.replace(/-/g, ' ');
       const target = anchor.toLowerCase();
@@ -646,10 +655,15 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       if (!feat) continue;
       const c = largestPolygonCentroid(feat);
       if (!c || !Number.isFinite(c[0]) || !Number.isFinite(c[1])) continue;
-      out.push({ lat: c[0], lng: c[1], text: label.toUpperCase(), faction });
+      out.push({
+        lat: c[0], lng: c[1],
+        text: label.toUpperCase(),
+        flag: flagForFaction(faction, year),
+        faction,
+      });
     }
     return out;
-  }, [warFactionAnchors, countries]);
+  }, [warFactionAnchors, countries, warSnapshotYear]);
 
   useEffect(() => {
     const handleResize = () => setDimensions({ width: window.innerWidth, height: window.innerHeight });
@@ -1026,18 +1040,20 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       polygonCapColor={(feat: object) => {
         if (!hasWarShading) return 'rgba(59,130,246,0.14)';
         const c = colorFor(feat);
-        // Non-belligerents get a heavier neutral slate wash so the "whole
-        // earth is part of the picture" reads continuously instead of
-        // patchy half-shading. Belligerents punch through at 0.94 alpha
-        // for editorial-illustration weight.
-        if (c === '__neutral__') return 'rgba(48,56,72,0.36)';
+        // Non-belligerents get an opaque neutral slate so the satellite-
+        // photo greens don't bleed through. Earlier 36% alpha left the
+        // map looking patchy — green Earth visible between every shaded
+        // country. 78% alpha covers the green while staying clearly
+        // distinct from the colored belligerents. Belligerents punch
+        // through at 0.94 alpha for editorial weight.
+        if (c === '__neutral__') return 'rgba(48,56,72,0.78)';
         return hexToRgba(c, 0.94);
       }}
       polygonSideColor={() => 'rgba(0,0,0,0)'}
       polygonStrokeColor={(feat: object) => {
         if (!hasWarShading) return 'rgba(59,130,246,0.55)';
         const c = colorFor(feat);
-        if (c === '__neutral__') return 'rgba(95,108,128,0.48)';
+        if (c === '__neutral__') return 'rgba(110,124,148,0.65)';
         return hexToRgba(c, 1.0);
       }}
       polygonAltitude={() => 0.002}
@@ -1048,22 +1064,47 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       htmlLng={(d: object) => (d as { lng: number }).lng}
       htmlAltitude={0.014}
       htmlElement={(d: object) => {
-        const m = d as { text: string; faction: string };
-        const el = document.createElement('div');
-        el.style.cssText = [
+        const m = d as { text: string; faction: string; flag: string | null };
+        const wrap = document.createElement('div');
+        wrap.style.cssText = [
           'pointer-events:none',
           'transform:translate(-50%,-50%)',
+          'display:flex',
+          'flex-direction:column',
+          'align-items:center',
+          'gap:4px',
+          'user-select:none',
+          'filter:drop-shadow(0 2px 4px rgba(0,0,0,0.9))',
+        ].join(';');
+        if (m.flag) {
+          const img = document.createElement('img');
+          img.src = m.flag;
+          img.alt = '';
+          img.style.cssText = [
+            'width:42px',
+            'height:auto',
+            'max-height:28px',
+            'object-fit:contain',
+            'border:1px solid rgba(255,255,255,0.18)',
+            'box-shadow:0 1px 3px rgba(0,0,0,0.6)',
+            'display:block',
+          ].join(';');
+          img.onerror = () => { img.style.display = 'none'; };
+          wrap.appendChild(img);
+        }
+        const label = document.createElement('div');
+        label.style.cssText = [
           'font-family:Georgia,"Times New Roman",serif',
           'font-weight:700',
-          'font-size:13px',
-          'letter-spacing:0.28em',
-          'color:rgba(255,255,255,0.96)',
-          'text-shadow:0 1px 3px rgba(0,0,0,0.98),0 0 8px rgba(0,0,0,0.8),0 0 16px rgba(0,0,0,0.4)',
+          'font-size:11px',
+          'letter-spacing:0.24em',
+          'color:rgba(255,255,255,0.94)',
+          'text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.7)',
           'white-space:nowrap',
-          'user-select:none',
         ].join(';');
-        el.textContent = m.text;
-        return el;
+        label.textContent = m.text;
+        wrap.appendChild(label);
+        return wrap;
       }}
     />
     </div>

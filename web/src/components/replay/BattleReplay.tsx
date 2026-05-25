@@ -12,6 +12,7 @@ import { cleanCasualtyText, cleanProseText, formatBattleDate } from '../../lib/f
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import CloseButton from '../CloseButton';
 import { findSnapshot, buildCountryColorMap } from '../../data/territory-snapshots';
+import { cachedReplay, loadReplay } from '../../data/replay-cache';
 
 interface BattleReplayProps {
   battle: Battle;
@@ -41,6 +42,12 @@ interface BattleReplayProps {
   // cinematic. Without it, opening a replay collapses the globe to just
   // the highlighted host country and the user loses the campaign sweep.
   warCountryColors?: Record<string, string>;
+  // warFactionAnchors + warSnapshotYear drive the in-replay faction
+  // identity overlay (period-accurate flag banner + editorial label per
+  // controlling power) so the user can tell red Reich from red USSR at
+  // a glance while watching a battle inside a war cinematic.
+  warFactionAnchors?: Array<{ faction: string; anchor: string }>;
+  warSnapshotYear?: number;
   // onAdvanceNext / onAdvancePrev are imperative jumps to the next or
   // previous battle in the war cinematic sequence. When provided, they
   // surface manual next/prev buttons in the outro card so the user always
@@ -50,9 +57,42 @@ interface BattleReplayProps {
   onAdvancePrev?: () => void;
 }
 
-export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange, cinematicMode = false, onEnded, outroPauseMs = 2400, warCountryColors, onAdvanceNext, onAdvancePrev }: BattleReplayProps) {
-  const [replay, setReplay] = useState<Replay | null>(null);
+export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange, cinematicMode = false, onEnded, outroPauseMs = 2400, warCountryColors, warFactionAnchors, warSnapshotYear, onAdvanceNext, onAdvancePrev }: BattleReplayProps) {
+  const [replay, setReplay] = useState<Replay | null>(() => cachedReplay(battle.id));
   const [phaseIdx, setPhaseIdx] = useState(initialPhase);
+  // sceneReady gates the title-card → live-globe crossfade. The card
+  // stays opaque while:
+  //   1. The Three.js scene initializes (globe ref attaches, first
+  //      pointOfView fires) — signaled by GlobeReplay onSceneReady
+  //   2. A minimum dwell elapses so the title card reads as a
+  //      deliberate film-style intro, not a flash
+  //   3. A polygon-paint buffer (500ms after globe-ready) lets the
+  //      country shading finish its color tween before the reveal
+  // Only when ALL three conditions are satisfied does the card fade
+  // out and the live globe become visible. ONE clean reveal instead
+  // of the user watching the scene reconcile in pieces.
+  const [globeUp, setGlobeUp] = useState(false);
+  const [minDwellPassed, setMinDwellPassed] = useState(false);
+  const sceneReady = globeUp && minDwellPassed && replay !== null;
+  useEffect(() => {
+    setGlobeUp(false);
+    setMinDwellPassed(false);
+  }, [battle.id]);
+  useEffect(() => {
+    // Minimum dwell of 1100ms so the title card always reads as
+    // intentional even when the globe warms quickly. Without this the
+    // card would flash for under 200ms on warm starts.
+    const t = setTimeout(() => setMinDwellPassed(true), 1100);
+    return () => clearTimeout(t);
+  }, [battle.id]);
+  const handleGlobeReady = useCallback(() => {
+    // Add a 500ms buffer after the Three.js scene is up so the
+    // polygon color tween (500ms) and the first-phase arrow fade-in
+    // (550ms) complete before we drop the title card. Eliminates the
+    // "arrows appear right when the card fades" jolt.
+    const t = setTimeout(() => setGlobeUp(true), 500);
+    return () => clearTimeout(t);
+  }, []);
   // Auto-play on open. Opening "Watch the battle" implies "play it". Making
   // the user hunt for a play button to see anything happen is a poor default.
   const [playing, setPlaying] = useState(true);
@@ -72,16 +112,23 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    fetch(`/api/battles/${battle.id}/replay`)
-      .then((res) => {
-        if (!res.ok) throw new Error('no replay');
-        return res.json();
-      })
-      .then((data: Replay) => {
+    const cached = cachedReplay(battle.id);
+    if (cached) {
+      setReplay(cached);
+      setError(null);
+      return;
+    }
+    let cancelled = false;
+    loadReplay(battle.id).then((data) => {
+      if (cancelled) return;
+      if (data) {
         setReplay(data);
         setError(null);
-      })
-      .catch(() => setError('No replay available for this battle.'));
+      } else {
+        setError('No replay available for this battle.');
+      }
+    });
+    return () => { cancelled = true; };
   }, [battle.id]);
 
   useEffect(() => {
@@ -221,7 +268,49 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           from { opacity: 0; }
           to { opacity: 1; }
         }
+        @keyframes intro-card-fade {
+          0%   { opacity: 0; transform: translateY(8px); }
+          12%  { opacity: 1; transform: translateY(0); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes intro-veil-out {
+          from { opacity: 1; }
+          to   { opacity: 0; }
+        }
       `}</style>
+
+      {/* Title-card veil: opaque background + battle name / date / war
+          while the Three.js scene warms up. Fades out only once
+          sceneReady fires, by which time the camera has snapped, the
+          polygons are coloring, and the first phase content is on
+          stage. Eliminates the "wonky reconciliation" the user sees
+          when the globe assembles itself in pieces. */}
+      <div
+        className="absolute inset-0 z-40 pointer-events-none flex items-center justify-center"
+        style={{
+          background: `radial-gradient(ellipse at center, ${theme.accent}22 0%, #070912 60%, #04060c 100%)`,
+          opacity: sceneReady ? 0 : 1,
+          transition: 'opacity 520ms ease-out',
+        }}
+      >
+        <div
+          className="text-center max-w-xl px-8"
+          style={{ animation: 'intro-card-fade 720ms ease-out both' }}
+        >
+          <div
+            className="text-[10px] uppercase tracking-[0.42em] mb-4"
+            style={{ color: theme.accent, opacity: 0.85 }}
+          >
+            {battle.war || battle.era || 'Battle'}
+          </div>
+          <div className="font-serif text-3xl md:text-4xl text-white/95 mb-3 leading-tight" style={{ textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}>
+            {battle.name}
+          </div>
+          <div className="text-sm text-white/60 tracking-wide">
+            {battle.date}
+          </div>
+        </div>
+      </div>
       <style>{`
         @keyframes dash-in {
           to { stroke-dashoffset: 0; }
@@ -459,6 +548,24 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                   if (!snap) return undefined;
                   return buildCountryColorMap(snap);
                 })()}
+                warFactionAnchors={warFactionAnchors ?? (() => {
+                  // Auto-resolve faction anchors from the snapshot when
+                  // the parent didn't pass them (direct-open path). One
+                  // anchor per controlling power, first country in each
+                  // control array.
+                  if (!battle.war) return undefined;
+                  const snap = findSnapshot(battle.war, battle.year || 0);
+                  if (!snap) return undefined;
+                  return Object.entries(snap.control)
+                    .filter(([, list]) => list.length > 0)
+                    .map(([faction, list]) => ({ faction, anchor: list[0] }));
+                })()}
+                warSnapshotYear={warSnapshotYear ?? (() => {
+                  if (!battle.war) return undefined;
+                  const snap = findSnapshot(battle.war, battle.year || 0);
+                  return snap ? Math.floor(snap.year) : undefined;
+                })()}
+                onSceneReady={handleGlobeReady}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

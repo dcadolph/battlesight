@@ -4,6 +4,7 @@ import { ERA_COLORS } from '../types/battle';
 import { themeForYear } from '../theme/era';
 import { canonBelligerentKey, canonBelligerentLabel } from '../lib/country';
 import { findSnapshot, buildCountryColorMap, TERRITORY } from '../data/territory-snapshots';
+import { prefetchReplay } from '../data/replay-cache';
 import WarSummaryCard from './WarSummaryCard';
 import { resolveMediaFor } from '../data/media';
 import type { MediaEntry } from '../data/media';
@@ -43,6 +44,7 @@ interface WarPlaybackProps {
     label: string | null,
     factions: string[],
     anchors: Array<{ faction: string; anchor: string }>,
+    snapshotYear: number | null,
   ) => void;
   // initialWar optionally pre-selects a war on mount so an external action
   // (search-bar war click, deep link, etc.) can open WarPlayback already
@@ -241,17 +243,15 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     if (battles.length === 0) return [];
     if (!cinematic) return groupConcurrentBattles(battles);
     // Cinematic playlist composition:
-    //   1. ALL hand-crafted phase replays (get the full deep-dive treatment).
-    //   2. ALL schematic-eligible battles (have sides data, get the short
-    //      auto-replay).
-    //   3. Up to 80 long-tail tooltip-only battles, sampled by even spacing
-    //      across the war's timeline so the user sees movement through the
-    //      whole war rather than just the 24-battle marquee highlight reel.
-    // Result: WW2 goes from 24 cinematic battles to ~120-180 (still under an
-    // hour of run time given short dwells on the schematic + tooltip tiers).
+    //   1. ALL hand-crafted phase replays (the full deep-dive treatment).
+    //   2. ALL schematic-eligible battles (have sides data, short auto-replay).
+    // Tooltip-only battles are EXCLUDED. With no replay or schematic they
+    // were rendering as a 4-second hold on a pulsing dot — dead air that
+    // made the cinematic feel "spotty" and not smooth to watch. The viewer
+    // gets the same chronological walk through the war from the curated
+    // + schematic mix without the empty beats.
     const replays = battles.filter((b) => b.hasReplay);
     const schematics = battles.filter((b) => !b.hasReplay && b.hasSchematic);
-    const tooltipOnly = battles.filter((b) => !b.hasReplay && !b.hasSchematic);
     // Cap each tier so even WW2 (~600 schematic battles) stays under an
     // hour of runtime. Sampling is by even chronological spacing so the
     // cinematic walks the whole war rather than clustering at the start.
@@ -266,9 +266,8 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     // the new 25-second schematic dwell. Increasing these further makes the
     // run too long for a single watch session.
     const sampledSchematics = sampleEvenly(schematics, 60);
-    const sampledTooltips = sampleEvenly(tooltipOnly, 40);
     // Merge + re-sort chronologically so the cinematic walks the timeline.
-    const merged = [...replays, ...sampledSchematics, ...sampledTooltips].sort((a, b) => {
+    const merged = [...replays, ...sampledSchematics].sort((a, b) => {
       if (a.year !== b.year) return a.year - b.year;
       return (a.date || '').localeCompare(b.date || '');
     });
@@ -695,6 +694,28 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       onPlayReplay(battle);
       openReplayBattleIdRef.current = battle.id;
     }
+
+    // Prefetch the next 3 battles' replay JSONs so by the time the
+    // cinematic advances, the data is already in cache. Eliminates the
+    // round-trip stall between battles that was reading as "super slow
+    // loading" — the camera glide now overlaps with a hot cache hit
+    // instead of a fresh network fetch.
+    if (cinematic) {
+      const lookahead: Battle[] = [];
+      let gi = groupIndex;
+      let si = subIndex + 1;
+      while (lookahead.length < 3 && gi < groups.length) {
+        const g = groups[gi];
+        while (si < g.battles.length && lookahead.length < 3) {
+          const nb = g.battles[si];
+          if (nb && (nb.hasReplay || nb.hasSchematic)) lookahead.push(nb);
+          si++;
+        }
+        gi++;
+        si = 0;
+      }
+      for (const nb of lookahead) prefetchReplay(nb.id);
+    }
     // Per-battle dwell budget. Hand-crafted replays vary 22-40s depending
     // on phase count; we now wait for the BattleReplay-driven onEnded
     // signal to advance and treat this dwell as a safety backstop, so the
@@ -713,17 +734,14 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       // after its full phase set + outro. The dwell only triggers if onEnded
       // somehow doesn't propagate.
       //   - hasReplay: 120s backstop (real dwell 30-90s from curated phases).
-      //   - hasSchematic: 25s backstop (3 auto-generated phases × 5.5s each
-      //     + 1.2s cinematic outro = ~18s real, with margin for the trace
-      //     arc + arrival to settle). Earlier 9s dwell cut schematics short
-      //     at the deployment phase — user saw the same opening over and
-      //     over because every schematic battle started fresh at phase 0
-      //     before the next ones could play.
-      //   - tooltip-only: 4s — no replay; just the ignition burst, focus
-      //     rings, and trace arc to the next battle.
+      //   - hasSchematic: 14s backstop (3 auto-generated phases × 3.2s each
+      //     + 0.4s cinematic outro = ~10s real, with margin for the trace
+      //     arc + arrival to settle). Backstops fire only if BattleReplay's
+      //     onEnded somehow doesn't propagate.
+      // Tooltip-only battles are excluded from the cinematic playlist
+      // upstream so the dwell tier no longer needs a tooltip branch.
       if (battle?.hasReplay) fullDwellMs = 120000;
-      else if (battle?.hasSchematic) fullDwellMs = 14000;
-      else fullDwellMs = 4000;
+      else fullDwellMs = 14000;
     } else if (group.concurrent && subIndex < group.battles.length - 1) {
       fullDwellMs = Math.max(speed / 2, 1500);
     } else {
@@ -1013,7 +1031,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     if (!selectedWar) {
       if (lastSnapshotKeyRef.current !== '') {
         lastSnapshotKeyRef.current = '';
-        onWarTerritory(null, null, [], []);
+        onWarTerritory(null, null, [], [], null);
       }
       return;
     }
@@ -1026,7 +1044,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         const key = `${selectedWar}|aftermath|${finalSnap.year}`;
         if (lastSnapshotKeyRef.current !== key) {
           lastSnapshotKeyRef.current = key;
-          onWarTerritory(buildCountryColorMap(finalSnap), finalSnap.label, Object.keys(finalSnap.control), anchorsFor(finalSnap.control));
+          onWarTerritory(buildCountryColorMap(finalSnap), finalSnap.label, Object.keys(finalSnap.control), anchorsFor(finalSnap.control), Math.floor(finalSnap.year));
         }
         return;
       }
@@ -1041,9 +1059,9 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       if (lastSnapshotKeyRef.current === key) return;
       lastSnapshotKeyRef.current = key;
       if (fallback) {
-        onWarTerritory(buildCountryColorMap(fallback), fallback.label, Object.keys(fallback.control), anchorsFor(fallback.control));
+        onWarTerritory(buildCountryColorMap(fallback), fallback.label, Object.keys(fallback.control), anchorsFor(fallback.control), Math.floor(fallback.year));
       } else {
-        onWarTerritory(null, null, [], []);
+        onWarTerritory(null, null, [], [], null);
       }
       return;
     }
@@ -1061,7 +1079,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     const key = `${selectedWar}|${snap.year}`;
     if (lastSnapshotKeyRef.current === key) return;
     lastSnapshotKeyRef.current = key;
-    onWarTerritory(buildCountryColorMap(snap), snap.label, Object.keys(snap.control), anchorsFor(snap.control));
+    onWarTerritory(buildCountryColorMap(snap), snap.label, Object.keys(snap.control), anchorsFor(snap.control), Math.floor(snap.year));
   }, [selectedWar, currentBattle, onWarTerritory, cinematicStage]);
 
   // Two distinct shells: a centered modal while the user is browsing the war

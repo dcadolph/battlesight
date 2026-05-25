@@ -1309,5 +1309,92 @@
     "victor": "South African Republic + Orange Free State",
     "summary": "Lord Methuen's relief column for the besieged Kimberley garrison is halted by Boer commandos dug into rifle trenches at the base of Magersfontein Hill, a novel deployment that breaks the textbook British plan of shelling the crest and storming. A pre-dawn assault by the Highland Brigade is caught in the open by close-range mauser fire. General Wauchope and over a third of his officers fall.",
     "significance": "Second engagement of the British \"Black Week.\" Combined with defeats at Stormberg (10 December) and Colenso (15 December), it forces a wholesale rethinking of British colonial warfare and the recall of Buller. Marks the early high point of Boer mobile defense."
+  },
+  {
+    "id": "battle-of-medina-texas",
+    "name": "Battle of Medina",
+    "year": 1813,
+    "date": "18 August 1813",
+    "lat": 29.1,
+    "lng": -98.5,
+    "era": "napoleonic",
+    "war": "Mexican War of Independence",
+    "battleType": "land",
+    "sides": [
+      {
+        "name": "Republican Army of the North",
+        "commander": "José Álvarez de Toledo y Dubois",
+        "strength": "~1,400",
+        "casualties": "~1,300 killed"
+      },
+      {
+        "name": "Spanish Royalist Army",
+        "commander": "Joaquín de Arredondo",
+        "strength": "~1,830",
+        "casualties": "55 killed, 178 wounded"
+      }
+    ],
+    "victor": "Spanish Royalist Army",
+    "summary": "The Gutiérrez-Magee Expedition's Republican Army of the North, advancing south from San Antonio under José Álvarez de Toledo, was lured into a sandy oak forest 20 miles south of Béxar where Arredondo's royalists waited in a concealed V-formation. After four hours of fire the republicans broke; Arredondo's cavalry ran the survivors down across the prairie and executed about 100 captured the next day. Antonio López de Santa Anna fought there as a junior royalist officer.",
+    "significance": "Bloodiest battle ever fought on Texas soil. Crushed the first Republic of Texas and ended the Gutiérrez-Magee Expedition. Mexico City held the province for another eight years until Mexican independence in 1821, after which Tejano demographics never recovered from Arredondo's reprisals.",
+    "wikipediaTitle": "Battle of Medina"
+  },
+  {
+    "id": "wounded-knee-massacre-1890",
+    "name": "Wounded Knee Massacre",
+    "year": 1890,
+    "date": "29 December 1890",
+    "lat": 43.1428,
+    "lng": -102.3672,
+    "era": "industrial",
+    "war": "Ghost Dance War",
+    "battleType": "land",
+    "sides": [
+      {
+        "name": "United States Army",
+        "commander": "James W. Forsyth",
+        "strength": "~490 (7th Cavalry)",
+        "casualties": "25 killed, 39 wounded"
+      },
+      {
+        "name": "Lakota Sioux",
+        "commander": "Spotted Elk (mortally wounded)",
+        "strength": "~350 (mostly noncombatants)",
+        "casualties": "150 to 300 killed, including women and children"
+      }
+    ],
+    "victor": "United States Army",
+    "summary": "A detachment of the 7th Cavalry under Forsyth surrounded Spotted Elk's Miniconjou and Hunkpapa Lakota at Wounded Knee Creek on Pine Ridge Reservation while disarming them. A scuffle over Black Coyote's rifle triggered indiscriminate fire from the troopers and four Hotchkiss guns positioned on the rise above. Within hours roughly half of the band lay dead, many shot down in flight kilometres from the camp. Twenty Medals of Honor were awarded for the action, a designation that has never been formally rescinded.",
+    "significance": "Generally considered the symbolic close of the Indian Wars and the American frontier era. The massacre crushed the Ghost Dance movement and Lakota resistance, prompting the 1973 standoff at the same site during the Red Power movement. The site is now a National Historic Landmark.",
+    "wikipediaTitle": "Wounded Knee Massacre"
+  },
+  {
+    "id": "sand-creek-massacre-1864",
+    "name": "Sand Creek Massacre",
+    "year": 1864,
+    "date": "29 November 1864",
+    "lat": 38.5419,
+    "lng": -102.5067,
+    "era": "industrial",
+    "war": "Colorado War",
+    "battleType": "land",
+    "sides": [
+      {
+        "name": "Colorado Territory Militia",
+        "commander": "John Chivington",
+        "strength": "~675 (1st & 3rd Colorado Cavalry)",
+        "casualties": "24 killed, 52 wounded"
+      },
+      {
+        "name": "Cheyenne and Arapaho",
+        "commander": "Black Kettle, White Antelope (killed)",
+        "strength": "~750 (mostly women, children, elderly)",
+        "casualties": "150 to 230 killed, primarily noncombatants"
+      }
+    ],
+    "victor": "Colorado Territory Militia",
+    "summary": "Colonel John Chivington's volunteer cavalry attacked Black Kettle's village of Cheyenne and Arapaho camped under a US flag of truce near Sand Creek in southeastern Colorado at dawn. Despite Black Kettle raising the Stars and Stripes and a white flag, Chivington ordered the camp scoured. Soldiers killed and scalped roughly 150-230 inhabitants over seven hours, almost all women, children, and elderly men. Scalps and mutilated remains were paraded in Denver to public acclaim.",
+    "significance": "One of the most infamous atrocities of the American Indian Wars. A congressional investigation condemned Chivington but he resigned before court-martial. The massacre triggered Cheyenne and Sioux uprisings that consumed the Great Plains for the next quarter century, including the Powder River Wars and the Battle of the Little Bighorn.",
+    "wikipediaTitle": "Sand Creek massacre"
   }
 ]

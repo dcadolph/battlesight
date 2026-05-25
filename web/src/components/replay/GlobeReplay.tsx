@@ -8,8 +8,58 @@ import type { Phase, Replay, Faction, ControlRegion, PaletteContext } from '../.
 import { factionColorFor } from '../../types/replay';
 import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../../data/cities';
 import { loadWorldCountries, worldCountriesCache } from '../../data/world-countries';
+import { OWNER_LABELS } from '../../data/territory-snapshots';
+import { flagForFaction } from '../../data/faction-flags';
 import { themeForEra } from '../../theme/era';
 import { playImpact } from '../../audio/sound';
+
+// largestPolygonCentroid returns the [lat, lng] vertex-average of the
+// LARGEST ring inside a MultiPolygon feature (by perimeter, a fast proxy
+// for area). Used to anchor faction flag + label on the country's
+// mainland rather than the geographic mean of every island and colony.
+function largestPolygonCentroid(feat: Feature<Geometry>): [number, number] | null {
+  const g = feat.geometry as Geometry;
+  const ringSize = (ring: Position[]): number => {
+    let sum = 0;
+    for (let i = 1; i < ring.length; i++) {
+      const dx = ring[i][0] - ring[i - 1][0];
+      const dy = ring[i][1] - ring[i - 1][1];
+      sum += Math.hypot(dx, dy);
+    }
+    return sum;
+  };
+  const ringCentroid = (ring: Position[]): [number, number] => {
+    let sx = 0;
+    let sy = 0;
+    let n = 0;
+    for (const [lng, lat] of ring) {
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        sx += lng;
+        sy += lat;
+        n++;
+      }
+    }
+    return n > 0 ? [sy / n, sx / n] : [NaN, NaN];
+  };
+  if (g.type === 'Polygon') {
+    return ringCentroid(g.coordinates[0] as Position[]);
+  }
+  if (g.type === 'MultiPolygon') {
+    let bestRing: Position[] | null = null;
+    let bestSize = -1;
+    for (const poly of g.coordinates) {
+      const outer = poly[0] as Position[];
+      const sz = ringSize(outer);
+      if (sz > bestSize) {
+        bestSize = sz;
+        bestRing = outer;
+      }
+    }
+    if (!bestRing) return null;
+    return ringCentroid(bestRing);
+  }
+  return null;
+}
 
 interface GlobeReplayProps {
   battle: Battle;
@@ -22,6 +72,20 @@ interface GlobeReplayProps {
   // Without it, opening a replay collapses the globe to just the highlighted
   // host country and the user loses the "Germany takes Europe" sweep.
   warCountryColors?: Record<string, string>;
+  // warFactionAnchors + warSnapshotYear drive the in-cinematic faction
+  // identity layer: one period-accurate flag banner + editorial label per
+  // controlling power, placed at the mainland centroid of each faction's
+  // anchor country. Without these the replay overlay would show the
+  // shading but no caller-name overlay, so the user can't tell red Reich
+  // from red USSR at a glance.
+  warFactionAnchors?: Array<{ faction: string; anchor: string }>;
+  warSnapshotYear?: number;
+  // onSceneReady fires once the Three.js scene is up (globe ref attached
+  // + first pointOfView completed). BattleReplay holds its title card
+  // opaque until this fires plus a minimum dwell, then crossfades to
+  // the live globe — eliminates the "wonky reconciliation" the user
+  // sees when polygons, flags, and arrows arrive on different timelines.
+  onSceneReady?: () => void;
 }
 
 // Default geographic extent in degrees per 100 units of normalized 0-100 phase
@@ -239,7 +303,7 @@ function relaxUnitCollisions(units: ProjectedUnit[]): ProjectedUnit[] {
   return out;
 }
 
-export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountryColors }: GlobeReplayProps) {
+export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountryColors, warFactionAnchors, warSnapshotYear, onSceneReady }: GlobeReplayProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
@@ -330,11 +394,20 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
   //     curated phase vantages.
   const initialMountRef = useRef(true);
   const firstPhaseAppliedRef = useRef(false);
+  const sceneReadyFiredRef = useRef(false);
   useEffect(() => {
     if (!globeRef.current) return;
     const globe = globeRef.current;
     const controls = globe.controls();
     controls.autoRotate = false;
+    // Signal the parent that the Three.js scene is up. Fires once per
+    // BattleReplay session — subsequent battle changes don't refire
+    // because the scene is already warm. BattleReplay uses this to
+    // crossfade its title card to the live globe.
+    if (!sceneReadyFiredRef.current && onSceneReady) {
+      sceneReadyFiredRef.current = true;
+      onSceneReady();
+    }
 
     // Compute the actual primary-tween duration so the drift can wait for
     // it. The drift used to fire at Math.max(1800, tweenMs), which on a
@@ -351,8 +424,10 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     } else if (!firstPhaseAppliedRef.current) {
       // First phase of a fresh battle (battle.id just changed). Smooth
       // eased fly across whatever distance separates the prior vantage
-      // from the new one. 2400ms reads as deliberate cinematography.
-      primaryMs = 2400;
+      // from the new one. 1500ms reads as a deliberate camera move but
+      // doesn't feel like waiting — the user wants snap-to-action, not
+      // a slow cinematic glide on every transition.
+      primaryMs = 1500;
       globe.pointOfView({ lat: cameraLat, lng: cameraLng, altitude: cameraAlt }, primaryMs);
       firstPhaseAppliedRef.current = true;
     } else {
@@ -500,14 +575,14 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
             altitude: 0.002,
           });
         } else {
-          // Non-belligerent neutral wash — gives the globe continuity
-          // instead of bare patches of satellite texture between shaded
-          // countries. Slightly heavier alpha so the "whole world is part
-          // of the picture" reads instead of patchy half-shading.
+          // Non-belligerent neutral wash, opaque enough to cover the
+          // satellite green underneath. The previous 36% alpha let the
+          // raw Earth show through, producing the patchy "green earth
+          // between colored countries" eyesore the user flagged.
           out.push({
             feature: feat as Feature<Geometry>,
-            capColor: 'rgba(48,56,72,0.36)',
-            strokeColor: 'rgba(95,108,128,0.48)',
+            capColor: 'rgba(48,56,72,0.78)',
+            strokeColor: 'rgba(110,124,148,0.65)',
             sideColor: 'rgba(0,0,0,0)',
             altitude: 0.002,
           });
@@ -543,6 +618,36 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     });
     return out;
   }, [highlightedCountry, phase.controlRegions, warCountryColors, countries, replay]);
+
+  // factionLabels mirrors the BattleGlobe overlay: one period-accurate
+  // flag banner + editorial caps label per controlling power, anchored
+  // at the mainland centroid of its anchor country. Without this layer
+  // the replay overlay would show colored shading but no caller name,
+  // so the user can't tell red Reich from red USSR at a glance.
+  const factionLabels = useMemo(() => {
+    if (!warFactionAnchors || warFactionAnchors.length === 0) return [];
+    if (countries.length === 0) return [];
+    const year = warSnapshotYear ?? battle.year ?? new Date().getFullYear();
+    const out: Array<{ lat: number; lng: number; text: string; flag: string | null; faction: string }> = [];
+    for (const { faction, anchor } of warFactionAnchors) {
+      const label = OWNER_LABELS[faction] || faction.replace(/-/g, ' ');
+      const target = anchor.toLowerCase();
+      const feat = countries.find((f) => {
+        const n = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
+        return n === target;
+      });
+      if (!feat) continue;
+      const c = largestPolygonCentroid(feat);
+      if (!c || !Number.isFinite(c[0]) || !Number.isFinite(c[1])) continue;
+      out.push({
+        lat: c[0], lng: c[1],
+        text: label.toUpperCase(),
+        flag: flagForFaction(faction, year),
+        faction,
+      });
+    }
+    return out;
+  }, [warFactionAnchors, countries, warSnapshotYear, battle.year]);
 
   // RAF loop projects all phase geometry onto screen pixels. Updates every
   // frame so the SVG overlay tracks camera fly-ins and any user drag without
@@ -633,7 +738,54 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         polygonSideColor={(d: object) => (d as PolygonDatum).sideColor}
         polygonStrokeColor={(d: object) => (d as PolygonDatum).strokeColor}
         polygonAltitude={(d: object) => (d as PolygonDatum).altitude}
-        polygonsTransitionDuration={900}
+        polygonsTransitionDuration={500}
+        htmlElementsData={factionLabels}
+        htmlLat={(d: object) => (d as { lat: number }).lat}
+        htmlLng={(d: object) => (d as { lng: number }).lng}
+        htmlAltitude={0.014}
+        htmlElement={(d: object) => {
+          const m = d as { text: string; faction: string; flag: string | null };
+          const wrap = document.createElement('div');
+          wrap.style.cssText = [
+            'pointer-events:none',
+            'transform:translate(-50%,-50%)',
+            'display:flex',
+            'flex-direction:column',
+            'align-items:center',
+            'gap:4px',
+            'user-select:none',
+            'filter:drop-shadow(0 2px 4px rgba(0,0,0,0.9))',
+          ].join(';');
+          if (m.flag) {
+            const img = document.createElement('img');
+            img.src = m.flag;
+            img.alt = '';
+            img.style.cssText = [
+              'width:42px',
+              'height:auto',
+              'max-height:28px',
+              'object-fit:contain',
+              'border:1px solid rgba(255,255,255,0.18)',
+              'box-shadow:0 1px 3px rgba(0,0,0,0.6)',
+              'display:block',
+            ].join(';');
+            img.onerror = () => { img.style.display = 'none'; };
+            wrap.appendChild(img);
+          }
+          const label = document.createElement('div');
+          label.style.cssText = [
+            'font-family:Georgia,"Times New Roman",serif',
+            'font-weight:700',
+            'font-size:11px',
+            'letter-spacing:0.24em',
+            'color:rgba(255,255,255,0.94)',
+            'text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.7)',
+            'white-space:nowrap',
+          ].join(';');
+          label.textContent = m.text;
+          wrap.appendChild(label);
+          return wrap;
+        }}
       />
       <svg
         className="absolute inset-0 pointer-events-none"

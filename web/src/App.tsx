@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import BattleGlobe from './components/BattleGlobe';
+import PersistentGlobe from './components/globe/PersistentGlobe';
 import TimelineSlider from './components/TimelineSlider';
 import BattlePanel from './components/BattlePanel';
 import CommanderPanel from './components/CommanderPanel';
@@ -80,7 +80,7 @@ export default function App() {
   // name to the accent color of its controller at the playhead's battle
   // year (e.g. WW2 mid-1941: Germany red across Poland/France/Norway, USSR
   // blue across Russia). Null whenever no snapshot applies, in which case
-  // BattleGlobe falls back to the flat warCountries shading.
+  // PersistentGlobe falls back to the flat warCountries shading.
   const [warCountryColors, setWarCountryColors] = useState<Record<string, string> | null>(null);
   // territoryLabel is the short caption tied to the active snapshot
   // ("June 1944: D-Day, Bagration"). Drives a HUD overlay so the user reads
@@ -91,7 +91,7 @@ export default function App() {
   // can read which side controls which territory without guessing.
   const [territoryFactions, setTerritoryFactions] = useState<string[]>([]);
   // factionAnchors pairs each controlling power with its anchor country
-  // (Germany for nazi-germany, Russia for ussr, etc.). BattleGlobe uses
+  // (Germany for nazi-germany, Russia for ussr, etc.). PersistentGlobe uses
   // these to place one identity glyph per faction on the mainland centroid
   // of its anchor — the cinematic equivalent of stamping the Reich symbol
   // on Berlin and the Soviet symbol on Moscow.
@@ -166,6 +166,13 @@ export default function App() {
       if (yearRange[0] !== MIN_YEAR) params.set('yearMin', String(yearRange[0]));
       if (yearRange[1] !== MAX_YEAR) params.set('yearMax', String(yearRange[1]));
     }
+    // lean=1 asks the server for the minimum projection per battle —
+    // only the fields the globe view, hover tooltip, and filter UI need.
+    // Cuts the response from ~17 MB to ~3 MB raw, ~400 KB gzipped, so
+    // the initial paint lands in well under a second. The full record
+    // (sides, summary, significance, references) is fetched on demand
+    // via /api/battles/{id} when the user opens a dossier or replay.
+    params.set('lean', '1');
 
     const qs = params.toString();
     const url = `/api/battles${qs ? '?' + qs : ''}`;
@@ -191,13 +198,13 @@ export default function App() {
     fetchBattles();
   }, [fetchBattles]);
 
-  // Enforce a minimum splash time so the loading state always gets to land
-  // on screen and finish its entrance animation, even when localhost
-  // responds in 30ms. Two seconds is long enough for the eye to read the
-  // headline; not so long it feels like the app is broken on a hot reload.
+  // Minimum splash. Cut to the smallest value that masks the first
+  // paint hiccup. The user said load is WAY too slow; 200ms is the
+  // floor below which the splash flashes too fast to read as
+  // intentional but doesn't actually mask anything either.
   useEffect(() => {
     const elapsed = Date.now() - splashStartRef.current;
-    const minMs = 2000;
+    const minMs = 200;
     if (elapsed >= minMs) {
       setSplashReady(true);
       return;
@@ -378,7 +385,7 @@ export default function App() {
     }
   }, []);
   // handleWarTerritory takes the resolved snapshot for the playhead's
-  // current battle year from WarPlayback and threads it into BattleGlobe.
+  // current battle year from WarPlayback and threads it into PersistentGlobe.
   // Stable identity keeps WarPlayback's effect dependency list from
   // tearing down and re-arming on every App render.
   const handleWarTerritory = useCallback(
@@ -807,7 +814,7 @@ export default function App() {
         onCommanderSelect={setCommanderQuery}
       />}
 
-      <BattleGlobe
+      <PersistentGlobe
         battles={globeBattles}
         yearRange={effectiveYearRange}
         onBattleClick={handleBattleClick}

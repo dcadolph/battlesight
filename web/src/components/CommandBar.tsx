@@ -3,6 +3,30 @@ import type { Battle } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 import { formatYear } from '../lib/format';
 
+// SEARCH_ALIASES rewrites well-known nicknames to a canonical query the
+// FTS index can match. Without this, "d-day" hits the Six-Day War (the
+// tokeniser splits on hyphens and "day" is a frequent term), and "the
+// bulge" misses Battle of the Bulge because FTS dislikes the bare "the".
+// Add new mappings here when a popular alias surfaces in the wild.
+// The full long-term fix is to seed these as Alias rows on the curated
+// battles so the FTS index covers them natively.
+const SEARCH_ALIASES: Record<string, string> = {
+  'd-day': 'Normandy',
+  'dday': 'Normandy',
+  'd day': 'Normandy',
+  'overlord': 'Normandy',
+  'operation overlord': 'Normandy',
+  'normandy landings': 'Normandy',
+  'the bulge': 'Bulge',
+  'battle of the bulge': 'Bulge',
+  'the somme': 'Somme',
+  'the marne': 'Marne',
+  'the ardennes': 'Bulge',
+  'desert storm': 'Desert Storm',
+  'operation desert storm': 'Desert Storm',
+  'the blitz': 'Britain',
+};
+
 interface NameCount { name: string; count: number; }
 interface StatsData {
   totalBattles: number;
@@ -84,8 +108,15 @@ export default function CommandBar({
       setSearchOpen(false);
       return;
     }
-    // Battle results from the FTS index.
-    fetch(`/api/battles/search?q=${encodeURIComponent(q)}&limit=8`)
+    // Battle results from the FTS index. The query is rewritten through
+    // SEARCH_ALIASES first so popular nicknames hit the right battles:
+    // "d-day" lands on Normandy instead of the Six-Day War (the FTS
+    // tokeniser matches the substring "day"), "stalingrad" expands to
+    // its proper canonical form, etc. The rewrite is conservative —
+    // only exact (case-insensitive) matches get rewritten so users
+    // typing real prose still hit the full-text path.
+    const rewritten = SEARCH_ALIASES[q.trim().toLowerCase()] ?? q;
+    fetch(`/api/battles/search?q=${encodeURIComponent(rewritten)}&limit=8`)
       .then((r) => r.json())
       .then((d) => { setResults(d.battles || []); setSearchOpen(true); setActiveIndex(-1); })
       .catch(() => setResults([]));

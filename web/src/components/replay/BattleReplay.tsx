@@ -79,25 +79,32 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     setMinDwellPassed(false);
   }, [battle.id]);
   useEffect(() => {
-    // Minimum dwell of 1100ms so the title card always reads as
-    // intentional even when the globe warms quickly. Without this the
-    // card would flash for under 200ms on warm starts.
-    const t = setTimeout(() => setMinDwellPassed(true), 1100);
+    // Title card minimum dwell. Slashed to 150 ms — just enough to
+    // mask the first paint and let the headline register as a beat,
+    // not a UI delay. The user has called load "WAY too slow"; the
+    // dwell was the biggest remaining inflation on the critical path.
+    const t = setTimeout(() => setMinDwellPassed(true), 150);
     return () => clearTimeout(t);
   }, [battle.id]);
   const handleGlobeReady = useCallback(() => {
-    // Add a 500ms buffer after the Three.js scene is up so the
-    // polygon color tween (500ms) and the first-phase arrow fade-in
-    // (550ms) complete before we drop the title card. Eliminates the
-    // "arrows appear right when the card fades" jolt.
-    const t = setTimeout(() => setGlobeUp(true), 500);
-    return () => clearTimeout(t);
+    // Drop the post-globe buffer to zero. The phaseSettled gate inside
+    // GlobeReplay already holds the SVG overlay until polygons paint,
+    // so an extra buffer here was redundant.
+    setGlobeUp(true);
   }, []);
   // Auto-play on open. Opening "Watch the battle" implies "play it". Making
   // the user hunt for a play button to see anything happen is a poor default.
   const [playing, setPlaying] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  // Default view is the globe. Auto-switching to the tactical schematic
+  // was reverted: curated phases for lat/lng-only battles (Normandy and
+  // most modern battles) leave x/y at the placeholder 50/50, so the
+  // TacticalMap stacks every unit and movement at the centre of the
+  // schematic. The globe carries real coastline imagery and is the only
+  // sensible default. The toggle still lets the user pick TacticalMap
+  // explicitly for older abstract-schematic battles (Marathon, Cannae)
+  // where x/y is real curated data.
   const [view, setView] = useState<'globe' | 'tactical'>('globe');
   // ended is true after the last phase's dwell completes. It triggers the
   // outro card so the replay lands with intention instead of just freezing
@@ -141,7 +148,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     // on a deployment-only phase reads as "stuck" — three of them ran 16.5s
     // total at the default rate, which was longer than the schematic dwell
     // backstop and produced the deployment-loop the user reported.
-    const baseDur = current.durationMs ?? (replay.schematic ? 3200 : 5500);
+    // Phase dwell. Curator-set durations win; the default fallback was
+    // 5500 ms hand-crafted and 3200 ms schematic — both glacial for an
+    // 11-phase battle. Slashed to 3000 / 2000. Eleven phases × 5.5s =
+    // a minute on rails; 3s/phase keeps the cinematic flow but lets a
+    // viewer get through a battle without checking out.
+    const baseDur = current.durationMs ?? (replay.schematic ? 2000 : 3000);
     const dur = prefersReducedMotion ? 0 : baseDur / speed;
     timerRef.current = setTimeout(() => {
       if (phaseIdx >= replay.phases.length - 1) {
@@ -288,9 +300,15 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
       <div
         className="absolute inset-0 z-40 pointer-events-none flex items-center justify-center"
         style={{
-          background: `radial-gradient(ellipse at center, ${theme.accent}22 0%, #070912 60%, #04060c 100%)`,
+          // Solid opaque base, then a subtle accent halo painted on top
+          // via backgroundImage. The previous radial-gradient set the
+          // center stop at theme.accent + 13% alpha, which let the SVG
+          // overlay (airdrop captions, anchor dots) bleed through while
+          // the camera was still warming up.
+          background: '#050810',
+          backgroundImage: `radial-gradient(ellipse at center, ${theme.accent}33 0%, transparent 55%)`,
           opacity: sceneReady ? 0 : 1,
-          transition: 'opacity 520ms ease-out',
+          transition: 'opacity 160ms ease-out',
         }}
       >
         <div
@@ -333,8 +351,15 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           from { stroke-dashoffset: 1; }
           to   { stroke-dashoffset: 0; }
         }
-        /* As the marching dashes take over, fade the trace stroke out so we
-           don't double-paint the line briefly. */
+        /* As the marching dashes take over, dim the shaft stroke to a
+           quiet underline so the dashes pop as the motion signal but the
+           shaft stays visible as the line of advance. */
+        @keyframes arrow-shaft-settle {
+          to { opacity: 0.42; }
+        }
+        /* Legacy: trace-fade fully hid the shaft after dashes started.
+           Replaced by arrow-shaft-settle above; kept here so any leftover
+           reference does not break. */
         @keyframes arrow-trace-fade {
           to { opacity: 0; }
         }
@@ -442,10 +467,92 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(0.4); }
         }
         /* Arrow label pop-in. The label pill ramps in just before the
-           trace completes so the story arrives with the force, not after. */
+           trace completes so the story arrives with the force, not after.
+           Retained for any legacy callers; the new tethered captions use
+           the field-* family below. */
         @keyframes arrow-label-in {
           from { opacity: 0; transform: translateY(4px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+        /* Field caption family. Three timed pieces — anchor dot, leader
+           line, then text — so the eye lands on the action, follows the
+           line to the words, then reads. Replaces the boxy pills that
+           were pinned to the bottom of the stage. */
+        @keyframes field-dot-in {
+          from { opacity: 0; transform: scale(0.2); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes field-leader-in {
+          from { stroke-dashoffset: 1; opacity: 0; }
+          to   { stroke-dashoffset: 0; opacity: 0.7; }
+        }
+        @keyframes field-caption-in {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        /* Phase caption holds for the dwell, then quietly fades, so the
+           playhead still feels like it has beats without a permanent
+           label hanging in the field. Mirrors the old chapter-card cadence. */
+        @keyframes phase-dot-cycle {
+          0%   { opacity: 0; transform: scale(0.2); }
+          10%  { opacity: 1; transform: scale(1); }
+          78%  { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(0.9); }
+        }
+        @keyframes phase-leader-cycle {
+          0%   { stroke-dashoffset: 1; opacity: 0; }
+          10%  { stroke-dashoffset: 0; opacity: 0.75; }
+          78%  { stroke-dashoffset: 0; opacity: 0.75; }
+          100% { stroke-dashoffset: 0; opacity: 0; }
+        }
+        @keyframes phase-caption-cycle {
+          0%   { opacity: 0; transform: translateY(-6px); }
+          10%  { opacity: 1; transform: translateY(0); }
+          78%  { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-4px); }
+        }
+        /* Spearhead bloom: a bright disk pops at the arrow's leading edge
+           the instant the trace lands. Reads as the moment of contact,
+           ahead of the broader impact shockwave. */
+        @keyframes spearhead-bloom {
+          0%   { opacity: 0; transform: scale(0.3); }
+          25%  { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(2.1); }
+        }
+        /* Scorch persists for several seconds after impact — a faint
+           colored stain at the point of contact. Anchors the eye to
+           "this happened here" for the rest of the phase. */
+        @keyframes scorch-cycle {
+          0%   { opacity: 0; transform: scale(0.4); }
+          18%  { opacity: 0.62; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.7); }
+        }
+        /* Inner white-hot core stain. Sits on top of the colored scorch
+           and fades faster, so the very instant after impact reads as
+           a flash-burned mark, settling into the colored stain that
+           lingers. */
+        @keyframes scorch-hot {
+          0%   { opacity: 0; transform: scale(0.4); }
+          14%  { opacity: 0.75; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.3); }
+        }
+        /* Path surge: the entire arrow path brightens at the instant of
+           impact, then fades. Connects the arrow's energy to the
+           destination so the impact reads as the arrival of THIS force
+           rather than an unrelated flash at the endpoint. */
+        @keyframes arrow-surge {
+          0%   { opacity: 0; }
+          16%  { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        /* Phase rule: a short horizontal accent line under the phase
+           title, in the era accent color. Holds with the title then
+           fades together. */
+        @keyframes phase-rule-cycle {
+          0%   { opacity: 0; transform: scaleX(0.2); }
+          12%  { opacity: 0.85; transform: scaleX(1); }
+          78%  { opacity: 0.85; transform: scaleX(1); }
+          100% { opacity: 0; transform: scaleX(1); }
         }
         .replay-fade-in {
           animation: fade-in 0.6s ease-out;
@@ -577,42 +684,11 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
               </div>
             )}
 
-            {/* Chapter card: drops in from the top edge of the stage at the
-                start of each phase, then fades. Centred horizontally but
-                pinned to the top so the action in the middle of the globe
-                is never obscured by the title text. Keyed on phaseIdx so
-                it replays on every advance. Suppressed when the outro
-                card is up so the two do not overlap on the final phase. */}
-            {!ended && (
-              <div
-                key={`chapter-${phaseIdx}`}
-                className="chapter-card pointer-events-none fixed left-1/2 -translate-x-1/2 z-10"
-                style={{ bottom: 162 }}
-              >
-                <div
-                  className="px-6 py-3 rounded-xl bg-black/65 backdrop-blur-sm border shadow-2xl text-center max-w-[68vw]"
-                  style={{ borderColor: `${theme.accent}55` }}
-                >
-                  {phase.timeMarker && (
-                    <div
-                      className="text-[10px] uppercase tracking-[0.32em] mb-1"
-                      style={{ color: theme.accent }}
-                    >
-                      {phase.timeMarker}
-                      {battle.year && !/\d{4}/.test(phase.timeMarker) && (
-                        <span className="text-slate-400/80 ml-2">· {battle.year}</span>
-                      )}
-                    </div>
-                  )}
-                  <div
-                    className="text-2xl text-white tracking-tight whitespace-nowrap"
-                    style={{ fontFamily: theme.titleFont, fontWeight: 600 }}
-                  >
-                    {phase.title}
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Phase title appears as a tethered field caption inside the
+                globe overlay (see FieldCaption in GlobeReplay), anchored on
+                the action centroid in screen coordinates. The old boxy
+                bottom-pinned chapter card was removed — it sat far from
+                the arrows and covered too much of the stage. */}
 
             {/* Outro: the battle is over. A composed end card replaces the
                 last phase's chapter flash so the replay lands with intention.

@@ -72,19 +72,26 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
               <marker
                 key={f}
                 id={`arrow-${f}`}
-                viewBox="0 0 16 16"
-                refX="13"
-                refY="8"
-                markerWidth="10"
-                markerHeight="10"
+                viewBox="0 0 12 12"
+                refX="11"
+                refY="6"
+                markerWidth="5"
+                markerHeight="5"
+                markerUnits="userSpaceOnUse"
                 orient="auto-start-reverse"
               >
+                {/* Filled triangle in absolute user-space units. Without
+                    markerUnits=userSpaceOnUse, SVG defaults to strokeWidth
+                    scaling: a stroke of 3 multiplied a 10-unit marker into
+                    a 30-unit triangle on a 100-unit viewBox — which is
+                    exactly the giant blue triangle filling the schematic
+                    in the user's screenshots. Now the marker is a clean
+                    5-unit head, always. */}
                 <path
-                  d="M 1 2 L 14 8 L 1 14"
-                  fill="none"
-                  stroke={c}
-                  strokeWidth="2.6"
-                  strokeLinecap="round"
+                  d="M 0 0 L 12 6 L 0 12 Z"
+                  fill={c}
+                  stroke="rgba(6,9,18,0.85)"
+                  strokeWidth="0.8"
                   strokeLinejoin="round"
                   style={{ filter: `drop-shadow(0 0 1.6px ${c}) drop-shadow(0 0 2.8px ${c}aa)` }}
                 />

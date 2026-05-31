@@ -12,6 +12,80 @@ type ListResponse struct {
 	Offset int `json:"offset"`
 }
 
+// LeanBattle is the minimum projection of a Battle needed to render the
+// globe view: identity, location, era, war, victor, and the per-record
+// tier / replay flags the UI uses to color and gate dot interactions.
+// Heavy prose fields (Sides, Summary, Significance, References, Aliases,
+// WikipediaTitle) are dropped. Cuts the list payload from ~17 MB to ~3 MB
+// for the full 13k-battle dataset. The full record is fetched on demand
+// via GET /api/battles/{id} when the user opens a dossier.
+type LeanBattle struct {
+	// ID is a unique slug for the battle.
+	ID string `json:"id"`
+	// Name is the common name of the battle.
+	Name string `json:"name"`
+	// Year is the primary year (negative for BC).
+	Year int `json:"year"`
+	// Date is a human-readable date string.
+	Date string `json:"date"`
+	// Lat is the latitude of the battle location.
+	Lat float64 `json:"lat"`
+	// Lng is the longitude of the battle location.
+	Lng float64 `json:"lng"`
+	// Era groups the battle into a historical period.
+	Era string `json:"era"`
+	// War is the larger conflict this battle belongs to.
+	War string `json:"war"`
+	// BattleType is the kind of engagement: land, naval, siege, aerial.
+	BattleType string `json:"battleType"`
+	// Victor is the winning side's name.
+	Victor string `json:"victor"`
+	// Verified is true for hand-curated battles, false for auto-imported.
+	Verified bool `json:"verified"`
+	// HasReplay is true when a hand-crafted phased replay exists.
+	HasReplay bool `json:"hasReplay"`
+	// HasSchematic is true when an auto-generated replay can be produced.
+	HasSchematic bool `json:"hasSchematic"`
+	// Tier is the data-quality tier.
+	Tier string `json:"tier"`
+}
+
+// LeanListResponse mirrors ListResponse but carries the LeanBattle slice
+// so the wire format on lean=true is self-describing.
+type LeanListResponse struct {
+	// Battles is the slice of lean-projected battles.
+	Battles []LeanBattle `json:"battles"`
+	// Total is the unfiltered total count.
+	Total int `json:"total"`
+	// Limit is the cap applied to the response.
+	Limit int `json:"limit"`
+	// Offset is the starting offset.
+	Offset int `json:"offset"`
+}
+
+// LeanFromBattle projects a full Battle into the lean shape used by the
+// list endpoint when lean=true. The fields kept are everything the globe
+// view, dot tooltip, and filter UI rely on; the rest is on-demand via
+// the per-battle endpoint.
+func LeanFromBattle(b Battle) LeanBattle {
+	return LeanBattle{
+		ID:           b.ID,
+		Name:         b.Name,
+		Year:         b.Year,
+		Date:         b.Date,
+		Lat:          b.Lat,
+		Lng:          b.Lng,
+		Era:          b.Era,
+		War:          b.War,
+		BattleType:   b.BattleType,
+		Victor:       b.Victor,
+		Verified:     b.Verified,
+		HasReplay:    b.HasReplay,
+		HasSchematic: b.HasSchematic,
+		Tier:         b.Tier,
+	}
+}
+
 // CommanderBattle wraps a battle with the role inferred for the queried
 // commander (led: top-billed on at least one side; participated: listed
 // but not first). Used by the people-search panel.

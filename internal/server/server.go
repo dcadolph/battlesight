@@ -1,10 +1,13 @@
 package server
 
 import (
+	"compress/gzip"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dcadolph/battlesight/internal/battles"
@@ -122,7 +125,7 @@ func Run(cfg Config) error {
 
 	srv := &http.Server{
 		Addr:              addr,
-		Handler:           withCORS(mux),
+		Handler:           withGzip(withCORS(mux)),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 	return srv.ListenAndServe()
@@ -144,3 +147,54 @@ func withCORS(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+// gzipResponseWriter wraps an http.ResponseWriter and transparently gzips
+// every byte written. WriteHeader is overridden to strip any Content-Length
+// the inner handler may have set, since the compressed length will differ.
+type gzipResponseWriter struct {
+	http.ResponseWriter
+	gz *gzip.Writer
+}
+
+// Write delegates to the underlying gzip writer.
+func (g *gzipResponseWriter) Write(p []byte) (int, error) {
+	return g.gz.Write(p)
+}
+
+// WriteHeader strips any Content-Length the inner handler set since the
+// compressed length will differ from the raw byte count.
+func (g *gzipResponseWriter) WriteHeader(status int) {
+	g.Header().Del("Content-Length")
+	g.ResponseWriter.WriteHeader(status)
+}
+
+// withGzip compresses response bodies when the client advertises gzip in
+// Accept-Encoding. JSON payloads from the list endpoints compress 8-10x,
+// which is the difference between a 17 MB initial fetch and a 2 MB one.
+// OPTIONS preflight requests bypass the wrapper since they have no body.
+func withGzip(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			next.ServeHTTP(w, r)
+			return
+		}
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Add("Vary", "Accept-Encoding")
+
+		gz := gzip.NewWriter(w)
+		defer func() {
+			if err := gz.Close(); err != nil {
+				log.Printf("gzip writer close: %v", err)
+			}
+		}()
+		next.ServeHTTP(&gzipResponseWriter{ResponseWriter: w, gz: gz}, r)
+	})
+}
+
+// Compile-time guarantee that gzip's Writer satisfies io.WriteCloser so
+// callers can rely on Close to flush the trailer.
+var _ io.WriteCloser = (*gzip.Writer)(nil)

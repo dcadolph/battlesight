@@ -148,6 +148,25 @@ func (h *Handler) listBattles(w http.ResponseWriter, r *http.Request) {
 		limit = 10000
 	}
 
+	// When ?lean=1 is set, project to LeanBattle so the response carries
+	// only the fields the globe view actually reads. Cuts the full-dataset
+	// payload from ~17 MB to ~3 MB and dramatically shrinks JSON parse
+	// time on the client. The dossier still calls /api/battles/{id} for
+	// the full record on demand.
+	if q.Get("lean") == "1" || q.Get("lean") == "true" {
+		lean := make([]LeanBattle, len(results))
+		for i, b := range results {
+			lean[i] = LeanFromBattle(b)
+		}
+		writeJSON(w, http.StatusOK, LeanListResponse{
+			Battles: lean,
+			Total:   total,
+			Limit:   limit,
+			Offset:  f.Offset,
+		})
+		return
+	}
+
 	writeJSON(w, http.StatusOK, ListResponse{
 		Battles: results,
 		Total:   total,

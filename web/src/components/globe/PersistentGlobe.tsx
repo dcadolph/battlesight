@@ -1,16 +1,28 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import Globe from 'react-globe.gl';
 import type { GlobeMethods } from 'react-globe.gl';
-import type { Battle } from '../types/battle';
-import { ERA_COLORS } from '../types/battle';
-import type { Feature, Geometry, Position } from 'geojson';
-import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../data/cities';
-import { OWNER_LABELS } from '../data/territory-snapshots';
-import { flagForFaction } from '../data/faction-flags';
-import { loadWorldCountries, worldCountriesCache } from '../data/world-countries';
-import { formatNumberWithCommas } from '../lib/format';
+import type { Battle } from '../../types/battle';
+import { ERA_COLORS } from '../../types/battle';
+import type { Feature, Geometry } from 'geojson';
+import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../../data/cities';
+import { OWNER_LABELS } from '../../data/territory-snapshots';
+import { flagForFaction } from '../../data/faction-flags';
+import { loadWorldCountries, worldCountriesCache } from '../../data/world-countries';
+import { formatNumberWithCommas } from '../../lib/format';
+import { COUNTRY_NAME_ALIASES } from '../../lib/globe/aliases';
+import { largestPolygonCentroid, polygonCentroid } from '../../lib/globe/centroid';
+import { findCountry, arcDistance } from '../../lib/globe/geometry';
+import { hexToRgba, darkenHex } from '../../lib/globe/colors';
+import { buildFactionLabelElement } from '../../lib/globe/faction-label';
 
-interface BattleGlobeProps {
+// PersistentGlobe is the single Three.js scene mounted at app root. In
+// this first cut it behaves identically to the old BattleGlobe — same
+// props, same renderer, same camera. The future replay/cinematic mode
+// will land via additional optional props (replay, phase, onSceneReady)
+// in Step 4 of the AppGlobe refactor. By keeping the surface backward-
+// compatible we can swap the App.tsx import today without any other
+// changes; replay mode arrives as additive props later.
+interface PersistentGlobeProps {
   battles: Battle[];
   yearRange: [number, number];
   onBattleClick: (battle: Battle) => void;
@@ -51,129 +63,6 @@ interface BattleGlobeProps {
   warSnapshotYear?: number;
 }
 
-// COUNTRY_NAME_ALIASES maps our canonical country labels to the names used
-// by the world-atlas topology. The atlas is the Natural Earth dataset which
-// uses long-form English names ("United States of America") while our
-// canonisation produces short forms ("United States"). Korea is split into
-// two atlas features but our normaliser collapses them, so we list both.
-const COUNTRY_NAME_ALIASES: Record<string, string[]> = {
-  'United States': ['United States of America'],
-  'United Kingdom': ['United Kingdom'],
-  Korea: ['South Korea', 'North Korea'],
-  Rome: ['Italy'],
-  Palestine: ['Palestine'],
-};
-
-// largestPolygonCentroid returns the [lat, lng] vertex-average of the
-// LARGEST ring inside a MultiPolygon feature (by perimeter, a fast proxy
-// for area). Used to anchor faction labels on the country's mainland —
-// not the geographic mean of every island, overseas department, and
-// colony, which is what put "FRANCE" on Sudan and "UNITED KINGDOM" on
-// Saudi Arabia in the earlier per-country label pass.
-function largestPolygonCentroid(feat: Feature<Geometry>): [number, number] | null {
-  const g = feat.geometry as Geometry;
-  const ringSize = (ring: Position[]): number => {
-    let sum = 0;
-    for (let i = 1; i < ring.length; i++) {
-      const dx = ring[i][0] - ring[i - 1][0];
-      const dy = ring[i][1] - ring[i - 1][1];
-      sum += Math.hypot(dx, dy);
-    }
-    return sum;
-  };
-  const ringCentroid = (ring: Position[]): [number, number] => {
-    let sx = 0;
-    let sy = 0;
-    let n = 0;
-    for (const [lng, lat] of ring) {
-      if (Number.isFinite(lat) && Number.isFinite(lng)) {
-        sx += lng;
-        sy += lat;
-        n++;
-      }
-    }
-    return n > 0 ? [sy / n, sx / n] : [NaN, NaN];
-  };
-  if (g.type === 'Polygon') {
-    return ringCentroid(g.coordinates[0] as Position[]);
-  }
-  if (g.type === 'MultiPolygon') {
-    let bestRing: Position[] | null = null;
-    let bestSize = -1;
-    for (const poly of g.coordinates) {
-      const outer = poly[0] as Position[];
-      const sz = ringSize(outer);
-      if (sz > bestSize) {
-        bestSize = sz;
-        bestRing = outer;
-      }
-    }
-    if (!bestRing) return null;
-    return ringCentroid(bestRing);
-  }
-  return null;
-}
-
-function pointInPolygon(lat: number, lng: number, coords: Position[][]): boolean {
-  for (const ring of coords) {
-    let inside = false;
-    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-      const xi = ring[i][0], yi = ring[i][1];
-      const xj = ring[j][0], yj = ring[j][1];
-      if ((yi > lat) !== (yj > lat) && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) {
-        inside = !inside;
-      }
-    }
-    if (inside) return true;
-  }
-  return false;
-}
-
-// polygonCentroid averages every coordinate of a polygon or multipolygon
-// geometry to produce a rough centroid. Good enough for placing a pulse
-// ring inside the country (we use it only for the territory-flip
-// animation, not for cartographic measurement). Returns [lat, lng] or null
-// when the geometry has no usable coordinates.
-function polygonCentroid(geom: Geometry): [number, number] | null {
-  let sx = 0;
-  let sy = 0;
-  let n = 0;
-  const walk = (rings: Position[][]) => {
-    for (const ring of rings) {
-      for (const [lng, lat] of ring) {
-        if (Number.isFinite(lat) && Number.isFinite(lng)) {
-          sx += lng;
-          sy += lat;
-          n++;
-        }
-      }
-    }
-  };
-  if (geom.type === 'Polygon') {
-    walk(geom.coordinates);
-  } else if (geom.type === 'MultiPolygon') {
-    for (const poly of geom.coordinates) walk(poly);
-  } else {
-    return null;
-  }
-  if (n === 0) return null;
-  return [sy / n, sx / n];
-}
-
-function findCountry(lat: number, lng: number, countries: Feature<Geometry>[]): Feature<Geometry> | null {
-  for (const c of countries) {
-    const geom = c.geometry;
-    if (geom.type === 'Polygon') {
-      if (pointInPolygon(lat, lng, geom.coordinates)) return c;
-    } else if (geom.type === 'MultiPolygon') {
-      for (const poly of geom.coordinates) {
-        if (pointInPolygon(lat, lng, poly)) return c;
-      }
-    }
-  }
-  return null;
-}
-
 // extractNumber pulls the largest comma-separated integer ≤ 10M from a string.
 function extractNumber(s: string | undefined): number {
   if (!s) return 0;
@@ -211,44 +100,6 @@ function escapeHTML(s: string): string {
     .replace(/'/g, '&#39;');
 }
 
-// hexToRgba converts "#rrggbb" + alpha into an "rgba(r,g,b,a)" string.
-// Used by ring color callbacks where the alpha animates over the ring's
-// propagation, so a solid hex doesn't cut it.
-function hexToRgba(hex: string, alpha: number): string {
-  if (!hex.startsWith('#') || hex.length !== 7) return hex;
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
-// darkenHex returns a solid darker variant of an #rrggbb color by scaling
-// each channel by factor (0..1). Solid output keeps the merged point buffer
-// fully opaque so depth sorting stays stable.
-function darkenHex(hex: string, factor: number): string {
-  if (!hex.startsWith('#') || hex.length !== 7) return hex;
-  const r = Math.round(parseInt(hex.slice(1, 3), 16) * factor);
-  const g = Math.round(parseInt(hex.slice(3, 5), 16) * factor);
-  const b = Math.round(parseInt(hex.slice(5, 7), 16) * factor);
-  const pad = (n: number) => n.toString(16).padStart(2, '0');
-  return `#${pad(r)}${pad(g)}${pad(b)}`;
-}
-
-// arcDistance is a cheap surrogate for great-circle distance in degrees,
-// using haversine on a unit sphere. Returns 0–180. Good enough to scale
-// camera altitude on the war-playback flythrough without pulling in a real
-// geo dependency.
-function arcDistance(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const phi1 = toRad(a.lat);
-  const phi2 = toRad(b.lat);
-  const dphi = toRad(b.lat - a.lat);
-  const dlambda = toRad(b.lng - a.lng);
-  const h = Math.sin(dphi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dlambda / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-  return (c * 180) / Math.PI;
-}
-
 // battleMagnitude estimates the scale of a battle from its sides' casualties.
 // Returns 0 when unknown. Uses log scale so a million-casualty battle isn't
 // a million times bigger than a 200-casualty one.
@@ -264,7 +115,7 @@ function battleMagnitude(b: Battle): number {
   return Math.max(0, Math.min(1, (v - 2) / 4));
 }
 
-export default function BattleGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, territoryLabel, warFactionAnchors, warSnapshotYear }: BattleGlobeProps) {
+export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, territoryLabel, warFactionAnchors, warSnapshotYear }: PersistentGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
@@ -1063,49 +914,7 @@ export default function BattleGlobe({ battles, yearRange, onBattleClick, selecte
       htmlLat={(d: object) => (d as { lat: number }).lat}
       htmlLng={(d: object) => (d as { lng: number }).lng}
       htmlAltitude={0.014}
-      htmlElement={(d: object) => {
-        const m = d as { text: string; faction: string; flag: string | null };
-        const wrap = document.createElement('div');
-        wrap.style.cssText = [
-          'pointer-events:none',
-          'transform:translate(-50%,-50%)',
-          'display:flex',
-          'flex-direction:column',
-          'align-items:center',
-          'gap:4px',
-          'user-select:none',
-          'filter:drop-shadow(0 2px 4px rgba(0,0,0,0.9))',
-        ].join(';');
-        if (m.flag) {
-          const img = document.createElement('img');
-          img.src = m.flag;
-          img.alt = '';
-          img.style.cssText = [
-            'width:42px',
-            'height:auto',
-            'max-height:28px',
-            'object-fit:contain',
-            'border:1px solid rgba(255,255,255,0.18)',
-            'box-shadow:0 1px 3px rgba(0,0,0,0.6)',
-            'display:block',
-          ].join(';');
-          img.onerror = () => { img.style.display = 'none'; };
-          wrap.appendChild(img);
-        }
-        const label = document.createElement('div');
-        label.style.cssText = [
-          'font-family:Georgia,"Times New Roman",serif',
-          'font-weight:700',
-          'font-size:11px',
-          'letter-spacing:0.24em',
-          'color:rgba(255,255,255,0.94)',
-          'text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.7)',
-          'white-space:nowrap',
-        ].join(';');
-        label.textContent = m.text;
-        wrap.appendChild(label);
-        return wrap;
-      }}
+      htmlElement={(d: object) => buildFactionLabelElement(d as { text: string; faction: string; flag: string | null })}
     />
     </div>
   );

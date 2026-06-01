@@ -61,6 +61,73 @@ interface PersistentGlobeProps {
   // shows for the era (Nazi swastika 1933-1945, USSR hammer-and-sickle
   // 1922-1991) rather than the modern country flag.
   warSnapshotYear?: number;
+  // landingMode controls what the dramatic-mode landing globe shows.
+  // 'current' (default): filter to ongoing conflicts only and render
+  // them as rippling pulses on a bare Earth. 'all': existing behavior
+  // with every battle in the catalog as a colored pillar.
+  landingMode?: 'current' | 'all';
+}
+
+// CURRENT_CONFLICT_KEYWORDS matches the war field (lowercased) for
+// ongoing post-2014 conflicts that should surface on the "current
+// conflicts" default landing. Substring match so longer variants
+// ("Russo-Ukrainian War / War in Donbas") still hit.
+const CURRENT_CONFLICT_KEYWORDS = [
+  'russo-ukrainian',
+  'russian invasion of ukraine',
+  'war in donbas',
+  'syrian civil war',
+  'syrian war',
+  'iraq war',
+  'war in iraq',
+  'war against the islamic state',
+  'isil',
+  'islamic state',
+  'israel-hamas',
+  'israel–hamas',
+  'gaza war',
+  'palestine',
+  'sudan civil war',
+  'sudanese civil war',
+  'yemen',
+  'yemeni civil war',
+  'libyan civil war',
+  'second libyan civil war',
+  'myanmar civil war',
+  'myanmar conflict',
+  'cabo delgado',
+  'somali civil war',
+  'tigray war',
+  'second nagorno-karabakh',
+  'sahel',
+];
+
+function isCurrentConflict(b: Battle): boolean {
+  const w = (b.war || '').toLowerCase();
+  if (!w) return false;
+  const y = b.year ?? 0;
+  if (y < 2014) return false;
+  return CURRENT_CONFLICT_KEYWORDS.some((kw) => w.includes(kw));
+}
+
+// conflictColor maps a war name to a theater-family color so the
+// landing globe's pulses sort by region at a glance: red for the
+// Russo-Ukrainian front, amber for the Middle East / Levant, orange
+// for the African Sahel and Horn of Africa, magenta for SE Asia,
+// neutral for unmapped. Hex strings only — the ring renderer expects
+// hex + alpha.
+function conflictColor(war: string | undefined): string {
+  const w = (war || '').toLowerCase();
+  if (!w) return '#f87171';
+  if (w.includes('ukrain') || w.includes('donbas')) return '#ef4444';
+  if (w.includes('israel') || w.includes('hamas') || w.includes('gaza') || w.includes('palestin')) return '#fbbf24';
+  if (w.includes('syria') || w.includes('iraq') || w.includes('islamic state') || w.includes('isil')) return '#f59e0b';
+  if (w.includes('yemen')) return '#fb923c';
+  if (w.includes('libya') || w.includes('sahel') || w.includes('cabo delgado')) return '#fdba74';
+  if (w.includes('sudan') || w.includes('tigray') || w.includes('somali')) return '#fb7185';
+  if (w.includes('myanmar')) return '#c084fc';
+  if (w.includes('nagorno-karabakh')) return '#d8b4fe';
+  return '#f87171';
 }
 
 // extractNumber pulls the largest comma-separated integer ≤ 10M from a string.
@@ -115,7 +182,7 @@ function battleMagnitude(b: Battle): number {
   return Math.max(0, Math.min(1, (v - 2) / 4));
 }
 
-export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, territoryLabel, warFactionAnchors, warSnapshotYear }: PersistentGlobeProps) {
+export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, territoryLabel, warFactionAnchors, warSnapshotYear, landingMode = 'current' }: PersistentGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
@@ -129,6 +196,25 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
   // Better to hide a battle than to lie about where it happened.
   // Out-of-range coords (typos, bad imports) are silently excluded too so
   // they do not render off the back of the globe or shove the camera.
+  // Sanity filter against the import garbage. The wikidata pull cross-
+  // contaminates fields on some entries — e.g. "Battle of Betamcarla" is
+  // actually a 16th-century Vijayanagara battle in India, but our DB has
+  // it at year=2025 in the Russo-Ukrainian War with coords in Brazil.
+  // Until the importer is fixed, hide these on the front end: any battle
+  // tagged with a current war (Russo-Ukrainian, Israel-Hamas, Sudan, etc)
+  // whose year is implausible for that war gets dropped.
+  const CURRENT_WAR_YEAR_RANGES: Record<string, [number, number]> = {
+    'russo-ukrainian war': [2014, 2030],
+    'war in donbas': [2014, 2030],
+    'israel-hamas war': [2023, 2030],
+    'israel–hamas war': [2023, 2030],
+    'gaza war': [2023, 2030],
+    'sudan civil war': [2023, 2030],
+    'tigray war': [2020, 2024],
+    'syrian civil war': [2011, 2030],
+    'yemeni civil war': [2014, 2030],
+    'second nagorno-karabakh war': [2020, 2024],
+  };
   const visibleBattles = useMemo(
     () => battles.filter((b) => {
       if (b.year < yearRange[0] || b.year > yearRange[1]) return false;
@@ -136,9 +222,21 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       if (!Number.isFinite(b.lat) || !Number.isFinite(b.lng)) return false;
       if (b.lat < -90 || b.lat > 90) return false;
       if (b.lng < -180 || b.lng > 180) return false;
+      // Cross-field garbage check: if the war is one of the known current
+      // conflicts but the year sits outside that war's plausible range,
+      // the import joined the wrong fields. Hide it.
+      const war = (b.war || '').toLowerCase().trim();
+      const range = CURRENT_WAR_YEAR_RANGES[war];
+      if (range && (b.year < range[0] || b.year > range[1])) return false;
+      // Current-conflicts landing: drop everything that isn't an ongoing
+      // post-2014 war. The user gets a clean Earth with pulses on Ukraine,
+      // Gaza, Sudan, Yemen, Syria, Myanmar, etc. — first impression is
+      // "what's happening now," not "every battle ever." A toggle in the
+      // chrome flips landingMode to 'all' for the full historical view.
+      if (dramatic && landingMode === 'current' && !isCurrentConflict(b)) return false;
       return true;
     }),
-    [battles, yearRange],
+    [battles, yearRange, dramatic, landingMode],
   );
 
   const replayRings = useMemo(
@@ -384,7 +482,37 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
     ];
   }, [selectedBattle]);
 
-  const rings = useMemo(() => [...replayRings, ...ignitionRings, ...flipRings, ...focusRings], [replayRings, ignitionRings, flipRings, focusRings]);
+  // Current-conflict pulse rings, aggregated. Dense theaters (49 Donbas
+  // entries within 200 km of each other, 27 Syrian battles around Aleppo)
+  // were rendering as a tangled mesh of overlapping rings because every
+  // catalog entry got its own broadcast. Cluster by war + 8-degree grid
+  // cell and keep one ring per bucket. That collapses ~300 battles into
+  // ~15 strong theater pulses the eye can read at a glance.
+  const currentConflictRings = useMemo(() => {
+    if (!dramatic || landingMode !== 'current') {
+      return [] as Array<{ lat: number; lng: number; id: string; kind: 'conflict'; color: string }>;
+    }
+    const seen = new Set<string>();
+    const out: Array<{ lat: number; lng: number; id: string; kind: 'conflict'; color: string }> = [];
+    for (const b of visibleBattles) {
+      const cell = `${(b.war || '').toLowerCase()}|${Math.round(b.lat / 8)}|${Math.round(b.lng / 8)}`;
+      if (seen.has(cell)) continue;
+      seen.add(cell);
+      out.push({
+        lat: b.lat,
+        lng: b.lng,
+        id: `cc-${b.id}`,
+        kind: 'conflict' as const,
+        color: conflictColor(b.war),
+      });
+    }
+    return out;
+  }, [dramatic, landingMode, visibleBattles]);
+
+  const rings = useMemo(
+    () => [...replayRings, ...ignitionRings, ...flipRings, ...focusRings, ...currentConflictRings],
+    [replayRings, ignitionRings, flipRings, focusRings, currentConflictRings],
+  );
 
   useEffect(() => {
     // Synchronously read the shared cache when it is already hot — most
@@ -673,17 +801,17 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
   const pointAltitude = useCallback((point: object) => {
     const b = point as Battle;
     if (dramatic) {
-      // Every battle gets a pillar so the globe always reads as "every battle ever".
-      // A small oscillation gives variety even where we have no casualty data;
-      // known-casualty battles get an additional bump so they stand out.
+      // In current-conflicts mode the points are rendered as flat dots
+      // and the eye is led by the pulse rings below — no pillars.
+      if (landingMode === 'current') return 0.002;
       const mag = battleMagnitude(b);
-      const base = 0.03 + Math.abs(Math.sin(b.lat * 0.13 + b.lng * 0.17)) * 0.05;
-      return base + mag * 0.16;
+      const base = 0.012 + Math.abs(Math.sin(b.lat * 0.13 + b.lng * 0.17)) * 0.018;
+      return base + mag * 0.06;
     }
-    if (selectedBattle?.id === b.id) return 0.15;
+    if (selectedBattle?.id === b.id) return 0.08;
     if (selectedBattle) return 0;
     return 0;
-  }, [selectedBattle, dramatic]);
+  }, [selectedBattle, dramatic, landingMode]);
 
   const pointRadius = useCallback((point: object) => {
     const b = point as Battle;
@@ -843,28 +971,26 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       ringLat="lat"
       ringLng="lng"
       ringColor={(d: object) => {
-        const r = d as { kind: 'replay' | 'ignition' | 'flip' | 'focus'; color: string };
+        const r = d as { kind: 'replay' | 'ignition' | 'flip' | 'focus' | 'conflict'; color: string };
         const base = r.color;
         if (r.kind === 'ignition') {
-          // Bright burst, slower fade with a hot plateau early to feel more
-          // like an impact than a pulse. White ignition rings (selection
-          // burst core) get an extra-bright envelope.
           const peak = base === '#ffffff' ? 1.0 : 0.98;
           return (t: number) => hexToRgba(base, t < 0.12 ? peak : peak * Math.max(0, 1 - (t - 0.12) / 0.88));
         }
         if (r.kind === 'flip') {
-          // Territory-flip pulse: country flares in the new owner's color
-          // as control changes hands at a snapshot boundary. Brighter than
-          // the replay ring, with a slight inner-glow plateau before fade.
           return (t: number) => hexToRgba(base, t < 0.18 ? 0.98 : 0.98 * (1 - (t - 0.18) / 0.82));
         }
         if (r.kind === 'focus') {
-          // Persistent doppler pulse on the selected battle. White core ring
-          // burns brighter than the era-colored shock waves so the eye
-          // immediately anchors on the active battle.
           const isCore = base === '#ffffff';
           const peak = isCore ? 1.0 : 0.92;
           return (t: number) => hexToRgba(base, peak * (1 - t * t));
+        }
+        if (r.kind === 'conflict') {
+          // Continuous broadcast pulse for an active conflict location.
+          // Brighter inner core, softer falloff than the replay ring so
+          // a dense theater (Ukraine front, Gaza) reads as a sustained
+          // signal rather than a flicker.
+          return (t: number) => hexToRgba(base, 0.95 * Math.pow(1 - t, 1.6));
         }
         return (t: number) => hexToRgba(base, 0.78 * (1 - t));
       }}

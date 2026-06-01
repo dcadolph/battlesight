@@ -50,6 +50,22 @@ interface GlobeReplayProps {
 // that arrows traverse visible geography.
 const DEFAULT_EXTENT_DEG = 3.0;
 
+// Module-level cache for country polygon centroids. Each polygonData
+// rebuild used to call largestPolygonCentroid for every country in the
+// world (200+), and each call iterates the country's full polygon ring.
+// On rapid phase changes this was the source of the frozen screens.
+// WeakMap keyed by feature reference so the cache is bounded by the
+// lifetime of the world-atlas features themselves.
+const countryCentroidCache = new WeakMap<Feature<Geometry>, [number, number] | null>();
+function cachedCentroid(feat: Feature<Geometry>): [number, number] | null {
+  let c = countryCentroidCache.get(feat);
+  if (c === undefined) {
+    c = largestPolygonCentroid(feat) ?? null;
+    countryCentroidCache.set(feat, c);
+  }
+  return c;
+}
+
 // projectToLatLng converts a 0-100 (x, y) coordinate from the phase's local
 // frame to (lat, lng) centered at the battle's location. y is inverted (0 is
 // "north" on the map, higher latitude).
@@ -138,18 +154,17 @@ function arrowTiming(kind: string | undefined, index: number): {
   // hit just as the trace completes so the eye reads "force arrives → land."
   impactDelay: number;
 } {
-  const appearDelay = index * 280;
-  // Sweep timings deliberately slower than they used to be so every arrow
-  // reads as a flowing campaign movement rather than a quick diagram line.
-  // Even charges get a meaningful arc; retreats are stretched longer so
-  // the somber drift back has weight.
+  // Stagger shortened from 280 ms to 130 ms so a 4-arrow phase no longer
+  // takes a second to fully populate. The traces themselves were also
+  // shortened — they were reading as "lethargic" not "considered."
+  const appearDelay = index * 130;
   const traceMs = kind === 'charge'
-    ? 1100
+    ? 850
     : kind === 'flank'
-      ? 1400
+      ? 1050
       : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal'
-        ? 1800
-        : 1500;
+        ? 1300
+        : 1100;
   const marchSpeed = kind === 'charge'
     ? 900
     : kind === 'flank'
@@ -273,7 +288,20 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
   const safeBattleLng = battleCoordsValid ? battle.lng : 10;
   const cameraLat = phase.cameraLat ?? safeBattleLat;
   const cameraLng = phase.cameraLng ?? safeBattleLng;
-  const cameraAlt = phase.cameraAltitude ?? defaultAltitude;
+  // Clamp altitude to a floor where Blue Marble still renders. Curated
+  // phases authored as 0.05-0.10 (Pegasus Bridge, Pointe du Hoc,
+  // Sedan crossing) leave the Three.js scene rendering a black void
+  // with a few floating unit symbols. 0.40 is the tightest altitude
+  // where the Earth surface paints reliably under both headless and
+  // a real GPU.
+  // Altitude floor: phases authored as 0.05-0.10 left the WebGL globe
+  // rendering nothing (canvas pixel sample at center returned full
+  // transparency at altitudes < 0.5). The Earth, polygon shading, and
+  // faction labels all paint cleanly at 0.8+ across both headless and
+  // real Chrome. The tradeoff: micro-tactical phases (Pegasus Bridge,
+  // Pointe du Hoc) are now framed as regional views rather than truly
+  // close-up. Worth it to keep the scene visible.
+  const cameraAlt = Math.max(0.55, phase.cameraAltitude ?? defaultAltitude);
   const tweenMs = phase.cameraTweenMs ?? 1400;
 
   // Movement centroid: average destination of this phase's arrows. The camera
@@ -311,14 +339,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
   const initialMountRef = useRef(true);
   const firstPhaseAppliedRef = useRef(false);
   const sceneReadyFiredRef = useRef(false);
-  // phaseSettled is the cinematic gate. SVG overlay content (unit
-  // markers, arrows, captions) holds at opacity 0 until the camera has
-  // arrived at the phase vantage AND a beat of polygon paint has
-  // passed. Stops the user from watching airdrop captions render over
-  // a still-Asia globe — the symptom in the user's screenshots.
-  const [phaseSettled, setPhaseSettled] = useState(false);
   useEffect(() => {
-    setPhaseSettled(false);
     // Retry the camera snap on each animation frame until the
     // react-globe.gl ref is attached. Earlier the useEffect tried once
     // and returned; if the ref hadn't been assigned yet the camera
@@ -330,7 +351,6 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     let primaryMs = 0;
     let driftTimer: ReturnType<typeof setTimeout> | undefined;
     let breatheTimer: ReturnType<typeof setTimeout> | undefined;
-    let settleTimer: ReturnType<typeof setTimeout> | undefined;
     let readyTimer: ReturnType<typeof setTimeout> | undefined;
 
     const apply = () => {
@@ -377,14 +397,6 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         }, primaryMs + 100);
       }
 
-      // phaseSettled gates the SVG overlay. Wait for camera arrival
-      // plus a tiny polygon-paint buffer. Buffer was 220 ms — cut to
-      // 80 ms so arrows appear right as the camera lands, not a beat
-      // after.
-      settleTimer = setTimeout(() => {
-        if (!cancelled) setPhaseSettled(true);
-      }, primaryMs + 80);
-
       driftTimer = setTimeout(() => {
         if (!globeRef.current) return;
         const targetLat = movementCentroid
@@ -393,7 +405,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         const targetLng = movementCentroid
           ? cameraLng + (movementCentroid.lng - cameraLng) * 0.4
           : cameraLng;
-        const tighter = Math.max(0.08, cameraAlt * 0.85);
+        const tighter = Math.max(0.55, cameraAlt * 0.92);
         globeRef.current.pointOfView(
           { lat: targetLat, lng: targetLng, altitude: tighter },
           3200,
@@ -415,7 +427,6 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
       cancelAnimationFrame(raf);
       if (driftTimer) clearTimeout(driftTimer);
       if (breatheTimer) clearTimeout(breatheTimer);
-      if (settleTimer) clearTimeout(settleTimer);
       if (readyTimer) clearTimeout(readyTimer);
       const c = globeRef.current?.controls();
       if (c) c.autoRotate = false;
@@ -434,6 +445,17 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
   const movementGeo: MovementGeo[] = useMemo(() => {
     const out: MovementGeo[] = [];
     (phase.movements ?? []).forEach((m, i) => {
+      // Skip placeholder x=50,y=50 movements left by the importer when a
+      // curated battle has no authored x/y for some phase items. Projecting
+      // them stacks every arrow at the battle center, which reads as dead
+      // arrows piled on the same point.
+      const hasRealStart = typeof m.fromLat === 'number' && typeof m.fromLng === 'number'
+        && (m.fromLat !== 0 || m.fromLng !== 0);
+      const hasRealEnd = typeof m.toLat === 'number' && typeof m.toLng === 'number'
+        && (m.toLat !== 0 || m.toLng !== 0);
+      const fromPh = m.fromX === 50 && m.fromY === 50 && !hasRealStart;
+      const toPh = m.toX === 50 && m.toY === 50 && !hasRealEnd;
+      if (fromPh && toPh) return;
       const [startLat, startLng] = geoOrProject(
         m.fromX, m.fromY, m.fromLat, m.fromLng,
         battle.lat, battle.lng,
@@ -471,6 +493,12 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
       const xyKey = `${u.x.toFixed(1)}|${u.y.toFixed(1)}`;
       const llKey = `${(u.lat ?? 0).toFixed(3)}|${(u.lng ?? 0).toFixed(3)}`;
       if (sourceKeys.has(xyKey) || sourceKeys.has(llKey)) return;
+      // Skip placeholder x=50,y=50 units left by the importer. They stack
+      // every defender on the battle center and read as a pile of ghost
+      // markers occluding the real action.
+      const hasRealGeo = typeof u.lat === 'number' && typeof u.lng === 'number'
+        && (u.lat !== 0 || u.lng !== 0);
+      if (u.x === 50 && u.y === 50 && !hasRealGeo) return;
       const [lat, lng] = geoOrProject(
         u.x, u.y, u.lat, u.lng,
         battle.lat, battle.lng,
@@ -488,6 +516,52 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     });
     return out;
   }, [phase, battle.lat, battle.lng, extentLatDeg, extentLngDeg, replay.aspectRatio]);
+
+  // Theater bbox: derived from battle.lat/lng + every arrow endpoint and
+  // unit position across ALL phases of the replay. Stable across phase
+  // changes so Germany doesn't flip in and out as the user advances
+  // (which was painting it red in one phase and exposing the green
+  // satellite texture in the next). Padding lets adjacent countries
+  // still shade — a French battle still paints the UK across the
+  // Channel even when no UK arrow appears in any phase.
+  const theater = useMemo(() => {
+    let minLat = battle.lat, maxLat = battle.lat;
+    let minLng = battle.lng, maxLng = battle.lng;
+    const ar = replay.aspectRatio ?? 1.6;
+    const _extentLat = replay.extentLatDeg ?? DEFAULT_EXTENT_DEG;
+    const _extentLng = (replay.extentLngDeg ?? DEFAULT_EXTENT_DEG) * ar;
+    for (const ph of replay.phases) {
+      for (const m of (ph.movements ?? [])) {
+        const fromPh = m.fromX === 50 && m.fromY === 50
+          && !(typeof m.fromLat === 'number' && typeof m.fromLng === 'number' && (m.fromLat !== 0 || m.fromLng !== 0));
+        const toPh = m.toX === 50 && m.toY === 50
+          && !(typeof m.toLat === 'number' && typeof m.toLng === 'number' && (m.toLat !== 0 || m.toLng !== 0));
+        if (fromPh && toPh) continue;
+        const [sLat, sLng] = geoOrProject(m.fromX, m.fromY, m.fromLat, m.fromLng, battle.lat, battle.lng, ar, _extentLat, _extentLng);
+        const [eLat, eLng] = geoOrProject(m.toX, m.toY, m.toLat, m.toLng, battle.lat, battle.lng, ar, _extentLat, _extentLng);
+        minLat = Math.min(minLat, sLat, eLat);
+        maxLat = Math.max(maxLat, sLat, eLat);
+        minLng = Math.min(minLng, sLng, eLng);
+        maxLng = Math.max(maxLng, sLng, eLng);
+      }
+      for (const u of (ph.units ?? [])) {
+        const hasRealGeo = typeof u.lat === 'number' && typeof u.lng === 'number' && (u.lat !== 0 || u.lng !== 0);
+        if (u.x === 50 && u.y === 50 && !hasRealGeo) continue;
+        const [uLat, uLng] = geoOrProject(u.x, u.y, u.lat, u.lng, battle.lat, battle.lng, ar, _extentLat, _extentLng);
+        minLat = Math.min(minLat, uLat);
+        maxLat = Math.max(maxLat, uLat);
+        minLng = Math.min(minLng, uLng);
+        maxLng = Math.max(maxLng, uLng);
+      }
+    }
+    const pad = 12;
+    return {
+      minLat: minLat - pad,
+      maxLat: maxLat + pad,
+      minLng: minLng - pad,
+      maxLng: maxLng + pad,
+    };
+  }, [battle.lat, battle.lng, replay]);
 
   // Polygons rendered on the globe: every country shaded by the active
   // war-territory snapshot (so the sweep stays visible while watching a
@@ -509,15 +583,23 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     // reads correctly at every zoom level. Stroke alpha follows but
     // stays a beat brighter so the border outline survives at tight
     // zoom even when the fill fades to near-transparent.
-    const belligerentAlpha = cameraAlt > 0.25 ? 0.94
-      : cameraAlt > 0.12 ? 0.62
-      : 0.22;
-    const neutralAlpha = cameraAlt > 0.25 ? 0.78
-      : cameraAlt > 0.12 ? 0.48
-      : 0.18;
-    const strokeAlpha = cameraAlt > 0.25 ? 1.0
-      : cameraAlt > 0.12 ? 0.85
-      : 0.6;
+    // Four altitude tiers, tuned against the screenshot evidence: the wide
+    // political view (Fleet phase, altitude > 0.4) reads brilliantly at near-
+    // full alpha; the mid-zoom Pointe-du-Hoc tier was flooding the frame with
+    // a flat blue field that swallowed every arrow. Each step down dims the
+    // territorial paint so the action layer (arrows, units, labels) wins.
+    const belligerentAlpha = cameraAlt > 0.4 ? 0.92
+      : cameraAlt > 0.22 ? 0.45
+      : cameraAlt > 0.10 ? 0.22
+      : 0.12;
+    const neutralAlpha = cameraAlt > 0.4 ? 0.75
+      : cameraAlt > 0.22 ? 0.32
+      : cameraAlt > 0.10 ? 0.15
+      : 0.08;
+    const strokeAlpha = cameraAlt > 0.4 ? 1.0
+      : cameraAlt > 0.22 ? 0.9
+      : cameraAlt > 0.10 ? 0.7
+      : 0.55;
     if (warCountryColors && countries.length > 0) {
       const colorByName: Record<string, string> = {};
       for (const [name, hex] of Object.entries(warCountryColors)) {
@@ -530,6 +612,31 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         const name = props.name;
         if (!name) continue;
         const color = colorByName[name];
+        // Snapshot-aware theater check. Countries the snapshot KNOWS about
+        // (Italy, Poland, Norway, Denmark for a 1944 view) always render
+        // in their faction color regardless of distance from the battle —
+        // the snapshot is authoritative for "this is who controls what."
+        // Countries NOT in the snapshot are theater-gated: only nearby
+        // ones get the neutral fill, distant ones go transparent so a
+        // Normandy phase doesn't paint Mongolia or Argentina.
+        if (!color) {
+          const centroid = cachedCentroid(feat as Feature<Geometry>);
+          const inTheater = centroid
+            && centroid[0] >= theater.minLat
+            && centroid[0] <= theater.maxLat
+            && centroid[1] >= theater.minLng
+            && centroid[1] <= theater.maxLng;
+          if (!inTheater) {
+            out.push({
+              feature: feat as Feature<Geometry>,
+              capColor: 'rgba(0,0,0,0)',
+              strokeColor: 'rgba(0,0,0,0)',
+              sideColor: 'rgba(0,0,0,0)',
+              altitude: 0.002,
+            });
+            continue;
+          }
+        }
         if (color) {
           out.push({
             feature: feat as Feature<Geometry>,
@@ -577,7 +684,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
       });
     });
     return out;
-  }, [highlightedCountry, phase.controlRegions, warCountryColors, countries, replay, cameraAlt]);
+  }, [highlightedCountry, phase.controlRegions, warCountryColors, countries, replay, cameraAlt, theater]);
 
   // factionLabels mirrors the BattleGlobe overlay: one period-accurate
   // flag banner + editorial caps label per controlling power, anchored
@@ -695,7 +802,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
             faction: u.faction,
             x: ok ? p!.x : 0,
             y: ok ? p!.y : 0,
-            radius: 6 + Math.min(8, u.strength * 0.6),
+            radius: 14 + Math.min(12, u.strength * 1.1),
             unitType: u.unitType,
             status: u.status,
             label: u.label,
@@ -716,7 +823,20 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
   }, [movementGeo, defenderGeo]);
 
   return (
-    <div ref={wrapRef} className="w-full h-full relative">
+    <div
+      ref={wrapRef}
+      className="w-full h-full relative"
+      style={{
+        // Dark base behind the globe so when Three.js is still warming up
+        // (texture upload, scene init) the void reads as a deliberate night
+        // sky instead of pure black. Without this the SVG overlay rendered
+        // against #000 while waiting for the Earth texture to paint, which
+        // looked broken (screenshot 9.03.15: airdrop arrows floating in a
+        // void). Soft radial gradient ties to the deeper accent of the
+        // surrounding chrome.
+        background: 'radial-gradient(ellipse at center, #0a1326 0%, #050810 70%)',
+      }}
+    >
       {/* On-stage side legend. Floats at the top-left of the replay stage
           so the eye can always map an arrow color to a faction without
           looking off into the sidebar. The sidebar's SideRow shows the
@@ -755,14 +875,6 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         width={dims.width}
         height={dims.height}
         viewBox={`0 0 ${dims.width} ${dims.height}`}
-        style={{
-          // phaseSettled gates the entire overlay so arrows, units, and
-          // captions stay invisible until the camera has arrived at
-          // the phase vantage. 200 ms crossfade — fast enough to feel
-          // snappy, slow enough to read as a deliberate reveal.
-          opacity: phaseSettled ? 1 : 0,
-          transition: 'opacity 200ms ease-out',
-        }}
       >
         <defs>
           {(['a', 'b', 'c'] as Faction[]).map((f) => {
@@ -817,10 +929,22 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
             paletteCtx={replay}
           />
         ))}
-        {/* Impact flashes timed to each arrow's individual trace duration, so
-            a slow retreat does not flash before it has finished moving and a
-            fast charge does not flash long after it has landed. The shared
-            arrowTiming helper keeps the flash and the trace honest. */}
+        {/* Traveling formations: a faction-colored token slides along
+            each arrow's curved path in lockstep with the trace timing.
+            This is the simulation feel — instead of arrows drawing
+            themselves out of nowhere, the viewer watches actual
+            forces move from start to objective. Token size scales
+            with movement kind (charge gets a heavier disc, retreat
+            a smaller one). */}
+        {arrows.filter((a) => a.visible).map((a) => (
+          <TravelingFormation
+            key={`travel-${phaseIdx}-${a.index}`}
+            arrow={a}
+            color={factionColorFor(a.faction, replay)}
+            timing={arrowTiming(a.kind, a.index)}
+          />
+        ))}
+        {/* Impact flashes timed to each arrow's individual trace duration. */}
         {arrows.filter((a) => a.visible).map((a) => (
           <ImpactFlash
             key={`flash-${phaseIdx}-${a.index}`}
@@ -919,6 +1043,57 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
   );
 }
 
+// TravelingFormation renders a faction-colored token that slides along
+// the same curved Bezier path as the arrow trace, in lockstep with the
+// trace timing. The viewer watches actual forces move from start to
+// objective instead of an arrow drawing itself in. This is what turns
+// the cinematic from "diagram" into "simulation."
+interface TravelingFormationProps {
+  arrow: ProjectedArrow;
+  color: string;
+  timing: { appearDelay: number; traceMs: number; marchSpeed: number; impactDelay: number };
+}
+function TravelingFormation({ arrow, color, timing }: TravelingFormationProps) {
+  const { x1, y1, x2, y2, kind, index } = arrow;
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+  const midX = (x1 + x2) / 2;
+  const midY = (y1 + y2) / 2;
+  const curveAmount = Math.min(len * 0.18, 50);
+  const sign = index % 2 === 0 ? 1 : -1;
+  const perpX = (-dy / len) * curveAmount * sign;
+  const perpY = (dx / len) * curveAmount * sign;
+  const cpX = midX + perpX;
+  const cpY = midY + perpY;
+  const path = `M ${x1} ${y1} Q ${cpX} ${cpY} ${x2} ${y2}`;
+  // Token size scales with movement kind. Charges and amphibious moves
+  // get the chunkiest formation; retreats are visibly smaller because
+  // they read as broken units pulling back.
+  let outerR = 11;
+  let innerR = 5;
+  if (kind === 'charge') { outerR = 13; innerR = 6; }
+  else if (kind === 'flank') { outerR = 12; innerR = 5.5; }
+  else if (kind === 'rout' || kind === 'retreat' || kind === 'withdrawal') {
+    outerR = 8; innerR = 3.5;
+  }
+  return (
+    <g style={{ pointerEvents: 'none' }}>
+      {/* Soft halo for visibility on dark territory */}
+      <circle r={outerR + 4} fill={color} opacity={0.28} style={{ filter: 'blur(3px)' }}>
+        <animateMotion path={path} dur={`${timing.traceMs}ms`} begin={`${timing.appearDelay}ms`} fill="freeze" />
+      </circle>
+      {/* Hard token: faction-colored disc with a white core for contrast */}
+      <circle r={outerR} fill={color} stroke="rgba(6,9,18,0.85)" strokeWidth={1.5}>
+        <animateMotion path={path} dur={`${timing.traceMs}ms`} begin={`${timing.appearDelay}ms`} fill="freeze" />
+      </circle>
+      <circle r={innerR} fill="#f8fafc">
+        <animateMotion path={path} dur={`${timing.traceMs}ms`} begin={`${timing.appearDelay}ms`} fill="freeze" />
+      </circle>
+    </g>
+  );
+}
+
 interface ArrowVectorProps {
   phaseIdx: number;
   arrow: ProjectedArrow;
@@ -951,10 +1126,10 @@ function ArrowVector({ phaseIdx, arrow, paletteCtx }: ArrowVectorProps) {
   const cpX = midX + perpX;
   const cpY = midY + perpY;
 
-  let stroke = 6;
-  if (kind === 'charge') stroke = 8;
-  else if (kind === 'flank') stroke = 7;
-  else if (kind === 'rout' || kind === 'retreat' || kind === 'withdrawal') stroke = 4.5;
+  let stroke = 8;
+  if (kind === 'charge') stroke = 11;
+  else if (kind === 'flank') stroke = 9.5;
+  else if (kind === 'rout' || kind === 'retreat' || kind === 'withdrawal') stroke = 6;
 
   const color = factionColorFor(faction, paletteCtx);
   const markerId = `gr-arrow-${phaseIdx}-${faction}`;
@@ -1261,18 +1436,29 @@ interface UnitMarkerProps {
   paletteCtx?: PaletteContext;
 }
 
-// UnitMarker renders a static defender / position marker at a unit's
-// projected screen position. The marker is a faction-colored disk with a
-// pale rim and a unit-type glyph in the center. Pop-in uses a slight
-// overshoot bezier so each unit lands with weight, not a flat fade.
+// UnitMarker renders a unit at its projected screen position using
+// NATO-inspired symbology. Ground forces (infantry, armor, cavalry,
+// artillery, command, archers) render as rectangles with the type
+// symbology inside (X for infantry, horizontal oval for armor, etc.).
+// Aircraft render as a wing chevron, ships as a hull silhouette,
+// fortifications as a heavy-rimmed square with diagonals. Anything
+// without a recognized unitType falls back to the legacy faction disk
+// + chess glyph so curated phase data stays backward compatible. The
+// shape itself carries the type, so the marker reads at a glance
+// without needing the label — the user's "no value in it" complaint.
 function UnitMarker({ unit, paletteCtx }: UnitMarkerProps) {
   const { x, y, faction, radius, unitType, status, index, label } = unit;
   const color = factionColorFor(faction, paletteCtx);
   const isBroken = status === 'broken' || status === 'routed' || status === 'destroyed';
-  const fill = isBroken ? hexWithAlpha(color, 0.35) : hexWithAlpha(color, 0.75);
+  const fill = isBroken ? hexWithAlpha(color, 0.35) : hexWithAlpha(color, 0.78);
   const stroke = isBroken ? hexWithAlpha(color, 0.55) : '#f8fafc';
   const appearDelay = index * 80;
   const titleText = status ? `${label} (${status})` : label;
+
+  // Halo dimensions: ellipse envelopes the rectangle shapes, slightly
+  // wider than tall to match the unit-symbol aspect ratio.
+  const haloRX = radius * 1.8;
+  const haloRY = radius * 1.3;
 
   return (
     <g
@@ -1281,17 +1467,14 @@ function UnitMarker({ unit, paletteCtx }: UnitMarkerProps) {
         opacity: 0,
         transformBox: 'fill-box',
         transformOrigin: 'center',
-        // unit-pop-in: scale from 0.4 with an overshoot, then settle. The
-        // cubic-bezier overshoots ~1.15 around 65% then eases back to 1.0.
         animation: `unit-pop-in 520ms ${appearDelay}ms cubic-bezier(.34,1.56,.4,1) forwards`,
         pointerEvents: 'auto',
       }}
     >
       <title>{titleText}</title>
-      {/* Soft halo, scaled separately so it breathes slightly larger than
-          the disk for that "this is a live force" feel. */}
-      <circle
-        r={radius + 3}
+      <ellipse
+        rx={haloRX}
+        ry={haloRY}
         fill={hexWithAlpha(color, 0.22)}
         style={{
           filter: 'blur(3px)',
@@ -1300,25 +1483,148 @@ function UnitMarker({ unit, paletteCtx }: UnitMarkerProps) {
           animation: `unit-halo-breath 3200ms ${appearDelay + 600}ms ease-in-out infinite`,
         }}
       />
-      <circle r={radius} fill={fill} stroke={stroke} strokeWidth={1.4} />
-      <UnitGlyph radius={radius} unitType={unitType} />
+      <UnitSymbol unitType={unitType} radius={radius} fill={fill} stroke={stroke} />
       {isBroken && (
-        <line
-          x1={-radius * 0.8}
-          y1={-radius * 0.8}
-          x2={radius * 0.8}
-          y2={radius * 0.8}
-          stroke="#f8fafc"
-          strokeWidth={1.5}
-          strokeLinecap="round"
-        />
+        <>
+          <line
+            x1={-radius * 1.1}
+            y1={-radius * 0.7}
+            x2={radius * 1.1}
+            y2={radius * 0.7}
+            stroke="#f8fafc"
+            strokeWidth={1.8}
+            strokeLinecap="round"
+          />
+          <line
+            x1={radius * 1.1}
+            y1={-radius * 0.7}
+            x2={-radius * 1.1}
+            y2={radius * 0.7}
+            stroke="#f8fafc"
+            strokeWidth={1.8}
+            strokeLinecap="round"
+          />
+        </>
       )}
-      {/* Unit caption is rendered separately as a FieldCaption in the
-          GlobeReplay SVG overlay so it tethers to this marker without
-          dragging a boxy pill underneath. Hover still shows the SVG
-          <title> above. */}
     </g>
   );
+}
+
+// UnitSymbol picks the right NATO-style glyph for a unit type and draws
+// it centered at the SVG origin (the parent <g> handles translation).
+// Ground forces use a horizontal rectangle (NATO unit frame) with type
+// symbology inside; air and naval get dedicated silhouettes. Unknown
+// types fall back to the legacy disk + chess glyph.
+function UnitSymbol({ unitType, radius, fill, stroke }: { unitType?: string; radius: number; fill: string; stroke: string }) {
+  const w = radius * 2.7;
+  const h = radius * 1.75;
+  const sw = 1.6;
+  const inner = '#f8fafc';
+  const isw = 1.6;
+  switch (unitType) {
+    case 'infantry':
+    case 'mechanized':
+      return (
+        <>
+          <rect x={-w / 2} y={-h / 2} width={w} height={h} fill={fill} stroke={stroke} strokeWidth={sw} />
+          <line x1={-w / 2} y1={-h / 2} x2={w / 2} y2={h / 2} stroke={inner} strokeWidth={isw} strokeLinecap="round" />
+          <line x1={w / 2} y1={-h / 2} x2={-w / 2} y2={h / 2} stroke={inner} strokeWidth={isw} strokeLinecap="round" />
+        </>
+      );
+    case 'armor':
+      return (
+        <>
+          <rect x={-w / 2} y={-h / 2} width={w} height={h} fill={fill} stroke={stroke} strokeWidth={sw} />
+          <ellipse cx={0} cy={0} rx={w * 0.34} ry={h * 0.32} fill="none" stroke={inner} strokeWidth={isw + 0.2} />
+        </>
+      );
+    case 'cavalry':
+      return (
+        <>
+          <rect x={-w / 2} y={-h / 2} width={w} height={h} fill={fill} stroke={stroke} strokeWidth={sw} />
+          <line x1={-w / 2} y1={h / 2} x2={w / 2} y2={-h / 2} stroke={inner} strokeWidth={isw} strokeLinecap="round" />
+        </>
+      );
+    case 'artillery':
+      return (
+        <>
+          <rect x={-w / 2} y={-h / 2} width={w} height={h} fill={fill} stroke={stroke} strokeWidth={sw} />
+          <circle cx={0} cy={0} r={radius * 0.36} fill={inner} />
+        </>
+      );
+    case 'command':
+      return (
+        <>
+          <rect x={-w / 2} y={-h / 2} width={w} height={h} fill={fill} stroke={stroke} strokeWidth={sw} />
+          <line x1={0} y1={-h / 2 - 6} x2={0} y2={-h / 2} stroke={inner} strokeWidth={1.6} />
+          <rect x={0.5} y={-h / 2 - 7} width={5} height={3.2} fill={inner} />
+        </>
+      );
+    case 'archers':
+      return (
+        <>
+          <rect x={-w / 2} y={-h / 2} width={w} height={h} fill={fill} stroke={stroke} strokeWidth={sw} />
+          <path
+            d={`M ${-w * 0.36} ${h * 0.28} Q 0 ${-h * 0.52} ${w * 0.36} ${h * 0.28}`}
+            fill="none"
+            stroke={inner}
+            strokeWidth={isw}
+            strokeLinecap="round"
+          />
+          <line x1={-w * 0.32} y1={h * 0.3} x2={w * 0.32} y2={h * 0.3} stroke={inner} strokeWidth={isw * 0.7} />
+        </>
+      );
+    case 'aircraft':
+      return (
+        <path
+          d={`M ${-radius * 1.4} ${radius * 0.45} L 0 ${-radius * 1.05} L ${radius * 1.4} ${radius * 0.45} L ${radius * 0.55} ${radius * 0.3} L 0 ${-radius * 0.35} L ${-radius * 0.55} ${radius * 0.3} Z`}
+          fill={fill}
+          stroke={stroke}
+          strokeWidth={sw}
+          strokeLinejoin="round"
+        />
+      );
+    case 'ships':
+      return (
+        <>
+          <path
+            d={`M ${-radius * 1.4} ${-radius * 0.35} L ${radius * 1.4} ${-radius * 0.35} L ${radius * 1.1} ${radius * 0.6} L ${-radius * 1.1} ${radius * 0.6} Z`}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+            strokeLinejoin="round"
+          />
+          <rect x={-radius * 0.22} y={-radius * 0.95} width={radius * 0.44} height={radius * 0.6} fill={fill} stroke={stroke} strokeWidth={1.2} />
+        </>
+      );
+    case 'fortification':
+    case 'fort':
+    case 'bunker':
+    case 'battery':
+    case 'strongpoint':
+      return (
+        <>
+          <rect
+            x={-radius * 1.05}
+            y={-radius * 1.05}
+            width={radius * 2.1}
+            height={radius * 2.1}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={2.6}
+          />
+          <line x1={-radius * 0.75} y1={-radius * 0.75} x2={radius * 0.75} y2={radius * 0.75} stroke={inner} strokeWidth={1.9} strokeLinecap="round" />
+          <line x1={radius * 0.75} y1={-radius * 0.75} x2={-radius * 0.75} y2={radius * 0.75} stroke={inner} strokeWidth={1.9} strokeLinecap="round" />
+        </>
+      );
+    default:
+      return (
+        <>
+          <circle r={radius} fill={fill} stroke={stroke} strokeWidth={1.4} />
+          <UnitGlyph radius={radius} unitType={unitType} />
+        </>
+      );
+  }
 }
 
 // UNIT_ICON maps a unit type to a unicode glyph rendered inside the marker.

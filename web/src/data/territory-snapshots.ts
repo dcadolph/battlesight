@@ -301,9 +301,16 @@ export const TERRITORY: WarTerritory[] = [
         year: 1944.5,
         label: 'June 1944: D-Day, Bagration',
         control: {
-          'nazi-germany': ['Germany', 'Austria', 'Czechia', 'Slovakia', 'Poland', 'Netherlands', 'Belgium', 'Denmark', 'Norway', 'Yugoslavia', 'Croatia', 'Bosnia and Herzegovina', 'Slovenia', 'Greece', 'Hungary', 'Italy'],
+          // Italy moved out of the Axis column: Rome fell on 4 June 1944
+          // (two days before D-Day) and the Kingdom of Italy had been a
+          // co-belligerent on the Allied side since the September 1943
+          // armistice. The Italian Social Republic (Mussolini's German
+          // puppet state, 1943-45) only governed northern Italy and is
+          // not a feature in the world atlas — so we paint the whole
+          // Italian peninsula Allied to reflect the political reality.
+          'nazi-germany': ['Germany', 'Austria', 'Czechia', 'Slovakia', 'Poland', 'Netherlands', 'Belgium', 'Denmark', 'Norway', 'Yugoslavia', 'Croatia', 'Bosnia and Herzegovina', 'Slovenia', 'Greece', 'Hungary'],
           'ussr': ['Russia', 'Belarus', 'Ukraine', 'Moldova', 'Lithuania', 'Latvia', 'Estonia', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan', 'Turkmenistan', 'Uzbekistan', 'Tajikistan', 'Kyrgyzstan'],
-          'uk': ['United Kingdom', 'France', 'Egypt', 'Libya', 'Sudan', 'Kenya', 'Tanzania', 'Nigeria', 'Myanmar'],
+          'uk': ['United Kingdom', 'France', 'Italy', 'Egypt', 'Libya', 'Sudan', 'Kenya', 'Tanzania', 'Nigeria', 'Myanmar'],
           'india': ['India'],
           'south-africa': ['South Africa'],
           'canada': ['Canada'],

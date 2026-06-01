@@ -129,6 +129,21 @@ export default function App() {
   const [cinematicPrevTick, setCinematicPrevTick] = useState(0);
   const [introVisible, setIntroVisible] = useState(false);
   const [featured, setFeatured] = useState<Battle | null>(null);
+  // landingMode toggles the cold-open globe between two modes:
+  //   'current' — the default — drops every catalog battle except the
+  //     ongoing post-2014 conflicts (Ukraine, Gaza, Sudan, etc.) and
+  //     renders them as continuous pulses on a bare Earth so the first
+  //     impression is "what's happening now."
+  //   'all' — the classic full-catalog view with every battle as a
+  //     colored pillar across 5,000 years of history.
+  // Persisted to localStorage so the user's pick survives reloads.
+  const [landingMode, setLandingMode] = useState<'current' | 'all'>(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('bt.landing_mode') : null;
+    return saved === 'all' ? 'all' : 'current';
+  });
+  useEffect(() => {
+    try { localStorage.setItem('bt.landing_mode', landingMode); } catch {}
+  }, [landingMode]);
   // historyMode is true whenever the user is in the play-history overlay,
   // even when paused. historyPaused gates the RAF loop without exiting the
   // mode, so the playhead stays on screen and the Resume button works.
@@ -799,7 +814,19 @@ export default function App() {
           (or the war cinematic overlay) to get it back. */}
       {!(replayBattle && replayCinematic) && <CommandBar
         filters={filters}
-        onFiltersChange={setFilters}
+        onFiltersChange={(next) => {
+          // Applying any filter clears the stale selectedBattle so the
+          // filter results render in their era colors instead of being
+          // dimmed by a previously-clicked battle. Also closes the
+          // dossier and any open replay so the user lands on a clean
+          // filter view.
+          setFilters(next);
+          setSelectedBattle(null);
+          setIsolatedBattle(null);
+          setPanelDismissed(false);
+          setReplayBattle(null);
+          setReplayPhase(0);
+        }}
         onBattleSelect={handleBattleClick}
         onIsolate={handleIsolate}
         onPlaybackOpen={() => setShowPlayback(true)}
@@ -831,7 +858,40 @@ export default function App() {
         territoryLabel={territoryLabel ?? undefined}
         warFactionAnchors={factionAnchors}
         warSnapshotYear={snapshotYear ?? undefined}
+        landingMode={landingMode}
       />
+
+      {/* Landing-mode toggle. Sits at the top-center while the dramatic
+          mode globe is showing so the user can flip between "current
+          conflicts" (default, ripples on bare Earth) and "all history"
+          (every battle as a pillar) in one click. Hidden as soon as the
+          user dives into a battle, war, or history sweep so it does not
+          compete with active chrome. */}
+      {showPillars && !historyMode && !showPlayback && (
+        <div
+          className="fixed top-5 left-1/2 z-30 -translate-x-1/2 flex items-center gap-1 p-1 rounded-full backdrop-blur-md"
+          style={{
+            background: 'rgba(10,12,18,0.7)',
+            border: '1px solid rgba(148,163,184,0.25)',
+            boxShadow: '0 8px 30px -10px rgba(0,0,0,0.7)',
+          }}
+        >
+          {(['current', 'all'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setLandingMode(m)}
+              className="px-3.5 h-7 rounded-full text-[10.5px] font-semibold uppercase tracking-[0.16em] transition-colors"
+              style={{
+                color: landingMode === m ? '#fff' : 'rgba(203,213,225,0.6)',
+                background: landingMode === m ? 'rgba(239,68,68,0.22)' : 'transparent',
+                border: landingMode === m ? '1px solid rgba(239,68,68,0.55)' : '1px solid transparent',
+              }}
+            >
+              {m === 'current' ? 'Current conflicts' : 'All history'}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Era legend chip. Visible while the user is browsing the globe.
           Hidden during history mode (the playhead and beat cards own the
@@ -839,18 +899,32 @@ export default function App() {
       {!historyMode && !replayBattle && (
         <EraLegend
           selectedEra={filters.era}
-          onSelect={(era) => setFilters((f) => ({ ...f, era }))}
+          onSelect={(era) => {
+            // Same as the search/filters change above: applying an era
+            // pick must clear any selectedBattle dimming, otherwise the
+            // 547-Ancient-battle filter shows as a black globe with no
+            // pillars because dramatic mode is off.
+            setFilters((f) => ({ ...f, era }));
+            setSelectedBattle(null);
+            setIsolatedBattle(null);
+            setPanelDismissed(false);
+            setReplayBattle(null);
+            setReplayPhase(0);
+          }}
         />
       )}
 
-      {/* Era-tinted screen vignette. A full-bleed overlay with a soft radial
-          gradient that pulls the eye toward the center while staining the
-          edges with the era's mood color. CSS transition smooths the cross
-          between eras during history playback. */}
+      {/* Era-tinted screen vignette. A soft radial mood wash at the
+          edges, NOT a black mask that drains the globe. Only applied
+          when a battle is selected or during history playback — on the
+          bare landing it does more harm than good (washes out the
+          satellite texture and battle pillars). */}
       <div
         className="pointer-events-none fixed inset-0 z-10 transition-[background] duration-[1500ms] ease-out"
         style={{
-          background: `radial-gradient(ellipse at center, transparent 55%, ${activeTheme.vignette} 100%)`,
+          background: (selectedBattle || historyMode)
+            ? `radial-gradient(ellipse at center, transparent 65%, ${activeTheme.vignette} 100%)`
+            : 'transparent',
         }}
       />
 

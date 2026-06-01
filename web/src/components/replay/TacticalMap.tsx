@@ -40,6 +40,20 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
     return `translate(${tx} ${ty}) scale(${scale})`;
   }, [phase.focus, viewW]);
 
+  // Suppress placeholder x=50,y=50 items left by the importer when a curated
+  // battle has no authored x/y. These stack every unit on the schematic
+  // center and reduce arrows to zero-length stubs at the middle of the field.
+  const visibleUnits = useMemo(
+    () => phase.units.filter((u) => !(u.x === 50 && u.y === 50)),
+    [phase.units],
+  );
+  const visibleMovements = useMemo(
+    () => (phase.movements ?? []).filter(
+      (m) => !(m.fromX === 50 && m.fromY === 50 && m.toX === 50 && m.toY === 50),
+    ),
+    [phase.movements],
+  );
+
   return (
     <div className="w-full h-full relative" style={{ aspectRatio: `${aspectRatio} / 1` }}>
       <svg
@@ -117,18 +131,18 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
               arrowhead pulses on top of unit bodies so the destination is
               visible, and floats labels above the rest so the text remains
               readable without burying the arrows themselves. */}
-          {phase.units.map((u) => (
+          {visibleUnits.map((u) => (
             <UnitBlock key={`unit-${u.label}`} unit={u} viewW={viewW} paletteCtx={paletteCtx} />
           ))}
 
-          {(phase.movements ?? []).map((m, i, all) => (
+          {visibleMovements.map((m, i, all) => (
             <MovementArrow key={`mv-${i}-${phase.index}`} movement={m} viewW={viewW} index={i} total={all.length} paletteCtx={paletteCtx} />
           ))}
 
           {/* Engagement pulses fire at the destination of every charge / flank
               movement (the point of impact) and at the centre of every
               destroyed unit (the kill). */}
-          {(phase.movements ?? [])
+          {visibleMovements
             .filter((m) => m.kind === 'charge' || m.kind === 'flank')
             .map((m, i, all) => (
               <ImpactPulse
@@ -139,7 +153,7 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
                 delayMs={1200 + i * 250}
               />
             ))}
-          {phase.units
+          {visibleUnits
             .filter((u) => u.status === 'destroyed')
             .map((u, i) => (
               <ImpactPulse
@@ -155,7 +169,7 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
           {/* Unit labels render last so the text sits on top of arrows
               and impact pulses. Strong dark halo via paintOrder/stroke keeps
               them readable wherever they fall. */}
-          {phase.units.map((u) => (
+          {visibleUnits.map((u) => (
             <UnitLabel key={`label-${u.label}`} unit={u} viewW={viewW} paletteCtx={paletteCtx} />
           ))}
 

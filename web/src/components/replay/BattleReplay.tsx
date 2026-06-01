@@ -60,38 +60,11 @@ interface BattleReplayProps {
 export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhaseChange, cinematicMode = false, onEnded, outroPauseMs = 2400, warCountryColors, warFactionAnchors, warSnapshotYear, onAdvanceNext, onAdvancePrev }: BattleReplayProps) {
   const [replay, setReplay] = useState<Replay | null>(() => cachedReplay(battle.id));
   const [phaseIdx, setPhaseIdx] = useState(initialPhase);
-  // sceneReady gates the title-card → live-globe crossfade. The card
-  // stays opaque while:
-  //   1. The Three.js scene initializes (globe ref attaches, first
-  //      pointOfView fires) — signaled by GlobeReplay onSceneReady
-  //   2. A minimum dwell elapses so the title card reads as a
-  //      deliberate film-style intro, not a flash
-  //   3. A polygon-paint buffer (500ms after globe-ready) lets the
-  //      country shading finish its color tween before the reveal
-  // Only when ALL three conditions are satisfied does the card fade
-  // out and the live globe become visible. ONE clean reveal instead
-  // of the user watching the scene reconcile in pieces.
-  const [globeUp, setGlobeUp] = useState(false);
-  const [minDwellPassed, setMinDwellPassed] = useState(false);
-  const sceneReady = globeUp && minDwellPassed && replay !== null;
-  useEffect(() => {
-    setGlobeUp(false);
-    setMinDwellPassed(false);
-  }, [battle.id]);
-  useEffect(() => {
-    // Title card minimum dwell. Slashed to 150 ms — just enough to
-    // mask the first paint and let the headline register as a beat,
-    // not a UI delay. The user has called load "WAY too slow"; the
-    // dwell was the biggest remaining inflation on the critical path.
-    const t = setTimeout(() => setMinDwellPassed(true), 150);
-    return () => clearTimeout(t);
-  }, [battle.id]);
-  const handleGlobeReady = useCallback(() => {
-    // Drop the post-globe buffer to zero. The phaseSettled gate inside
-    // GlobeReplay already holds the SVG overlay until polygons paint,
-    // so an extra buffer here was redundant.
-    setGlobeUp(true);
-  }, []);
+  // The opaque full-screen veil that used to wait on globeUp +
+  // minDwell + polygon-paint conditions was the cold-load problem.
+  // Now the globe renders immediately and a small floating title slate
+  // (see TitleSlate in the JSX below) fades over the live action for
+  // ~1.6s as an orientation cue, then gets out of the way.
   // Auto-play on open. Opening "Watch the battle" implies "play it". Making
   // the user hunt for a play button to see anything happen is a poor default.
   const [playing, setPlaying] = useState(true);
@@ -280,55 +253,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        @keyframes intro-card-fade {
-          0%   { opacity: 0; transform: translateY(8px); }
-          12%  { opacity: 1; transform: translateY(0); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes intro-veil-out {
-          from { opacity: 1; }
-          to   { opacity: 0; }
-        }
       `}</style>
-
-      {/* Title-card veil: opaque background + battle name / date / war
-          while the Three.js scene warms up. Fades out only once
-          sceneReady fires, by which time the camera has snapped, the
-          polygons are coloring, and the first phase content is on
-          stage. Eliminates the "wonky reconciliation" the user sees
-          when the globe assembles itself in pieces. */}
-      <div
-        className="absolute inset-0 z-40 pointer-events-none flex items-center justify-center"
-        style={{
-          // Solid opaque base, then a subtle accent halo painted on top
-          // via backgroundImage. The previous radial-gradient set the
-          // center stop at theme.accent + 13% alpha, which let the SVG
-          // overlay (airdrop captions, anchor dots) bleed through while
-          // the camera was still warming up.
-          background: '#050810',
-          backgroundImage: `radial-gradient(ellipse at center, ${theme.accent}33 0%, transparent 55%)`,
-          opacity: sceneReady ? 0 : 1,
-          transition: 'opacity 160ms ease-out',
-        }}
-      >
-        <div
-          className="text-center max-w-xl px-8"
-          style={{ animation: 'intro-card-fade 720ms ease-out both' }}
-        >
-          <div
-            className="text-[10px] uppercase tracking-[0.42em] mb-4"
-            style={{ color: theme.accent, opacity: 0.85 }}
-          >
-            {battle.war || battle.era || 'Battle'}
-          </div>
-          <div className="font-serif text-3xl md:text-4xl text-white/95 mb-3 leading-tight" style={{ textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}>
-            {battle.name}
-          </div>
-          <div className="text-sm text-white/60 tracking-wide">
-            {battle.date}
-          </div>
-        </div>
-      </div>
       <style>{`
         @keyframes dash-in {
           to { stroke-dashoffset: 0; }
@@ -672,7 +597,6 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                   const snap = findSnapshot(battle.war, battle.year || 0);
                   return snap ? Math.floor(snap.year) : undefined;
                 })()}
-                onSceneReady={handleGlobeReady}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

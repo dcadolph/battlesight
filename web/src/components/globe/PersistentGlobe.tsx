@@ -14,6 +14,7 @@ import { largestPolygonCentroid, polygonCentroid } from '../../lib/globe/centroi
 import { findCountry, arcDistance } from '../../lib/globe/geometry';
 import { hexToRgba, darkenHex } from '../../lib/globe/colors';
 import { buildFactionLabelElement } from '../../lib/globe/faction-label';
+import { enhanceGlobe } from '../../lib/globe/cinematic';
 
 // PersistentGlobe is the single Three.js scene mounted at app root. In
 // this first cut it behaves identically to the old BattleGlobe — same
@@ -947,6 +948,7 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       ref={globeRef as React.MutableRefObject<GlobeMethods | undefined>}
       width={dimensions.width}
       height={dimensions.height}
+      onGlobeReady={() => enhanceGlobe(globeRef.current)}
       globeImageUrl={HI_RES_EARTH}
       bumpImageUrl={TOPOLOGY_BUMP}
       backgroundImageUrl={NIGHT_SKY}

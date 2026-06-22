@@ -5,8 +5,10 @@ import type { Replay } from '../../types/replay';
 import { factionColorFor } from '../../types/replay';
 import TacticalMap from './TacticalMap';
 import GlobeReplay from './GlobeReplay';
+import TacticalSurface from './TacticalSurface';
 import { themeForEra } from '../../theme/era';
 import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
+import { narrate, cancelNarration, pauseNarration, resumeNarration } from '../../audio/narration';
 import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
 import { cleanCasualtyText, cleanProseText, formatBattleDate } from '../../lib/format';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
@@ -78,7 +80,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   // sensible default. The toggle still lets the user pick TacticalMap
   // explicitly for older abstract-schematic battles (Marathon, Cannae)
   // where x/y is real curated data.
-  const [view, setView] = useState<'globe' | 'tactical'>('globe');
+  const [view, setView] = useState<'globe' | 'tactical' | 'surface'>('surface');
   // ended is true after the last phase's dwell completes. It triggers the
   // outro card so the replay lands with intention instead of just freezing
   // on the final tactical state. Cleared whenever the user scrubs back.
@@ -146,7 +148,29 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     onPhaseChange?.(phaseIdx);
     // Soft thump on every phase advance. No-op when sound is disabled.
     playPhaseAdvance();
-  }, [phaseIdx, onPhaseChange]);
+    // Browser TTS narration of the current phase. Cancels any in-flight
+    // utterance first so rapid advances don't queue overlapping voices.
+    // Only fires while playing — paused scrubbing doesn't trigger speech.
+    if (replay && playing) {
+      const text = replay.phases[phaseIdx]?.narration;
+      if (text) narrate(text);
+    }
+  }, [phaseIdx, onPhaseChange, replay, playing]);
+
+  // Pause / resume the narration when the user toggles play. Without
+  // this, a paused replay keeps the voiceover going past the visible
+  // dwell, which reads as the audio leading the action.
+  useEffect(() => {
+    if (playing) resumeNarration();
+    else pauseNarration();
+  }, [playing]);
+
+  // Cancel any in-flight narration on unmount (replay closed, war
+  // cinematic advanced past this battle, etc.). Without this the
+  // SpeechSynthesis queue keeps talking after the visible chrome is gone.
+  useEffect(() => {
+    return () => { cancelNarration(); };
+  }, []);
 
   // Fire onEnded a short pause after the replay's final phase lands. The
   // pause gives the outro card time to read; the callback then lets the
@@ -560,7 +584,38 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             etc. when watching Battle of France, not an abstract grid. */}
         <div className="flex-1 flex items-center justify-center p-2 relative">
           <div className="w-full h-full relative">
-            {view === 'globe' ? (
+            {view === 'surface' ? (
+              <TacticalSurface
+                battle={battle}
+                replay={replay}
+                phase={phase}
+                phaseIdx={phaseIdx}
+                playing={playing}
+                speed={speed}
+                ended={ended}
+                prefersReducedMotion={prefersReducedMotion}
+                warCountryColors={(() => {
+                  if (warCountryColors) return warCountryColors;
+                  if (!battle.war) return undefined;
+                  const snap = findSnapshot(battle.war, battle.year || 0);
+                  if (!snap) return undefined;
+                  return buildCountryColorMap(snap);
+                })()}
+                warFactionAnchors={warFactionAnchors ?? (() => {
+                  if (!battle.war) return undefined;
+                  const snap = findSnapshot(battle.war, battle.year || 0);
+                  if (!snap) return undefined;
+                  return Object.entries(snap.control)
+                    .filter(([, list]) => list.length > 0)
+                    .map(([faction, list]) => ({ faction, anchor: list[0] }));
+                })()}
+                warSnapshotYear={warSnapshotYear ?? (() => {
+                  if (!battle.war) return undefined;
+                  const snap = findSnapshot(battle.war, battle.year || 0);
+                  return snap ? Math.floor(snap.year) : undefined;
+                })()}
+              />
+            ) : view === 'globe' ? (
               <GlobeReplay
                 battle={battle}
                 replay={replay}
@@ -635,6 +690,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             {/* View toggle (pinned bottom-left over the stage). */}
             <div className="absolute bottom-3 left-3 flex bg-black/60 border border-white/10 rounded-full overflow-hidden text-[10px] uppercase tracking-wider">
               <button
+                onClick={() => setView('surface')}
+                className={`px-3 py-1 transition-colors ${
+                  view === 'surface' ? 'bg-emerald-500/40 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >Surface</button>
+              <button
                 onClick={() => setView('globe')}
                 className={`px-3 py-1 transition-colors ${
                   view === 'globe' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
@@ -645,7 +706,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 className={`px-3 py-1 transition-colors ${
                   view === 'tactical' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
                 }`}
-              >Tactical</button>
+              >Schematic</button>
             </div>
           </div>
         </div>

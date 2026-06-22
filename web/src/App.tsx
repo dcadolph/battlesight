@@ -317,7 +317,14 @@ export default function App() {
   const handleBattleClick = useCallback((battle: Battle) => {
     setSelectedBattle(battle);
     setPanelDismissed(false);
-  }, []);
+    // Picking any battle ends the intro overlay. Otherwise the featured-battle
+    // card stays on top of whatever the user just chose and the click reads
+    // as "nothing happened."
+    if (introVisible) {
+      setIntroVisible(false);
+      localStorage.setItem('bt.intro_seen', '1');
+    }
+  }, [introVisible]);
 
   // Closing the dossier returns to the bare globe but keeps the battle's
   // dot painted in place. The user can re-open the dossier by clicking

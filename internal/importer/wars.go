@@ -310,4 +310,3 @@ func writeWarsFile(path string, m map[string]warNarrative) error {
 	b.WriteString("}\n")
 	return os.WriteFile(path, []byte(b.String()), 0o644)
 }
-

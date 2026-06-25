@@ -85,10 +85,7 @@ func EnrichReferences(ctx context.Context, db *sql.DB) (int, error) {
 	batchSize := 15
 
 	for i := 0; i < len(pending); i += batchSize {
-		end := i + batchSize
-		if end > len(pending) {
-			end = len(pending)
-		}
+		end := min(i+batchSize, len(pending))
 		batch := pending[i:end]
 
 		titles := make([]string, len(batch))

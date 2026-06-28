@@ -23,6 +23,8 @@ func main() {
 	infobox := flag.Bool("infobox", false, "fetch Wikipedia infobox data (sides, commanders, casualties)")
 	significance := flag.Bool("significance", false, "fetch Wikipedia aftermath/legacy sections for battles missing significance")
 	references := flag.Bool("references", false, "extract citation URLs from Wikipedia articles into battle_references")
+	geocodeMissing := flag.Bool("geocode-missing", false, "backfill coordinates from the Wikipedia coordinates API for battles at lat=0 lng=0")
+	geocodeDryRun := flag.Bool("geocode-dry-run", false, "run the -geocode-missing flow without writing to the DB; prints the would-be summary")
 	warsEnrich := flag.Bool("wars", false, "enrich data/wars.json from Wikipedia for every war with at least 3 battles in the catalog")
 	warsPath := flag.String("wars-file", "data/wars.json", "path to wars.json output for -wars enrichment")
 	all := flag.Bool("all", false, "run all import and enrichment steps")
@@ -64,8 +66,10 @@ func main() {
 		}
 	}
 
-	if *jsonPath == "" && !*wikidata && !*enrich && !*infobox && !*significance && !*references && !*warsEnrich {
-		log.Fatal("at least one action required: -json, -wikidata, -enrich, -infobox, -significance, -references, -wars, -validate, or -all")
+	if *jsonPath == "" && !*wikidata && !*enrich && !*infobox && !*significance && !*references &&
+		!*warsEnrich && !*geocodeMissing && !*geocodeDryRun {
+		log.Fatal("at least one action required: -json, -wikidata, -enrich, -infobox, -significance, " +
+			"-references, -wars, -geocode-missing, -geocode-dry-run, -validate, or -all")
 	}
 
 	database, err := db.Open(*dbPath)
@@ -137,6 +141,20 @@ func main() {
 		} else {
 			log.Printf("added %d references across battles", count)
 		}
+	}
+
+	if *geocodeMissing || *geocodeDryRun {
+		log.Println("backfilling coordinates from the Wikipedia coordinates API...")
+		sum, err := importer.GeocodeMissing(ctx, database, *geocodeDryRun)
+		if err != nil {
+			log.Fatalf("geocode backfill failed: %v", err)
+		}
+		mode := "live"
+		if *geocodeDryRun {
+			mode = "dry-run"
+		}
+		log.Printf("geocode backfill (%s): attempted=%d resolved=%d skipped-no-title=%d api-miss=%d",
+			mode, sum.Attempted, sum.Resolved, sum.SkippedNoTitle, sum.APIMiss)
 	}
 
 	if *warsEnrich {

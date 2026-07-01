@@ -1,33 +1,28 @@
-// TacticalSurface — phase-replay renderer on top of MapLibre GL (base
-// map: satellite + 3D terrain) and deck.gl via MapboxOverlay (units,
-// movements, territory, labels). Same Replay/Phase schema as the legacy
+// TacticalSurface — phase-replay renderer on top of MapLibre GL (graded
+// satellite imagery + 3D terrain mesh) and deck.gl via MapboxOverlay
+// (units, movements, territory). Same Replay/Phase schema as the legacy
 // GlobeReplay; richer rendering.
 //
-// What this stack delivers that the globe could not:
-//   - Real satellite imagery at any zoom (Esri / Mapbox), with 3D terrain
-//     so cliffs and ridges read as relief.
-//   - GPU-accelerated TripsLayer arrows that draw themselves along the
-//     line of advance, with a low-alpha base arc that persists.
-//   - NATO-style unit icons via a baked sprite atlas so the symbols are
-//     instantly recognisable and stay crisp at every zoom.
-//   - Per-phase controlRegions + war-cinematic country shading so the
-//     viewer always sees who controls what.
-//   - Smooth flyTo with pitch + bearing that respects per-phase camera
-//     choreography.
+// Render loop contract: React renders on phase change only. All
+// per-frame animation (arrow growth, impact pulses, unit glide) runs
+// through a single RAF that mutates refs and pushes deck.gl layers
+// with overlay.setProps directly. HTML labels are repositioned by
+// direct DOM writes on MapLibre move events. Nothing per-frame touches
+// React state.
 //
 // No tokens. No signups. All sources CORS-open.
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import type { StyleSpecification } from 'maplibre-gl';
 import { MapboxOverlay } from '@deck.gl/mapbox';
+import type { LayersList } from '@deck.gl/core';
 import {
   IconLayer,
   PolygonLayer,
   ScatterplotLayer,
   TextLayer,
 } from '@deck.gl/layers';
-import { TripsLayer } from '@deck.gl/geo-layers';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import type { Battle } from '../../types/battle';
@@ -150,24 +145,400 @@ function statusSize(status: string | undefined): number {
   return 1.0;
 }
 
-// Cartographic-atlas MapLibre style. No keys, no signups, CORS-open.
-// The base raster is Esri's World Shaded Relief — pure grayscale relief
-// with no roads, no labels, no satellite noise. We tint it with a paper
-// background and let the action layer (arrows, units, territory) own the
-// colour budget. This is the "documentary atlas" look: think Beevor's
-// "Stalingrad" plates or Ambrose's "Band of Brothers" maps, not Google
-// Maps with arrows. AWS Terrarium DEM keeps the 3D terrain extrusion so
-// cliffs at Pointe du Hoc and the Mt Agrieliki ridge still read as relief.
+// pitchForAltitude maps the phase camera altitude to a cinematic tilt.
+// Tight tactical framings get a strong oblique so the 3D terrain mesh
+// reads as relief; strategic pullbacks flatten toward plan view so the
+// theater map stays legible.
+function pitchForAltitude(altitude: number): number {
+  if (altitude < 0.18) return 50;
+  if (altitude < 0.55) return 34;
+  return 16;
+}
+
+// azimuthDeg returns the compass bearing in degrees from one lng/lat
+// point toward another, in the same flat-earth frame as the arrows.
+function azimuthDeg(from: [number, number], to: [number, number]): number {
+  const midLat = (from[1] + to[1]) / 2;
+  const dx = (to[0] - from[0]) * Math.cos((midLat * Math.PI) / 180);
+  const dy = to[1] - from[1];
+  return (Math.atan2(dx, dy) * 180) / Math.PI;
+}
+
+// bearingForPhase rotates the map a restrained amount toward the focal
+// movement's axis of advance so the push reads up-screen. Partial
+// rotation with a hard clamp: full alignment would spin the map
+// between phases and disorient the viewer.
+function bearingForPhase(
+  trips: Array<{ from: [number, number]; to: [number, number] }>,
+  override: number | undefined,
+): number {
+  if (typeof override === 'number') return override;
+  if (trips.length === 0) return 0;
+  let focal = trips[0];
+  let best = 0;
+  for (const t of trips) {
+    const len = Math.hypot(t.to[0] - t.from[0], t.to[1] - t.from[1]);
+    if (len > best) {
+      best = len;
+      focal = t;
+    }
+  }
+  let az = azimuthDeg(focal.from, focal.to);
+  while (az > 180) az -= 360;
+  while (az < -180) az += 360;
+  return Math.max(-30, Math.min(30, az * 0.35));
+}
+
+// easeInOutCubic is the glide easing for unit movement between phases.
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+// scaleAlpha multiplies the alpha channel of a deck.gl color tuple.
+function scaleAlpha(
+  c: [number, number, number, number],
+  k: number,
+): [number, number, number, number] {
+  return [c[0], c[1], c[2], Math.round(c[3] * Math.max(0, Math.min(1, k)))];
+}
+
+// Rgba is a deck.gl color tuple.
+type Rgba = [number, number, number, number];
+
+// ResolvedUnit is one unit with its geography resolved and its glide
+// bookkeeping attached: where it starts from (previous phase position),
+// whether it is entering the field this phase, or exiting (present last
+// phase, absent now — rendered as a fading ghost during the glide).
+interface ResolvedUnit {
+  index: number;
+  gid: string;
+  position: [number, number];
+  from: [number, number] | null;
+  entering: boolean;
+  exiting: boolean;
+  color: Rgba;
+  glowColor: Rgba;
+  shadowColor: Rgba;
+  iconName: string;
+  size: number;
+  status: string | undefined;
+  label: string;
+  strength: number;
+}
+
+// ResolvedTrip is one movement with geography and animation timing
+// resolved.
+interface ResolvedTrip {
+  index: number;
+  kind: string | undefined;
+  timestamps: [number, number];
+  impactAt: number;
+  color: Rgba;
+  fillAlpha: number;
+  width: number;
+  label: string;
+  midpoint: [number, number];
+  from: [number, number];
+  to: [number, number];
+}
+
+// UnitAtlasLike matches the shape returned by the unit-icons bakers.
+interface UnitAtlasLike {
+  canvas: HTMLCanvasElement | null;
+  mapping: Record<string, { x: number; y: number; width: number; height: number; anchorY?: number; mask?: boolean }>;
+}
+
+// buildUnitLayers renders shadows, halos, icons, and status stamps for
+// the units, with positions lerped along their glide and alpha ramps
+// for entering/exiting units. gt is the eased glide progress 0..1.
+function buildUnitLayers(
+  units: ResolvedUnit[],
+  gt: number,
+  phaseIdx: number,
+  unitAtlas: UnitAtlasLike,
+  statusAtlas: UnitAtlasLike,
+): unknown[] {
+  if (units.length === 0) return [];
+  const ease = easeInOutCubic(Math.max(0, Math.min(1, gt)));
+  const live = units
+    .map((u) => {
+      if (u.exiting && ease >= 1) return null;
+      let position = u.position;
+      if (u.from && ease < 1) {
+        position = [
+          u.from[0] + (u.position[0] - u.from[0]) * ease,
+          u.from[1] + (u.position[1] - u.from[1]) * ease,
+        ];
+      }
+      let alphaMul = 1;
+      if (u.entering) alphaMul = ease;
+      if (u.exiting) alphaMul = 1 - ease;
+      if (alphaMul <= 0) return null;
+      return {
+        ...u,
+        position,
+        color: scaleAlpha(u.color, alphaMul),
+        glowColor: scaleAlpha(u.glowColor, alphaMul),
+        shadowColor: scaleAlpha(u.shadowColor, alphaMul),
+      };
+    })
+    .filter((u): u is NonNullable<typeof u> => u !== null);
+  if (live.length === 0) return [];
+
+  const result: unknown[] = [];
+  result.push(new ScatterplotLayer({
+    id: `unit-shadows-${phaseIdx}`,
+    data: live,
+    getPosition: (d: ResolvedUnit) => d.position,
+    getFillColor: (d: ResolvedUnit) => d.shadowColor,
+    getRadius: (d: ResolvedUnit) => d.size * 3.2,
+    radiusUnits: 'meters',
+    stroked: false,
+    radiusMinPixels: 10,
+    radiusMaxPixels: 32,
+    parameters: { depthTest: false },
+  }));
+  result.push(new ScatterplotLayer({
+    id: `unit-halos-${phaseIdx}`,
+    data: live,
+    getPosition: (d: ResolvedUnit) => d.position,
+    getFillColor: (d: ResolvedUnit) => d.glowColor,
+    getRadius: (d: ResolvedUnit) => d.size * 5,
+    radiusUnits: 'meters',
+    stroked: false,
+    radiusMinPixels: 14,
+    radiusMaxPixels: 42,
+    parameters: { depthTest: false },
+  }));
+  if (unitAtlas.canvas) {
+    result.push(new IconLayer({
+      id: `unit-icons-${phaseIdx}`,
+      data: live,
+      // deck.gl's iconAtlas typing intersects Texture into the canvas
+      // branch; the runtime accepts a plain canvas.
+      iconAtlas: unitAtlas.canvas as unknown as string,
+      iconMapping: unitAtlas.mapping,
+      getIcon: (d: ResolvedUnit) => d.iconName,
+      getPosition: (d: ResolvedUnit) => d.position,
+      getColor: (d: ResolvedUnit) => d.color,
+      getSize: (d: ResolvedUnit) => d.size,
+      sizeUnits: 'pixels',
+      sizeMinPixels: 52,
+      sizeMaxPixels: 170,
+      parameters: { depthTest: false },
+    }));
+  }
+  if (statusAtlas.canvas) {
+    const stamped = live.filter((u) => hasStatusOverlay(u.status as never));
+    if (stamped.length > 0) {
+      result.push(new IconLayer({
+        id: `unit-status-${phaseIdx}`,
+        data: stamped,
+        iconAtlas: statusAtlas.canvas as unknown as string,
+        iconMapping: statusAtlas.mapping,
+        getIcon: (d: ResolvedUnit) => d.status as string,
+        getPosition: (d: ResolvedUnit) => d.position,
+        getColor: (d: ResolvedUnit) => scaleAlpha([255, 255, 255, 240], d.color[3] / 255),
+        getSize: (d: ResolvedUnit) => d.size * 1.06,
+        sizeUnits: 'pixels',
+        sizeMinPixels: 52,
+        sizeMaxPixels: 170,
+        parameters: { depthTest: false },
+      }));
+    }
+  }
+  return result;
+}
+
+// buildMotionLayers renders the per-frame movement graphics: the atlas
+// arrow polygons growing along their lines of advance, terminus
+// anchors, the impact disc, and the shockwave ring. t is the phase
+// clock in ms.
+function buildMotionLayers(trips: ResolvedTrip[], t: number, phaseIdx: number): unknown[] {
+  if (trips.length === 0) return [];
+  const result: unknown[] = [];
+
+  const arrowsLive = trips
+    .map((trip) => {
+      if (t < trip.timestamps[0]) return null;
+      const dur = Math.max(1, trip.timestamps[1] - trip.timestamps[0]);
+      const progress = Math.max(0, Math.min(1, (t - trip.timestamps[0]) / dur));
+      const tip: [number, number] = t >= trip.timestamps[1]
+        ? trip.to
+        : [
+            trip.from[0] + (trip.to[0] - trip.from[0]) * progress,
+            trip.from[1] + (trip.to[1] - trip.from[1]) * progress,
+          ];
+      return {
+        ...trip,
+        arrowPolygon: buildAtlasArrow(trip.from, tip, trip.kind as never, 1),
+      };
+    })
+    .filter((trip): trip is NonNullable<typeof trip> => trip !== null);
+
+  if (arrowsLive.length > 0) {
+    // Beevor/Ambrose treatment: heavy warm-black outline grounds the
+    // silhouette; saturated faction fill reads as a single deliberate
+    // brushstroke. The draw-on growth is the motion cue; no comet.
+    result.push(new PolygonLayer({
+      id: `atlas-arrows-outline-${phaseIdx}`,
+      data: arrowsLive,
+      getPolygon: (d: { arrowPolygon: [number, number][] }) => d.arrowPolygon,
+      getFillColor: [12, 10, 8, 0],
+      getLineColor: [12, 10, 8, 250],
+      getLineWidth: 6,
+      lineWidthUnits: 'pixels',
+      stroked: true,
+      filled: false,
+      pickable: false,
+      parameters: { depthTest: false },
+    }));
+    result.push(new PolygonLayer({
+      id: `atlas-arrows-fill-${phaseIdx}`,
+      data: arrowsLive,
+      getPolygon: (d: { arrowPolygon: [number, number][] }) => d.arrowPolygon,
+      getFillColor: (d: ResolvedTrip) => [d.color[0], d.color[1], d.color[2], d.fillAlpha] as Rgba,
+      getLineColor: [0, 0, 0, 0],
+      stroked: false,
+      filled: true,
+      pickable: false,
+      parameters: { depthTest: false },
+    }));
+  }
+
+  // Permanent terminus marker at every arrow tip whose trip has
+  // completed. The impact disc flashes and dies; without this anchor
+  // the arrowhead reads as orphaned for the rest of the phase.
+  const terminusData = trips
+    .filter((trip) => t >= trip.impactAt)
+    .map((trip) => ({
+      position: trip.to,
+      inner: [
+        Math.min(255, trip.color[0] + 60),
+        Math.min(255, trip.color[1] + 60),
+        Math.min(255, trip.color[2] + 60),
+        255,
+      ] as Rgba,
+      ring: [trip.color[0], trip.color[1], trip.color[2], 230] as Rgba,
+    }));
+  if (terminusData.length > 0) {
+    result.push(new ScatterplotLayer({
+      id: `terminus-ring-${phaseIdx}`,
+      data: terminusData,
+      getPosition: (d: { position: [number, number] }) => d.position,
+      getFillColor: [0, 0, 0, 0],
+      getLineColor: (d: { ring: Rgba }) => d.ring,
+      getRadius: 8,
+      getLineWidth: 3,
+      lineWidthUnits: 'pixels',
+      radiusUnits: 'pixels',
+      stroked: true,
+      filled: false,
+      parameters: { depthTest: false },
+    }));
+    result.push(new ScatterplotLayer({
+      id: `terminus-dot-${phaseIdx}`,
+      data: terminusData,
+      getPosition: (d: { position: [number, number] }) => d.position,
+      getFillColor: (d: { inner: Rgba }) => d.inner,
+      getRadius: 4,
+      radiusUnits: 'pixels',
+      stroked: false,
+      parameters: { depthTest: false },
+    }));
+  }
+
+  // Impact disc: bright filled flash that grows and fades on arrival.
+  const impacts = trips
+    .map((trip) => {
+      const since = t - trip.impactAt;
+      const inWindow = since >= 0 && since < 1500;
+      const k = inWindow ? since / 1500 : 1;
+      const easeOut = 1 - Math.pow(1 - k, 3);
+      return {
+        position: trip.to,
+        color: [
+          trip.color[0],
+          trip.color[1],
+          trip.color[2],
+          inWindow ? Math.round(245 * (1 - easeOut)) : 0,
+        ] as Rgba,
+        radius: inWindow ? 500 + 8000 * easeOut : 0,
+      };
+    })
+    .filter((d) => d.radius > 0);
+  if (impacts.length > 0) {
+    result.push(new ScatterplotLayer({
+      id: `impacts-${phaseIdx}`,
+      data: impacts,
+      getPosition: (d: { position: [number, number] }) => d.position,
+      getFillColor: (d: { color: Rgba }) => d.color,
+      getRadius: (d: { radius: number }) => d.radius,
+      radiusUnits: 'meters',
+      stroked: false,
+      radiusMinPixels: 0,
+      radiusMaxPixels: 100,
+      parameters: { depthTest: false },
+    }));
+  }
+
+  // Shockwave ring: races outward faster than the disc, then fades.
+  const shockwaves = trips.flatMap((trip) => {
+    const since = t - trip.impactAt;
+    if (since < 0 || since >= 1800) return [];
+    const k = since / 1800;
+    const easeOut = 1 - Math.pow(1 - k, 4);
+    return [{
+      position: trip.to,
+      color: [trip.color[0], trip.color[1], trip.color[2], Math.round(255 * (1 - k))] as Rgba,
+      radius: 200 + 14000 * easeOut,
+    }];
+  });
+  if (shockwaves.length > 0) {
+    result.push(new ScatterplotLayer({
+      id: `shockwave-${phaseIdx}`,
+      data: shockwaves,
+      getPosition: (d: { position: [number, number] }) => d.position,
+      getFillColor: [0, 0, 0, 0],
+      getLineColor: (d: { color: Rgba }) => d.color,
+      getRadius: (d: { radius: number }) => d.radius,
+      getLineWidth: 3,
+      lineWidthUnits: 'pixels',
+      radiusUnits: 'meters',
+      stroked: true,
+      filled: false,
+      radiusMinPixels: 0,
+      radiusMaxPixels: 140,
+      parameters: { depthTest: false },
+    }));
+  }
+
+  return result;
+}
+
+// Cinematic MapLibre style. No keys, no signups, CORS-open.
+// Base register: graded satellite imagery over a fast dark underlay,
+// hillshade for shadow depth, and a real 3D terrain mesh (setTerrain in
+// the map init below) so pitched cameras read actual relief. The grade
+// desaturates and darkens the imagery so the action layer (arrows,
+// units, territory) still owns the color budget. This is the
+// "documentary atlas" look: Beevor's "Stalingrad" plates shot on real
+// ground, not Google Maps with arrows.
 const OPEN_STYLE: StyleSpecification = {
   version: 8,
+  // Sky and horizon fog so pitched framings get atmospheric depth
+  // instead of a hard void above the terrain silhouette.
+  sky: {
+    'sky-color': '#0a0f1c',
+    'horizon-color': '#241d14',
+    'fog-color': '#0d0a08',
+    'sky-horizon-blend': 0.6,
+    'horizon-fog-blend': 0.55,
+    'fog-ground-blend': 0.6,
+  },
   sources: {
-    // Carto dark_nolabels. Same documentary register as Esri Dark
-    // Gray but on a HTTP/2 multi-host CDN — cold start is ~5× faster
-    // because requests parallelise across {a,b,c,d} subdomains and
-    // tiles are gzipped PNG8s. Esri's ArcGIS server serves serially
-    // and was the root cause of the "load is insanely slow" feel.
-    // Visual register: clean dark base, restrained relief, no baked
-    // labels. Action layer pops because the basemap stays quiet.
+    // Carto dark_nolabels. HTTP/2 multi-host CDN, so first paint is
+    // fast while the heavier satellite tiles stream in above it.
     'dark-canvas': {
       type: 'raster',
       tiles: [
@@ -181,8 +552,20 @@ const OPEN_STYLE: StyleSpecification = {
       maxzoom: 19,
       attribution: '(c) OpenStreetMap (c) CARTO',
     },
-    // Hillshade DEM for terrain relief at tactical zooms. RGB-
-    // encoded elevation, free, CORS-open.
+    // Esri World Imagery. Real ground at every zoom; graded dark in
+    // the layer paint below.
+    satellite: {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      minzoom: 0,
+      maxzoom: 19,
+      attribution: 'Imagery (c) Esri, Maxar, Earthstar Geographics',
+    },
+    // Terrarium DEM for the hillshade shadow pass.
     'terrain-dem': {
       type: 'raster-dem',
       tiles: [
@@ -193,17 +576,27 @@ const OPEN_STYLE: StyleSpecification = {
       maxzoom: 15,
       attribution: 'Terrain (c) Mapzen / AWS Open Data',
     },
+    // Second Terrarium source dedicated to the 3D terrain mesh.
+    // MapLibre wants hillshade and setTerrain on separate sources;
+    // the browser HTTP cache dedupes the actual tile fetches.
+    'terrain-dem-3d': {
+      type: 'raster-dem',
+      tiles: [
+        'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
+      ],
+      tileSize: 256,
+      encoding: 'terrarium',
+      maxzoom: 15,
+    },
   },
   layers: [
-    // Warm matte. Slate-blue was the source of the "everything looks
-    // blue" complaint — sat under every translucent layer and bled
-    // through. Warm dark coffee reads as film matte, neutral under the
-    // faction palette.
+    // Warm matte under everything. Reads as film base, not blue slate.
     {
       id: 'matte',
       type: 'background',
       paint: { 'background-color': '#0d0a08' },
     },
+    // Fast dark underlay. Visible only while satellite tiles stream.
     {
       id: 'dark-canvas',
       type: 'raster',
@@ -211,20 +604,31 @@ const OPEN_STYLE: StyleSpecification = {
       minzoom: 0,
       maxzoom: 19,
       paint: {
-        // Carto dark_nolabels has a cool gray-blue undertone. Drag
-        // saturation down so it reads as neutral grayscale relief
-        // rather than a blue tinted basemap. Brightness slightly
-        // lifted so the faction shading reads against it without
-        // washing out cliffs/coastlines.
         'raster-saturation': -0.7,
         'raster-brightness-max': 0.78,
         'raster-contrast': 0.08,
       },
     },
-    // Hillshade overlay. Warm accent + warm highlight strips the
-    // blue-slate cast off Terrarium DEM's RGB-encoded relief.
-    // Exaggeration moderate so ridges read without overpowering
-    // the action layer.
+    // Graded satellite. Saturation and brightness pulled down so the
+    // imagery reads as documentary film ground, and the faction
+    // palette stays the loudest thing in frame.
+    {
+      id: 'satellite',
+      type: 'raster',
+      source: 'satellite',
+      minzoom: 0,
+      maxzoom: 19,
+      paint: {
+        'raster-saturation': -0.42,
+        'raster-brightness-min': 0.02,
+        'raster-brightness-max': 0.8,
+        'raster-contrast': 0.14,
+        'raster-fade-duration': 300,
+      },
+    },
+    // Hillshade over the imagery. With the 3D mesh doing the actual
+    // relief, this pass just deepens shadowed slopes so ridgelines
+    // keep definition when the camera is near plan view.
     {
       id: 'hillshade',
       type: 'hillshade',
@@ -233,7 +637,7 @@ const OPEN_STYLE: StyleSpecification = {
         'hillshade-shadow-color': '#0a0806',
         'hillshade-highlight-color': '#e7e0d2',
         'hillshade-accent-color': '#1a1612',
-        'hillshade-exaggeration': 0.48,
+        'hillshade-exaggeration': 0.32,
         'hillshade-illumination-direction': 335,
       },
     },
@@ -257,14 +661,6 @@ export default function TacticalSurface({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const overlayRef = useRef<MapboxOverlay | null>(null);
-  // mapInstance mirrors mapRef.current into React state so the HTML
-  // overlay labels can re-project on every render without violating
-  // the react-hooks/refs rule against reading refs during render.
-  const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null);
-  // currentTime drives TripsLayer animation. Increments via RAF when
-  // playing, halts on pause / ended / reduced-motion, scales with speed.
-  // Resets on phase change so trips re-fire from the start.
-  const [currentTime, setCurrentTime] = useState(0);
   // mapReady becomes true after the first style.load so the per-phase
   // overlay effect can wait on it. Without this the initial frame paints
   // with no layers attached because MapboxOverlay's addControl resolves
@@ -279,15 +675,47 @@ export default function TacticalSurface({
   // countries is the Natural Earth feature array used for war-cinematic
   // country shading. Loaded once via the shared promise cache.
   const [countries, setCountries] = useState<Feature<Geometry>[]>([]);
-  // currentZoom tracks the live MapLibre zoom so the territory layers
-  // can scale their alpha (memory: bright political fill floods the
-  // frame tight; dim it as we zoom in).
-  const [currentZoom, setCurrentZoom] = useState<number>(7);
-  // mapMoveTick increments on every MapLibre move/zoom event so the
-  // HTML overlay labels can re-project their lng/lat to screen pixels
-  // and follow the camera in real time. Empty for the brief moment
-  // before the map mounts; then bumps ~60Hz during flyTo.
-  const [mapMoveTick, setMapMoveTick] = useState(0);
+  // zoomBucket is the live MapLibre zoom quantized to the nearest
+  // integer, updated only on zoomend. Territory alpha tiers and label
+  // dedup cells read this instead of a continuous zoom value so a
+  // camera flight does not rebuild the heavy layers 60 times a second
+  // mid-flight (the alpha tiers still land correctly once the move
+  // settles).
+  const [zoomBucket, setZoomBucket] = useState<number>(7);
+  // timeRef is the per-phase animation clock in ms. Starts negative by
+  // the camera tween so the action begins after the camera arrives.
+  // Mutated by the RAF loop; never React state.
+  const timeRef = useRef(0);
+  // staticLayersRef / animatedLayersRef hold the two halves of the
+  // deck.gl layer stack. pushFrame() concatenates them into a single
+  // setProps call, from React effects (static) and the RAF (animated).
+  const staticLayersRef = useRef<unknown[]>([]);
+  const animatedLayersRef = useRef<unknown[]>([]);
+  // prevUnitsRef remembers the previous phase's resolved unit points by
+  // stable id so the next phase can glide units from their old
+  // positions instead of teleporting them. glidePrepRef caches the
+  // glide-annotated unit list for the current phase so re-running the
+  // RAF effect (pause/resume, speed change) doesn't rotate the
+  // previous-phase buffer twice. Both live in refs and are touched
+  // only inside effects.
+  const prevUnitsRef = useRef<{ battleId: string; units: Map<string, ResolvedUnit> }>({
+    battleId: '',
+    units: new Map(),
+  });
+  const glidePrepRef = useRef<{ battleId: string; phaseIdx: number; units: ResolvedUnit[] }>({
+    battleId: '',
+    phaseIdx: -1,
+    units: [],
+  });
+  // labelWrapRef is the HTML label overlay container. Label pills are
+  // positioned by direct DOM writes on map move events.
+  const labelWrapRef = useRef<HTMLDivElement | null>(null);
+  // userCameraLockRef flips when the viewer grabs the map; the dwell
+  // drift stands down until the next phase reclaims the camera.
+  const userCameraLockRef = useRef(false);
+  // labelPositionRef holds the current label projection routine so the
+  // map move listener (attached once at init) always calls the latest.
+  const labelPositionRef = useRef<() => void>(() => {});
 
   const extentLatDeg = replay.extentLatDeg ?? 3;
   const extentLngDeg = (replay.extentLngDeg ?? 3) * (replay.aspectRatio ?? 1.6);
@@ -296,12 +724,10 @@ export default function TacticalSurface({
   const cameraLng = phase.cameraLng ?? battle.lng ?? -0.51;
   const altitude = phase.cameraAltitude ?? 0.4;
   const cameraZoom = altitudeToZoom(altitude);
-  // Documentary maps live mostly top-down. 3D tilt was adding visual
-  // chaos at tactical zoom (labels tilted, symbols sheared, terrain
-  // bumpy enough to obscure focal arrows). A small pitch only for
-  // wider strategic phases where relief reads, otherwise flat.
-  const cameraPitch = altitude > 0.5 ? 18 : 0;
-  const cameraBearing = 0;
+  // With a real terrain mesh under the imagery, tilt is the money
+  // shot: tactical framings take a strong oblique, strategic pullbacks
+  // stay near plan view. Curated phases can override both angles.
+  const cameraPitch = phase.cameraPitch ?? pitchForAltitude(altitude);
 
   // Initialise the map once. Subsequent phase changes drive camera.flyTo
   // and overlay setProps via refs.
@@ -313,28 +739,41 @@ export default function TacticalSurface({
       center: [cameraLng, cameraLat],
       zoom: cameraZoom,
       pitch: cameraPitch,
-      bearing: cameraBearing,
+      bearing: 0,
       attributionControl: false,
-      maxPitch: 45,
+      maxPitch: 62,
     });
     mapRef.current = map;
-    setMapInstance(map);
 
     const overlay = new MapboxOverlay({ interleaved: false, layers: [] });
     overlayRef.current = overlay;
     map.addControl(overlay as unknown as maplibregl.IControl);
 
     map.on('style.load', () => {
+      // Real 3D relief. The mesh is what makes pitched framings read
+      // as ground instead of a sheared flat image.
+      map.setTerrain({ source: 'terrain-dem-3d', exaggeration: 1.2 });
       setMapReady(true);
-      setCurrentZoom(map.getZoom());
+      setZoomBucket(Math.round(map.getZoom()));
     });
-    map.on('zoom', () => setCurrentZoom(map.getZoom()));
-    // HTML label overlay needs to re-project on every camera change.
-    // 'move' fires during pan AND flyTo each frame; 'zoom' covers
-    // pinch / scroll zoom. Combined coverage so labels track the map.
-    const bumpTick = () => setMapMoveTick((t) => (t + 1) % 1_000_000);
-    map.on('move', bumpTick);
-    map.on('zoom', bumpTick);
+    // Quantized zoom for the alpha-tier memos. Updates only when the
+    // move settles AND the integer bucket actually changed, so camera
+    // flights never thrash the heavy territory layers mid-flight.
+    map.on('zoomend', () => {
+      const bucket = Math.round(map.getZoom());
+      setZoomBucket((prev) => (prev === bucket ? prev : bucket));
+    });
+    // HTML labels track the camera by direct DOM writes; no React.
+    map.on('move', () => labelPositionRef.current());
+    // Viewer grabbing the map cancels the dwell drift until the next
+    // phase reclaims the camera.
+    const onUserCamera = () => {
+      userCameraLockRef.current = true;
+      map.stop();
+    };
+    map.on('mousedown', onUserCamera);
+    map.on('wheel', onUserCamera);
+    map.on('touchstart', onUserCamera);
     map.on('error', (e) => {
       console.warn('[TacticalSurface] map error', e.error?.message || e);
     });
@@ -358,7 +797,6 @@ export default function TacticalSurface({
       overlayRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
-      setMapInstance(null);
     };
     // Map is intentionally created once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -380,127 +818,13 @@ export default function TacticalSurface({
     return () => { cancelled = true; };
   }, [mapIdle]);
 
-  // Phase animation clock. RAF only ticks while playing AND not ended AND
-  // not reduced-motion AND the map slate has faded. Gated on mapIdle
-  // so cold-start tile fetches aren't stealing frames.
-  //
-  // Starts at a NEGATIVE offset equal to the camera tween so arrow
-  // growth and impact flashes don't fire while the map is still
-  // flying to position. The eye reads "camera arrives, then advance
-  // begins" instead of "everything happens at once mid-pan", which
-  // was the "clunky scene transition" complaint.
-  useEffect(() => {
-    if (prefersReducedMotion || ended) {
-      // Jump to a generous post-animation frame so all trips are fully drawn.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCurrentTime(1e7);
-      return;
-    }
-    const camTween = phase.cameraTweenMs ?? 1800;
-    setCurrentTime(-camTween);
-    if (!playing || !mapIdle) return;
-    let raf = 0;
-    let last = performance.now();
-    const tick = (now: number) => {
-      const dt = (now - last) * Math.max(0.1, speed);
-      last = now;
-      setCurrentTime((t) => t + dt);
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [phaseIdx, playing, speed, prefersReducedMotion, ended, mapIdle, phase.cameraTweenMs]);
-
-  // Camera choreography on phase change. Snap (or reduced-motion) is an
-  // instant jumpTo. Otherwise fly. When the curator has set explicit
-  // camera coords (phase.cameraLat / cameraLng), use those — the
-  // hand-authored framing usually has more intent than a fit. When the
-  // curator hasn't set them, auto-fit to the action bbox: every unit
-  // position + every movement endpoint, with edge padding. The
-  // tactical surface no longer sits in the middle of a huge dark void
-  // because the camera framed too wide.
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const hasCurator = typeof phase.cameraLat === 'number' && typeof phase.cameraLng === 'number';
-    const points: Array<[number, number]> = [];
-    if (!hasCurator) {
-      for (const u of phase.units ?? []) {
-        const p = resolvePoint(u.x, u.y, u.lat, u.lng, battle.lat, battle.lng, extentLatDeg, extentLngDeg);
-        if (p) points.push(p);
-      }
-      for (const m of phase.movements ?? []) {
-        const from = resolvePoint(m.fromX, m.fromY, m.fromLat, m.fromLng, battle.lat, battle.lng, extentLatDeg, extentLngDeg);
-        const to = resolvePoint(m.toX, m.toY, m.toLat, m.toLng, battle.lat, battle.lng, extentLatDeg, extentLngDeg);
-        if (from) points.push(from);
-        if (to) points.push(to);
-      }
-    }
-    if (!hasCurator && points.length >= 2) {
-      let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
-      for (const [lng, lat] of points) {
-        if (lng < minLng) minLng = lng;
-        if (lng > maxLng) maxLng = lng;
-        if (lat < minLat) minLat = lat;
-        if (lat > maxLat) maxLat = lat;
-      }
-      // Pad by 30% of the bbox span (or a minimum) so the action sits
-      // off the labels in the corners and the unit icons don't bleed
-      // into the frame edge.
-      const dLng = Math.max((maxLng - minLng) * 0.3, 0.01);
-      const dLat = Math.max((maxLat - minLat) * 0.3, 0.01);
-      const bounds: [[number, number], [number, number]] = [
-        [minLng - dLng, minLat - dLat],
-        [maxLng + dLng, maxLat + dLat],
-      ];
-      const padding = { top: 140, bottom: 80, left: 80, right: 80 };
-      if (prefersReducedMotion || phase.cameraMotion === 'snap') {
-        map.fitBounds(bounds, { padding, animate: false, pitch: 0, bearing: 0 });
-      } else {
-        map.fitBounds(bounds, {
-          padding,
-          duration: phase.cameraTweenMs ?? 1800,
-          essential: true,
-          pitch: 0,
-          bearing: 0,
-          // Cinematic ease-out: fast accelerate, gentle arrival. The
-          // previous default easeInOutCubic landed too abruptly and
-          // read as a mechanical jump-cut on phase change.
-          easing: (t: number) => 1 - Math.pow(1 - t, 3),
-        });
-      }
-      return;
-    }
-    const target = {
-      center: [cameraLng, cameraLat] as [number, number],
-      zoom: cameraZoom,
-      pitch: cameraPitch,
-      bearing: cameraBearing,
-    };
-    if (prefersReducedMotion || phase.cameraMotion === 'snap') {
-      map.jumpTo(target);
-      return;
-    }
-    map.flyTo({
-      ...target,
-      duration: phase.cameraTweenMs ?? 2000,
-      essential: true,
-      // Slower curve + lower max speed for documentary feel: camera
-      // takes a moment to leave, glides, then settles. Default 1.42
-      // curve felt like a snap-zoom, which read as "clunky".
-      curve: 1.6,
-      speed: 0.9,
-      easing: (t: number) => 1 - Math.pow(1 - t, 3),
-    });
-  }, [cameraLat, cameraLng, cameraZoom, cameraPitch, cameraBearing, phaseIdx, phase, battle.lat, battle.lng, extentLatDeg, extentLngDeg, prefersReducedMotion]);
-
   // Build the per-phase derived data. Resolves geographic coordinates
   // once so every layer below reads from the same source.
   const phaseData = useMemo(() => {
     const movements: Movement[] = phase.movements ?? [];
     const units: Unit[] = phase.units ?? [];
 
-    const trips = movements
+    const trips: ResolvedTrip[] = movements
       .map((m, i) => {
         const from = resolvePoint(m.fromX, m.fromY, m.fromLat, m.fromLng, battle.lat, battle.lng, extentLatDeg, extentLngDeg);
         const to = resolvePoint(m.toX, m.toY, m.toLat, m.toLng, battle.lat, battle.lng, extentLatDeg, extentLngDeg);
@@ -510,7 +834,6 @@ export default function TacticalSurface({
         return {
           index: i,
           kind: m.kind,
-          path: [from, to] as Array<[number, number]>,
           timestamps: [timing.begin, timing.begin + timing.duration] as [number, number],
           impactAt: timing.begin + timing.duration,
           color: hexToRgb(color, 255),
@@ -524,7 +847,8 @@ export default function TacticalSurface({
       })
       .filter((t): t is NonNullable<typeof t> => t !== null);
 
-    const unitPoints = units
+    const occurrence = new Map<string, number>();
+    const unitPoints: ResolvedUnit[] = units
       .map((u, i) => {
         const p = resolvePoint(u.x, u.y, u.lat, u.lng, battle.lat, battle.lng, extentLatDeg, extentLngDeg);
         if (!p) return null;
@@ -533,12 +857,23 @@ export default function TacticalSurface({
         // icon renders at ~115px, a full division at ~135px. Pixel-space
         // caps below keep clusters from overpowering the frame.
         const baseSize = 100 + (u.strength ?? 3) * 12;
+        // Stable identity across phases: curated id when present, else
+        // label + faction with an occurrence counter so twin unnamed
+        // formations stay distinct.
+        const base = u.id ?? `${u.label || u.unitType || 'unit'}|${u.faction}`;
+        const n = occurrence.get(base) ?? 0;
+        occurrence.set(base, n + 1);
+        const gid = `${base}|${n}`;
         return {
           index: i,
+          gid,
           position: p,
+          from: null,
+          entering: false,
+          exiting: false,
           color: hexToRgb(color, statusOpacity(u.status)),
           glowColor: hexToRgb(color, 95),
-          shadowColor: [10, 8, 6, 200] as [number, number, number, number],
+          shadowColor: [10, 8, 6, 200] as Rgba,
           iconName: iconNameFor(u.unitType),
           size: baseSize * statusSize(u.status),
           status: u.status,
@@ -563,8 +898,8 @@ export default function TacticalSurface({
     }> = [];
     // Soften: too much fill turns push-in zooms into flat color blocks
     // and creates the hard banding the user flagged in Pointe du Hoc.
-    const fillAlpha = currentZoom > 9 ? 30 : currentZoom > 6 ? 50 : 70;
-    const lineAlpha = currentZoom > 9 ? 90 : 120;
+    const fillAlpha = zoomBucket > 9 ? 30 : zoomBucket > 6 ? 50 : 70;
+    const lineAlpha = zoomBucket > 9 ? 90 : 120;
     (phase.controlRegions ?? []).forEach((r: ControlRegion) => {
       if (!r.ring || r.ring.length < 3) return;
       const color = factionColorFor(r.controller, replay) ?? '#94a3b8';
@@ -577,7 +912,7 @@ export default function TacticalSurface({
       });
     });
     return out;
-  }, [phase.controlRegions, replay, currentZoom]);
+  }, [phase.controlRegions, replay, zoomBucket]);
 
   // War-cinematic country shading. Maps each color-keyed country to its
   // GeoJSON feature; honors COUNTRY_NAME_ALIASES so historical spellings
@@ -595,8 +930,8 @@ export default function TacticalSurface({
     // Country shading: brilliant when pulled back, near-invisible when
     // pushed in tight. Otherwise an Atlantic Wall flat-color band blots
     // out the action layer the way the legacy globe did at low altitude.
-    const fillAlpha = currentZoom > 10 ? 12 : currentZoom > 8 ? 28 : currentZoom > 6 ? 55 : 95;
-    const lineAlpha = currentZoom > 10 ? 35 : currentZoom > 8 ? 70 : 120;
+    const fillAlpha = zoomBucket > 10 ? 12 : zoomBucket > 8 ? 28 : zoomBucket > 6 ? 55 : 95;
+    const lineAlpha = zoomBucket > 10 ? 35 : zoomBucket > 8 ? 70 : 120;
     const out: Array<{
       polygon: Array<Array<[number, number]>>;
       fillColor: [number, number, number, number];
@@ -627,7 +962,7 @@ export default function TacticalSurface({
       }
     }
     return out;
-  }, [warCountryColors, countries, currentZoom]);
+  }, [warCountryColors, countries, zoomBucket]);
 
   // Faction banners. Period-accurate flag + editorial caption per
   // controlling power (Nazi Germany, Soviet Union, Free France, etc.).
@@ -673,14 +1008,12 @@ export default function TacticalSurface({
   const unitAtlas = useMemo(() => getUnitIconAtlas(), []);
   const statusAtlas = useMemo(() => getStatusOverlayAtlas(), []);
 
-  // staticLayers holds everything that does NOT depend on the per-frame
-  // currentTime clock: territory shading, faction banners, control
-  // regions, units, status, all text labels. Rebuilds only when the
-  // phase changes or the camera zoom crosses a tier (alpha thresholds).
-  // This was the perf bottleneck the user flagged as "load times" — the
-  // full 10+ layer stack was being reinstantiated 60 times a second.
+  // staticLayers holds everything that does not animate within a
+  // phase: territory shading, faction banners, control regions, region
+  // labels. Rebuilds only when the phase changes or the zoom bucket
+  // flips. Units and movements live in the RAF frame builder because
+  // they glide and grow per frame.
   const staticLayers = useMemo(() => {
-    const { unitPoints } = phaseData;
     const result: unknown[] = [];
 
     // 1. War-cinematic country shading. Big political layer underneath.
@@ -773,89 +1106,7 @@ export default function TacticalSurface({
       }));
     }
 
-    // 3. Tight unit shadow + thin glow + icon. The previous shadow + halo
-    //    radii were ballooning at higher zooms — multiple units at one
-    //    position fused into the magenta blob the user flagged on Cannae.
-    //    Slammed both down so the icon itself is the visual element and
-    //    the halo is just a subtle aura, not a colored bubble.
-    if (unitPoints.length > 0) {
-      result.push(new ScatterplotLayer({
-        id: `unit-shadows-${phaseIdx}`,
-        data: unitPoints,
-        getPosition: (d) => d.position,
-        getFillColor: (d) => d.shadowColor,
-        getRadius: (d) => d.size * 3.2,
-        radiusUnits: 'meters',
-        stroked: false,
-        radiusMinPixels: 10,
-        radiusMaxPixels: 32,
-        parameters: { depthTest: false },
-      }));
-      result.push(new ScatterplotLayer({
-        id: `unit-halos-${phaseIdx}`,
-        data: unitPoints,
-        getPosition: (d) => d.position,
-        getFillColor: (d) => d.glowColor,
-        getRadius: (d) => d.size * 5,
-        radiusUnits: 'meters',
-        stroked: false,
-        radiusMinPixels: 14,
-        radiusMaxPixels: 42,
-        parameters: { depthTest: false },
-      }));
-
-      // 8. Unit icons. NATO-style symbol atlas, tinted by faction color
-      //    via mask: true in the mapping. Pixel-space size caps keep
-      //    units legible across zooms.
-      if (unitAtlas.canvas) {
-        result.push(new IconLayer({
-          id: `unit-icons-${phaseIdx}`,
-          data: unitPoints,
-          iconAtlas: unitAtlas.canvas,
-          iconMapping: unitAtlas.mapping,
-          getIcon: (d) => d.iconName,
-          getPosition: (d) => d.position,
-          getColor: (d) => d.color,
-          getSize: (d) => d.size,
-          sizeUnits: 'pixels',
-          sizeMinPixels: 52,
-          sizeMaxPixels: 170,
-          parameters: { depthTest: false },
-        }));
-      }
-
-      // 9. Status overlays. Stamped on top of the unit icon: slash for
-      //    destroyed, dashed ring for encircled, etc. Skip units whose
-      //    status has no overlay glyph.
-      if (statusAtlas.canvas) {
-        const stamped = unitPoints.filter((u) => hasStatusOverlay(u.status as never));
-        if (stamped.length > 0) {
-          result.push(new IconLayer({
-            id: `unit-status-${phaseIdx}`,
-            data: stamped,
-            iconAtlas: statusAtlas.canvas,
-            iconMapping: statusAtlas.mapping,
-            getIcon: (d) => d.status as string,
-            getPosition: (d) => d.position,
-            getColor: () => [255, 255, 255, 240],
-            getSize: (d) => d.size * 1.06,
-            sizeUnits: 'pixels',
-            sizeMinPixels: 52,
-            sizeMaxPixels: 170,
-            parameters: { depthTest: false },
-          }));
-        }
-      }
-
-      // 10. Unit + movement labels are now rendered as HTML overlays
-      //     (see <HTMLLabels> in JSX below) instead of SDF text. The
-      //     SDF baker was the source of the "blurry names" complaint —
-      //     browser-rendered text with proper antialiasing wins on
-      //     sharpness at any pixel scale. The dedup grid still curates
-      //     which labels show; just the rendering is HTML now.
-    }
-
-    // 12. Control-region labels (e.g. "3rd Reich", "Soviet sector"). One
+    // 3. Control-region labels (e.g. "3rd Reich", "Soviet sector"). One
     //     per region with a centroid above the polygon.
     if (controlPolygons.length > 0) {
       const labelData = controlPolygons
@@ -891,217 +1142,241 @@ export default function TacticalSurface({
     }
 
     return result;
-  }, [phaseData, controlPolygons, countryPolygons, factionBanners, phaseIdx, unitAtlas, statusAtlas]);
+  }, [controlPolygons, countryPolygons, factionBanners, phaseIdx]);
 
-  // animatedLayers holds the per-frame layers: the growing atlas arrow
-  // polygon, the motion comet sweeping its spine, and the impact pulse
-  // + secondary shockwave at the arrival point. These rebuild on every
-  // RAF tick because they read currentTime. Everything that doesn't
-  // need the clock lives in staticLayers above so we don't pay the
-  // allocation cost 60 times a second.
-  const animatedLayers = useMemo(() => {
-    const { trips } = phaseData;
-    if (trips.length === 0) return [];
-    const result: unknown[] = [];
-
-    // Build the in-progress polygon for each trip. While the trip is
-    // animating, the arrow extends only from the tail to the comet
-    // head (lerp(from, to, progress)) so the arrow LITERALLY grows
-    // along the line of advance. Reads as a spearhead pushing forward.
-    // Before the window starts: no polygon. After: full polygon.
-    const arrowsLive = trips
-      .map((t) => {
-        const dur = Math.max(1, t.timestamps[1] - t.timestamps[0]);
-        const raw = (currentTime - t.timestamps[0]) / dur;
-        const progress = Math.max(0, Math.min(1, raw));
-        if (currentTime < t.timestamps[0]) return null;
-        const tip: [number, number] = currentTime >= t.timestamps[1]
-          ? t.to
-          : [
-              t.from[0] + (t.to[0] - t.from[0]) * progress,
-              t.from[1] + (t.to[1] - t.from[1]) * progress,
-            ];
-        return {
-          ...t,
-          progress,
-          arrowPolygon: buildAtlasArrow(t.from, tip, t.kind, 1),
-        };
-      })
-      .filter((t): t is NonNullable<typeof t> => t !== null);
-
-    if (arrowsLive.length > 0) {
-      // Classic Beevor/Ambrose treatment: two-tone solid arrow. Heavy
-      // warm-black outline grounds the silhouette; saturated faction
-      // fill reads as a single deliberate brushstroke. Previous halo
-      // + inner-highlight layers were stacking nested arrowheads at
-      // the tip and reading as a tangle. The Hollywood war-atlas
-      // look is brutally minimal — outline + fill + nothing else.
-      result.push(new PolygonLayer({
-        id: `atlas-arrows-outline-${phaseIdx}`,
-        data: arrowsLive,
-        getPolygon: (d) => d.arrowPolygon,
-        getFillColor: [12, 10, 8, 0],
-        getLineColor: [12, 10, 8, 250],
-        getLineWidth: 6,
-        lineWidthUnits: 'pixels',
-        stroked: true,
-        filled: false,
-        pickable: false,
-        parameters: { depthTest: false },
-      }));
-      result.push(new PolygonLayer({
-        id: `atlas-arrows-fill-${phaseIdx}`,
-        data: arrowsLive,
-        getPolygon: (d) => d.arrowPolygon,
-        getFillColor: (d) => [d.color[0], d.color[1], d.color[2], d.fillAlpha],
-        getLineColor: [0, 0, 0, 0],
-        stroked: false,
-        filled: true,
-        pickable: false,
-        parameters: { depthTest: false },
-      }));
-    }
-
-    // Motion comet. Thin bright spine that sweeps the centreline
-    // during the active window. Kept slim (3px) so it adds the
-    // "advance happening now" cue without competing with the
-    // growing arrow polygon for shape attention.
-    result.push(new TripsLayer({
-      id: `trips-comet-${phaseIdx}`,
-      data: trips,
-      getPath: (d) => d.path,
-      getTimestamps: (d) => d.timestamps,
-      getColor: (d) => [Math.min(255, d.color[0] + 120), Math.min(255, d.color[1] + 120), Math.min(255, d.color[2] + 120), 255],
-      getWidth: 3,
-      widthUnits: 'pixels',
-      capRounded: true,
-      jointRounded: true,
-      trailLength: 900,
-      currentTime,
-      fadeTrail: true,
-    }));
-
-    // Permanent terminus marker at every arrow tip whose trip has
-    // already completed. The impact disc flashes and dies in 1.5s;
-    // without this anchor the arrowhead reads as orphaned the moment
-    // the flash fades. A small bright dot + dark halo at the tip
-    // grounds the arrow in the geography for the rest of the phase.
-    const terminusData = trips
-      .filter((t) => currentTime >= t.impactAt)
-      .map((t) => ({
-        position: t.to,
-        inner: [
-          Math.min(255, t.color[0] + 60),
-          Math.min(255, t.color[1] + 60),
-          Math.min(255, t.color[2] + 60),
-          255,
-        ] as [number, number, number, number],
-        ring: [t.color[0], t.color[1], t.color[2], 230] as [number, number, number, number],
-      }));
-    if (terminusData.length > 0) {
-      result.push(new ScatterplotLayer({
-        id: `terminus-ring-${phaseIdx}`,
-        data: terminusData,
-        getPosition: (d) => d.position,
-        getFillColor: [0, 0, 0, 0],
-        getLineColor: (d) => d.ring,
-        getRadius: 8,
-        getLineWidth: 3,
-        lineWidthUnits: 'pixels',
-        radiusUnits: 'pixels',
-        stroked: true,
-        filled: false,
-        parameters: { depthTest: false },
-      }));
-      result.push(new ScatterplotLayer({
-        id: `terminus-dot-${phaseIdx}`,
-        data: terminusData,
-        getPosition: (d) => d.position,
-        getFillColor: (d) => d.inner,
-        getRadius: 4,
-        radiusUnits: 'pixels',
-        stroked: false,
-        parameters: { depthTest: false },
-      }));
-    }
-
-    // Impact disc. Bright filled flash that grows + fades as the
-    // comet arrives. Anchor for the moment of contact.
-    const impacts = trips.map((t) => {
-      const since = currentTime - t.impactAt;
-      const inWindow = since >= 0 && since < 1500;
-      const k = inWindow ? since / 1500 : 1;
-      const easeOut = 1 - Math.pow(1 - k, 3);
-      return {
-        position: t.to,
-        color: [t.color[0], t.color[1], t.color[2], inWindow ? Math.round(245 * (1 - easeOut)) : 0] as [number, number, number, number],
-        radius: inWindow ? 500 + 8000 * easeOut : 0,
-      };
-    }).filter((d) => d.radius > 0);
-    if (impacts.length > 0) {
-      result.push(new ScatterplotLayer({
-        id: `impacts-${phaseIdx}`,
-        data: impacts,
-        getPosition: (d) => d.position,
-        getFillColor: (d) => d.color,
-        getRadius: (d) => d.radius,
-        radiusUnits: 'meters',
-        stroked: false,
-        radiusMinPixels: 0,
-        radiusMaxPixels: 100,
-        parameters: { depthTest: false },
-      }));
-    }
-
-    // Secondary shockwave ring. Thin stroked circle that races outward
-    // faster than the disc, then fades. Two concentric rings give the
-    // impact moment proper documentary weight rather than a single
-    // pop. Faction-colored at high alpha so it reads through the
-    // cartographic palette.
-    const shockwaves = trips.flatMap((t) => {
-      const since = currentTime - t.impactAt;
-      if (since < 0 || since >= 1800) return [];
-      const k = since / 1800;
-      const easeOut = 1 - Math.pow(1 - k, 4);
-      const alpha = Math.round(255 * (1 - k));
-      return [{
-        position: t.to,
-        color: [t.color[0], t.color[1], t.color[2], alpha] as [number, number, number, number],
-        radius: 200 + 14000 * easeOut,
-      }];
+  // pushFrame concatenates the static and animated layer halves into a
+  // single overlay update. Called from the static-mirror effect and
+  // from the RAF loop; never allocates through React.
+  const pushFrame = useCallback(() => {
+    overlayRef.current?.setProps({
+      layers: [
+        ...staticLayersRef.current,
+        ...animatedLayersRef.current,
+      ] as unknown as LayersList,
     });
-    if (shockwaves.length > 0) {
-      result.push(new ScatterplotLayer({
-        id: `shockwave-${phaseIdx}`,
-        data: shockwaves,
-        getPosition: (d) => d.position,
-        getFillColor: [0, 0, 0, 0],
-        getLineColor: (d) => d.color,
-        getRadius: (d) => d.radius,
-        getLineWidth: 3,
-        lineWidthUnits: 'pixels',
-        radiusUnits: 'meters',
-        stroked: true,
-        filled: false,
-        radiusMinPixels: 0,
-        radiusMaxPixels: 140,
-        parameters: { depthTest: false },
-      }));
-    }
+  }, []);
 
-    return result;
-  }, [phaseData, currentTime, phaseIdx]);
-
-  // Combine static + animated layers for the overlay. MapboxOverlay
-  // diffs by layer ID, so the static ones reuse their cached GPU state
-  // while only the animated ones re-allocate.
-  const layers = useMemo(() => [...staticLayers, ...animatedLayers], [staticLayers, animatedLayers]);
-
-  // Push the latest layer set into the overlay.
+  // Mirror static layers into their ref whenever they rebuild (phase
+  // change, zoom bucket flip, territory update) and push a frame.
   useEffect(() => {
     if (!mapReady) return;
-    overlayRef.current?.setProps({ layers });
-  }, [layers, mapReady]);
+    staticLayersRef.current = staticLayers;
+    pushFrame();
+  }, [staticLayers, mapReady, pushFrame]);
+
+  // Camera choreography on phase change. Snap (or reduced-motion) is an
+  // instant jumpTo. Otherwise fly with cinematic bearing and pitch.
+  // Curator-set camera coords win; otherwise auto-fit the action bbox.
+  // After the entry move settles, a slow documentary push-in drifts the
+  // camera for the rest of the dwell unless the viewer grabbed the map.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    userCameraLockRef.current = false;
+    const bearing = bearingForPhase(phaseData.trips, phase.cameraBearing);
+    const snap = prefersReducedMotion || phase.cameraMotion === 'snap';
+    const entryMs = phase.cameraTweenMs ?? 1900;
+
+    // Labels hide during the entry flight and fade back in once the
+    // camera settles: declutters the move, reads as a documentary cut.
+    const wrap = labelWrapRef.current;
+    if (wrap && !snap) {
+      wrap.style.transition = 'opacity 200ms ease-out';
+      wrap.style.opacity = '0';
+    }
+    const onSettled = () => {
+      if (wrap) {
+        wrap.style.transition = 'opacity 500ms ease-out';
+        wrap.style.opacity = '1';
+      }
+      labelPositionRef.current();
+      startDrift();
+    };
+
+    // startDrift begins the slow push-in for the remainder of the
+    // phase dwell: a touch of zoom, a few degrees of bearing, a nudge
+    // of pitch. Linear easing so it reads as drift, not a move.
+    let driftStarted = false;
+    const startDrift = () => {
+      if (driftStarted || snap || userCameraLockRef.current) return;
+      driftStarted = true;
+      const dwellMs = (phase.durationMs ?? 3000) / Math.max(0.1, speed);
+      const driftMs = dwellMs - entryMs - 200;
+      if (driftMs < 1200) return;
+      map.easeTo({
+        zoom: map.getZoom() + 0.12,
+        bearing: map.getBearing() + (phaseIdx % 2 === 0 ? 4 : -4),
+        pitch: Math.min(58, map.getPitch() + 3),
+        duration: driftMs,
+        easing: (t: number) => t,
+      });
+    };
+
+    const hasCurator = typeof phase.cameraLat === 'number' && typeof phase.cameraLng === 'number';
+    const points: Array<[number, number]> = [];
+    if (!hasCurator) {
+      for (const u of phaseData.unitPoints) points.push(u.position);
+      for (const m of phaseData.trips) {
+        points.push(m.from);
+        points.push(m.to);
+      }
+    }
+    if (!hasCurator && points.length >= 2) {
+      let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+      for (const [lng, lat] of points) {
+        if (lng < minLng) minLng = lng;
+        if (lng > maxLng) maxLng = lng;
+        if (lat < minLat) minLat = lat;
+        if (lat > maxLat) maxLat = lat;
+      }
+      // Pad by 30% of the bbox span (or a minimum) so the action sits
+      // off the labels in the corners and the unit icons don't bleed
+      // into the frame edge.
+      const dLng = Math.max((maxLng - minLng) * 0.3, 0.01);
+      const dLat = Math.max((maxLat - minLat) * 0.3, 0.01);
+      const bounds: [[number, number], [number, number]] = [
+        [minLng - dLng, minLat - dLat],
+        [maxLng + dLng, maxLat + dLat],
+      ];
+      const padding = { top: 140, bottom: 80, left: 80, right: 80 };
+      if (snap) {
+        map.fitBounds(bounds, { padding, animate: false, pitch: 0, bearing: 0 });
+        onSettled();
+      } else {
+        map.once('moveend', onSettled);
+        map.fitBounds(bounds, {
+          padding,
+          duration: entryMs,
+          essential: true,
+          pitch: cameraPitch,
+          bearing,
+          // Cinematic ease-out: fast accelerate, gentle arrival.
+          easing: (t: number) => 1 - Math.pow(1 - t, 3),
+        });
+      }
+      return;
+    }
+    const target = {
+      center: [cameraLng, cameraLat] as [number, number],
+      zoom: cameraZoom,
+      pitch: cameraPitch,
+      bearing,
+    };
+    if (snap) {
+      map.jumpTo(target);
+      onSettled();
+      return;
+    }
+    map.once('moveend', onSettled);
+    map.flyTo({
+      ...target,
+      duration: phase.cameraTweenMs ?? 2000,
+      essential: true,
+      // Slower curve + lower max speed for documentary feel: camera
+      // takes a moment to leave, glides, then settles.
+      curve: 1.6,
+      speed: 0.9,
+      easing: (t: number) => 1 - Math.pow(1 - t, 3),
+    });
+    // phaseIdx stands in for per-phase camera intent; phaseData carries
+    // the resolved geometry the bbox and bearing derive from.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phaseIdx, phaseData, cameraLat, cameraLng, cameraZoom, cameraPitch, prefersReducedMotion, speed]);
+
+  // The per-frame animation loop. Advances the phase clock, builds the
+  // animated layer half (gliding units, growing arrows, impact
+  // effects), and pushes the combined frame straight into the deck.gl
+  // overlay. React never re-renders from this loop. The loop parks
+  // itself once every animation in the phase has settled.
+  useEffect(() => {
+    const camTween = phase.cameraTweenMs ?? 1800;
+    const glideMs = Math.min(1600, Math.max(600, camTween * 0.85));
+    const { trips, unitPoints } = phaseData;
+
+    // Rotate the glide buffers once per phase: annotate each unit with
+    // its previous-phase position (glide origin) and enter flag, build
+    // fade-out ghosts for units that vanished, then remember this
+    // phase's units for the next rotation. Guarded so pause/resume
+    // re-runs of this effect reuse the prepared list.
+    const prep = glidePrepRef.current;
+    if (prep.battleId !== battle.id || prep.phaseIdx !== phaseIdx) {
+      const prev = prevUnitsRef.current.battleId === battle.id
+        ? prevUnitsRef.current.units
+        : new Map<string, ResolvedUnit>();
+      const annotated = unitPoints.map((u) => {
+        const prior = prev.get(u.gid);
+        return {
+          ...u,
+          from: prior ? prior.position : null,
+          entering: !prior && prev.size > 0,
+        };
+      });
+      const liveGids = new Set(unitPoints.map((u) => u.gid));
+      for (const [gid, pu] of prev) {
+        if (liveGids.has(gid)) continue;
+        annotated.push({ ...pu, gid, from: pu.position, entering: false, exiting: true });
+      }
+      glidePrepRef.current = { battleId: battle.id, phaseIdx, units: annotated };
+      prevUnitsRef.current = {
+        battleId: battle.id,
+        units: new Map(unitPoints.map((u) => [u.gid, u])),
+      };
+    }
+    const glideUnits = glidePrepRef.current.units;
+    // Everything is settled once the last shockwave dies and the glide
+    // is done; after that the frame is static until the next phase.
+    const lastImpact = trips.reduce((acc, t) => Math.max(acc, t.impactAt), 0);
+    const settleAt = Math.max(lastImpact + 1900, -camTween + glideMs + 100);
+
+    const build = (t: number) => {
+      const gt = (t + camTween) / glideMs;
+      animatedLayersRef.current = [
+        ...buildUnitLayers(glideUnits, gt, phaseIdx, unitAtlas, statusAtlas),
+        ...buildMotionLayers(trips, t, phaseIdx),
+      ];
+      pushFrame();
+    };
+
+    if (prefersReducedMotion || ended) {
+      timeRef.current = 1e7;
+      if (mapReady) build(1e7);
+      return;
+    }
+    timeRef.current = -camTween;
+    if (mapReady) build(timeRef.current);
+    if (!playing || !mapIdle || !mapReady) return;
+
+    let raf = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = (now - last) * Math.max(0.1, speed);
+      last = now;
+      timeRef.current += dt;
+      if (timeRef.current >= settleAt) {
+        // Final frame, then park. Nothing animates past this point.
+        build(settleAt + 1);
+        return;
+      }
+      build(timeRef.current);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [
+    battle.id,
+    phaseIdx,
+    phaseData,
+    playing,
+    speed,
+    prefersReducedMotion,
+    ended,
+    mapIdle,
+    mapReady,
+    phase.cameraTweenMs,
+    pushFrame,
+    unitAtlas,
+    statusAtlas,
+  ]);
 
   // Era theme picks the title font, accent hue, and vignette tint for
   // this battle. Drives every cinematic chrome piece below so an ancient
@@ -1109,29 +1384,25 @@ export default function TacticalSurface({
   // as ostinato-and-steel.
   const theme = useMemo(() => themeForEra(battle.era), [battle.era]);
 
-  // HTML overlay labels: deduped unit labels + top-4 movement labels,
-  // each projected to screen pixels via map.project(). HTML text wins
-  // on sharpness over deck.gl SDF — that "blurry names" complaint
-  // dies here. Re-projects every map move/zoom via mapMoveTick. Empty
-  // until the map is ready and a phase is loaded.
-  const htmlLabels = useMemo(() => {
-    const map = mapInstance;
-    if (!map || !mapReady) return [];
-    type Label = {
+  // Label candidates for the HTML overlay: deduped unit labels plus
+  // the top-4 movement labels, geo-anchored and priority-sorted.
+  // Projection to screen pixels happens imperatively below, so this
+  // memo rebuilds only on phase change or zoom bucket flip.
+  const labelCandidates = useMemo(() => {
+    type Candidate = {
       key: string;
-      x: number;
-      y: number;
+      anchor: [number, number];
       text: string;
       color: string;
       kind: 'unit' | 'movement';
       priority: number;
     };
-    const out: Label[] = [];
+    const out: Candidate[] = [];
 
     // Unit labels — dedup by ~500m grid cell so dense beachheads /
     // urban scenes don't pile a wall of names on one position.
-    const cellSize = currentZoom > 10 ? 0.0035 : currentZoom > 7 ? 0.012 : 0.04;
-    const grid = new Map<string, typeof phaseData.unitPoints[number]>();
+    const cellSize = zoomBucket > 10 ? 0.0035 : zoomBucket > 7 ? 0.012 : 0.04;
+    const grid = new Map<string, ResolvedUnit>();
     for (const u of phaseData.unitPoints) {
       if (!u.label) continue;
       const key = `${Math.round(u.position[0] / cellSize)}|${Math.round(u.position[1] / cellSize)}`;
@@ -1139,11 +1410,9 @@ export default function TacticalSurface({
       if (!prior || u.label.length > prior.label.length) grid.set(key, u);
     }
     for (const u of grid.values()) {
-      const p = map.project(u.position);
       out.push({
-        key: `unit-${u.index}`,
-        x: p.x,
-        y: p.y,
+        key: `unit-${u.gid}`,
+        anchor: u.position,
         text: u.label,
         color: `rgb(${u.color[0]},${u.color[1]},${u.color[2]})`,
         kind: 'unit',
@@ -1159,11 +1428,9 @@ export default function TacticalSurface({
       .sort((a, b) => b.label.length - a.label.length)
       .slice(0, 4);
     for (const m of movLabels) {
-      const p = map.project(m.midpoint);
       out.push({
         key: `mov-${m.index}`,
-        x: p.x,
-        y: p.y,
+        anchor: m.midpoint,
         text: m.label,
         color: `rgb(${m.color[0]},${m.color[1]},${m.color[2]})`,
         kind: 'movement',
@@ -1171,31 +1438,47 @@ export default function TacticalSurface({
       });
     }
 
-    // Screen-space collision filter: drop any lower-priority label
-    // whose pill (~140px wide × 28px tall) overlaps a higher-priority
-    // one already kept. Sorted by priority desc so longer/named
-    // formations win the conflict.
+    // Priority order doubles as collision precedence: the positioning
+    // routine walks children in DOM order and keeps first-come.
     out.sort((a, b) => b.priority - a.priority);
-    const kept: Label[] = [];
-    const PILL_W = 150;
-    const PILL_H = 38;
-    for (const l of out) {
-      let collides = false;
-      for (const k of kept) {
-        if (Math.abs(l.x - k.x) < PILL_W && Math.abs(l.y - k.y) < PILL_H) {
-          collides = true;
-          break;
+    return out;
+  }, [phaseData, zoomBucket]);
+
+  // Imperative label projection. Positions every pill by direct DOM
+  // writes with screen-space collision pruning (~150x38px per pill).
+  // Registered as the map's move handler via labelPositionRef, so
+  // labels track the camera at 60fps without a single React render.
+  useEffect(() => {
+    const position = () => {
+      const map = mapRef.current;
+      const wrap = labelWrapRef.current;
+      if (!map || !wrap) return;
+      const kept: Array<{ x: number; y: number }> = [];
+      const w = wrap.clientWidth;
+      const h = wrap.clientHeight;
+      for (const child of Array.from(wrap.children)) {
+        const el = child as HTMLElement;
+        const lng = Number(el.dataset.lng);
+        const lat = Number(el.dataset.lat);
+        if (!Number.isFinite(lng) || !Number.isFinite(lat)) continue;
+        const p = map.project([lng, lat]);
+        let hidden = p.x < -80 || p.y < -60 || p.x > w + 80 || p.y > h + 60;
+        if (!hidden) {
+          for (const k of kept) {
+            if (Math.abs(p.x - k.x) < 150 && Math.abs(p.y - k.y) < 38) {
+              hidden = true;
+              break;
+            }
+          }
         }
+        el.style.visibility = hidden ? 'hidden' : 'visible';
+        el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
+        if (!hidden) kept.push({ x: p.x, y: p.y });
       }
-      if (!collides) kept.push(l);
-    }
-    return kept;
-    // mapMoveTick listed so the projection re-runs on every camera
-    // change; phaseData / phaseIdx for content changes. currentZoom
-    // changes also bump mapMoveTick via the zoom listener so we don't
-    // list it again.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phaseData, phaseIdx, mapMoveTick, mapReady, mapInstance]);
+    };
+    labelPositionRef.current = position;
+    position();
+  }, [labelCandidates, mapReady]);
 
   // Cinematic phase title slate: centered chapter card at the top of
   // the frame, like a film cue. Pulses in on phase change, holds, fades.
@@ -1255,48 +1538,56 @@ export default function TacticalSurface({
         }}
       />
 
-      {/* HTML overlay labels. Replaces deck.gl SDF text for unit and
-          movement labels — browser-rendered text is dramatically sharper
-          at any scale. Pill backgrounds with faction-colored border +
-          leader line down to the geographic position. Re-projects on
-          every map move via mapMoveTick. */}
-      <div className="pointer-events-none absolute inset-0 z-[15]">
-        {htmlLabels.map((label) => (
+      {/* HTML overlay labels. Browser-rendered text is dramatically
+          sharper than deck.gl SDF at any scale. Pills carry data-lng /
+          data-lat; the positioning routine projects and moves them by
+          direct DOM writes on every map move, and the camera effect
+          fades the whole layer during entry flights. */}
+      <div ref={labelWrapRef} className="pointer-events-none absolute inset-0 z-[15]">
+        {labelCandidates.map((label) => (
           <div
             key={label.key}
+            data-lng={label.anchor[0]}
+            data-lat={label.anchor[1]}
             style={{
               position: 'absolute',
-              left: label.x,
-              top: label.y,
-              transform: `translate(-50%, calc(-100% - ${label.kind === 'unit' ? 48 : 14}px))`,
+              left: 0,
+              top: 0,
+              visibility: 'hidden',
               willChange: 'transform',
             }}
           >
             <div
-              className="px-3 py-1 rounded-md text-[12px] uppercase font-semibold text-white whitespace-nowrap"
               style={{
-                background: 'rgba(14,10,7,0.88)',
-                border: `1px solid ${label.color}`,
-                boxShadow: `0 4px 14px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.5), 0 0 12px ${label.color}55`,
-                backdropFilter: 'blur(6px)',
-                WebkitBackdropFilter: 'blur(6px)',
-                letterSpacing: '0.14em',
-                fontFamily: 'Inter, system-ui, sans-serif',
-                textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+                transform: `translate(-50%, calc(-100% - ${label.kind === 'unit' ? 48 : 14}px))`,
               }}
             >
-              {label.text}
+              <div
+                className="px-3 py-1 rounded-md text-[12px] uppercase font-semibold text-white whitespace-nowrap"
+                style={{
+                  background: 'rgba(14,10,7,0.88)',
+                  border: `1px solid ${label.color}`,
+                  boxShadow: `0 4px 14px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.5), 0 0 12px ${label.color}55`,
+                  backdropFilter: 'blur(6px)',
+                  WebkitBackdropFilter: 'blur(6px)',
+                  letterSpacing: '0.14em',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+                }}
+              >
+                {label.text}
+              </div>
+              {/* Leader line down to the position */}
+              <div
+                className="mx-auto"
+                style={{
+                  width: 1.5,
+                  height: label.kind === 'unit' ? 16 : 6,
+                  background: `linear-gradient(to bottom, ${label.color}cc, transparent)`,
+                  boxShadow: `0 0 4px ${label.color}99`,
+                }}
+              />
             </div>
-            {/* Leader line down to the position */}
-            <div
-              className="mx-auto"
-              style={{
-                width: 1.5,
-                height: label.kind === 'unit' ? 16 : 6,
-                background: `linear-gradient(to bottom, ${label.color}cc, transparent)`,
-                boxShadow: `0 0 4px ${label.color}99`,
-              }}
-            />
           </div>
         ))}
       </div>
@@ -1431,7 +1722,7 @@ export default function TacticalSurface({
       )}
 
       <div className="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded text-[9px] uppercase tracking-wider text-slate-300/60 pointer-events-none">
-        NatGeo . Terrarium DEM . MapLibre
+        Esri World Imagery . Terrarium DEM . MapLibre
       </div>
     </div>
   );

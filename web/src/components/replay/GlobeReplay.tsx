@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Globe from 'react-globe.gl';
 import type { GlobeMethods } from 'react-globe.gl';
-import type { Feature, Geometry, Position } from 'geojson';
+import type { Feature, Geometry } from 'geojson';
 
 import type { Battle } from '../../types/battle';
 import type { Phase, Replay, Faction, ControlRegion, PaletteContext } from '../../types/replay';
@@ -14,6 +14,7 @@ import { themeForEra } from '../../theme/era';
 import { playImpact } from '../../audio/sound';
 import { COUNTRY_NAME_ALIASES } from '../../lib/globe/aliases';
 import { largestPolygonCentroid } from '../../lib/globe/centroid';
+import { enhanceGlobe } from '../../lib/globe/cinematic';
 import { findCountry } from '../../lib/globe/geometry';
 import { hexWithAlpha } from '../../lib/globe/colors';
 import { buildFactionLabelElement } from '../../lib/globe/faction-label';
@@ -232,6 +233,34 @@ function relaxUnitCollisions(units: ProjectedUnit[]): ProjectedUnit[] {
     }
   }
   return out;
+}
+
+// arrowsMoved reports whether any arrow projection differs from the last
+// committed one by at least half a pixel or by visibility. Every other field
+// on ProjectedArrow is fixed for the lifetime of a movementGeo, so position
+// and visibility are the only values that can change between frames.
+function arrowsMoved(prev: ProjectedArrow[] | null, next: ProjectedArrow[]): boolean {
+  if (!prev || prev.length !== next.length) return true;
+  for (let i = 0; i < next.length; i++) {
+    const p = prev[i];
+    const n = next[i];
+    if (p.visible !== n.visible) return true;
+    if (Math.abs(p.x1 - n.x1) >= 0.5 || Math.abs(p.y1 - n.y1) >= 0.5
+      || Math.abs(p.x2 - n.x2) >= 0.5 || Math.abs(p.y2 - n.y2) >= 0.5) return true;
+  }
+  return false;
+}
+
+// unitsMoved is the unit-marker counterpart of arrowsMoved.
+function unitsMoved(prev: ProjectedUnit[] | null, next: ProjectedUnit[]): boolean {
+  if (!prev || prev.length !== next.length) return true;
+  for (let i = 0; i < next.length; i++) {
+    const p = prev[i];
+    const n = next[i];
+    if (p.visible !== n.visible) return true;
+    if (Math.abs(p.x - n.x) >= 0.5 || Math.abs(p.y - n.y) >= 0.5) return true;
+  }
+  return false;
 }
 
 export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountryColors, warFactionAnchors, warSnapshotYear, onSceneReady }: GlobeReplayProps) {
@@ -735,19 +764,36 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
     return out;
   }, [warFactionAnchors, countries, warSnapshotYear, battle.year, cameraLat, cameraLng]);
 
-  // RAF loop projects all phase geometry onto screen pixels. Updates every
-  // frame so the SVG overlay tracks camera fly-ins and any user drag without
-  // visible lag. mountedRef guards against state updates queued in the same
-  // frame as an unmount (closing the replay mid-tween). Without the guard,
-  // React logs "update on unmounted component" and the next phase mount can
-  // briefly inherit the stale projection from the previous phase.
+  // RAF loop projects all phase geometry onto screen pixels so the SVG
+  // overlay tracks camera fly-ins and any user drag without visible lag.
+  // mounted guards against state updates queued in the same frame as an
+  // unmount (closing the replay mid-tween). Without the guard, React logs
+  // "update on unmounted component" and the next phase mount can briefly
+  // inherit the stale projection from the previous phase.
   useEffect(() => {
     let raf = 0;
     let mounted = true;
+    // lastSig captures the projection inputs (camera position + phase). When
+    // it matches the previous frame, all projection and setState work is
+    // skipped, so an idle globe does zero per-frame work. appliedArrows and
+    // appliedUnits hold the last projections committed to state; drift below
+    // half a pixel accumulates against them instead of re-rendering the
+    // overlay every frame. Canvas resizes move projections without camera
+    // motion, so dims sit in the effect deps to reset the signature.
+    let lastSig = '';
+    let appliedArrows: ProjectedArrow[] | null = null;
+    let appliedUnits: ProjectedUnit[] | null = null;
     const tick = () => {
       if (!mounted) return;
       const globe = globeRef.current;
       if (globe && typeof globe.getScreenCoords === 'function') {
+        const cam = globe.camera().position;
+        const sig = `${phaseIdx}|${cam.x.toFixed(4)}|${cam.y.toFixed(4)}|${cam.z.toFixed(4)}`;
+        if (sig === lastSig) {
+          raf = requestAnimationFrame(tick);
+          return;
+        }
+        lastSig = sig;
         // Minimum projected arrow length. Sub-km tactical movements
         // (Pegasus Bridge = 440 m, Pointe du Hoc = 200 m) project to
         // 1-2 px even at the curator's tight 0.06 altitude, so the eye
@@ -792,7 +838,10 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
           };
         });
         if (!mounted) return;
-        setArrows(nextArrows);
+        if (arrowsMoved(appliedArrows, nextArrows)) {
+          appliedArrows = nextArrows;
+          setArrows(nextArrows);
+        }
 
         const projected: ProjectedUnit[] = defenderGeo.map((u) => {
           const p = globe.getScreenCoords(u.lat, u.lng, 0) as { x: number; y: number } | null;
@@ -811,7 +860,10 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         });
         const nextUnits = relaxUnitCollisions(projected);
         if (!mounted) return;
-        setUnits(nextUnits);
+        if (unitsMoved(appliedUnits, nextUnits)) {
+          appliedUnits = nextUnits;
+          setUnits(nextUnits);
+        }
       }
       raf = requestAnimationFrame(tick);
     };
@@ -820,7 +872,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
       mounted = false;
       cancelAnimationFrame(raf);
     };
-  }, [movementGeo, defenderGeo]);
+  }, [movementGeo, defenderGeo, phaseIdx, dims.width, dims.height]);
 
   return (
     <div
@@ -852,6 +904,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         ref={globeRef as React.MutableRefObject<GlobeMethods | undefined>}
         width={dims.width}
         height={dims.height}
+        onGlobeReady={() => enhanceGlobe(globeRef.current)}
         globeImageUrl={HI_RES_EARTH}
         bumpImageUrl={TOPOLOGY_BUMP}
         backgroundImageUrl={NIGHT_SKY}

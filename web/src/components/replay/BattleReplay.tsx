@@ -94,12 +94,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    const cached = cachedReplay(battle.id);
-    if (cached) {
-      setReplay(cached);
-      setError(null);
-      return;
-    }
+    // loadReplay resolves synchronously-fast from the module cache when the
+    // replay is already hot (the state initializer covers the mount case),
+    // so a battle change swaps the data within a microtask.
     let cancelled = false;
     loadReplay(battle.id).then((data) => {
       if (cancelled) return;
@@ -948,7 +945,10 @@ interface TransportScrubberProps {
 function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, reducedMotion }: TransportScrubberProps) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [hovering, setHovering] = useState(false);
-  const [hoverX, setHoverX] = useState<number | null>(null);
+  // hover carries both the raw mouse x (tooltip position) and the [0,1]
+  // track fraction, captured together at event time so the render never
+  // has to measure the track element itself.
+  const [hover, setHover] = useState<{ x: number; frac: number } | null>(null);
   const [dragging, setDragging] = useState(false);
   // intraProgress is the [0,1] fraction of the current phase that has
   // elapsed during playback, so the fill creeps within a phase instead of
@@ -958,12 +958,10 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
   const [intraProgress, setIntraProgress] = useState(0);
 
   // RAF loop for intra-phase progress. Only runs while playing and not
-  // dragging; otherwise the fill stays put.
+  // dragging; otherwise the fill stays put. The cleanup zeroes the fraction
+  // so a pause, scrub, or phase change never leaves stale creep behind.
   useEffect(() => {
-    if (!playing || dragging || reducedMotion) {
-      setIntraProgress(0);
-      return;
-    }
+    if (!playing || dragging || reducedMotion) return;
     const dur = (phases[phaseIdx]?.durationMs ?? 5500) / Math.max(0.1, speed);
     if (dur <= 0) return;
     const start = performance.now();
@@ -974,7 +972,10 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      setIntraProgress(0);
+    };
   }, [playing, phaseIdx, speed, phases, dragging, reducedMotion]);
 
   // Resolve clientX to a phase index using the track's bounding rect.
@@ -990,13 +991,7 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
   // nearest phase for the tooltip position itself; the tooltip follows the
   // raw mouse x so the user sees a continuous slider feel. Only the seek
   // target snaps to a phase.
-  const hoverPhase = (hoverX !== null && trackRef.current)
-    ? (() => {
-        const rect = trackRef.current.getBoundingClientRect();
-        const pct = Math.max(0, Math.min(1, hoverX / rect.width));
-        return Math.round(pct * (phases.length - 1));
-      })()
-    : null;
+  const hoverPhase = hover !== null ? Math.round(hover.frac * (phases.length - 1)) : null;
 
   const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     setDragging(true);
@@ -1022,7 +1017,8 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
     const el = trackRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    setHoverX(e.clientX - rect.left);
+    const x = e.clientX - rect.left;
+    setHover({ x, frac: Math.max(0, Math.min(1, x / rect.width)) });
   }, []);
 
   const totalSteps = Math.max(1, phases.length - 1);
@@ -1036,16 +1032,16 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
   return (
     <div className="relative w-full select-none" style={{ height: 22, cursor: 'pointer' }}
       onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => { setHovering(false); setHoverX(null); }}
+      onMouseLeave={() => { setHovering(false); setHover(null); }}
       onMouseMove={onTrackMove}
     >
       {/* Tooltip. Floats above the raw mouse x (not the playhead), shows
           the previewed phase number, title, and time marker if known. */}
-      {hoverPhase !== null && hoverX !== null && (
+      {hoverPhase !== null && hover !== null && (
         <div
           className="absolute pointer-events-none"
           style={{
-            left: hoverX,
+            left: hover.x,
             bottom: 26,
             transform: 'translateX(-50%)',
             background: 'rgba(8,10,18,0.95)',

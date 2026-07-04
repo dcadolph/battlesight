@@ -122,7 +122,7 @@ export function detectColorKey(name: string): ColorKey | null {
   const s = name.toLowerCase();
 
   // World War II Axis.
-  if (/(nazi|wehrmacht|waffen[\- ]?ss|kriegsmarine|luftwaffe|third reich|axis germany|german army group|panzer)/.test(s)) {
+  if (/(nazi|wehrmacht|waffen[- ]?ss|kriegsmarine|luftwaffe|third reich|axis germany|german army group|panzer)/.test(s)) {
     return 'nazi-black';
   }
   if (/(imperial japan|japanese army|imperial japanese|empire of japan|kwantung|\bija\b|\bijn\b)/.test(s)) {
@@ -140,7 +140,7 @@ export function detectColorKey(name: string): ColorKey | null {
   // Fallujah etc. don't accidentally render insurgents in the same blue
   // as US forces. Catches generic "insurgents" / "resistance" / "militants"
   // labels too so curators don't have to spell out every group name.
-  if (/(\bisis\b|\bisil\b|daesh|al[\- ]qaeda|\baqi\b|zarqawi|mahdi army|islamic state|taliban|mujahid|insurgent|resistance(?!.*fr\.?)|militants?|jihadi|hamas|hezbollah|houthi|boko[\- ]haram|al[\- ]shabaab|wagner)/.test(s)) {
+  if (/(\bisis\b|\bisil\b|daesh|al[- ]qaeda|\baqi\b|zarqawi|mahdi army|islamic state|taliban|mujahid|insurgent|resistance(?!.*fr\.?)|militants?|jihadi|hamas|hezbollah|houthi|boko[- ]haram|al[- ]shabaab|wagner)/.test(s)) {
     return 'isis-black';
   }
 
@@ -153,7 +153,7 @@ export function detectColorKey(name: string): ColorKey | null {
   if (/(south korea|\brok\b|republic of korea)/.test(s)) return 'south-korea-blue';
 
   // Vietnam.
-  if (/(north vietnam|\bnva\b|\bpavn\b|viet cong|\bvc\b|vietcong|viet[\- ]?minh)/.test(s)) return 'north-vietnam-red';
+  if (/(north vietnam|\bnva\b|\bpavn\b|viet cong|\bvc\b|vietcong|viet[- ]?minh)/.test(s)) return 'north-vietnam-red';
   if (/(south vietnam|\barvn\b|republic of vietnam)/.test(s)) return 'south-vietnam-blue';
 
   // Modern Russia / Ukraine.

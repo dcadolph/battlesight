@@ -131,13 +131,15 @@ function splitTopCommander(s: string | undefined): string {
 export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, onCommanderClick }: BattlePanelProps) {
   const color = ERA_COLORS[battle.era] || '#ffffff';
   const theme = themeForEra(battle.era);
-  const [detail, setDetail] = useState<Battle>(battle);
+  // fetched holds the full battle record from the API. Display falls back
+  // to the lean prop until the fetch for this battle id lands, so switching
+  // battles never shows the previous battle's detail.
+  const [fetched, setFetched] = useState<Battle | null>(null);
 
   useEffect(() => {
-    setDetail(battle);
     fetch(`/api/battles/${battle.id}`)
       .then((res) => res.json())
-      .then(setDetail)
+      .then(setFetched)
       .catch(() => {});
     // Warm the replay cache as soon as the dossier opens. Clicking "Watch
     // the battle" then hits the browser cache and the overlay opens with no
@@ -146,6 +148,8 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
       fetch(`/api/battles/${battle.id}/replay`).catch(() => {});
     }
   }, [battle]);
+
+  const detail = fetched && fetched.id === battle.id ? fetched : battle;
 
   const refs = detail.references || [];
   const groupedRefs = groupRefs(refs);

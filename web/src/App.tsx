@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
 import PersistentGlobe from './components/globe/PersistentGlobe';
 import TimelineSlider from './components/TimelineSlider';
 import BattlePanel from './components/BattlePanel';
@@ -6,8 +6,6 @@ import CommanderPanel from './components/CommanderPanel';
 import { canonCountriesForBattle } from './lib/country';
 import CommandBar from './components/CommandBar';
 import EraLegend from './components/EraLegend';
-import WarPlayback from './components/WarPlayback';
-import BattleReplay from './components/replay/BattleReplay';
 import IntroOverlay from './components/IntroOverlay';
 import HistoryPlayhead from './components/HistoryPlayhead';
 import BattleTitleCard from './components/BattleTitleCard';
@@ -16,8 +14,40 @@ import { HISTORY_BEATS, type HistoryBeat } from './data/history-beats';
 import { OWNER_COLORS, OWNER_LABELS } from './data/territory-snapshots';
 import type { Battle } from './types/battle';
 import { themeForEra, themeForYear } from './theme/era';
-import { enableSound, disableSound, soundEnabled, setSoundEra, playSelect } from './audio/sound';
+import { disableSound, soundEnabled, setSoundEra } from './audio/sound';
 import { usePauseOnHidden } from './hooks/usePauseOnHidden';
+
+// The war panel and the battle replay stack (maplibre-gl, deck.gl, the
+// tactical surface) are only needed once the user opens one of them, so
+// they load as separate chunks instead of weighing down the first paint.
+const WarPlayback = lazy(() => import('./components/WarPlayback'));
+const BattleReplay = lazy(() => import('./components/replay/BattleReplay'));
+
+// ChunkFallback covers the viewport while a lazily loaded overlay chunk is
+// fetched. Matches the splash styling so the beat reads as intentional
+// staging rather than a blank flash.
+function ChunkFallback({ label }: { label: string }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: '#070912' }}
+      role="status"
+      aria-live="polite"
+    >
+      <div
+        className="font-semibold uppercase"
+        style={{
+          fontSize: 11,
+          letterSpacing: '0.55em',
+          color: '#93c5fd',
+          textShadow: '0 2px 14px rgba(0,0,0,0.7), 0 0 24px rgba(147,197,253,0.35)',
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
 
 // MIN_YEAR floors the timeline at -3000 so deep-antiquity engagements
 // (Megiddo 1457 BC, Kadesh 1274 BC, future Mesopotamian and Egyptian
@@ -127,7 +157,12 @@ export default function App() {
   // manual control. Same propagation path; WarPlayback decrements
   // groupIndex by one when this changes.
   const [cinematicPrevTick, setCinematicPrevTick] = useState(0);
-  const [introVisible, setIntroVisible] = useState(false);
+  // Intro overlay shows on a first visit only: no battle deep link in the
+  // URL and no prior dismissal recorded.
+  const [introVisible, setIntroVisible] = useState(() => {
+    if (parseHash().battleId) return false;
+    return localStorage.getItem('bt.intro_seen') !== '1';
+  });
   const [featured, setFeatured] = useState<Battle | null>(null);
   // landingMode toggles the cold-open globe between two modes:
   //   'current' — the default — drops every catalog battle except the
@@ -142,7 +177,7 @@ export default function App() {
     return saved === 'all' ? 'all' : 'current';
   });
   useEffect(() => {
-    try { localStorage.setItem('bt.landing_mode', landingMode); } catch {}
+    try { localStorage.setItem('bt.landing_mode', landingMode); } catch { /* best-effort persistence */ }
   }, [landingMode]);
   // historyMode is true whenever the user is in the play-history overlay,
   // even when paused. historyPaused gates the RAF loop without exiting the
@@ -162,11 +197,15 @@ export default function App() {
   const [soundOn, setSoundOn] = useState(false);
   const rafRef = useRef<number | null>(null);
   const lastTickRef = useRef<number | null>(null);
-  // splashStartRef pins the timestamp the loading splash mounted so we can
+  // yearAccumRef carries the sweep's fractional year between RAF ticks
+  // so React state (and the whole app tree) only updates in ~0.4-year
+  // steps instead of 60 times a second.
+  const yearAccumRef = useRef<number | null>(null);
+  // splashStart pins the timestamp the loading splash mounted so we can
   // enforce a minimum visible duration. On localhost the battles fetch
   // returns in under 100ms and the splash used to flash in and right back
   // out before its own entrance animation finished, which read as broken.
-  const splashStartRef = useRef<number>(Date.now());
+  const [splashStart] = useState(() => Date.now());
   const [splashReady, setSplashReady] = useState(false);
 
   const fetchBattles = useCallback(() => {
@@ -218,15 +257,11 @@ export default function App() {
   // floor below which the splash flashes too fast to read as
   // intentional but doesn't actually mask anything either.
   useEffect(() => {
-    const elapsed = Date.now() - splashStartRef.current;
+    const elapsed = Date.now() - splashStart;
     const minMs = 200;
-    if (elapsed >= minMs) {
-      setSplashReady(true);
-      return;
-    }
-    const t = setTimeout(() => setSplashReady(true), minMs - elapsed);
+    const t = setTimeout(() => setSplashReady(true), Math.max(0, minMs - elapsed));
     return () => clearTimeout(t);
-  }, []);
+  }, [splashStart]);
 
   // Load featured battle for first visit / intro card.
   useEffect(() => {
@@ -241,24 +276,19 @@ export default function App() {
   // Honor URL hash on first load.
   useEffect(() => {
     const s = parseHash();
-    if (s.battleId) {
-      fetch(`/api/battles/${s.battleId}`)
-        .then((r) => (r.ok ? r.json() : null))
-        .then((b: Battle | null) => {
-          if (!b) return;
-          setSelectedBattle(b);
-          setIsolatedBattle(b);
-          if (s.replay && (b.hasReplay ?? false)) {
-            setReplayBattle(b);
-            if (typeof s.phase === 'number') setReplayPhase(s.phase);
-          }
-        })
-        .catch(() => {});
-    } else {
-      // First visit: show intro overlay if there is no battle in URL.
-      const seen = localStorage.getItem('bt.intro_seen') === '1';
-      if (!seen) setIntroVisible(true);
-    }
+    if (!s.battleId) return;
+    fetch(`/api/battles/${s.battleId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b: Battle | null) => {
+        if (!b) return;
+        setSelectedBattle(b);
+        setIsolatedBattle(b);
+        if (s.replay && (b.hasReplay ?? false)) {
+          setReplayBattle(b);
+          if (typeof s.phase === 'number') setReplayPhase(s.phase);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Mirror state into URL hash for sharable links.
@@ -469,12 +499,21 @@ export default function App() {
       return;
     }
     const YEARS_PER_SECOND = (MAX_YEAR - MIN_YEAR) / 90;
+    // Advance accumulates in a ref and flushes to React state in coarse
+    // steps. A 60fps setHistoryYear was re-rendering the entire app tree
+    // every frame and re-filtering the globe's battle set with it; at
+    // ~28 years/sec, 0.4-year steps keep the playhead visually smooth
+    // while cutting the render rate by an order of magnitude.
+    const FLUSH_STEP_YEARS = 0.4;
+    yearAccumRef.current = null;
     const tick = (ts: number) => {
       if (lastTickRef.current == null) lastTickRef.current = ts;
       const dt = ts - lastTickRef.current;
       lastTickRef.current = ts;
       setHistoryYear((y) => {
-        const next = y + (dt / 1000) * YEARS_PER_SECOND;
+        if (yearAccumRef.current == null) yearAccumRef.current = y;
+        yearAccumRef.current += (dt / 1000) * YEARS_PER_SECOND;
+        const next = yearAccumRef.current;
         // Check whether the advance reached a curated beat. We fire the
         // first un-fired beat whose year is at or before our new position
         // and snap the playhead to its year so the title card feels
@@ -486,6 +525,7 @@ export default function App() {
           if (next >= beat.year) {
             firedBeatsRef.current.add(i);
             setHistoryBeat(beat);
+            yearAccumRef.current = beat.year;
             return beat.year;
           }
         }
@@ -495,7 +535,8 @@ export default function App() {
           setHistoryPaused(true);
           return MAX_YEAR;
         }
-        return next;
+        // Returning the same value bails out of the re-render entirely.
+        return next - y >= FLUSH_STEP_YEARS ? next : y;
       });
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -661,10 +702,14 @@ export default function App() {
   // Effective year window: during history playback this is a trailing range
   // from the very start of recorded history up to the current playhead, so
   // battles light up as we cross their year. Outside playback it's whatever
-  // the user has dialed in on the timeline.
-  const effectiveYearRange: [number, number] = historyMode
-    ? [MIN_YEAR, Math.floor(historyYear) + 1]
-    : yearRange;
+  // the user has dialed in on the timeline. Identity is stable across
+  // renders that do not move the integer playhead year, so the globe's
+  // battle filter only re-runs when the window actually changes.
+  const historyCeilingYear = Math.floor(historyYear) + 1;
+  const effectiveYearRange: [number, number] = useMemo(
+    () => (historyMode ? [MIN_YEAR, historyCeilingYear] : yearRange),
+    [historyMode, historyCeilingYear, yearRange],
+  );
 
   if (loading || !splashReady) {
     return (
@@ -862,10 +907,10 @@ export default function App() {
         }
         warAccent={activeTheme.accent}
         warCountryColors={warCountryColors ?? undefined}
-        territoryLabel={territoryLabel ?? undefined}
         warFactionAnchors={factionAnchors}
         warSnapshotYear={snapshotYear ?? undefined}
         landingMode={landingMode}
+        paused={!!replayBattle}
       />
 
       {/* Landing-mode toggle. Sits at the top-center while the dramatic
@@ -1072,36 +1117,40 @@ export default function App() {
       `}</style>
 
       {showPlayback && (
-        <WarPlayback
-          onBattleFocus={handleBattleClick}
-          onBattlesLoaded={setPlaybackBattles}
-          onClose={() => { setInitialWar(''); handlePlaybackClose(); }}
-          onWarSelected={handleWarSelected}
-          onWarCountries={setWarCountries}
-          onPlayReplay={handleWarOpenReplay}
-          onCloseReplay={handleWarCloseReplay}
-          onWarTerritory={handleWarTerritory}
-          cinematicAdvanceTick={cinematicAdvanceTick}
-          cinematicPrevTick={cinematicPrevTick}
-          initialWar={initialWar}
-        />
+        <Suspense fallback={<ChunkFallback label="Preparing the war atlas" />}>
+          <WarPlayback
+            onBattleFocus={handleBattleClick}
+            onBattlesLoaded={setPlaybackBattles}
+            onClose={() => { setInitialWar(''); handlePlaybackClose(); }}
+            onWarSelected={handleWarSelected}
+            onWarCountries={setWarCountries}
+            onPlayReplay={handleWarOpenReplay}
+            onCloseReplay={handleWarCloseReplay}
+            onWarTerritory={handleWarTerritory}
+            cinematicAdvanceTick={cinematicAdvanceTick}
+            cinematicPrevTick={cinematicPrevTick}
+            initialWar={initialWar}
+          />
+        </Suspense>
       )}
 
       {replayBattle && (
-        <BattleReplay
-          battle={replayBattle}
-          initialPhase={replayPhase}
-          onPhaseChange={setReplayPhase}
-          onClose={handleCloseReplay}
-          cinematicMode={replayCinematic}
-          onEnded={replayCinematic ? handleCinematicBattleEnded : undefined}
-          outroPauseMs={replayCinematic ? 400 : 2400}
-          onAdvanceNext={replayCinematic ? handleCinematicBattleEnded : undefined}
-          onAdvancePrev={replayCinematic ? handleCinematicAdvancePrev : undefined}
-          warCountryColors={warCountryColors ?? undefined}
-          warFactionAnchors={factionAnchors.length > 0 ? factionAnchors : undefined}
-          warSnapshotYear={snapshotYear ?? undefined}
-        />
+        <Suspense fallback={<ChunkFallback label="Preparing the replay" />}>
+          <BattleReplay
+            battle={replayBattle}
+            initialPhase={replayPhase}
+            onPhaseChange={setReplayPhase}
+            onClose={handleCloseReplay}
+            cinematicMode={replayCinematic}
+            onEnded={replayCinematic ? handleCinematicBattleEnded : undefined}
+            outroPauseMs={replayCinematic ? 400 : 2400}
+            onAdvanceNext={replayCinematic ? handleCinematicBattleEnded : undefined}
+            onAdvancePrev={replayCinematic ? handleCinematicAdvancePrev : undefined}
+            warCountryColors={warCountryColors ?? undefined}
+            warFactionAnchors={factionAnchors.length > 0 ? factionAnchors : undefined}
+            warSnapshotYear={snapshotYear ?? undefined}
+          />
+        </Suspense>
       )}
 
       {introVisible && featured && (

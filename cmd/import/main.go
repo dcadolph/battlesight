@@ -23,8 +23,14 @@ func main() {
 	infobox := flag.Bool("infobox", false, "fetch Wikipedia infobox data (sides, commanders, casualties)")
 	significance := flag.Bool("significance", false, "fetch Wikipedia aftermath/legacy sections for battles missing significance")
 	references := flag.Bool("references", false, "extract citation URLs from Wikipedia articles into battle_references")
+	geocodeMissing := flag.Bool("geocode-missing", false, "backfill coordinates from the Wikipedia coordinates API for battles at lat=0 lng=0")
+	geocodeDryRun := flag.Bool("geocode-dry-run", false, "run the -geocode-missing flow without writing to the DB; prints the would-be summary")
+	infoboxBackfill := flag.Bool("infobox-backfill", false, "backfill coordinates and dates from Wikipedia infobox text for battles missing them")
+	infoboxDryRun := flag.Bool("infobox-dry-run", false, "run the -infobox-backfill flow without writing to the DB; prints the would-be summary")
 	warsEnrich := flag.Bool("wars", false, "enrich data/wars.json from Wikipedia for every war with at least 3 battles in the catalog")
 	warsPath := flag.String("wars-file", "data/wars.json", "path to wars.json output for -wars enrichment")
+	mergeReplays := flag.String("merge-replays", "", "validate a replay-draft JSON file (object keyed by battle id) and merge it into -phases-file")
+	phasesPath := flag.String("phases-file", "data/phases.json", "path to the served replay phases file for -merge-replays")
 	all := flag.Bool("all", false, "run all import and enrichment steps")
 	validate := flag.Bool("validate", false, "validate curated JSON + curated/ dir without writing to the DB; exits non-zero on any error")
 	// network defaults to true. When set false, every Wikipedia/Wikidata
@@ -64,8 +70,12 @@ func main() {
 		}
 	}
 
-	if *jsonPath == "" && !*wikidata && !*enrich && !*infobox && !*significance && !*references && !*warsEnrich {
-		log.Fatal("at least one action required: -json, -wikidata, -enrich, -infobox, -significance, -references, -wars, -validate, or -all")
+	if *jsonPath == "" && !*wikidata && !*enrich && !*infobox && !*significance && !*references &&
+		!*warsEnrich && !*geocodeMissing && !*geocodeDryRun && !*infoboxBackfill && !*infoboxDryRun &&
+		*mergeReplays == "" {
+		log.Fatal("at least one action required: -json, -wikidata, -enrich, -infobox, -significance, " +
+			"-references, -wars, -geocode-missing, -geocode-dry-run, -infobox-backfill, " +
+			"-infobox-dry-run, -merge-replays, -validate, or -all")
 	}
 
 	database, err := db.Open(*dbPath)
@@ -75,6 +85,14 @@ func main() {
 	defer database.Close()
 
 	ctx := context.Background()
+
+	if *mergeReplays != "" {
+		ids, err := importer.MergeReplays(ctx, database, *mergeReplays, *phasesPath)
+		if err != nil {
+			log.Fatalf("merge replays failed: %v", err)
+		}
+		log.Printf("merged %d replays into %s: %s", len(ids), *phasesPath, strings.Join(ids, ", "))
+	}
 
 	if *jsonPath != "" {
 		count, err := importer.ImportJSON(ctx, database, *jsonPath)
@@ -137,6 +155,35 @@ func main() {
 		} else {
 			log.Printf("added %d references across battles", count)
 		}
+	}
+
+	if *geocodeMissing || *geocodeDryRun {
+		log.Println("backfilling coordinates from the Wikipedia coordinates API...")
+		sum, err := importer.GeocodeMissing(ctx, database, *geocodeDryRun)
+		if err != nil {
+			log.Fatalf("geocode backfill failed: %v", err)
+		}
+		mode := "live"
+		if *geocodeDryRun {
+			mode = "dry-run"
+		}
+		log.Printf("geocode backfill (%s): attempted=%d resolved=%d skipped-no-title=%d api-miss=%d",
+			mode, sum.Attempted, sum.Resolved, sum.SkippedNoTitle, sum.APIMiss)
+	}
+
+	if *infoboxBackfill || *infoboxDryRun {
+		log.Println("backfilling coordinates and dates from Wikipedia infobox text...")
+		sum, err := importer.InfoboxBackfill(ctx, database, *infoboxDryRun)
+		if err != nil {
+			log.Fatalf("infobox backfill failed: %v", err)
+		}
+		mode := "live"
+		if *infoboxDryRun {
+			mode = "dry-run"
+		}
+		log.Printf("infobox backfill (%s): coords written=%d of %d attempted, dates written=%d of %d attempted, nominatim requests=%d",
+			mode, sum.Coords.Written, sum.Coords.Attempted,
+			sum.Dates.Written, sum.Dates.Attempted, sum.NominatimRequests)
 	}
 
 	if *warsEnrich {

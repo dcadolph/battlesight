@@ -1,10 +1,8 @@
 @import "tailwindcss";
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* Tailwind preflight already provides the universal margin/padding
+   reset inside @layer base. An unlayered reset here would outrank
+   every layered padding and margin utility in the app. */
 
 html, body, #root {
   width: 100%;

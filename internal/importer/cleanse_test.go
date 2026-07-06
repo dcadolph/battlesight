@@ -162,8 +162,10 @@ func TestYearToEra(t *testing.T) {
 		{Year: 1938, Want: "interwar"},
 		{Year: 1939, Want: "world-war-2"},
 		{Year: 1945, Want: "world-war-2"},
-		{Year: 1946, Want: "modern"},
-		{Year: 2025, Want: "modern"},
+		{Year: 1946, Want: "cold-war"},
+		{Year: 1990, Want: "cold-war"},
+		{Year: 1991, Want: "contemporary"},
+		{Year: 2025, Want: "contemporary"},
 		{Year: 0, Want: ""},
 	}
 	for _, test := range tests {

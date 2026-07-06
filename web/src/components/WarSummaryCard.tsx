@@ -62,36 +62,40 @@ const formatCasualties = (n: number) => (n <= 0 ? 'Unknown' : `~${formatCountCom
 // and a WWII war shows in Pacific rose, matching what the user sees on
 // the globe behind it.
 export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick }: WarSummaryCardProps) {
-  const [summary, setSummary] = useState<WarSummary | null>(null);
-  const [expanded, setExpanded] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  // result tags the fetched summary with the war it belongs to, so both the
+  // summary and the error derive from the current prop during render.
+  const [result, setResult] = useState<{ war: string; summary: WarSummary | null; error: string | null } | null>(null);
+  const [expanded, setExpanded] = useState<boolean>(!!emphasize);
 
   useEffect(() => {
-    if (!warName) {
-      setSummary(null);
-      return;
-    }
+    if (!warName) return;
     let cancelled = false;
-    setError(null);
     fetch(`/api/wars/summary?name=${encodeURIComponent(warName)}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
       .then((s: WarSummary) => {
-        if (!cancelled) setSummary(s);
+        if (!cancelled) setResult({ war: warName, summary: s, error: null });
       })
       .catch(() => {
-        if (!cancelled) setError('Summary unavailable');
+        if (!cancelled) setResult({ war: warName, summary: null, error: 'Summary unavailable' });
       });
     return () => {
       cancelled = true;
     };
   }, [warName]);
 
-  useEffect(() => {
+  const summary = result && result.war === warName ? result.summary : null;
+  const error = result && result.war === warName ? result.error : null;
+
+  // Force-expand on the emphasize edge (playback reached the ending) while
+  // still letting the user collapse the card manually afterward.
+  const [prevEmphasize, setPrevEmphasize] = useState(!!emphasize);
+  if (!!emphasize !== prevEmphasize) {
+    setPrevEmphasize(!!emphasize);
     if (emphasize) setExpanded(true);
-  }, [emphasize]);
+  }
 
   if (!warName) return null;
   if (error) return null;

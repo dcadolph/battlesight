@@ -58,10 +58,11 @@ const PLATE_H = 44;
 const STROKE = 5;
 
 function ctxSetup(ctx: CanvasRenderingContext2D) {
-  // Plate fill is the field color underneath the symbol. Bumped from
-  // 0.18 to 0.55 so the icon reads on a satellite backdrop instead of
-  // dissolving into bright terrain.
-  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  // Plate fill is the field color underneath the symbol. Translucent:
+  // the icon should read as a cartographic marker over the terrain,
+  // not a solid slab covering it. The dark unit-shadow disc under the
+  // icon carries the contrast against bright ground.
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
   ctx.strokeStyle = '#fff';
   ctx.lineWidth = STROKE;
   ctx.lineCap = 'round';
@@ -495,37 +496,42 @@ const STATUS_DRAWERS: Partial<Record<UnitStatus, Drawer>> = {
 let cachedUnitAtlas: IconAtlas | null = null;
 let cachedStatusAtlas: IconAtlas | null = null;
 
+// BAKE_SCALE supersamples the atlas. Drawers still work in ICON_SIZE
+// logical space; the canvas holds 2x pixels so icons stay crisp when
+// deck.gl displays them near their 170px pixel cap.
+const BAKE_SCALE = 2;
+
 function buildAtlas(drawers: Record<string, Drawer>, prefix: string): IconAtlas {
   if (typeof document === 'undefined') {
     return { canvas: null, mapping: {}, size: ICON_SIZE };
   }
+  const cell = ICON_SIZE * BAKE_SCALE;
   const keys = Object.keys(drawers);
   const cols = Math.min(8, keys.length);
   const rows = Math.ceil(keys.length / cols);
-  const W = cols * ICON_SIZE;
-  const H = rows * ICON_SIZE;
   const c = document.createElement('canvas');
-  c.width = W;
-  c.height = H;
+  c.width = cols * cell;
+  c.height = rows * cell;
   const ctx = c.getContext('2d');
   if (!ctx) return { canvas: null, mapping: {}, size: ICON_SIZE };
   const mapping: IconMapping = {};
   keys.forEach((key, i) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
-    const x = col * ICON_SIZE;
-    const y = row * ICON_SIZE;
+    const x = col * cell;
+    const y = row * cell;
     ctx.save();
     ctx.translate(x, y);
+    ctx.scale(BAKE_SCALE, BAKE_SCALE);
     ctxSetup(ctx);
     drawers[key](ctx);
     ctx.restore();
     mapping[`${prefix}${key}`] = {
       x,
       y,
-      width: ICON_SIZE,
-      height: ICON_SIZE,
-      anchorY: ICON_SIZE / 2,
+      width: cell,
+      height: cell,
+      anchorY: cell / 2,
       mask: true,
     };
   });

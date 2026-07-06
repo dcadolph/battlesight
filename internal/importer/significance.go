@@ -47,9 +47,9 @@ func EnrichSignificance(ctx context.Context, db *sql.DB) (int, error) {
 		return 0, fmt.Errorf("query battles needing significance: %w", err)
 	}
 	type ref struct {
-		id         string
-		title      string
-		current    string
+		id      string
+		title   string
+		current string
 	}
 	var pending []ref
 	for rows.Next() {
@@ -78,10 +78,7 @@ func EnrichSignificance(ctx context.Context, db *sql.DB) (int, error) {
 	batchSize := 15
 
 	for i := 0; i < len(pending); i += batchSize {
-		end := i + batchSize
-		if end > len(pending) {
-			end = len(pending)
-		}
+		end := min(i+batchSize, len(pending))
 		batch := pending[i:end]
 
 		titles := make([]string, len(batch))
@@ -201,8 +198,8 @@ func extractSignificance(wikitext string) string {
 	// line. Wikipedia sections often open with a templated quote or hatnote
 	// like {{see also|...}} that we want to skip past, so we iterate over
 	// candidate paragraphs until we find one with real prose.
-	paragraphs := strings.Split(body, "\n\n")
-	for _, p := range paragraphs {
+	paragraphs := strings.SplitSeq(body, "\n\n")
+	for p := range paragraphs {
 		p = strings.TrimSpace(p)
 		if p == "" {
 			continue

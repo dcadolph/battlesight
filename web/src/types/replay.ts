@@ -26,6 +26,10 @@
 // ============================================================================
 
 export interface Replay {
+  // origin records how the replay was produced: "curated" for
+  // hand-authored, "drafted" for pipeline drafts awaiting promotion.
+  // Absent means curated (legacy entries).
+  origin?: 'curated' | 'drafted';
   battleId: string;
   title: string;
   intro: string;
@@ -105,6 +109,11 @@ export interface Phase {
   cameraLng?: number;
   cameraAltitude?: number;
   cameraTweenMs?: number;
+  // cameraBearing / cameraPitch override the tactical surface's
+  // auto-cinematography (bearing derived from the focal movement's
+  // axis of advance, pitch derived from altitude). Degrees.
+  cameraBearing?: number;
+  cameraPitch?: number;
   // controlRegions paints territorial state under the arrows. Each region is
   // a closed polygon (lat/lng pairs) tinted by the controlling faction. The
   // engine tweens the fill color when the same region's controller changes
@@ -307,6 +316,10 @@ export type UnitStatus =
   | 'squares';
 
 export interface Unit {
+  // id is the stable identity of this formation across phases. When
+  // set, the renderer glides the unit between its per-phase positions.
+  // Unset units fall back to a derived label+faction identity.
+  id?: string;
   label: string;
   faction: Faction;
   unitType?: UnitType;

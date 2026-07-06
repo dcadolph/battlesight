@@ -130,8 +130,8 @@ type WarNarrative struct {
 // JSON file. Behaves like Replays — supports hot-reload via Watch so
 // curators can iterate without restarting.
 type Wars struct {
-	mu       sync.RWMutex
-	byName   map[string]WarNarrative
+	mu     sync.RWMutex
+	byName map[string]WarNarrative
 }
 
 // NewWars returns an empty narrative registry.
@@ -238,12 +238,7 @@ func parseCasualties(s string) int {
 	tokens := casualtyPattern.FindAllString(s, -1)
 	total := 0
 	for _, tok := range tokens {
-		raw := ""
-		for _, r := range tok {
-			if r != ',' {
-				raw += string(r)
-			}
-		}
+		raw := strings.ReplaceAll(tok, ",", "")
 		n, err := strconv.Atoi(raw)
 		if err != nil || n <= 0 || n > 10_000_000 {
 			continue

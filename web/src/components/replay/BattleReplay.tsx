@@ -10,6 +10,12 @@ import { themeForEra } from '../../theme/era';
 import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
 import { narrate, cancelNarration, pauseNarration, resumeNarration } from '../../audio/narration';
 import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
+import {
+  RecorderSession,
+  recordingSupported,
+  downloadBlob,
+  type RecorderChrome,
+} from '../../lib/replay-recorder';
 import { cleanCasualtyText, cleanProseText, formatBattleDate } from '../../lib/format';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import CloseButton from '../CloseButton';
@@ -86,6 +92,14 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   // on the final tactical state. Cleared whenever the user scrubs back.
   const [ended, setEnded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // chapterRailRef scrolls the active chapter card into view on phase
+  // change so the current chapter is never clipped off the rail's edge.
+  const chapterRailRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const rail = chapterRailRef.current;
+    const card = rail?.children[phaseIdx] as HTMLElement | undefined;
+    card?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [phaseIdx]);
   // Honour the OS-level "Reduce motion" preference: phase timer collapses
   // to the next phase with no dwell so the user steps through frames
   // rather than waiting on animated transitions. Decorative pulse keyframes
@@ -94,12 +108,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    const cached = cachedReplay(battle.id);
-    if (cached) {
-      setReplay(cached);
-      setError(null);
-      return;
-    }
+    // loadReplay resolves synchronously-fast from the module cache when the
+    // replay is already hot (the state initializer covers the mount case),
+    // so a battle change swaps the data within a microtask.
     let cancelled = false;
     loadReplay(battle.id).then((data) => {
       if (cancelled) return;
@@ -113,6 +124,29 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     return () => { cancelled = true; };
   }, [battle.id]);
 
+  // Battle hop reset, adjusted during render (the prev-value pattern).
+  // This component stays mounted across cinematic battle changes (that
+  // is what keeps the map alive and the camera flying between
+  // battlefields), so the per-battle state must reset by hand. Without
+  // this the previous battle's ended/paused state leaks into the next
+  // one: a battle landing on ended=true instant-fires its outro and the
+  // cinematic stampedes through battles. The hop card is the chapter
+  // interstitial that rides the camera flight.
+  const [prevBattleId, setPrevBattleId] = useState(battle.id);
+  const [hopCard, setHopCard] = useState<Battle | null>(null);
+  if (prevBattleId !== battle.id) {
+    setPrevBattleId(battle.id);
+    setPhaseIdx(0);
+    setEnded(false);
+    setPlaying(true);
+    if (cinematicMode && !prefersReducedMotion) setHopCard(battle);
+  }
+  useEffect(() => {
+    if (!hopCard) return;
+    const t = setTimeout(() => setHopCard(null), 2600);
+    return () => clearTimeout(t);
+  }, [hopCard]);
+
   useEffect(() => {
     if (!playing || !replay) return;
     const current = replay.phases[phaseIdx];
@@ -123,12 +157,14 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     // on a deployment-only phase reads as "stuck" — three of them ran 16.5s
     // total at the default rate, which was longer than the schematic dwell
     // backstop and produced the deployment-loop the user reported.
-    // Phase dwell. Curator-set durations win; the default fallback was
-    // 5500 ms hand-crafted and 3200 ms schematic — both glacial for an
-    // 11-phase battle. Slashed to 3000 / 2000. Eleven phases × 5.5s =
-    // a minute on rails; 3s/phase keeps the cinematic flow but lets a
-    // viewer get through a battle without checking out.
-    const baseDur = current.durationMs ?? (replay.schematic ? 2000 : 3000);
+    // Phase dwell. Curator-set durations win. The fallback has swung
+    // both ways: 5500/3200 read as glacial solo, 3000/2000 read as
+    // unfollowable inside a war cinematic (three schematic phases blew
+    // past in six seconds). The floor must also outlast the arrow
+    // animations (up to ~4.5s with stagger) or phases cut mid-motion,
+    // which is the "jumpy" feel. Schematics have only three phases, so
+    // the taller floor still finishes a battle in about sixteen seconds.
+    const baseDur = current.durationMs ?? (replay.schematic ? 5400 : 4200);
     const dur = prefersReducedMotion ? 0 : baseDur / speed;
     timerRef.current = setTimeout(() => {
       if (phaseIdx >= replay.phases.length - 1) {
@@ -210,6 +246,59 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     // to engage with the replay again; do not occlude it.
     setEnded(false);
   }, [replay]);
+
+  // Video export. The recorder composites the stage's WebGL canvases
+  // plus re-drawn label pills and the phase slate, and MediaRecorder
+  // wraps them into a downloadable file. Recording restarts the replay
+  // from phase one for a complete take and saves itself on the outro.
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const recorderRef = useRef<RecorderSession | null>(null);
+  const [recording, setRecording] = useState(false);
+  const chromeRef = useRef<RecorderChrome>({ eyebrow: '', title: '', accent: '#fff', titleFont: 'serif' });
+  useEffect(() => {
+    const p = replay?.phases[phaseIdx];
+    if (!p) return;
+    const t = themeForEra(battle.era);
+    chromeRef.current = {
+      eyebrow: `Phase ${String(phaseIdx + 1).padStart(2, '0')}${p.timeMarker ? ` · ${p.timeMarker}` : ''}`,
+      title: p.title,
+      accent: t.accent,
+      titleFont: t.titleFont,
+    };
+  }, [phaseIdx, replay, battle.era]);
+
+  const startRecording = () => {
+    if (!stageRef.current || recorderRef.current) return;
+    goto(0);
+    try {
+      recorderRef.current = new RecorderSession(stageRef.current, () => chromeRef.current);
+      setRecording(true);
+    } catch (err) {
+      console.warn('[BattleReplay] recording failed to start', err);
+    }
+  };
+
+  const finishRecording = useCallback(async () => {
+    const rec = recorderRef.current;
+    if (!rec) return;
+    recorderRef.current = null;
+    setRecording(false);
+    const blob = await rec.stop();
+    downloadBlob(blob, `${battle.id}-replay`, rec.mimeType);
+  }, [battle.id]);
+
+  // The outro is the natural end of a take.
+  useEffect(() => {
+    if (ended && recorderRef.current) void finishRecording();
+  }, [ended, finishRecording]);
+
+  // Unmounting mid-take discards the recording.
+  useEffect(() => {
+    return () => {
+      recorderRef.current?.stop();
+      recorderRef.current = null;
+    };
+  }, []);
 
   // restartReplay rewinds to the first phase and starts playing again. Used
   // by the outro card so a viewer can re-watch without leaving the overlay.
@@ -522,7 +611,11 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
       `}</style>
 
       {/* Top bar */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-slate-800/80 bg-[#0a0d18]/90">
+      {/* paddingLeft clears the app's fixed home anchor pill. */}
+      <header
+        className="flex items-center justify-between px-6 py-3 border-b border-slate-800/80 bg-[#0a0d18]/90"
+        style={{ paddingLeft: 178 }}
+      >
         <div className="flex items-center gap-3 min-w-0">
           <span
             className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
@@ -557,6 +650,25 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           )}
         </div>
         <div className="flex items-center gap-2">
+          {/* Export the replay as a video. Restarts from phase one so the
+              take is complete, records the composited stage, and saves on
+              the outro (or on click while recording). */}
+          {view === 'surface' && recordingSupported() && (
+            <button
+              onClick={recording ? () => void finishRecording() : startRecording}
+              className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-full border transition-colors ${
+                recording
+                  ? 'border-red-500/70 bg-red-500/25 text-red-100 hover:bg-red-500/35'
+                  : 'border-slate-600/60 bg-slate-800/60 text-slate-200 hover:border-slate-400 hover:bg-slate-700/60'
+              }`}
+              title={recording ? 'Stop recording and save the video' : 'Record this replay to a video file'}
+            >
+              <span
+                className={`inline-block w-2 h-2 rounded-full ${recording ? 'bg-red-400 animate-pulse' : 'bg-red-500/80'}`}
+              />
+              <span className="text-xs font-semibold tracking-wide">{recording ? 'Save video' : 'Record'}</span>
+            </button>
+          )}
           {/* One-click jump to the battlefield in Google Earth. Opens in a
               new tab so the replay session is preserved — the user can come
               back to BattleSight from the same tab they left. */}
@@ -583,7 +695,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             geography so the viewer sees Belgium, the Ardennes, the Channel,
             etc. when watching Battle of France, not an abstract grid. */}
         <div className="flex-1 flex items-center justify-center p-2 relative">
-          <div className="w-full h-full relative">
+          <div ref={stageRef} className="w-full h-full relative">
             {view === 'surface' ? (
               <TacticalSurface
                 battle={battle}
@@ -708,6 +820,44 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 }`}
               >Schematic</button>
             </div>
+
+            {/* Chapter interstitial: rides the camera flight between
+                battles in a war cinematic so the hop reads as "next
+                engagement", not a cut. */}
+            {hopCard && (
+              <div
+                key={`hop-${hopCard.id}`}
+                className="pointer-events-none absolute inset-x-0 bottom-[16%] z-30 flex flex-col items-center"
+                style={{ animation: 'hop-card 2600ms ease-out forwards' }}
+              >
+                <div
+                  className="text-[10px] font-semibold uppercase tracking-[0.5em] mb-2"
+                  style={{ color: theme.accent, textShadow: '0 2px 12px rgba(0,0,0,0.9)' }}
+                >
+                  Next engagement{hopCard.year ? ` · ${hopCard.year}` : ''}
+                </div>
+                <div
+                  className="text-white text-center max-w-[70%]"
+                  style={{
+                    fontFamily: theme.titleFont,
+                    fontWeight: 600,
+                    fontSize: 'clamp(24px, 2.6vw, 40px)',
+                    lineHeight: 1.05,
+                    textShadow: '0 6px 26px rgba(0,0,0,0.95)',
+                  }}
+                >
+                  {hopCard.name}
+                </div>
+              </div>
+            )}
+            <style>{`
+              @keyframes hop-card {
+                0%   { opacity: 0; transform: translateY(14px); }
+                12%  { opacity: 1; transform: translateY(0); }
+                78%  { opacity: 1; }
+                100% { opacity: 0; transform: translateY(-8px); }
+              }
+            `}</style>
           </div>
         </div>
 
@@ -770,6 +920,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
               <span className="tabular-nums text-slate-600">{phaseIdx + 1} / {replay.phases.length}</span>
             </div>
             <div
+              ref={chapterRailRef}
               className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scroll-smooth"
               style={{ scrollbarWidth: 'thin' }}
             >
@@ -948,7 +1099,10 @@ interface TransportScrubberProps {
 function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, reducedMotion }: TransportScrubberProps) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [hovering, setHovering] = useState(false);
-  const [hoverX, setHoverX] = useState<number | null>(null);
+  // hover carries both the raw mouse x (tooltip position) and the [0,1]
+  // track fraction, captured together at event time so the render never
+  // has to measure the track element itself.
+  const [hover, setHover] = useState<{ x: number; frac: number } | null>(null);
   const [dragging, setDragging] = useState(false);
   // intraProgress is the [0,1] fraction of the current phase that has
   // elapsed during playback, so the fill creeps within a phase instead of
@@ -958,12 +1112,10 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
   const [intraProgress, setIntraProgress] = useState(0);
 
   // RAF loop for intra-phase progress. Only runs while playing and not
-  // dragging; otherwise the fill stays put.
+  // dragging; otherwise the fill stays put. The cleanup zeroes the fraction
+  // so a pause, scrub, or phase change never leaves stale creep behind.
   useEffect(() => {
-    if (!playing || dragging || reducedMotion) {
-      setIntraProgress(0);
-      return;
-    }
+    if (!playing || dragging || reducedMotion) return;
     const dur = (phases[phaseIdx]?.durationMs ?? 5500) / Math.max(0.1, speed);
     if (dur <= 0) return;
     const start = performance.now();
@@ -974,7 +1126,10 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      setIntraProgress(0);
+    };
   }, [playing, phaseIdx, speed, phases, dragging, reducedMotion]);
 
   // Resolve clientX to a phase index using the track's bounding rect.
@@ -990,13 +1145,7 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
   // nearest phase for the tooltip position itself; the tooltip follows the
   // raw mouse x so the user sees a continuous slider feel. Only the seek
   // target snaps to a phase.
-  const hoverPhase = (hoverX !== null && trackRef.current)
-    ? (() => {
-        const rect = trackRef.current.getBoundingClientRect();
-        const pct = Math.max(0, Math.min(1, hoverX / rect.width));
-        return Math.round(pct * (phases.length - 1));
-      })()
-    : null;
+  const hoverPhase = hover !== null ? Math.round(hover.frac * (phases.length - 1)) : null;
 
   const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     setDragging(true);
@@ -1022,7 +1171,8 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
     const el = trackRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    setHoverX(e.clientX - rect.left);
+    const x = e.clientX - rect.left;
+    setHover({ x, frac: Math.max(0, Math.min(1, x / rect.width)) });
   }, []);
 
   const totalSteps = Math.max(1, phases.length - 1);
@@ -1036,16 +1186,16 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
   return (
     <div className="relative w-full select-none" style={{ height: 22, cursor: 'pointer' }}
       onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => { setHovering(false); setHoverX(null); }}
+      onMouseLeave={() => { setHovering(false); setHover(null); }}
       onMouseMove={onTrackMove}
     >
       {/* Tooltip. Floats above the raw mouse x (not the playhead), shows
           the previewed phase number, title, and time marker if known. */}
-      {hoverPhase !== null && hoverX !== null && (
+      {hoverPhase !== null && hover !== null && (
         <div
           className="absolute pointer-events-none"
           style={{
-            left: hoverX,
+            left: hover.x,
             bottom: 26,
             transform: 'translateX(-50%)',
             background: 'rgba(8,10,18,0.95)',

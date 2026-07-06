@@ -144,7 +144,7 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
               destroyed unit (the kill). */}
           {visibleMovements
             .filter((m) => m.kind === 'charge' || m.kind === 'flank')
-            .map((m, i, all) => (
+            .map((m, i) => (
               <ImpactPulse
                 key={`impact-mv-${i}-${phase.index}`}
                 x={scaleX(m.toX, viewW)}
@@ -747,10 +747,9 @@ function UnitBlock({ unit, viewW, paletteCtx }: UnitProps) {
 // keeps the arrow strokes and arrowhead pulses visible at unit-destination
 // points instead of being covered by the label that used to sit in the
 // same group as the body.
-function UnitLabel({ unit, viewW, paletteCtx: _paletteCtx }: UnitProps) {
+function UnitLabel({ unit, viewW }: UnitProps) {
   const x = scaleX(unit.x, viewW);
   const y = unit.y;
-  const w = scaleX(unit.w ?? 8, viewW) - scaleX(0, viewW);
   const h = unit.h ?? 6;
   const dim = unit.status && ['broken', 'routed', 'destroyed'].includes(unit.status);
   const opacity = dim ? 0.45 : unit.status === 'destroyed' ? 0.3 : 0.92;

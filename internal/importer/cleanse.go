@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"unicode/utf8"
@@ -250,18 +251,18 @@ func applyCoordOverrides(ctx context.Context, db *sql.DB) (int, error) {
 // CleanseReport is what the migration returns so the caller can log the work
 // performed without a second pass over the data.
 type CleanseReport struct {
-	BattleTextFixed       int
-	SideTextFixed         int
+	BattleTextFixed        int
+	SideTextFixed          int
 	MissingDatesBackfilled int
-	DateStringsNormalised int
-	YearsAligned          int
-	YearsDerived          int
-	ErasRecomputed        int
-	BlankSidesDropped     int
-	WarNamesCanonicalised int
-	DuplicatesRemoved     int
-	CoordsOverridden      int
-	RichSearchRowsIndexed int
+	DateStringsNormalised  int
+	YearsAligned           int
+	YearsDerived           int
+	ErasRecomputed         int
+	BlankSidesDropped      int
+	WarNamesCanonicalised  int
+	DuplicatesRemoved      int
+	CoordsOverridden       int
+	RichSearchRowsIndexed  int
 }
 
 // Total returns the sum of every fix bucket. Cheap signal for "did the
@@ -455,8 +456,8 @@ func cleanseSides(ctx context.Context, db *sql.DB) (int, error) {
 		return 0, fmt.Errorf("scan sides: %w", err)
 	}
 	type row struct {
-		battleID  string
-		sideIndex int
+		battleID                              string
+		sideIndex                             int
 		name, commander, strength, casualties string
 	}
 	var batch []row
@@ -701,10 +702,8 @@ func yearAcceptable(year int, candidates []int) bool {
 	if len(candidates) == 0 {
 		return true
 	}
-	for _, c := range candidates {
-		if c == year {
-			return true
-		}
+	if slices.Contains(candidates, year) {
+		return true
 	}
 	if len(candidates) >= 2 {
 		lo, hi := candidates[0], candidates[0]
@@ -830,6 +829,8 @@ func dropBlankSides(ctx context.Context, db *sql.DB) (int, error) {
 
 // YearToEra mirrors importer.yearToEra (private) plus the audit script. Kept
 // in this file so the cleanse can apply it without poking into wikidata.go.
+// Post-1945 years split at 1991 (Soviet collapse) into cold-war and
+// contemporary, matching validErasSet and the front-end ERA_COLORS taxonomy.
 func YearToEra(y int) string {
 	switch {
 	case y == 0:
@@ -850,8 +851,10 @@ func YearToEra(y int) string {
 		return "interwar"
 	case y < 1946:
 		return "world-war-2"
+	case y < 1991:
+		return "cold-war"
 	default:
-		return "modern"
+		return "contemporary"
 	}
 }
 
@@ -916,14 +919,14 @@ type warCount struct {
 }
 
 // canonicaliseWarNames performs two passes:
-//   1. Repair comma-joined war names ("Trans-Mississippi Theater of the,
-//      American Civil War" → "Trans-Mississippi Theater of the American Civil
-//      War") by recognising whether the comma split a single name or joined
-//      two distinct wars, and producing a clean canonical string for either
-//      case. The existing warParent classifier then groups the cleaned name
-//      under its parent (American Civil War, World War I, etc.).
-//   2. Collapse spelling variants of the same war (dash style, leading
-//      "the") onto the variant with the most battles.
+//  1. Repair comma-joined war names ("Trans-Mississippi Theater of the,
+//     American Civil War" → "Trans-Mississippi Theater of the American Civil
+//     War") by recognising whether the comma split a single name or joined
+//     two distinct wars, and producing a clean canonical string for either
+//     case. The existing warParent classifier then groups the cleaned name
+//     under its parent (American Civil War, World War I, etc.).
+//  2. Collapse spelling variants of the same war (dash style, leading
+//     "the") onto the variant with the most battles.
 func canonicaliseWarNames(ctx context.Context, db *sql.DB) (int, error) {
 	loadCounts := func() ([]warCount, error) {
 		rows, err := db.QueryContext(ctx,
@@ -1059,29 +1062,30 @@ func canonicaliseWarNames(ctx context.Context, db *sql.DB) (int, error) {
 // wars connected by a conjunction, so we keep only the head ("Haitian
 // Revolution and the, War of the First Coalition" → "Haitian Revolution").
 var (
-	joinPreps = []string{" of the", " of"}
+	joinPreps  = []string{" of the", " of"}
 	splitConjs = []string{" and the", " and"}
 )
 
 // repairCommaWar normalises a comma-joined Wikidata war name into a single
 // canonical form, handling the three real-world cases we see:
-//   1. Artifact comma after a preposition → drop the comma, keep both halves
-//      ("Trans-Mississippi Theater of the, American Civil War" →
-//       "Trans-Mississippi Theater of the American Civil War").
-//   2. Artifact conjunction → keep only the head war
-//      ("Haitian Revolution and the, War of the First Coalition" →
-//       "Haitian Revolution").
-//   3. Two distinct wars joined by a comma → keep the first segment
-//      ("Dakota War of 1862, American Civil War" → "Dakota War of 1862").
+//  1. Artifact comma after a preposition → drop the comma, keep both halves
+//     ("Trans-Mississippi Theater of the, American Civil War" →
+//     "Trans-Mississippi Theater of the American Civil War").
+//  2. Artifact conjunction → keep only the head war
+//     ("Haitian Revolution and the, War of the First Coalition" →
+//     "Haitian Revolution").
+//  3. Two distinct wars joined by a comma → keep the first segment
+//     ("Dakota War of 1862, American Civil War" → "Dakota War of 1862").
+//
 // In every case the result is a clean human-readable name. The existing
 // warParent classifier then groups it under its parent war when applicable.
 func repairCommaWar(name string) string {
-	idx := strings.Index(name, ",")
-	if idx < 0 {
+	before, after, ok := strings.Cut(name, ",")
+	if !ok {
 		return name
 	}
-	before := strings.TrimSpace(name[:idx])
-	after := strings.TrimSpace(strings.TrimPrefix(name[idx+1:], ","))
+	before = strings.TrimSpace(before)
+	after = strings.TrimSpace(after)
 	// Drop wrapping parens that wiki templates leave around the second half.
 	after = strings.TrimSpace(strings.TrimPrefix(after, "("))
 	after = strings.TrimSpace(strings.TrimSuffix(after, ")"))

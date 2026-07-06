@@ -21,11 +21,11 @@ func MigrateDates(ctx context.Context, db *sql.DB) (int, error) {
 	}
 
 	type row struct {
-		id        string
-		year      int
-		date      string
-		curStart  string
-		curEnd    string
+		id       string
+		year     int
+		date     string
+		curStart string
+		curEnd   string
 	}
 	var pending []row
 	for rows.Next() {

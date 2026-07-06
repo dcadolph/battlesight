@@ -11,8 +11,6 @@
 // Public API is a small singleton mirroring SoundEngine. Callers do not
 // construct the engine themselves, they call the wrapper functions.
 
-import { themeForEra } from '../theme/era';
-
 // VoiceConfig describes one oscillator in the ambient pad. Each era picks a
 // set of these and the chord they form together is what the listener hears.
 interface VoiceConfig {

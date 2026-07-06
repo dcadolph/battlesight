@@ -21,6 +21,10 @@ type Replay struct {
 	// Schematic is true when the replay was generated automatically from
 	// the battle's metadata rather than hand-curated.
 	Schematic bool `json:"schematic,omitempty"`
+	// Origin records how the replay was produced: "curated" for
+	// hand-authored, "drafted" for pipeline drafts awaiting promotion.
+	// Empty means curated (legacy entries).
+	Origin string `json:"origin,omitempty"`
 	// Phases is the ordered sequence of phases.
 	Phases []Phase `json:"phases"`
 }

@@ -26,6 +26,10 @@
 // ============================================================================
 
 export interface Replay {
+  // origin records how the replay was produced: "curated" for
+  // hand-authored, "drafted" for pipeline drafts awaiting promotion.
+  // Absent means curated (legacy entries).
+  origin?: 'curated' | 'drafted';
   battleId: string;
   title: string;
   intro: string;

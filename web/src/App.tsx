@@ -365,7 +365,21 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [replayBattle, introVisible, historyMode, showPlayback]);
 
+  // cinematicHaltTick tells WarPlayback the viewer closed the inner
+  // replay overlay by hand: the cinematic must stop, not open the next
+  // battle over the top of the exit.
+  const [cinematicHaltTick, setCinematicHaltTick] = useState(0);
+
   const handleBattleClick = useCallback((battle: Battle) => {
+    // Picking a battle while a replay overlay is up (searching from
+    // inside a replay) must first tear the old replay down, or the
+    // selection lands invisibly underneath it and reads as limbo.
+    if (replayBattle) {
+      if (replayCinematic) setCinematicHaltTick((t) => t + 1);
+      setReplayCinematic(false);
+      setReplayBattle(null);
+      setReplayPhase(0);
+    }
     setSelectedBattle(battle);
     setPanelDismissed(false);
     // Picking any battle ends the intro overlay. Otherwise the featured-battle
@@ -375,7 +389,7 @@ export default function App() {
       setIntroVisible(false);
       localStorage.setItem('bt.intro_seen', '1');
     }
-  }, [introVisible]);
+  }, [introVisible, replayBattle, replayCinematic]);
 
   // Closing the dossier returns to the bare globe but keeps the battle's
   // dot painted in place. The user can re-open the dossier by clicking
@@ -425,10 +439,6 @@ export default function App() {
     setReplayCinematic(false);
   }, [selectedBattle]);
 
-  // cinematicHaltTick tells WarPlayback the viewer closed the inner
-  // replay overlay by hand: the cinematic must stop, not open the next
-  // battle over the top of the exit.
-  const [cinematicHaltTick, setCinematicHaltTick] = useState(0);
   const handleCloseReplay = useCallback(() => {
     setReplayBattle(null);
     setReplayPhase(0);
@@ -898,7 +908,7 @@ export default function App() {
           cinematic battle replay is active so the search box doesn't
           float over the cinematic action. The user closes the replay
           (or the war cinematic overlay) to get it back. */}
-      {!(replayBattle && replayCinematic) && <CommandBar
+      {!replayBattle && <CommandBar
         filters={filters}
         onFiltersChange={(next) => {
           // Applying any filter clears the stale selectedBattle so the
@@ -1014,14 +1024,16 @@ export default function App() {
         }}
       />
 
-      <TimelineSlider
-        min={MIN_YEAR}
-        max={MAX_YEAR}
-        value={effectiveYearRange}
-        onChange={setYearRange}
-        battleCount={globeBattles.length}
-        battles={battles}
-      />
+      {!replayBattle && (
+        <TimelineSlider
+          min={MIN_YEAR}
+          max={MAX_YEAR}
+          value={effectiveYearRange}
+          onChange={setYearRange}
+          battleCount={globeBattles.length}
+          battles={battles}
+        />
+      )}
 
       {/* Cinematic title card. Keyed on battle id so each new selection
           remounts and re-fires the appear / hold / clear animation. Suppressed

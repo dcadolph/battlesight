@@ -24,8 +24,8 @@ type DateRange struct {
 
 var (
 	// "14 July 1864" or "July 14, 1864"
-	dmyRe  = regexp.MustCompile(`(?i)(\d{1,2})\s+([A-Za-z]+)\s+(\d{3,4})`)
-	mdyRe  = regexp.MustCompile(`(?i)([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{3,4})`)
+	dmyRe = regexp.MustCompile(`(?i)(\d{1,2})\s+([A-Za-z]+)\s+(\d{3,4})`)
+	mdyRe = regexp.MustCompile(`(?i)([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{3,4})`)
 	// "July 14–15, 1864" or "14–15 July 1864". Word boundaries on the day
 	// captures so dayRangeRe2 cannot match "1914 – 11 July 1915" by grabbing
 	// the trailing "14" out of "1914" (a real-world bug — produced date_start

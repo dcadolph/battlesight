@@ -323,8 +323,8 @@ func (s *Store) BattlesByCommander(ctx context.Context, name string, limit, offs
 			// separated commander entry (which by curator convention is
 			// the senior commander on that side).
 			first := cmd
-			if i := strings.Index(cmd, ","); i >= 0 {
-				first = cmd[:i]
+			if before, _, ok0 := strings.Cut(cmd, ","); ok0 {
+				first = before
 			}
 			if strings.Contains(first, needleLower) {
 				role = "led"
@@ -909,8 +909,8 @@ func findRange(s string, nums []int) ([2]int, bool) {
 	}
 	low := strings.ToLower(s)
 	for _, sep := range []string{"–", "—", " to ", "-"} {
-		idx := strings.Index(low, sep)
-		if idx < 0 {
+		found := strings.Contains(low, sep)
+		if !found {
 			continue
 		}
 		left := nums[0]
@@ -1093,7 +1093,7 @@ func scanBattle(row *sql.Row, b *Battle) error {
 
 // prefixCols copies a comma-separated column list and prefixes each column
 // with the given table alias. Splits on top-level commas only — commas
-// inside function arguments (e.g. COALESCE(x, '')) are preserved.
+// inside function arguments (e.g. COALESCE(x, ”)) are preserved.
 func prefixCols(prefix, cols string) string {
 	if cols == "" {
 		return ""

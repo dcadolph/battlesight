@@ -157,9 +157,9 @@ export function cleanProseText(s: string | undefined | null): string {
   out = out.replace(/\{\{[^{}]*\}\}/g, '');
   // Drop file/image embeds entirely: "[[File:foo.jpg|thumb|caption]]" or
   // any bracket block that starts with File:/Image:/Media:.
-  out = out.replace(/\[\[(?:File|Image|Media):[^\[\]]*\]\]/gi, '');
+  out = out.replace(/\[\[(?:File|Image|Media):[^[\]]*\]\]/gi, '');
   // Resolve wiki links: prefer the display label after the pipe.
-  out = out.replace(/\[\[([^\[\]|]*\|)?([^\[\]]+)\]\]/g, (_, _pre, label) => label);
+  out = out.replace(/\[\[([^[\]|]*\|)?([^[\]]+)\]\]/g, (_, _pre, label) => label);
   // Strip the "thumb|" / "left|" / "right|" / "300px|" caption prefix
   // chain that occasionally survives when an image caption sentence
   // was lifted out of its surrounding [[File:...]] block. Handles a

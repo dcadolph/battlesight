@@ -40,7 +40,7 @@ func TestGenerateReplay(t *testing.T) {
 			Want3:     true,
 		},
 		{
-			Name: "single side still produces a replay",
+			Name: "single side produces no replay",
 			In: Battle{
 				ID:   "x",
 				Name: "Skirmish",
@@ -49,8 +49,7 @@ func TestGenerateReplay(t *testing.T) {
 					{Name: "Force A"},
 				},
 			},
-			WantOK: true,
-			Want3:  true,
+			WantOK: false,
 		},
 		{
 			Name: "naval battle gets ship unit type and coast terrain",

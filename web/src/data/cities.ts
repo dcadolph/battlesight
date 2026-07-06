@@ -87,12 +87,12 @@ export const CITIES: CityLabel[] = [
   { name: 'Waterloo', lat: 50.6803, lng: 4.4124, tier: 2 },
 ];
 
-// HI_RES_EARTH is the NASA Blue Marble Next Generation color texture at
-// 5400x2700, self-hosted from /public/textures so it's same-origin (no CORS
-// surprises) and we control caching. ~2.2MB; cached after first load. The
-// resolution boost (2K → 5.4K) is what makes close-zoom replays not look like
-// a pixel smear.
-export const HI_RES_EARTH = '/textures/earth-blue-marble-5k.jpg';
+// HI_RES_EARTH is the Earth day-color texture at 8192x4096 (Solar
+// System Scope, CC BY 4.0), self-hosted from /public/textures so it's
+// same-origin (no CORS surprises) and we control caching. ~4.6MB;
+// cached after first load. The resolution boost is what makes
+// close-zoom framings not look like a pixel smear.
+export const HI_RES_EARTH = '/textures/earth-blue-marble-8k.jpg';
 
 // TOPOLOGY_BUMP gives the globe a relief feel. Bumpy mountains and ocean
 // floor. Used as bump map on top of HI_RES_EARTH.

@@ -50,18 +50,18 @@ type Report struct {
 	Distribution map[string]int // bracket → count
 	ByEra        []EraStats
 	ByRegion     []RegionStats
-	ByWar        []WarStats   // top 30 wars by battle count
-	WorstByID    []Score      // bottom 20 with verified=1 (need repair)
-	StarsByID    []Score      // top 20 by score, useful as anchors
+	ByWar        []WarStats // top 30 wars by battle count
+	WorstByID    []Score    // bottom 20 with verified=1 (need repair)
+	StarsByID    []Score    // top 20 by score, useful as anchors
 }
 
 // EraStats is one row of the per-era coverage breakdown.
 type EraStats struct {
-	Era         string
-	Count       int
-	Avg         float64
-	PctOver85   float64
-	PctUnder30  float64
+	Era        string
+	Count      int
+	Avg        float64
+	PctOver85  float64
+	PctUnder30 float64
 }
 
 // RegionStats is one row of the rough continental breakdown computed from
@@ -237,13 +237,13 @@ func Compute(ctx context.Context, db *sql.DB) (*Report, error) {
 // scoreInputs bundles the per-battle ingredients of a quality score so
 // scoreBattle stays a pure function of inputs (testable, no DB).
 type scoreInputs struct {
-	lat, lng                       float64
-	date                           string
-	sideCount                      int
-	hasCasualty, hasCommander      bool
-	summaryLen, sigLen             int
-	victor                         string
-	refCount                       int
+	lat, lng                  float64
+	date                      string
+	sideCount                 int
+	hasCasualty, hasCommander bool
+	summaryLen, sigLen        int
+	victor                    string
+	refCount                  int
 }
 
 func scoreBattle(in scoreInputs) int {

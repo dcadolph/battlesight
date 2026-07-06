@@ -21,6 +21,10 @@ type Replay struct {
 	// Schematic is true when the replay was generated automatically from
 	// the battle's metadata rather than hand-curated.
 	Schematic bool `json:"schematic,omitempty"`
+	// Origin records how the replay was produced: "curated" for
+	// hand-authored, "drafted" for pipeline drafts awaiting promotion.
+	// Empty means curated (legacy entries).
+	Origin string `json:"origin,omitempty"`
 	// Phases is the ordered sequence of phases.
 	Phases []Phase `json:"phases"`
 }
@@ -62,6 +66,13 @@ type Phase struct {
 	// CameraTweenMs is the duration of the camera fly-in for this phase.
 	// Defaults to 900ms when omitted.
 	CameraTweenMs int `json:"cameraTweenMs,omitempty"`
+	// CameraBearing overrides the tactical camera's auto-bearing in
+	// degrees. When omitted the renderer derives a restrained rotation
+	// from the focal movement's axis of advance.
+	CameraBearing float64 `json:"cameraBearing,omitempty"`
+	// CameraPitch overrides the tactical camera's tilt in degrees. When
+	// omitted the renderer derives pitch from CameraAltitude.
+	CameraPitch float64 `json:"cameraPitch,omitempty"`
 	// ControlRegions paints territorial state under the arrows. Each region
 	// is a closed lat/lng polygon tinted by its controller. The renderer
 	// tweens fill color when the same region's controller changes between
@@ -98,6 +109,10 @@ type FocusRect struct {
 
 // Unit is a force unit positioned on the tactical map.
 type Unit struct {
+	// ID is the stable identity of this formation across phases. When set,
+	// the renderer glides the unit between its per-phase positions instead
+	// of cutting. Unset units fall back to a label+faction identity.
+	ID string `json:"id,omitempty"`
 	// Label is the unit name, like "Roman center" or "Pickett's division".
 	Label string `json:"label"`
 	// Faction identifies the side: "a", "b", or "c".

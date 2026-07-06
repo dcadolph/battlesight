@@ -78,8 +78,6 @@ export default function CommandBar({
   battleCount,
   onHistoryPlay,
   historyActive,
-  soundOn,
-  onToggleSound,
   onResetView,
   onWarSelect,
   onCommanderSelect,

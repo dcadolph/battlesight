@@ -1,0 +1,29 @@
+{
+  "id": "easter-offensive-1972",
+  "name": "Easter Offensive",
+  "year": 1972,
+  "date": "30 March – 22 October 1972",
+  "lat": 16.75,
+  "lng": 107.19,
+  "era": "cold-war",
+  "war": "Vietnam War",
+  "battleType": "land",
+  "sides": [
+    {
+      "name": "South Vietnam and the United States",
+      "commander": "Creighton Abrams (MACV), Ngô Quang Trưởng (I Corps from early May, after Hoàng Xuân Lãm was relieved), Nguyễn Văn Minh (III Corps)",
+      "strength": "About 758,000 South Vietnamese regulars and territorials with 550 tanks and 900 armored personnel carriers, backed by rebuilt American air power and the guns of the Seventh Fleet",
+      "casualties": "Roughly 30,000 ARVN killed, 78,000 wounded, and 14,000 missing, about 300 Americans killed and 1,500 wounded, with more than 25,000 civilians dead and nearly a million driven from their homes"
+    },
+    {
+      "name": "North Vietnam and the Viet Cong",
+      "commander": "Văn Tiến Dũng (PAVN chief of staff), with Lê Trọng Tấn, Hoàng Minh Thảo, and Trần Văn Trà directing the fronts",
+      "strength": "About 300,000 troops in fourteen divisions and two dozen independent regiments, with several hundred T-54 and PT-76 tanks, 130mm guns, and the first SA-7 missiles seen in the South",
+      "casualties": "American estimates run past 100,000 casualties, including some 40,000 killed, with several hundred tanks and armored vehicles destroyed"
+    }
+  ],
+  "victor": "South Vietnam and the United States",
+  "summary": "At noon on 30 March 1972 North Vietnam abandoned guerrilla war for a conventional invasion, striking on three fronts at once behind tanks and 130mm artillery. In the north the PAVN came straight across the DMZ, collapsed the green ARVN 3rd Division, and took Quang Tri City on 2 May while shellfire fell on the refugee columns streaming down Route 1. In the Central Highlands Tan Canh was overrun and Kontum besieged. On Route 13 north of Saigon three divisions surrounded An Loc, whose garrison held through nearly three months of tank assaults supplied only by air. Ngô Quang Trưởng took over I Corps and stopped the northern drive on the My Chanh River, Nixon answered with Operation Linebacker and the mining of Haiphong, and B-52s broke each new assault as it massed. The counteroffensive that opened on 28 June ground north for eleven weeks until South Vietnamese marines raised the flag over the Quang Tri citadel on 16 September.",
+  "significance": "The offensive was the great test of Vietnamization, and the verdict cut both ways. South Vietnamese soldiers held Kontum, An Loc, and the My Chanh line, but only under an American air umbrella flying tens of thousands of sorties, and the ARVN command in the north had to be rebuilt in the middle of the battle. Hanoi lost perhaps 100,000 men yet kept a belt of captured border territory that became the springboard for the final offensive of 1975. The bloody stalemate pushed both sides back to the table in Paris, produced the accords of January 1973, and sent the Americans home. When the PAVN came again three years later, the air umbrella was gone.",
+  "wikipediaTitle": "Easter Offensive"
+}

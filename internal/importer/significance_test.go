@@ -37,20 +37,20 @@ func TestExtractSignificance(t *testing.T) {
 		},
 		// Test 2: No qualifying section returns empty.
 		{
-			Name: "no_qualifying_section",
-			Wikitext: "== Background ==\nSome setup.\n\n== Forces ==\nForce sizes.\n",
+			Name:      "no_qualifying_section",
+			Wikitext:  "== Background ==\nSome setup.\n\n== Forces ==\nForce sizes.\n",
 			WantEmpty: true,
 		},
 		// Test 3: First-paragraph "see also" hatnote is skipped in favour of
 		// the second prose paragraph.
 		{
-			Name: "skip_hatnote",
-			Wikitext: "== Aftermath ==\n{{see also|Treaty of Whatever}}\n\nThe real aftermath prose paragraph spans several sentences and discusses the political and military consequences of the battle in some detail.\n",
+			Name:        "skip_hatnote",
+			Wikitext:    "== Aftermath ==\n{{see also|Treaty of Whatever}}\n\nThe real aftermath prose paragraph spans several sentences and discusses the political and military consequences of the battle in some detail.\n",
 			WantContain: "real aftermath prose",
 		},
 		// Test 4: Cap at sentence boundary near 800 chars.
 		{
-			Name: "long_paragraph_truncated_at_sentence",
+			Name:     "long_paragraph_truncated_at_sentence",
 			Wikitext: "== Aftermath ==\n" + strings.Repeat("Filler sentence here. ", 60) + "End.\n",
 			// 60 * 22 chars = ~1320 chars. Truncated to <= 800 ending in
 			// either '.' or '!' or '?' from one of the filler sentences.

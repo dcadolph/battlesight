@@ -12,8 +12,8 @@ import (
 // union") are checked before broader ones (e.g. "russian") so a Cold War
 // belligerent does not also accrue a tsarist-era label.
 type countryPattern struct {
-	Name     string
-	Phrases  []string
+	Name    string
+	Phrases []string
 }
 
 // countryPatterns drives the side-to-country mapping. Each entry is matched

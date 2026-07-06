@@ -1,0 +1,29 @@
+{
+  "id": "tobruk-1941",
+  "name": "Siege of Tobruk",
+  "year": 1941,
+  "date": "10 April – 27 November 1941",
+  "lat": 32.08,
+  "lng": 23.96,
+  "era": "world-war-2",
+  "war": "World War II",
+  "battleType": "siege",
+  "sides": [
+    {
+      "name": "Allied garrison (Australia, United Kingdom, India, Poland, Czechoslovakia)",
+      "commander": "Leslie Morshead (April to September), Ronald Scobie (September to November)",
+      "strength": "About 27,000 troops built around the Australian 9th Division and the 18th Brigade of the 7th, with British gunners and tank crews, relieved from August by the British 70th Division, the Polish Carpathian Rifle Brigade, and the Czechoslovak 11th Battalion",
+      "casualties": "About 5,989 ground casualties, 3,194 of them Australian, plus around 780 naval casualties and more than 60 ships sunk or damaged keeping the fortress supplied"
+    },
+    {
+      "name": "Axis (Germany and Italy)",
+      "commander": "Erwin Rommel (Afrika Korps, later Panzergruppe Afrika), Gastone Gambara (Italian mobile corps)",
+      "strength": "About 35,000 besieging troops of the Afrika Korps and the Italian Brescia, Pavia, Trento, Bologna, and Ariete divisions, with Stuka groups flying from nearby fields",
+      "casualties": "Around 12,296 killed, wounded, missing, or captured, and between 74 and 150 aircraft lost"
+    }
+  ],
+  "victor": "Allied garrison (Australia, United Kingdom, India, Poland, Czechoslovakia)",
+  "summary": "Rommel's first offensive threw the British out of Cyrenaica in two weeks, but the Australian 9th Division fell back into the old Italian fortress at Tobruk and refused to move. Behind a 30-mile arc of concrete posts, wire, and anti-tank ditch, Morshead's garrison shattered the first assault on 13 and 14 April, the Easter Battle, trapping the infiltrating machine-gun battalion and stripping the panzers from their infantry with 25-pounders firing over open sights. A second attack at Ras el Medauar in early May bit a salient into the western perimeter and went no further. Through the summer the garrison ruled no man's land with night patrols while destroyers of the Tobruk Ferry Service sprinted in from Alexandria on moonless nights with stores and fresh battalions, taking most of the Australians out again between August and October. When Operation Crusader opened on 18 November the garrison attacked outward, took Ed Duda ridge, and met the New Zealanders there on 27 November. Rommel abandoned the siege lines in the first week of December, 241 days after they closed.",
+  "significance": "Tobruk was the first place a German land offensive had been stopped and held anywhere in the war. The fortress denied Rommel the only major port between Benghazi and Alexandria, stretched every ton of Axis supply along more than 1,000 miles of coast road, and capped how far into Egypt he could reach. The defense fixed four Italian divisions and much of the Afrika Korps for eight months and bought the Eighth Army time to rebuild for Crusader. Radio Berlin sneered that the defenders were rats caught in a trap, and the Rats of Tobruk became one of the founding legends of the Australian army. When the fortress fell to Rommel in a single day the following June, the shock was measured against what the Rats had held.",
+  "wikipediaTitle": "Siege of Tobruk"
+}

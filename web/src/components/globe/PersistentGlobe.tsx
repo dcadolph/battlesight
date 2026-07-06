@@ -47,10 +47,6 @@ interface PersistentGlobeProps {
   // country gets its controller's accent. Keyed by canonical country
   // name; the COUNTRY_NAME_ALIASES table handles atlas mismatches.
   warCountryColors?: Record<string, string>;
-  // territoryLabel is the short caption shown briefly when a new snapshot
-  // takes effect ("June 1944: D-Day, Bagration"). Drives a HUD overlay so
-  // the user reads the campaign beat as a labeled stage.
-  territoryLabel?: string;
   // warFactionAnchors lists one anchor country per controlling power in
   // the active snapshot. Drives the editorial typography label layer so
   // each bloc shows its faction name in small-caps over its mainland (the
@@ -67,6 +63,10 @@ interface PersistentGlobeProps {
   // them as rippling pulses on a bare Earth. 'all': existing behavior
   // with every battle in the catalog as a colored pillar.
   landingMode?: 'current' | 'all';
+  // paused halts the globe's render loop entirely. Set while a battle
+  // replay covers the screen so the hidden globe stops burning GPU
+  // frames behind the opaque overlay.
+  paused?: boolean;
 }
 
 // CURRENT_CONFLICT_KEYWORDS matches the war field (lowercased) for
@@ -183,7 +183,7 @@ function battleMagnitude(b: Battle): number {
   return Math.max(0, Math.min(1, (v - 2) / 4));
 }
 
-export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, territoryLabel, warFactionAnchors, warSnapshotYear, landingMode = 'current' }: PersistentGlobeProps) {
+export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, warFactionAnchors, warSnapshotYear, landingMode = 'current', paused = false }: PersistentGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
@@ -289,6 +289,7 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       color: ERA_COLORS[b.era] || '#ffffff',
       expires: tNow + 2200,
     }));
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Appends transient ignition pulses when new battles enter the visible set; imperative animation bookkeeping, not derivable state.
     setIgnitionRings((prev) => {
       const alive = prev.filter((r) => r.expires > tNow);
       return [...alive, ...additions];
@@ -388,24 +389,6 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
     return () => clearInterval(id);
   }, [traceArcs.length]);
 
-  // Hard-clear all transient ring/arc layers whenever EITHER the war context
-  // goes away (warCountryColors empty/undefined) OR no battle is selected.
-  // Both are signals that the user is back on the bare main globe and
-  // shouldn't see leftover rings or campaign-trace arcs from a previous
-  // cinematic. Also resets the initial-burst guard so the next selection
-  // lands cleanly.
-  useEffect(() => {
-    const noWar = !warCountryColors || Object.keys(warCountryColors).length === 0;
-    const noSelection = !selectedBattle;
-    if (noWar && noSelection) {
-      setIgnitionRings([]);
-      setTraceArcs([]);
-      setFlipRings([]);
-      suppressInitialBurstRef.current = true;
-      lastSelectedRef.current = null;
-    }
-  }, [warCountryColors, selectedBattle]);
-
   // Territory-flip pulses: when the war cinematic crosses a snapshot
   // boundary and a country's owner changes color, emit a brief ring at
   // that country's centroid so the user catches the flip even when the
@@ -448,6 +431,7 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       });
     }
     if (fresh.length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Appends transient territory-flip pulses when the snapshot ownership changes; imperative animation bookkeeping, not derivable state.
     setFlipRings((prev) => {
       const alive = prev.filter((r) => r.expires > tNow);
       return [...alive, ...fresh];
@@ -462,6 +446,25 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
     }, 500);
     return () => clearInterval(id);
   }, [flipRings.length]);
+
+  // Hard-clear all transient ring/arc layers whenever EITHER the war context
+  // goes away (warCountryColors empty/undefined) OR no battle is selected.
+  // Both are signals that the user is back on the bare main globe and
+  // shouldn't see leftover rings or campaign-trace arcs from a previous
+  // cinematic. Also resets the initial-burst guard so the next selection
+  // lands cleanly.
+  useEffect(() => {
+    const noWar = !warCountryColors || Object.keys(warCountryColors).length === 0;
+    const noSelection = !selectedBattle;
+    if (noWar && noSelection) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Clears transient animation layers when the war/selection context empties; imperative bookkeeping, not derivable state.
+      setIgnitionRings([]);
+      setTraceArcs([]);
+      setFlipRings([]);
+      suppressInitialBurstRef.current = true;
+      lastSelectedRef.current = null;
+    }
+  }, [warCountryColors, selectedBattle]);
 
   // Focus rings: a bright doppler pulse pinned to the currently selected
   // battle. Three concentric copies stacked so the rings cascade outward
@@ -516,14 +519,10 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
   );
 
   useEffect(() => {
-    // Synchronously read the shared cache when it is already hot — most
-    // mounts after the first hit this fast path and paint polygons on the
-    // first frame. Otherwise wait on the in-flight parse promise.
-    const cached = worldCountriesCache();
-    if (cached) {
-      setCountries(cached);
-      return;
-    }
+    // The state initializer above already reads the hot cache synchronously,
+    // so most mounts paint polygons on the first frame. This effect covers
+    // the cold path; on a hot cache the promise resolves immediately with
+    // the same array reference and the setState bails out.
     let cancelled = false;
     loadWorldCountries()
       .then((feats) => { if (!cancelled) setCountries(feats); })
@@ -650,6 +649,56 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Halt the render loop while an opaque replay covers the screen. Two
+  // concurrent WebGL contexts were rasterizing during every battle
+  // replay; the hidden one is pure waste.
+  useEffect(() => {
+    const globe = globeRef.current;
+    if (!globe) return;
+    if (paused) globe.pauseAnimation();
+    else globe.resumeAnimation();
+  }, [paused]);
+
+  // cameraPov tracks the globe camera's facing at a coarse cadence so
+  // the faction-label layer can hemisphere-cull. htmlElementsData DOM
+  // nodes have no depth test: without the cull a far-side anchor
+  // (an Australia label during a Pacific war) bleeds through onto the
+  // visible face. 400ms poll: culling is a per-phase concern, not a
+  // per-frame one, and polling avoids per-frame listener churn.
+  const [cameraPov, setCameraPov] = useState<{ lat: number; lng: number }>({ lat: 42, lng: 22 });
+  const hasFactionLabels = !!(warFactionAnchors && warFactionAnchors.length > 0);
+  useEffect(() => {
+    if (!hasFactionLabels) return;
+    const timer = setInterval(() => {
+      const globe = globeRef.current;
+      if (!globe) return;
+      const pov = globe.pointOfView() as { lat: number; lng: number };
+      if (!pov || !Number.isFinite(pov.lat) || !Number.isFinite(pov.lng)) return;
+      setCameraPov((prev) => {
+        const moved = Math.abs(prev.lat - pov.lat) > 2 || Math.abs(prev.lng - pov.lng) > 2;
+        return moved ? { lat: pov.lat, lng: pov.lng } : prev;
+      });
+    }, 400);
+    return () => clearInterval(timer);
+  }, [hasFactionLabels]);
+
+  // visibleFactionLabels drops anchors more than 88 degrees of great-
+  // circle from the camera facing, i.e. on the far hemisphere.
+  const visibleFactionLabels = useMemo(() => {
+    if (factionLabels.length === 0) return factionLabels;
+    const camLat = (cameraPov.lat * Math.PI) / 180;
+    const camLng = (cameraPov.lng * Math.PI) / 180;
+    const limit = Math.cos((88 * Math.PI) / 180);
+    return factionLabels.filter((l) => {
+      const lat = (l.lat * Math.PI) / 180;
+      const lng = (l.lng * Math.PI) / 180;
+      const cosAngle =
+        Math.sin(camLat) * Math.sin(lat) +
+        Math.cos(camLat) * Math.cos(lat) * Math.cos(lng - camLng);
+      return cosAngle > limit;
+    });
+  }, [factionLabels, cameraPov]);
 
   // Keep a ref to the latest selectedBattle so listener closures don't go stale
   // without re-binding (which would also reset the camera).
@@ -965,10 +1014,11 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       pointsMerge={false}
       pointsTransitionDuration={0}
       // pointResolution drives the segment count of the extruded point
-      // cylinders. 6 reads as hexagonal prisms which feels chunky at globe
-      // scale; 20 reads as smooth pillars without measurable GPU cost at
-      // this point count.
-      pointResolution={20}
+      // cylinders. Each battle is its own mesh (merge would kill click
+      // handling), so segment count scales draw cost directly: 12 still
+      // reads as a smooth pillar at globe scale, and the full-catalog
+      // landing drops to 6 to keep ~12k cylinders viable.
+      pointResolution={visibleBattles.length > 2000 ? 6 : 12}
       ringsData={rings}
       ringLat="lat"
       ringLng="lng"
@@ -1038,7 +1088,7 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       polygonAltitude={() => 0.002}
       polygonsTransitionDuration={650}
       polygonLabel={polygonLabel}
-      htmlElementsData={factionLabels}
+      htmlElementsData={visibleFactionLabels}
       htmlLat={(d: object) => (d as { lat: number }).lat}
       htmlLng={(d: object) => (d as { lng: number }).lng}
       htmlAltitude={0.014}

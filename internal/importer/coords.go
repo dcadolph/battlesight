@@ -92,10 +92,7 @@ func EnrichCoordinates(ctx context.Context, db *sql.DB) (int, error) {
 	batchSize := 30
 
 	for i := 0; i < len(pending); i += batchSize {
-		end := i + batchSize
-		if end > len(pending) {
-			end = len(pending)
-		}
+		end := min(i+batchSize, len(pending))
 		batch := pending[i:end]
 
 		titles := make([]string, len(batch))
@@ -304,12 +301,12 @@ func fetchCoordinates(ctx context.Context, titles []string) (map[string]coordPai
 		return nil, nil
 	}
 	params := url.Values{
-		"action":  {"query"},
-		"prop":    {"coordinates"},
-		"coprop":  {"type|name|globe"},
+		"action":    {"query"},
+		"prop":      {"coordinates"},
+		"coprop":    {"type|name|globe"},
 		"coprimary": {"primary"},
-		"titles":  {strings.Join(titles, "|")},
-		"format":  {"json"},
+		"titles":    {strings.Join(titles, "|")},
+		"format":    {"json"},
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, wikipediaAPI+"?"+params.Encode(), nil)
@@ -366,15 +363,24 @@ func parseCoordTemplate(wikitext string) (float64, float64) {
 		return 0, 0
 	}
 
-	// Try decimal format first: {{coord|51.5|-0.12|...}}
+	// Hemisphere letters mean DMS (or decimal-with-hemisphere) form. The
+	// check must come before the decimal attempt: {{coord|34|15|20.4|N|...}}
+	// would otherwise parse as lat=34, lng=15, silently corrupting the
+	// coordinate with the latitude's own minutes value.
+	for _, p := range parts {
+		switch strings.TrimSpace(p) {
+		case "N", "S", "E", "W":
+			return parseDMS(parts)
+		}
+	}
+
+	// Decimal format: {{coord|51.5|-0.12|...}}
 	lat, errLat := strconv.ParseFloat(parts[0], 64)
 	lng, errLng := strconv.ParseFloat(parts[1], 64)
 	if errLat == nil && errLng == nil && isValidCoord(lat, lng) {
 		return lat, lng
 	}
-
-	// DMS format: {{coord|D|M|S|N|D|M|S|W|...}}
-	return parseDMS(parts)
+	return 0, 0
 }
 
 // parseDMS parses degrees/minutes/seconds from coord template parts.

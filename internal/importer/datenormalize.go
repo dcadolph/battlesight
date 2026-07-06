@@ -206,4 +206,3 @@ func canoniseDateStrings(ctx context.Context, db *sql.DB) (int, error) {
 	}
 	return rewritten, nil
 }
-

@@ -56,6 +56,10 @@ interface WarPlaybackProps {
   // from getting trapped on the outro card when the dwell budget is
   // shorter than the actual phase total.
   cinematicAdvanceTick?: number;
+  // cinematicHaltTick increments when the viewer closes the inner
+  // replay overlay by hand. The cinematic must stand down instead of
+  // opening the next battle over the top of their exit.
+  cinematicHaltTick?: number;
   // cinematicPrevTick increments when the user clicks "Previous battle"
   // on the cinematic outro card. WarPlayback rewinds the group index by
   // one and re-focuses that battle.
@@ -221,13 +225,38 @@ function groupConcurrentBattles(battles: Battle[]): BattleGroup[] {
   return groups;
 }
 
-export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, onWarTerritory, initialWar, cinematicAdvanceTick = 0, cinematicPrevTick = 0 }: WarPlaybackProps) {
+// EMPTY_BATTLES keeps the derived battle list referentially stable while no
+// fetch has landed for the selected war.
+const EMPTY_BATTLES: Battle[] = [];
+
+// WarSummaryData is the /api/wars/summary response shape used by the
+// cinematic overlay's closing card.
+interface WarSummaryData {
+  outcome?: string;
+  aftermath?: string;
+  notable?: string[];
+  yearStart: number;
+  yearEnd: number;
+  battleCount: number;
+  totalCasualties: number;
+  humanDeaths?: number;
+  curatedStartYear?: number;
+  curatedEndYear?: number;
+  finalVictor?: string;
+}
+
+export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, onWarTerritory, initialWar, cinematicAdvanceTick = 0, cinematicPrevTick = 0, cinematicHaltTick = 0 }: WarPlaybackProps) {
   const [wars, setWars] = useState<WarCount[]>([]);
   const [warSearch, setWarSearch] = useState('');
   const [warSort, setWarSort] = useState<WarSort>('casualties');
   const [selectedWar, setSelectedWar] = useState(initialWar || '');
-  const [battles, setBattles] = useState<Battle[]>([]);
-  const [battlesLoading, setBattlesLoading] = useState(false);
+  // battlesFetch tags each fetched battle list with the war it answers for.
+  // Both the visible list and the loading flag derive from the tag during
+  // render, so switching wars empties the list and reads as loading with no
+  // imperative resets.
+  const [battlesFetch, setBattlesFetch] = useState<{ war: string; list: Battle[] } | null>(null);
+  const battles = battlesFetch && battlesFetch.war === selectedWar ? battlesFetch.list : EMPTY_BATTLES;
+  const battlesLoading = !!selectedWar && (!battlesFetch || battlesFetch.war !== selectedWar);
   const [groupIndex, setGroupIndex] = useState(0);
   const [subIndex, setSubIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -273,24 +302,30 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     });
     return groupConcurrentBattles(merged.length >= 3 ? merged : battles);
   }, [battles, cinematic]);
-  const [speed, setSpeed] = useState(4000);
+  // Manual-mode dwell per battle in ms. Fixed; cinematic mode derives
+  // its own dwell from the replay length.
+  const speed = 4000;
   const [detail, setDetail] = useState<Battle | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [warSummaryLoading, setWarSummaryLoading] = useState(false);
-  // initialPaneLoaded is set true once we've successfully loaded the FIRST
-  // (battles list + battle detail + war summary) round for this war. It
-  // suppresses re-showing the full-pane loading on subsequent battle hops
-  // — those finish in ~50-200ms and don't need a heavy overlay.
-  const [initialPaneLoaded, setInitialPaneLoaded] = useState(false);
+  // paneLoadedWar latches the war whose FIRST (battles list + battle detail
+  // + war summary) round has fully settled; initialPaneLoaded derives from
+  // it, flipping false the moment another war is selected. It suppresses
+  // re-showing the full-pane loading on subsequent battle hops — those
+  // finish in ~50-200ms and don't need a heavy overlay.
+  const [paneLoadedWar, setPaneLoadedWar] = useState<string | null>(null);
+  const initialPaneLoaded = !!selectedWar && paneLoadedWar === selectedWar;
   // cinematicStage drives the full-screen war overlay: an opening title
   // card before the first battle plays, the playthrough itself, then a
   // closing aftermath card. The existing per-battle playback loop runs
   // unchanged under the 'playing' stage; the overlay is purely additive.
   const [cinematicStage, setCinematicStage] = useState<'none' | 'overture' | 'playing' | 'aftermath'>('none');
-  // warSummary mirrors the data the WarSummaryCard fetches so the
-  // cinematic overlay can show outcome and aftermath text on the
-  // closing card without a second round trip.
-  const [warSummary, setWarSummary] = useState<{ outcome?: string; aftermath?: string; notable?: string[]; yearStart: number; yearEnd: number; battleCount: number; totalCasualties: number; humanDeaths?: number; curatedStartYear?: number; curatedEndYear?: number; finalVictor?: string } | null>(null);
+  // summaryFetch mirrors the data the WarSummaryCard fetches so the
+  // cinematic overlay can show outcome and aftermath text on the closing
+  // card without a second round trip. Tagged with the war it belongs to;
+  // the summary and its loading flag derive from the tag during render.
+  const [summaryFetch, setSummaryFetch] = useState<{ war: string; summary: WarSummaryData | null } | null>(null);
+  const warSummary = summaryFetch && summaryFetch.war === selectedWar ? summaryFetch.summary : null;
+  const warSummaryLoading = !!selectedWar && (!summaryFetch || summaryFetch.war !== selectedWar);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   // openReplayBattleIdRef remembers which battle the cinematic has already
   // opened a replay overlay for. Without this, every pause/resume cycle
@@ -313,6 +348,19 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // past it so a fresh mount with a non-zero tick does not auto-skip.
   const lastAdvanceTickRef = useRef(cinematicAdvanceTick);
   const lastPrevTickRef = useRef(cinematicPrevTick);
+
+  // Viewer closed the inner replay by hand: stand the cinematic down.
+  // Playback pauses on the current battle instead of stampeding into
+  // the next one over the top of their exit.
+  const lastHaltTickRef = useRef(cinematicHaltTick);
+  useEffect(() => {
+    if (cinematicHaltTick === lastHaltTickRef.current) return;
+    lastHaltTickRef.current = cinematicHaltTick;
+    setPlaying(false);
+    setCinematic(false);
+    setCinematicStage('none');
+    openReplayBattleIdRef.current = null;
+  }, [cinematicHaltTick]);
 
   useEffect(() => {
     fetch('/api/battles/stats')
@@ -345,38 +393,23 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         onWarCountries(matchedWar?.countries?.length ? matchedWar.countries : (inherited ?? []));
       }
     }
-    if (!selectedWar) { setBattles([]); setBattlesLoading(false); setInitialPaneLoaded(false); onBattlesLoaded(null); return; }
-    setBattlesLoading(true);
-    setInitialPaneLoaded(false);
+    if (!selectedWar) { onBattlesLoaded(null); return; }
+    let cancelled = false;
     fetch(`/api/battles?war=${encodeURIComponent(selectedWar)}&limit=2000`)
       .then((r) => r.json())
       .then((d) => {
+        if (cancelled) return;
         const b: Battle[] = d.battles || [];
-        setBattles(b);
+        setBattlesFetch({ war: selectedWar, list: b });
         setGroupIndex(0);
         setSubIndex(0);
         setPlaying(false);
         setDetail(null);
         onBattlesLoaded(b);
       })
-      .catch(() => {})
-      .finally(() => setBattlesLoading(false));
+      .catch(() => { if (!cancelled) setBattlesFetch({ war: selectedWar, list: [] }); });
+    return () => { cancelled = true; };
   }, [selectedWar, onBattlesLoaded, onWarSelected, onWarCountries, wars]);
-
-  // Toggling cinematic on/off re-shapes the playable groups (different set
-  // of battles), so anchor the playhead back to the first entry. Otherwise
-  // a user halfway through a 600-battle step-through who switches to
-  // cinematic mode would jump to whatever index the original list had at
-  // that position, which is meaningless in the narrower 22-battle subset.
-  // Also clears the open-replay tracker and the dwell-remaining capture so
-  // a fresh mode starts cleanly.
-  useEffect(() => {
-    setGroupIndex(0);
-    setSubIndex(0);
-    openReplayBattleIdRef.current = null;
-    dwellRemainingMsRef.current = null;
-    dwellEndsAtRef.current = null;
-  }, [cinematic]);
 
   // When the selected war changes the previous war's open-replay tracker
   // and dwell capture are stale. Reset.
@@ -404,19 +437,17 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     if (battles.length === 0) return;
     if (detailLoading || !detail) return;
     if (warSummaryLoading || !warSummary) return;
-    setInitialPaneLoaded(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Latches the one-time "first load settled" flag; fires at most once per war selection and cannot be derived because later battle hops flip the loading flags again.
+    setPaneLoadedWar(selectedWar);
   }, [initialPaneLoaded, selectedWar, battlesLoading, battles.length, detailLoading, detail, warSummaryLoading, warSummary]);
 
   useEffect(() => {
-    if (!selectedWar) { setWarSummary(null); setWarSummaryLoading(false); return; }
+    if (!selectedWar) return;
     let cancelled = false;
-    setWarSummaryLoading(true);
-    setWarSummary(null);
     fetch(`/api/wars/summary?name=${encodeURIComponent(selectedWar)}`)
       .then((r) => (r.ok ? r.json() : null))
-      .then((s) => { if (!cancelled && s) setWarSummary(s); })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setWarSummaryLoading(false); });
+      .then((s) => { if (!cancelled) setSummaryFetch({ war: selectedWar, summary: s ?? null }); })
+      .catch(() => { if (!cancelled) setSummaryFetch({ war: selectedWar, summary: null }); });
     return () => { cancelled = true; };
   }, [selectedWar]);
 
@@ -822,6 +853,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     openReplayBattleIdRef.current = null;
     if (group.concurrent && subIndex < group.battles.length - 1) {
       const next = subIndex + 1;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Consumes a parent-driven event tick (BattleReplay outro finished / user clicked Next); the jump must run exactly once per tick and cannot be derived.
       setSubIndex(next);
       focusBattle(group.battles[next]);
       setPlaying(true);
@@ -852,6 +884,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     openReplayBattleIdRef.current = null;
     if (subIndex > 0) {
       const next = subIndex - 1;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Consumes a parent-driven event tick (user clicked Previous on the outro); the rewind must run exactly once per tick and cannot be derived.
       setSubIndex(next);
       focusBattle(groups[groupIndex].battles[next]);
     } else if (groupIndex > 0) {
@@ -1070,7 +1103,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
       const key = `${selectedWar}|nosnap`;
       if (lastSnapshotKeyRef.current === key) return;
       lastSnapshotKeyRef.current = key;
-      onWarTerritory(null, null, [], []);
+      onWarTerritory(null, null, [], [], null);
       return;
     }
     // Snapshot dedupe: every advance whose year falls into the same snapshot
@@ -1350,11 +1383,17 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           return (
             <button
               onClick={() => {
+                // Entering cinematic re-shapes the playable groups, so the
+                // playhead anchors to the first entry and the open-replay
+                // tracker and dwell capture clear for a fresh start.
                 setCinematic(true);
                 setCinematicStage('overture');
                 setGroupIndex(0);
                 setSubIndex(0);
                 setPlaying(false);
+                openReplayBattleIdRef.current = null;
+                dwellRemainingMsRef.current = null;
+                dwellEndsAtRef.current = null;
               }}
               className="w-full mb-4 group relative px-4 py-3.5 text-left flex items-center gap-3.5 rounded-xl overflow-hidden border border-blue-400/40 bg-gradient-to-br from-blue-500/[0.16] via-blue-500/[0.06] to-transparent hover:from-blue-500/[0.24] hover:via-blue-500/[0.10] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40"
               style={{ boxShadow: '0 8px 28px -12px rgba(96,165,250,0.40)' }}
@@ -1526,9 +1565,17 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
             </button>
             <button
               onClick={() => {
+                // Leaving cinematic re-shapes the groups back to the full
+                // chronological list; reset the playhead and the dwell
+                // bookkeeping to match.
                 setCinematic(false);
                 setCinematicStage('none');
                 setPlaying(false);
+                setGroupIndex(0);
+                setSubIndex(0);
+                openReplayBattleIdRef.current = null;
+                dwellRemainingMsRef.current = null;
+                dwellEndsAtRef.current = null;
                 if (onCloseReplay) onCloseReplay();
               }}
               aria-label="Stop cinematic"

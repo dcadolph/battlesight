@@ -28,28 +28,30 @@ interface CommanderPanelProps {
 // clicking a commander chip. Reuses the right-side overlay shell shared by
 // the other detail surfaces so the user lands in a familiar layout.
 export default function CommanderPanel({ name, onClose, onBattleClick }: CommanderPanelProps) {
-  const [data, setData] = useState<CommanderResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // result tags each response with the commander it answers for, so a name
+  // change reads as "loading" during render with no imperative reset.
+  const [result, setResult] = useState<{ name: string; data: CommanderResponse | null; error: string | null } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    setData(null);
-    setError(null);
     fetch(`/api/people/battles?name=${encodeURIComponent(name)}&limit=200`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
       .then((d: CommanderResponse) => {
-        if (!cancelled) setData(d);
+        if (!cancelled) setResult({ name, data: d, error: null });
       })
       .catch(() => {
-        if (!cancelled) setError('Could not load battles for this commander.');
+        if (!cancelled) setResult({ name, data: null, error: 'Could not load battles for this commander.' });
       });
     return () => {
       cancelled = true;
     };
   }, [name]);
+
+  const data = result && result.name === name ? result.data : null;
+  const error = result && result.name === name ? result.error : null;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

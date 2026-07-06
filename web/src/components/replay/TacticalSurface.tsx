@@ -197,6 +197,14 @@ function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+// kmBetween is an equirectangular distance approximation, plenty for
+// scaling camera flight durations between battlefields.
+function kmBetween(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const dLat = (lat2 - lat1) * 111.32;
+  const dLng = (lng2 - lng1) * 111.32 * Math.cos(((lat1 + lat2) / 2) * (Math.PI / 180));
+  return Math.hypot(dLat, dLng);
+}
+
 // scaleAlpha multiplies the alpha channel of a deck.gl color tuple.
 function scaleAlpha(
   c: [number, number, number, number],
@@ -719,6 +727,12 @@ export default function TacticalSurface({
   // labelPositionRef holds the current label projection routine so the
   // map move listener (attached once at init) always calls the latest.
   const labelPositionRef = useRef<() => void>(() => {});
+  // hopBattleIdRef detects battle-to-battle hops inside a war cinematic
+  // (this component stays mounted across them). entryMsRef carries the
+  // camera effect's actual flight duration to the RAF clock so the
+  // action never starts while a long hop flight is still in the air.
+  const hopBattleIdRef = useRef('');
+  const entryMsRef = useRef<number | null>(null);
 
   const extentLatDeg = replay.extentLatDeg ?? 3;
   const extentLngDeg = (replay.extentLngDeg ?? 3) * (replay.aspectRatio ?? 1.6);
@@ -1179,7 +1193,21 @@ export default function TacticalSurface({
     userCameraLockRef.current = false;
     const bearing = bearingForPhase(phaseData.trips, phase.cameraBearing);
     const snap = prefersReducedMotion || phase.cameraMotion === 'snap';
-    const entryMs = phase.cameraTweenMs ?? 1900;
+    // Battle hops get a flight duration scaled to the distance flown:
+    // Kyiv to Kherson deserves a five-second sweep with a high arc, a
+    // neighboring phase gets the usual tight tween. The chosen duration
+    // is published for the RAF clock so the action waits for arrival.
+    const isHop = hopBattleIdRef.current !== '' && hopBattleIdRef.current !== battle.id;
+    hopBattleIdRef.current = battle.id;
+    let entryMs = phase.cameraTweenMs ?? 1900;
+    let flyCurve = 1.6;
+    if (isHop && !snap) {
+      const from = map.getCenter();
+      const km = kmBetween(from.lat, from.lng, cameraLat, cameraLng);
+      entryMs = Math.min(5200, Math.max(2400, Math.round(km * 5)));
+      flyCurve = 1.85;
+    }
+    entryMsRef.current = entryMs;
 
     // Labels hide during the entry flight and fade back in once the
     // camera settles: declutters the move, reads as a documentary cut.
@@ -1274,11 +1302,12 @@ export default function TacticalSurface({
     map.once('moveend', onSettled);
     map.flyTo({
       ...target,
-      duration: phase.cameraTweenMs ?? 2000,
+      duration: entryMs,
       essential: true,
       // Slower curve + lower max speed for documentary feel: camera
-      // takes a moment to leave, glides, then settles.
-      curve: 1.6,
+      // takes a moment to leave, glides, then settles. Battle hops
+      // arc higher so the flight reads as travel, not a warp.
+      curve: flyCurve,
       speed: 0.9,
       easing: (t: number) => 1 - Math.pow(1 - t, 3),
     });
@@ -1293,7 +1322,10 @@ export default function TacticalSurface({
   // overlay. React never re-renders from this loop. The loop parks
   // itself once every animation in the phase has settled.
   useEffect(() => {
-    const camTween = phase.cameraTweenMs ?? 1800;
+    // The camera effect publishes its actual flight duration (battle
+    // hops fly longer than the phase default); the clock's negative
+    // offset must match or arrows fire mid-flight.
+    const camTween = entryMsRef.current ?? phase.cameraTweenMs ?? 1800;
     const glideMs = Math.min(1600, Math.max(600, camTween * 0.85));
     const { trips, unitPoints } = phaseData;
 

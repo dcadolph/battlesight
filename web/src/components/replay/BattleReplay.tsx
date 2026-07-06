@@ -124,6 +124,29 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     return () => { cancelled = true; };
   }, [battle.id]);
 
+  // Battle hop reset, adjusted during render (the prev-value pattern).
+  // This component stays mounted across cinematic battle changes (that
+  // is what keeps the map alive and the camera flying between
+  // battlefields), so the per-battle state must reset by hand. Without
+  // this the previous battle's ended/paused state leaks into the next
+  // one: a battle landing on ended=true instant-fires its outro and the
+  // cinematic stampedes through battles. The hop card is the chapter
+  // interstitial that rides the camera flight.
+  const [prevBattleId, setPrevBattleId] = useState(battle.id);
+  const [hopCard, setHopCard] = useState<Battle | null>(null);
+  if (prevBattleId !== battle.id) {
+    setPrevBattleId(battle.id);
+    setPhaseIdx(0);
+    setEnded(false);
+    setPlaying(true);
+    if (cinematicMode && !prefersReducedMotion) setHopCard(battle);
+  }
+  useEffect(() => {
+    if (!hopCard) return;
+    const t = setTimeout(() => setHopCard(null), 2600);
+    return () => clearTimeout(t);
+  }, [hopCard]);
+
   useEffect(() => {
     if (!playing || !replay) return;
     const current = replay.phases[phaseIdx];
@@ -793,6 +816,44 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 }`}
               >Schematic</button>
             </div>
+
+            {/* Chapter interstitial: rides the camera flight between
+                battles in a war cinematic so the hop reads as "next
+                engagement", not a cut. */}
+            {hopCard && (
+              <div
+                key={`hop-${hopCard.id}`}
+                className="pointer-events-none absolute inset-x-0 bottom-[16%] z-30 flex flex-col items-center"
+                style={{ animation: 'hop-card 2600ms ease-out forwards' }}
+              >
+                <div
+                  className="text-[10px] font-semibold uppercase tracking-[0.5em] mb-2"
+                  style={{ color: theme.accent, textShadow: '0 2px 12px rgba(0,0,0,0.9)' }}
+                >
+                  Next engagement{hopCard.year ? ` · ${hopCard.year}` : ''}
+                </div>
+                <div
+                  className="text-white text-center max-w-[70%]"
+                  style={{
+                    fontFamily: theme.titleFont,
+                    fontWeight: 600,
+                    fontSize: 'clamp(24px, 2.6vw, 40px)',
+                    lineHeight: 1.05,
+                    textShadow: '0 6px 26px rgba(0,0,0,0.95)',
+                  }}
+                >
+                  {hopCard.name}
+                </div>
+              </div>
+            )}
+            <style>{`
+              @keyframes hop-card {
+                0%   { opacity: 0; transform: translateY(14px); }
+                12%  { opacity: 1; transform: translateY(0); }
+                78%  { opacity: 1; }
+                100% { opacity: 0; transform: translateY(-8px); }
+              }
+            `}</style>
           </div>
         </div>
 

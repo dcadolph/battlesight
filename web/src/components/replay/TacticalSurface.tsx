@@ -1205,7 +1205,7 @@ export default function TacticalSurface({
       const driftMs = dwellMs - entryMs - 200;
       if (driftMs < 1200) return;
       map.easeTo({
-        zoom: map.getZoom() + 0.12,
+        zoom: map.getZoom() + 0.07,
         bearing: map.getBearing() + (phaseIdx % 2 === 0 ? 4 : -4),
         pitch: Math.min(58, map.getPitch() + 3),
         duration: driftMs,
@@ -1230,16 +1230,16 @@ export default function TacticalSurface({
         if (lat < minLat) minLat = lat;
         if (lat > maxLat) maxLat = lat;
       }
-      // Pad by 30% of the bbox span (or a minimum) so the action sits
-      // off the labels in the corners and the unit icons don't bleed
-      // into the frame edge.
-      const dLng = Math.max((maxLng - minLng) * 0.3, 0.01);
-      const dLat = Math.max((maxLat - minLat) * 0.3, 0.01);
+      // Pad by 42% of the bbox span (or a minimum) so formations, their
+      // label pills, and arrow heads all sit comfortably inside the
+      // frame instead of crowding the edges.
+      const dLng = Math.max((maxLng - minLng) * 0.42, 0.014);
+      const dLat = Math.max((maxLat - minLat) * 0.42, 0.014);
       const bounds: [[number, number], [number, number]] = [
         [minLng - dLng, minLat - dLat],
         [maxLng + dLng, maxLat + dLat],
       ];
-      const padding = { top: 140, bottom: 80, left: 80, right: 80 };
+      const padding = { top: 150, bottom: 96, left: 104, right: 104 };
       if (snap) {
         map.fitBounds(bounds, { padding, animate: false, pitch: 0, bearing: 0 });
         onSettled();
@@ -1466,7 +1466,7 @@ export default function TacticalSurface({
         let hidden = p.x < -80 || p.y < -60 || p.x > w + 80 || p.y > h + 60;
         if (!hidden) {
           for (const k of kept) {
-            if (Math.abs(p.x - k.x) < 150 && Math.abs(p.y - k.y) < 38) {
+            if (Math.abs(p.x - k.x) < 168 && Math.abs(p.y - k.y) < 46) {
               hidden = true;
               break;
             }

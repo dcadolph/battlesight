@@ -294,8 +294,8 @@ function buildUnitLayers(
     getRadius: (d: ResolvedUnit) => d.size * 3.2,
     radiusUnits: 'meters',
     stroked: false,
-    radiusMinPixels: 10,
-    radiusMaxPixels: 32,
+    radiusMinPixels: 5,
+    radiusMaxPixels: 14,
     parameters: { depthTest: false },
   }));
   result.push(new ScatterplotLayer({
@@ -306,8 +306,8 @@ function buildUnitLayers(
     getRadius: (d: ResolvedUnit) => d.size * 5,
     radiusUnits: 'meters',
     stroked: false,
-    radiusMinPixels: 14,
-    radiusMaxPixels: 42,
+    radiusMinPixels: 7,
+    radiusMaxPixels: 18,
     parameters: { depthTest: false },
   }));
   if (unitAtlas.canvas) {
@@ -323,8 +323,8 @@ function buildUnitLayers(
       getColor: (d: ResolvedUnit) => d.color,
       getSize: (d: ResolvedUnit) => d.size,
       sizeUnits: 'pixels',
-      sizeMinPixels: 52,
-      sizeMaxPixels: 170,
+      sizeMinPixels: 22,
+      sizeMaxPixels: 60,
       parameters: { depthTest: false },
     }));
   }
@@ -341,8 +341,8 @@ function buildUnitLayers(
         getColor: (d: ResolvedUnit) => scaleAlpha([255, 255, 255, 240], d.color[3] / 255),
         getSize: (d: ResolvedUnit) => d.size * 1.06,
         sizeUnits: 'pixels',
-        sizeMinPixels: 52,
-        sizeMaxPixels: 170,
+        sizeMinPixels: 22,
+        sizeMaxPixels: 60,
         parameters: { depthTest: false },
       }));
     }
@@ -853,10 +853,11 @@ export default function TacticalSurface({
         const p = resolvePoint(u.x, u.y, u.lat, u.lng, battle.lat, battle.lng, extentLatDeg, extentLngDeg);
         if (!p) return null;
         const color = factionColorFor(u.faction, replay);
-        // Hollywood-scale tokens. baseSize 100 means a single-battalion
-        // icon renders at ~115px, a full division at ~135px. Pixel-space
-        // caps below keep clusters from overpowering the frame.
-        const baseSize = 100 + (u.strength ?? 3) * 12;
+        // Cartographic-scale tokens. The icon is a map marker, not the
+        // subject: small enough that dense formations read as distinct
+        // pieces and the movement arrows own the frame. Strength nudges
+        // size a little; the pixel caps below hold the range tight.
+        const baseSize = 40 + (u.strength ?? 3) * 5;
         // Stable identity across phases: curated id when present, else
         // label + faction with an occurrence counter so twin unnamed
         // formations stay distinct.
@@ -1559,7 +1560,7 @@ export default function TacticalSurface({
           >
             <div
               style={{
-                transform: `translate(-50%, calc(-100% - ${label.kind === 'unit' ? 48 : 14}px))`,
+                transform: `translate(-50%, calc(-100% - ${label.kind === 'unit' ? 26 : 14}px))`,
               }}
             >
               <div

@@ -58,10 +58,11 @@ const PLATE_H = 44;
 const STROKE = 5;
 
 function ctxSetup(ctx: CanvasRenderingContext2D) {
-  // Plate fill is the field color underneath the symbol. Bumped from
-  // 0.18 to 0.55 so the icon reads on a satellite backdrop instead of
-  // dissolving into bright terrain.
-  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  // Plate fill is the field color underneath the symbol. Translucent:
+  // the icon should read as a cartographic marker over the terrain,
+  // not a solid slab covering it. The dark unit-shadow disc under the
+  // icon carries the contrast against bright ground.
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
   ctx.strokeStyle = '#fff';
   ctx.lineWidth = STROKE;
   ctx.lineCap = 'round';

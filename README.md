@@ -97,17 +97,22 @@ make quality        # produce data-quality report
 
 ## Data quality tiers
 
-Every battle in the catalog falls into one of four tiers. The cinematic
-plays only the curated tier so the experience is consistent.
+Every battle sits in one of four tiers. Replays play from the curated
+tier. The full catalog stays searchable.
 
-| Tier&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description | Surfaces in |
-| --- | --- | --- |
-| **S. Curated**&nbsp;&nbsp; | Hand-authored phase replay + verified facts + curated narrative. ~143 entries today. | Cinematic, dossier, search, war card |
-| **A. Verified**&nbsp;&nbsp; | Hand-verified facts (sides, dates, coordinates, casualties) but auto-generated schematic replay. ~200 entries. | Dossier, search, war card |
-| **B. Imported**&nbsp;&nbsp; | Wikidata/Wikipedia import with plausible metadata. Most of the catalog. | Search, war card |
-| **C. Stub**&nbsp;&nbsp;&nbsp; | Imported with thin or partial metadata (year=0, no coordinates, broken sides parse). | Search only |
+**Curated** (168): full phase replay with researched narrative and
+verified facts. Powers the cinematic, the dossier, search, and war
+cards.
 
-The cinematic filter is `tier === S`. The full catalog stays searchable.
+**Verified** (390): hand-checked sides, dates, coordinates, and
+casualties, with an auto-generated schematic replay. Everywhere except
+the cinematic.
+
+**Imported** (most of the catalog): Wikipedia and Wikidata records with
+plausible metadata. Search and war cards.
+
+**Stub** (~600): thin imports missing a date or coordinates. Search
+only, pending curation.
 
 ## Architecture
 

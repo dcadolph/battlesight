@@ -1550,6 +1550,9 @@ export default function TacticalSurface({
             key={label.key}
             data-lng={label.anchor[0]}
             data-lat={label.anchor[1]}
+            data-rec-label={label.text}
+            data-rec-color={label.color}
+            data-rec-lift={label.kind === 'unit' ? 26 : 14}
             style={{
               position: 'absolute',
               left: 0,

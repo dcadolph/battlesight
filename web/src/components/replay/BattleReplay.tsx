@@ -10,6 +10,12 @@ import { themeForEra } from '../../theme/era';
 import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
 import { narrate, cancelNarration, pauseNarration, resumeNarration } from '../../audio/narration';
 import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
+import {
+  RecorderSession,
+  recordingSupported,
+  downloadBlob,
+  type RecorderChrome,
+} from '../../lib/replay-recorder';
 import { cleanCasualtyText, cleanProseText, formatBattleDate } from '../../lib/format';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import CloseButton from '../CloseButton';
@@ -215,6 +221,59 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     // to engage with the replay again; do not occlude it.
     setEnded(false);
   }, [replay]);
+
+  // Video export. The recorder composites the stage's WebGL canvases
+  // plus re-drawn label pills and the phase slate, and MediaRecorder
+  // wraps them into a downloadable file. Recording restarts the replay
+  // from phase one for a complete take and saves itself on the outro.
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const recorderRef = useRef<RecorderSession | null>(null);
+  const [recording, setRecording] = useState(false);
+  const chromeRef = useRef<RecorderChrome>({ eyebrow: '', title: '', accent: '#fff', titleFont: 'serif' });
+  useEffect(() => {
+    const p = replay?.phases[phaseIdx];
+    if (!p) return;
+    const t = themeForEra(battle.era);
+    chromeRef.current = {
+      eyebrow: `Phase ${String(phaseIdx + 1).padStart(2, '0')}${p.timeMarker ? ` · ${p.timeMarker}` : ''}`,
+      title: p.title,
+      accent: t.accent,
+      titleFont: t.titleFont,
+    };
+  }, [phaseIdx, replay, battle.era]);
+
+  const startRecording = () => {
+    if (!stageRef.current || recorderRef.current) return;
+    goto(0);
+    try {
+      recorderRef.current = new RecorderSession(stageRef.current, () => chromeRef.current);
+      setRecording(true);
+    } catch (err) {
+      console.warn('[BattleReplay] recording failed to start', err);
+    }
+  };
+
+  const finishRecording = useCallback(async () => {
+    const rec = recorderRef.current;
+    if (!rec) return;
+    recorderRef.current = null;
+    setRecording(false);
+    const blob = await rec.stop();
+    downloadBlob(blob, `${battle.id}-replay`, rec.mimeType);
+  }, [battle.id]);
+
+  // The outro is the natural end of a take.
+  useEffect(() => {
+    if (ended && recorderRef.current) void finishRecording();
+  }, [ended, finishRecording]);
+
+  // Unmounting mid-take discards the recording.
+  useEffect(() => {
+    return () => {
+      recorderRef.current?.stop();
+      recorderRef.current = null;
+    };
+  }, []);
 
   // restartReplay rewinds to the first phase and starts playing again. Used
   // by the outro card so a viewer can re-watch without leaving the overlay.
@@ -562,6 +621,25 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           )}
         </div>
         <div className="flex items-center gap-2">
+          {/* Export the replay as a video. Restarts from phase one so the
+              take is complete, records the composited stage, and saves on
+              the outro (or on click while recording). */}
+          {view === 'surface' && recordingSupported() && (
+            <button
+              onClick={recording ? () => void finishRecording() : startRecording}
+              className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-full border transition-colors ${
+                recording
+                  ? 'border-red-500/70 bg-red-500/25 text-red-100 hover:bg-red-500/35'
+                  : 'border-slate-600/60 bg-slate-800/60 text-slate-200 hover:border-slate-400 hover:bg-slate-700/60'
+              }`}
+              title={recording ? 'Stop recording and save the video' : 'Record this replay to a video file'}
+            >
+              <span
+                className={`inline-block w-2 h-2 rounded-full ${recording ? 'bg-red-400 animate-pulse' : 'bg-red-500/80'}`}
+              />
+              <span className="text-xs font-semibold tracking-wide">{recording ? 'Save video' : 'Record'}</span>
+            </button>
+          )}
           {/* One-click jump to the battlefield in Google Earth. Opens in a
               new tab so the replay session is preserved — the user can come
               back to BattleSight from the same tab they left. */}
@@ -588,7 +666,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             geography so the viewer sees Belgium, the Ardennes, the Channel,
             etc. when watching Battle of France, not an abstract grid. */}
         <div className="flex-1 flex items-center justify-center p-2 relative">
-          <div className="w-full h-full relative">
+          <div ref={stageRef} className="w-full h-full relative">
             {view === 'surface' ? (
               <TacticalSurface
                 battle={battle}

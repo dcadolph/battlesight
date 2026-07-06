@@ -56,6 +56,10 @@ interface WarPlaybackProps {
   // from getting trapped on the outro card when the dwell budget is
   // shorter than the actual phase total.
   cinematicAdvanceTick?: number;
+  // cinematicHaltTick increments when the viewer closes the inner
+  // replay overlay by hand. The cinematic must stand down instead of
+  // opening the next battle over the top of their exit.
+  cinematicHaltTick?: number;
   // cinematicPrevTick increments when the user clicks "Previous battle"
   // on the cinematic outro card. WarPlayback rewinds the group index by
   // one and re-focuses that battle.
@@ -241,7 +245,7 @@ interface WarSummaryData {
   finalVictor?: string;
 }
 
-export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, onWarTerritory, initialWar, cinematicAdvanceTick = 0, cinematicPrevTick = 0 }: WarPlaybackProps) {
+export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, onWarSelected, onWarCountries, onPlayReplay, onCloseReplay, onWarTerritory, initialWar, cinematicAdvanceTick = 0, cinematicPrevTick = 0, cinematicHaltTick = 0 }: WarPlaybackProps) {
   const [wars, setWars] = useState<WarCount[]>([]);
   const [warSearch, setWarSearch] = useState('');
   const [warSort, setWarSort] = useState<WarSort>('casualties');
@@ -344,6 +348,19 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   // past it so a fresh mount with a non-zero tick does not auto-skip.
   const lastAdvanceTickRef = useRef(cinematicAdvanceTick);
   const lastPrevTickRef = useRef(cinematicPrevTick);
+
+  // Viewer closed the inner replay by hand: stand the cinematic down.
+  // Playback pauses on the current battle instead of stampeding into
+  // the next one over the top of their exit.
+  const lastHaltTickRef = useRef(cinematicHaltTick);
+  useEffect(() => {
+    if (cinematicHaltTick === lastHaltTickRef.current) return;
+    lastHaltTickRef.current = cinematicHaltTick;
+    setPlaying(false);
+    setCinematic(false);
+    setCinematicStage('none');
+    openReplayBattleIdRef.current = null;
+  }, [cinematicHaltTick]);
 
   useEffect(() => {
     fetch('/api/battles/stats')

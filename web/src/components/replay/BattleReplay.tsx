@@ -611,7 +611,11 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
       `}</style>
 
       {/* Top bar */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-slate-800/80 bg-[#0a0d18]/90">
+      {/* paddingLeft clears the app's fixed home anchor pill. */}
+      <header
+        className="flex items-center justify-between px-6 py-3 border-b border-slate-800/80 bg-[#0a0d18]/90"
+        style={{ paddingLeft: 178 }}
+      >
         <div className="flex items-center gap-3 min-w-0">
           <span
             className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${

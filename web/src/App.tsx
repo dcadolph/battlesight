@@ -404,10 +404,16 @@ export default function App() {
     setReplayCinematic(false);
   }, [selectedBattle]);
 
+  // cinematicHaltTick tells WarPlayback the viewer closed the inner
+  // replay overlay by hand: the cinematic must stop, not open the next
+  // battle over the top of the exit.
+  const [cinematicHaltTick, setCinematicHaltTick] = useState(0);
   const handleCloseReplay = useCallback(() => {
     setReplayBattle(null);
     setReplayPhase(0);
-  }, []);
+    if (replayCinematic) setCinematicHaltTick((t) => t + 1);
+    setReplayCinematic(false);
+  }, [replayCinematic]);
 
   // Stable references for WarPlayback's cinematic auto-step. Inline arrows
   // would get a fresh identity on every App render, which thrashes the dwell
@@ -634,6 +640,7 @@ export default function App() {
     setTerritoryFactions([]);
     setFactionAnchors([]);
     setSnapshotYear(null);
+    setWarCountries([]);
   }, []);
 
   // handleHistoryScrub moves the playhead to an explicit year and rewrites
@@ -1135,6 +1142,7 @@ export default function App() {
             onWarTerritory={handleWarTerritory}
             cinematicAdvanceTick={cinematicAdvanceTick}
             cinematicPrevTick={cinematicPrevTick}
+            cinematicHaltTick={cinematicHaltTick}
             initialWar={initialWar}
           />
         </Suspense>
@@ -1157,6 +1165,23 @@ export default function App() {
             warSnapshotYear={snapshotYear ?? undefined}
           />
         </Suspense>
+      )}
+
+      {/* Persistent home anchor. Present whenever an overlay owns the
+          screen (replay, war cinematic, history sweep), always top-left,
+          above everything. One click tears down whatever the viewer is
+          inside and returns to the bare globe. On the bare globe itself
+          the CommandBar wordmark already serves as home. */}
+      {!introVisible && (replayBattle || showPlayback || historyMode) && (
+        <button
+          onClick={handleResetView}
+          className="fixed top-3 left-3 z-[70] inline-flex items-center gap-2 h-9 px-3.5 rounded-full border border-slate-600/50 bg-[#0a0d18]/85 hover:border-slate-300/60 hover:bg-[#131829]/95 transition-colors"
+          style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+          title="Back to the globe"
+        >
+          <span className="inline-block w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+          <span className="text-[12px] font-semibold tracking-[0.22em] uppercase text-slate-100">BattleSight</span>
+        </button>
       )}
 
       {introVisible && featured && (

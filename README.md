@@ -5,6 +5,22 @@
 <h1 align="center">BattleSight</h1>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/status-pre--release-f59e0b" alt="Status: pre-release" />
+  <img src="https://img.shields.io/badge/license-all%20rights%20reserved-8b5cf6" alt="License: all rights reserved" />
+  <img src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" alt="Go 1.26" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/MapLibre%20GL-5-396CB2" alt="MapLibre GL 5" />
+  <img src="https://img.shields.io/badge/deck.gl-9-29323C" alt="deck.gl 9" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/battles-13%2C220-dc2626" alt="13,220 battles" />
+  <img src="https://img.shields.io/badge/replays-152-2563eb" alt="152 replays" />
+  <img src="https://img.shields.io/badge/wars-713-475569" alt="713 wars" />
+</p>
+
+<p align="center">
   <em>Status: pre-release. Data quality is uneven and the catalog is being curated.
   Visuals and replays are iterating fast. expect breaking changes on every commit.</em>
 </p>

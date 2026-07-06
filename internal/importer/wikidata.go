@@ -306,8 +306,10 @@ func yearToEra(year int) string {
 		return "interwar"
 	case year < 1946:
 		return "world-war-2"
+	case year < 1991:
+		return "cold-war"
 	default:
-		return "modern"
+		return "contemporary"
 	}
 }
 

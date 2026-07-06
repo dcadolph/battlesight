@@ -43,11 +43,13 @@ def year_to_era(y: int) -> str:
         return 'interwar'
     if y < 1946:
         return 'world-war-2'
-    return 'modern'
+    if y < 1991:
+        return 'cold-war'
+    return 'contemporary'
 
 VALID_ERAS = {
     'ancient', 'medieval', 'early-modern', 'napoleonic', 'industrial',
-    'world-war-1', 'interwar', 'world-war-2', 'modern',
+    'world-war-1', 'interwar', 'world-war-2', 'cold-war', 'contemporary',
 }
 
 VALID_BATTLE_TYPES = {'land', 'naval', 'siege', 'aerial', 'air',

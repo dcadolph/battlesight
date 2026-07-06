@@ -829,6 +829,8 @@ func dropBlankSides(ctx context.Context, db *sql.DB) (int, error) {
 
 // YearToEra mirrors importer.yearToEra (private) plus the audit script. Kept
 // in this file so the cleanse can apply it without poking into wikidata.go.
+// Post-1945 years split at 1991 (Soviet collapse) into cold-war and
+// contemporary, matching validErasSet and the front-end ERA_COLORS taxonomy.
 func YearToEra(y int) string {
 	switch {
 	case y == 0:
@@ -849,8 +851,10 @@ func YearToEra(y int) string {
 		return "interwar"
 	case y < 1946:
 		return "world-war-2"
+	case y < 1991:
+		return "cold-war"
 	default:
-		return "modern"
+		return "contemporary"
 	}
 }
 

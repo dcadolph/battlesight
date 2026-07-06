@@ -69,7 +69,8 @@ func main() {
 		WHEN year < 1919 THEN 'world-war-1'
 		WHEN year < 1939 THEN 'interwar'
 		WHEN year < 1946 THEN 'world-war-2'
-		ELSE 'modern'
+		WHEN year < 1991 THEN 'cold-war'
+		ELSE 'contemporary'
 	END WHERE year != 0 AND era = ''`)
 
 	var remaining int

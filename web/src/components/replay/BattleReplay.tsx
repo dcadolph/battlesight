@@ -86,6 +86,14 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   // on the final tactical state. Cleared whenever the user scrubs back.
   const [ended, setEnded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // chapterRailRef scrolls the active chapter card into view on phase
+  // change so the current chapter is never clipped off the rail's edge.
+  const chapterRailRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const rail = chapterRailRef.current;
+    const card = rail?.children[phaseIdx] as HTMLElement | undefined;
+    card?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [phaseIdx]);
   // Honour the OS-level "Reduce motion" preference: phase timer collapses
   // to the next phase with no dwell so the user steps through frames
   // rather than waiting on animated transitions. Decorative pulse keyframes
@@ -767,6 +775,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
               <span className="tabular-nums text-slate-600">{phaseIdx + 1} / {replay.phases.length}</span>
             </div>
             <div
+              ref={chapterRailRef}
               className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scroll-smooth"
               style={{ scrollbarWidth: 'thin' }}
             >

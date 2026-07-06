@@ -686,6 +686,23 @@ export default function TacticalSurface({
   // countries is the Natural Earth feature array used for war-cinematic
   // country shading. Loaded once via the shared promise cache.
   const [countries, setCountries] = useState<Feature<Geometry>[]>([]);
+  // terrainReady flips when MapLibre reaches idle (tiles fetched and
+  // painted). Until then a small streaming indicator shows so a half
+  // dark frame reads as loading, not a freeze. Reset per battle via the
+  // render-adjust pair below.
+  const [terrainReady, setTerrainReady] = useState(false);
+  const [tileBattleId, setTileBattleId] = useState(battle.id);
+  if (tileBattleId !== battle.id) {
+    setTileBattleId(battle.id);
+    setTerrainReady(false);
+  }
+  // Failsafe: a single stuck tile request can hold MapLibre's idle
+  // event hostage; the indicator must never outlive its welcome.
+  useEffect(() => {
+    if (terrainReady) return;
+    const t = setTimeout(() => setTerrainReady(true), 12000);
+    return () => clearTimeout(t);
+  }, [tileBattleId, terrainReady]);
   // zoomBucket is the live MapLibre zoom quantized to the nearest
   // integer, updated only on zoomend. Territory alpha tiers and label
   // dedup cells read this instead of a continuous zoom value so a
@@ -782,6 +799,8 @@ export default function TacticalSurface({
     });
     // HTML labels track the camera by direct DOM writes; no React.
     map.on('move', () => labelPositionRef.current());
+    // Tile/paint settlement signal for the streaming indicator.
+    map.on('idle', () => setTerrainReady(true));
     // Viewer grabbing the map cancels the dwell drift until the next
     // phase reclaims the camera.
     const onUserCamera = () => {
@@ -1761,6 +1780,27 @@ export default function TacticalSurface({
               }}
             />
           </div>
+        </div>
+      )}
+
+      {/* Terrain streaming indicator: satellite tiles keep arriving for
+          a few seconds after the title slate fades, and a half dark
+          frame with no signal reads as a freeze. */}
+      {mapIdle && !terrainReady && (
+        <div
+          className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2.5 px-3.5 py-1.5 rounded-full"
+          style={{ background: 'rgba(10,8,6,0.72)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
+        >
+          <span className="text-[10px] uppercase tracking-[0.3em] text-slate-200/90">Streaming terrain</span>
+          <span className="h-[2px] w-16 overflow-hidden rounded-full inline-block" style={{ background: 'rgba(148,163,184,0.25)' }}>
+            <span
+              className="block h-full w-1/3 rounded-full"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${theme.accent}, transparent)`,
+                animation: prefersReducedMotion ? undefined : 'tactical-loader-sweep 1400ms ease-in-out infinite',
+              }}
+            />
+          </span>
         </div>
       )}
 

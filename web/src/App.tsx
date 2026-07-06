@@ -24,16 +24,26 @@ const WarPlayback = lazy(() => import('./components/WarPlayback'));
 const BattleReplay = lazy(() => import('./components/replay/BattleReplay'));
 
 // ChunkFallback covers the viewport while a lazily loaded overlay chunk is
-// fetched. Matches the splash styling so the beat reads as intentional
-// staging rather than a blank flash.
+// fetched. Motion is the point: a static label over black reads as a
+// freeze, so the label breathes and a sweep bar keeps time underneath.
 function ChunkFallback({ label }: { label: string }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center"
       style={{ background: '#070912' }}
       role="status"
       aria-live="polite"
     >
+      <style>{`
+        @keyframes chunk-pulse {
+          0%, 100% { opacity: 0.55; }
+          50% { opacity: 1; }
+        }
+        @keyframes chunk-sweep {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(300%); }
+        }
+      `}</style>
       <div
         className="font-semibold uppercase"
         style={{
@@ -41,9 +51,20 @@ function ChunkFallback({ label }: { label: string }) {
           letterSpacing: '0.55em',
           color: '#93c5fd',
           textShadow: '0 2px 14px rgba(0,0,0,0.7), 0 0 24px rgba(147,197,253,0.35)',
+          animation: 'chunk-pulse 1600ms ease-in-out infinite',
         }}
       >
         {label}
+      </div>
+      <div className="mt-6 h-[2px] w-64 overflow-hidden rounded-full" style={{ background: 'rgba(148,163,184,0.16)' }}>
+        <div
+          className="h-full w-1/4 rounded-full"
+          style={{
+            background: 'linear-gradient(90deg, transparent, #93c5fd, transparent)',
+            boxShadow: '0 0 12px rgba(147,197,253,0.7)',
+            animation: 'chunk-sweep 1400ms ease-in-out infinite',
+          }}
+        />
       </div>
     </div>
   );

@@ -7,17 +7,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/status-pre--release-f59e0b" alt="Status: pre-release" />
   <img src="https://img.shields.io/badge/license-all%20rights%20reserved-8b5cf6" alt="License: all rights reserved" />
-  <img src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" alt="Go 1.26" />
-  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React 19" />
-  <img src="https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/MapLibre%20GL-5-396CB2" alt="MapLibre GL 5" />
-  <img src="https://img.shields.io/badge/deck.gl-9-29323C" alt="deck.gl 9" />
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/battles-13%2C220-dc2626" alt="13,220 battles" />
-  <img src="https://img.shields.io/badge/replays-152-2563eb" alt="152 replays" />
-  <img src="https://img.shields.io/badge/wars-713-475569" alt="713 wars" />
+  <img src="https://img.shields.io/badge/stack-Go%20%C2%B7%20React%20%C2%B7%20MapLibre%20%C2%B7%20deck.gl-00ADD8" alt="Stack: Go, React, MapLibre, deck.gl" />
+  <img src="https://img.shields.io/badge/catalog-13%2C220%20battles%20%C2%B7%20168%20replays%20%C2%B7%20713%20wars-dc2626" alt="Catalog: 13,220 battles, 168 replays, 713 wars" />
 </p>
 
 <p align="center">

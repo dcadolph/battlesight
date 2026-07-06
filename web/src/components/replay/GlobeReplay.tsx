@@ -155,17 +155,18 @@ function arrowTiming(kind: string | undefined, index: number): {
   // hit just as the trace completes so the eye reads "force arrives → land."
   impactDelay: number;
 } {
-  // Stagger shortened from 280 ms to 130 ms so a 4-arrow phase no longer
-  // takes a second to fully populate. The traces themselves were also
-  // shortened — they were reading as "lethargic" not "considered."
-  const appearDelay = index * 130;
+  // Stagger and trace lengths sit between two failure modes seen in
+  // testing: 280ms/1.5s+ read as lethargic solo, 130ms/0.85s read as an
+  // unfollowable swarm inside war cinematics. Each arrow now gets a
+  // clear beat of its own before the next fires.
+  const appearDelay = index * 300;
   const traceMs = kind === 'charge'
-    ? 850
+    ? 1400
     : kind === 'flank'
-      ? 1050
+      ? 1700
       : kind === 'rout' || kind === 'retreat' || kind === 'withdrawal'
-        ? 1300
-        : 1100;
+        ? 2000
+        : 1750;
   const marchSpeed = kind === 'charge'
     ? 900
     : kind === 'flank'

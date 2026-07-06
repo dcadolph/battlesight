@@ -134,12 +134,14 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     // on a deployment-only phase reads as "stuck" — three of them ran 16.5s
     // total at the default rate, which was longer than the schematic dwell
     // backstop and produced the deployment-loop the user reported.
-    // Phase dwell. Curator-set durations win; the default fallback was
-    // 5500 ms hand-crafted and 3200 ms schematic — both glacial for an
-    // 11-phase battle. Slashed to 3000 / 2000. Eleven phases × 5.5s =
-    // a minute on rails; 3s/phase keeps the cinematic flow but lets a
-    // viewer get through a battle without checking out.
-    const baseDur = current.durationMs ?? (replay.schematic ? 2000 : 3000);
+    // Phase dwell. Curator-set durations win. The fallback has swung
+    // both ways: 5500/3200 read as glacial solo, 3000/2000 read as
+    // unfollowable inside a war cinematic (three schematic phases blew
+    // past in six seconds). The floor must also outlast the arrow
+    // animations (up to ~4.5s with stagger) or phases cut mid-motion,
+    // which is the "jumpy" feel. Schematics have only three phases, so
+    // the taller floor still finishes a battle in about sixteen seconds.
+    const baseDur = current.durationMs ?? (replay.schematic ? 5400 : 4200);
     const dur = prefersReducedMotion ? 0 : baseDur / speed;
     timerRef.current = setTimeout(() => {
       if (phaseIdx >= replay.phases.length - 1) {

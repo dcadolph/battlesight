@@ -389,6 +389,12 @@ export default function App() {
     setTerritoryFactions([]);
     setFactionAnchors([]);
     setSnapshotYear(null);
+    // Leaving the war must also clear the war's residue on the globe:
+    // the country shading and the battle filter. Otherwise the closed
+    // war keeps painting the map and the next search looks stuck inside
+    // the old context.
+    setWarCountries([]);
+    setFilters((f) => (f.war ? { ...f, war: '' } : f));
   }, []);
 
   const handleWatchReplay = useCallback(() => {

@@ -97,17 +97,20 @@ function resolvePoint(
 }
 
 // tripTiming returns the [begin, end] timestamps for a movement based on
-// its kind. Charges punch fast, retreats drift slowly, amphibious and
-// airdrops cover distance so they get a longer run. Index staggers each
-// arrow so the sequence reads as choreography, not a swarm.
+// its kind. Charges punch fastest, retreats drift, amphibious and
+// airdrops cover distance so they get the longest run. Index staggers
+// each arrow so the sequence reads as choreography, not a swarm. Tuned
+// slow enough that the eye can follow each axis of advance before the
+// next one fires; the earlier faster set read as unfollowable inside
+// war cinematics.
 function tripTiming(kind: string | undefined, index: number): { begin: number; duration: number } {
-  const begin = index * 240;
-  let duration = 2200;
-  if (kind === 'charge' || kind === 'cavalry-charge') duration = 1500;
-  else if (kind === 'flank' || kind === 'envelopment' || kind === 'pincer') duration = 1900;
-  else if (kind === 'amphibious' || kind === 'airdrop' || kind === 'air-strike') duration = 2800;
-  else if (kind === 'rout' || kind === 'retreat' || kind === 'withdrawal') duration = 2600;
-  else if (kind === 'siege' || kind === 'breakout') duration = 2400;
+  const begin = index * 420;
+  let duration = 3000;
+  if (kind === 'charge' || kind === 'cavalry-charge') duration = 2100;
+  else if (kind === 'flank' || kind === 'envelopment' || kind === 'pincer') duration = 2600;
+  else if (kind === 'amphibious' || kind === 'airdrop' || kind === 'air-strike') duration = 3600;
+  else if (kind === 'rout' || kind === 'retreat' || kind === 'withdrawal') duration = 3400;
+  else if (kind === 'siege' || kind === 'breakout') duration = 3100;
   return { begin, duration };
 }
 
@@ -1656,6 +1659,10 @@ export default function TacticalSurface({
           style={{
             background: `radial-gradient(ellipse at center, ${theme.vignette} 0%, #0a0806 100%)`,
             transition: 'opacity 700ms ease-out',
+            // Fade the card in rather than popping it: inside a war
+            // cinematic this slate appears on every battle hop, and the
+            // hard cut read as "bam, another load."
+            animation: prefersReducedMotion ? undefined : 'tactical-loader-bloom 320ms ease-out both',
           }}
         >
           <div

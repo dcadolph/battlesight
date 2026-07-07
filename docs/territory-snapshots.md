@@ -1,6 +1,6 @@
 # Territory snapshots
 
-How the per-war country-level shading works. and how to curate new wars.
+How the per-war country-level shading works. And how to curate new wars.
 
 ## Index
 
@@ -70,7 +70,7 @@ Owner keys map to colors via `OWNER_COLORS` and labels via
 | ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | ... | (See `OWNER_COLORS` for the full list.) |
 
 Picking a color: avoid neighbors. Nazi feldgrau is olive, Soviet bright
-red, Vichy mustard. three distinct hues so the European map at peak
+red, Vichy mustard. Three distinct hues so the European map at peak
 1942 occupation reads as three competing forces, not one mottled blob.
 
 ## Authoring a new war
@@ -90,7 +90,7 @@ red, Vichy mustard. three distinct hues so the European map at peak
 4. Country names must match `world-atlas` TopoJSON
    `properties.name`. Common pitfalls:
 
-   - "United States" vs "United States of America". aliased.
+   - "United States" vs "United States of America". Aliased.
    - "Korea". TopoJSON has separate "South Korea" and "North Korea".
    - "Czech Republic". TopoJSON uses "Czechia".
 
@@ -107,7 +107,7 @@ red, Vichy mustard. three distinct hues so the European map at peak
 
 - **Country-polygon resolution only.** No sub-national borders (US
   states, German Länder, French departments). So the American Civil
-  War can't shade Union vs Confederate territory. the US is one
+  War can't shade Union vs Confederate territory. The US is one
   polygon. Same problem for the Spanish Civil War, Russian Civil War,
   Chinese Civil War.
 

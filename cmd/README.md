@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="../internal/logo/battlesight.png" alt="BattleSight command-line tools" width="200" />
+  <img src="../internal/logo/battlesight-tools-banner.png" alt="BattleSight command-line tools" width="100%" />
 </p>
-
-<h1 align="center">BattleSight command-line tools</h1>
 
 Four Go programs build, serve, and curate the catalog. Run each from the
 repository root so the default `data/` paths resolve. Every flag has a

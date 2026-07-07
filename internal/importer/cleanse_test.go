@@ -49,6 +49,88 @@ func TestNormaliseText(t *testing.T) {
 	}
 }
 
+// TestCapitalizeSentences pins sentence-start capitalization with the
+// abbreviation and version guards.
+func TestCapitalizeSentences(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		Name string
+		In   string
+		Want string
+	}{
+		{Name: "lowercase initial", In: "the army held.", Want: "The army held."},
+		{Name: "mid-sentence start", In: "The city fell. the Persians looted it.", Want: "The city fell. The Persians looted it."},
+		{Name: "spare e.g.", In: "Many powers, e.g. france, joined.", Want: "Many powers, e.g. france, joined."},
+		{Name: "spare i.e.", In: "One side, i.e. the rebels, lost.", Want: "One side, i.e. the rebels, lost."},
+		{Name: "spare vs", In: "Union vs confederate forces met.", Want: "Union vs confederate forces met."},
+		{Name: "spare version", In: "Built on v9.3. see notes.", Want: "Built on v9.3. see notes."},
+		{Name: "ellipsis untouched", In: "He paused... then charged.", Want: "He paused... then charged."},
+		{Name: "already clean", In: "The battle began. It ended by noon.", Want: "The battle began. It ended by noon."},
+		{Name: "empty", In: "", Want: ""},
+	}
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("test %d %s", i, test.Name), func(t *testing.T) {
+			t.Parallel()
+			if diff := cmp.Diff(test.Want, capitalizeSentences(test.In)); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+// TestCleanseProse pins caption blanking, pipe-tail truncation, and
+// capitalization for summary and significance fields.
+func TestCleanseProse(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		Name string
+		In   string
+		Want string
+	}{
+		{Name: "leaked caption blanks", In: "thumbnail|Markers at the Monument show the dead.", Want: ""},
+		{Name: "thumb space caption blanks", In: "thumb | Memorial at the church.", Want: ""},
+		{Name: "File caption blanks", In: "File:Foo.jpg|The victory tapestry.", Want: ""},
+		{Name: "ref group tail truncated", In: "Adherbal was reinforced by Carthalo with 70 ships.|group=note", Want: "Adherbal was reinforced by Carthalo with 70 ships."},
+		{Name: "lowercase sentence fixed", In: "the city fell. the enemy fled.", Want: "The city fell. The enemy fled."},
+		{Name: "clean prose untouched", In: "Rome mustered its largest army. Hannibal destroyed it.", Want: "Rome mustered its largest army. Hannibal destroyed it."},
+	}
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("test %d %s", i, test.Name), func(t *testing.T) {
+			t.Parallel()
+			if diff := cmp.Diff(test.Want, cleanseProse(test.In)); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+// TestCleanseSideName pins flag-template, border, align, and pipe residue
+// removal for belligerent names.
+func TestCleanseSideName(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		Name string
+		In   string
+		Want string
+	}{
+		{Name: "border pipe residue", In: "Denmark |border| Lübeck", Want: "Denmark, Lübeck"},
+		{Name: "leading border pipe", In: "|border Sheikhdom of Kuwait", Want: "Sheikhdom of Kuwait"},
+		{Name: "flag of scrap", In: "|Flag of the National Revolutionary Army", Want: "National Revolutionary Army"},
+		{Name: "leading pipe acronym", In: "|PLA People's Liberation Army", Want: "PLA People's Liberation Army"},
+		{Name: "align word residue", In: "left Duchy of Greater Poland", Want: "Duchy of Greater Poland"},
+		{Name: "lowercase initial raised", In: "the Crown of Aragon", Want: "The Crown of Aragon"},
+		{Name: "already clean", In: "Roman Republic", Want: "Roman Republic"},
+	}
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("test %d %s", i, test.Name), func(t *testing.T) {
+			t.Parallel()
+			if diff := cmp.Diff(test.Want, cleanseSideName(test.In)); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 // TestNormaliseTextIdempotent confirms a second pass is a no-op for every
 // fixture above. Idempotency matters because the cleanse migration runs on
 // every server start.

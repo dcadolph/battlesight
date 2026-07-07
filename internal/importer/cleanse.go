@@ -8,6 +8,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -310,7 +311,117 @@ var (
 	// is the parser stuffing two sides into one cell. Cut at the next infobox
 	// field marker so we keep the first side and drop the rest.
 	reInfoboxCombatantLeak = regexp.MustCompile(`(?i)\s*\|\s*(combatant|commander|strength|casualties|result)\d*\s*=.*$`)
+
+	// Leaked image / align directives at the head of a field, each ending in a
+	// pipe: "thumb|", "thumbnail|", "left|", "200px|", "upright=1.2|",
+	// "File:Foo.jpg|". Applied in a loop so chains ("thumb|left|200px|") strip.
+	reLeadDirective = regexp.MustCompile(`(?i)^\s*(?:thumb|thumbnail|frame|frameless|border|bottom|top|centre|center|left|right|none|upright(?:=[0-9.]+)?|alt=[^|]*|link=[^|]*|\d+\s*px|File:[^|]*|Image:[^|]*)\s*\|\s*`)
+	// Flag-template scrap: "|Flag of the National Revolutionary Army" leaves
+	// the name, "| border" and "border|" and bullet points get dropped.
+	reFlagScrap   = regexp.MustCompile(`(?i)\|\s*Flag of (?:the )?`)
+	reBorderScrap = regexp.MustCompile(`(?i)\|\s*border\s*\|?|\bborder\s*\|`)
+	reBullet      = regexp.MustCompile(`[•]`)
+	// Reference-group residue: "...70 ships.|group=note".
+	reGroupRef = regexp.MustCompile(`(?i)\|\s*group\s*=\s*\S+`)
+	// Leading structural punctuation left after the strips above.
+	reLeadPunct = regexp.MustCompile(`^\s*[|•;,]+\s*`)
+	// Side-name align residue with no pipe: "left Duchy of...", "thumb Foo".
+	// RE2 has no lookahead, so the following capitalized letter is captured
+	// and re-emitted by the caller's "$1" replacement.
+	reSideAlignLead = regexp.MustCompile(`(?i)^(?:left|right|thumb|thumbnail|bottom|none|upright)\s+(\p{Lu})`)
+	// Residual pipe between belligerent entities becomes a comma separator.
+	reInnerPipe = regexp.MustCompile(`\s*\|\s*`)
+	// Collapse runs of separators ("; ,", ",,", "; ;") into one comma.
+	reDupSeparator = regexp.MustCompile(`\s*[;,](?:\s*[;,])+\s*`)
+
+	// Sentence boundary followed by a lowercase letter: the group captures the
+	// preceding token so the caller can spare abbreviations and version numbers.
+	reSentenceCap = regexp.MustCompile(`(\S+)([.!?])(\s+)(\p{Ll})`)
 )
+
+// sentenceAbbrev holds tokens that end in a period mid-sentence, so the word
+// after them must not be capitalized.
+var sentenceAbbrev = map[string]bool{
+	"e.g": true, "i.e": true, "etc": true, "vs": true, "al": true, "no": true,
+	"mr": true, "mrs": true, "dr": true, "st": true, "inc": true, "ltd": true,
+	"u.s": true, "u.k": true, "ca": true, "cf": true, "fig": true, "vol": true,
+	"esp": true, "approx": true, "cap": true,
+}
+
+// reCaptionLead detects a field whose content is a leaked image caption
+// ("thumbnail|Markers at the...", "File:Foo.jpg|..."). Such a field held no
+// real significance to begin with, so the caller blanks it for re-curation.
+var reCaptionLead = regexp.MustCompile(`(?i)^\s*(?:thumb|thumbnail|frame|frameless|bottom|upright(?:=[0-9.]+)?|alt=|File:|Image:|\d+\s*px)\b`)
+
+// upperInitial capitalizes the first letter of s, leaving leading markup or
+// punctuation untouched.
+func upperInitial(s string) string {
+	for i, r := range s {
+		if unicode.IsLetter(r) {
+			if unicode.IsLower(r) {
+				return s[:i] + string(unicode.ToUpper(r)) + s[i+len(string(r)):]
+			}
+			return s
+		}
+	}
+	return s
+}
+
+// capitalizeSentences raises the first letter of s and of every sentence
+// after a period, question mark, or exclamation, sparing abbreviations,
+// version numbers, and ellipses.
+func capitalizeSentences(s string) string {
+	if s == "" {
+		return s
+	}
+	s = upperInitial(s)
+	return reSentenceCap.ReplaceAllStringFunc(s, func(m string) string {
+		sub := reSentenceCap.FindStringSubmatch(m)
+		word, punct, sp, ch := sub[1], sub[2], sub[3], sub[4]
+		if strings.HasSuffix(word, "..") {
+			return m // ellipsis, not a sentence boundary
+		}
+		if punct == "." {
+			lw := strings.ToLower(strings.TrimRight(word, ".!?"))
+			if sentenceAbbrev[lw] {
+				return m
+			}
+			wr := []rune(word)
+			if len(wr) > 0 && unicode.IsDigit(wr[len(wr)-1]) {
+				return m // version or decimal, e.g. "9.3. x"
+			}
+		}
+		return word + punct + sp + strings.ToUpper(ch)
+	})
+}
+
+// cleanseProse cleans a summary or significance field. A field that is a
+// leaked image caption blanks out for re-curation. Otherwise markup is
+// stripped, any reference or caption pipe-tail is truncated, and sentence
+// starts are capitalized.
+func cleanseProse(s string) string {
+	if reCaptionLead.MatchString(s) {
+		return ""
+	}
+	s = NormaliseText(s)
+	if i := strings.IndexByte(s, '|'); i >= 0 {
+		s = strings.TrimSpace(s[:i])
+	}
+	return capitalizeSentences(s)
+}
+
+// cleanseSideName cleans a belligerent name: shared markup strip, align-word
+// residue removal, residual pipes turned into separators, and a raised
+// initial.
+func cleanseSideName(s string) string {
+	s = NormaliseText(s)
+	s = reSideAlignLead.ReplaceAllString(s, "$1")
+	s = reInnerPipe.ReplaceAllString(s, ", ")
+	s = reDupSeparator.ReplaceAllString(s, ", ")
+	s = reMultiSpace.ReplaceAllString(s, " ")
+	s = strings.TrimSpace(strings.Trim(s, ",;| "))
+	return upperInitial(s)
+}
 
 // NormaliseText strips Wikipedia / infobox markup that leaked through the
 // importer, replaces invalid UTF-8 with nothing, collapses whitespace, and
@@ -343,6 +454,22 @@ func NormaliseText(s string) string {
 	s = reFieldLead.ReplaceAllString(s, "")
 	// Mid-string infobox field leak: "Italy|combatant2=Austria-Hungary" -> "Italy".
 	s = reInfoboxCombatantLeak.ReplaceAllString(s, "")
+	// Leaked image / align directive chains at the head ("thumb|left|200px|").
+	for {
+		before := s
+		s = reLeadDirective.ReplaceAllString(s, "")
+		if s == before {
+			break
+		}
+	}
+	// Flag-template and border scraps from {{flagicon|...|border}} leaks.
+	// Border becomes a pipe so a side-name pass can turn the gap between
+	// two belligerents into a comma; the flag prefix and bullets drop.
+	s = reFlagScrap.ReplaceAllString(s, " ")
+	s = reBorderScrap.ReplaceAllString(s, "|")
+	s = reBullet.ReplaceAllString(s, " ")
+	s = reGroupRef.ReplaceAllString(s, "")
+	s = reLeadPunct.ReplaceAllString(s, "")
 
 	// Tags first (so brace strippers don't see template fragments embedded
 	// inside ref tags or vice versa). The unclosed-ref pass runs LAST in
@@ -380,11 +507,12 @@ func NormaliseText(s string) string {
 	s = reWikiOpenEOL.ReplaceAllString(s, "")
 	s = reOrphanWiki.ReplaceAllString(s, "")
 
-	// Collapse whitespace and trim. The right-trim also drops trailing
-	// pipe/colon/comma/semicolon left over after structural strips.
+	// Collapse whitespace and trim. The right-trim drops trailing
+	// pipe/colon/comma/semicolon left over after structural strips, but
+	// keeps a terminal period so prose sentences stay intact.
 	s = reMultiSpace.ReplaceAllString(s, " ")
 	s = strings.TrimSpace(s)
-	s = strings.TrimRight(s, ",:;|. \t")
+	s = strings.TrimRight(s, ",:;| \t")
 	return s
 }
 
@@ -430,8 +558,8 @@ func cleanseBattleText(ctx context.Context, db *sql.DB) (int, error) {
 		name := NormaliseText(r.name)
 		war := NormaliseText(r.war)
 		victor := NormaliseText(r.victor)
-		summary := NormaliseText(r.summary)
-		significance := NormaliseText(r.significance)
+		summary := cleanseProse(r.summary)
+		significance := cleanseProse(r.significance)
 		if name == r.name && war == r.war && victor == r.victor &&
 			summary == r.summary && significance == r.significance {
 			continue
@@ -489,7 +617,7 @@ func cleanseSides(ctx context.Context, db *sql.DB) (int, error) {
 
 	var updated int
 	for _, r := range batch {
-		name := NormaliseText(r.name)
+		name := cleanseSideName(r.name)
 		commander := NormaliseText(r.commander)
 		strength := NormaliseText(r.strength)
 		casualties := NormaliseText(r.casualties)

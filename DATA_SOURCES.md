@@ -6,7 +6,7 @@ We are grateful to the maintainers, contributors, and donors of each.
 
 If you reuse BattleSight's data, preserve the attribution and licensing of the
 underlying sources. The combined database is not redistributed as a single
-licensed work. each row inherits the license of the source it came from.
+licensed work. Each row inherits the license of the source it came from.
 
 ---
 
@@ -33,7 +33,7 @@ licensed work. each row inherits the license of the source it came from.
   the [GNU Free Documentation License](https://www.gnu.org/licenses/fdl-1.3.html).
   GeoData coordinates are exported separately and are effectively in the
   same content pool.
-- **What we use:** Article infoboxes parsed into structured fields. sides,
+- **What we use:** Article infoboxes parsed into structured fields. Sides,
   commanders, strength, casualties, victor, parent conflict, location, date.
   Coordinates pulled either from the GeoData API (`prop=coordinates`) or by
   regex from the `{{coord}}` template in the article wikitext.
@@ -101,7 +101,7 @@ licensed work. each row inherits the license of the source it came from.
 ### three-globe night sky
 
 - **Source:** https://github.com/vasturiano/three-globe (`example/img/night-sky.png`)
-- **License:** MIT (the wrapper). the image itself is public domain stellar
+- **License:** MIT (the wrapper). The image itself is public domain stellar
   imagery from various NASA/ESA sources.
 - **What we use:** Background star field behind the globe.
 
@@ -121,7 +121,7 @@ licensed work. each row inherits the license of the source it came from.
 ### Back end
 
 - **modernc.org/sqlite**. https://gitlab.com/cznic/sqlite. BSD-3-Clause.
-  Pure-Go SQLite port. ships without CGO so the binary is portable.
+  Pure-Go SQLite port. Ships without CGO so the binary is portable.
 - **google/go-cmp**. https://github.com/google/go-cmp. BSD-3-Clause. Used
   in tests for structured comparisons.
 
@@ -132,7 +132,7 @@ licensed work. each row inherits the license of the source it came from.
 If you use BattleSight's data or screenshots:
 
 - Cite the underlying source (Wikipedia, Wikidata, CDB90) for any specific
-  number you reproduce. those are the authoritative records.
+  number you reproduce. Those are the authoritative records.
 - A link back to the project is welcome but not required.
 
 If you fork the curated set, please retain `DATA_SOURCES.md` and preserve the

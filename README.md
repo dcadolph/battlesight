@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="internal/logo/battlesight-eye.png" alt="BattleSight" width="100%" />
+  <img src="internal/logo/battlesight-eye.png" alt="BattleSight" width="400" />
 </p>
 
 <h1 align="center">BattleSight</h1>

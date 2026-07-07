@@ -1,6 +1,6 @@
 # Cinematic mode
 
-How the war cinematic actually plays. the timing, the advance logic,
+How the war cinematic actually plays. The timing, the advance logic,
 the failure modes, and the controls.
 
 ## Index
@@ -42,7 +42,7 @@ for groupIndex in 0..groups.length:
 ```
 
 The cinematic-grade filter picks the battles. By default this is
-`b.hasReplay && !b.hasSchematic`. hand-crafted phase replays only.
+`b.hasReplay && !b.hasSchematic`. Hand-crafted phase replays only.
 Falls back to the full battle list when the filter would yield fewer
 than 3 entries.
 
@@ -56,7 +56,7 @@ country-coloring.
 
 The polygon transition tweens between snapshots over ~1200ms. A
 territory-flip ring pulse fires at the centroid of every country that
-changed hands across the snapshot boundary. so you can see Germany's
+changed hands across the snapshot boundary. So you can see Germany's
 black ring expanding east across Poland, then France, then the Low
 Countries.
 
@@ -74,7 +74,7 @@ a new war.
 | `Previous` button&nbsp;&nbsp; | Cinematic outro card | Step back one battle. |
 | `→` / `←`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Keyboard | Next / Previous battle (in cinematic mode). |
 | `Esc`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Keyboard | Close the replay overlay. |
-| `Space`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Keyboard | Toggle pause. disabled in cinematic mode to prevent foot-gun pause-on-Stalingrad. |
+| `Space`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Keyboard | Toggle pause. Disabled in cinematic mode to prevent foot-gun pause-on-Stalingrad. |
 
 ## Stalls and how we recover
 
@@ -88,7 +88,7 @@ cinematic doesn't advance. We have three guard layers:
    timeout at the start of each cinematic battle. If `onEnded` never
    fires (broken phases, JS error, etc.), this catches the campaign
    and advances anyway.
-3. **Manual Next / Previous buttons**. visible on every cinematic
+3. **Manual Next / Previous buttons**. Visible on every cinematic
    outro card. The user always has agency.
 
 The advance handler is a shared code path. All three layers funnel

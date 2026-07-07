@@ -11,7 +11,7 @@
 > **⚠ Before you start:** the importer hits Wikidata's public SPARQL
 > endpoint and Wikipedia's REST API. A full pull is ~10-15 minutes the
 > first time and uses ~80 MB of disk cache in `data/.wikicache/`.
-> Subsequent runs are fast because of the cache. pass `-network=false`
+> Subsequent runs are fast because of the cache. Pass `-network=false`
 > to refuse new network calls entirely.
 
 ## Quick Start
@@ -38,7 +38,7 @@ updates the rows it owns. You can run a single stage or chain them with
 | Wikidata pull&nbsp;&nbsp; | `-wikidata` | SPARQL query for all entities of type `military operation` with coordinates. Inserts/updates `battles` rows. |
 | Wikipedia enrichment&nbsp;&nbsp; | `-enrich` | Fetches REST API summary for each battle. Populates `wikipedia_title`, `wikipedia_extract`. |
 | Infobox parse&nbsp;&nbsp; | `-infobox` | Pulls the Wikipedia article wikitext, parses the `{{Infobox military conflict}}` template, populates `sides`, `commanders`, `casualties`, `strength`. |
-| Significance&nbsp;&nbsp; | `-significance` | Mines the "Aftermath" / "Legacy" sections for prose. stores in `significance` column. |
+| Significance&nbsp;&nbsp; | `-significance` | Mines the "Aftermath" / "Legacy" sections for prose. Stores in `significance` column. |
 | References&nbsp;&nbsp;&nbsp;&nbsp; | `-references` | Extracts citation URLs into `battle_references` (one row per source). |
 | Wars enrichment&nbsp;&nbsp; | `-wars` | For every war with ≥3 battles, fetches a Wikipedia summary and writes `outcome` / `aftermath` / `keyTerms` into `data/wars.json`. |
 | Curated JSON seed&nbsp;&nbsp; | `-json <path>` | Insert/update from a hand-curated JSON file. Used for editorial overrides. |
@@ -72,7 +72,7 @@ The `-all` flag chains: `-wikidata -enrich -infobox -significance -references -w
 
 The Wikipedia/Wikidata cache lives at `data/.wikicache/`. Each upstream
 response is keyed by URL and stored verbatim. The cache is the reason
-re-running the importer is fast. and it's gitignored, so don't worry
+re-running the importer is fast. And it's gitignored, so don't worry
 about size locally. Delete the directory to force a full re-fetch.
 
 ## Output
@@ -103,12 +103,12 @@ Each stage logs a one-line summary on completion:
 
 Wikidata is updated continuously by editors. The SPARQL query runs
 against the live endpoint so the snapshot is current at run time. Cache
-the result if you need reproducibility. the on-disk cache makes
+the result if you need reproducibility. The on-disk cache makes
 subsequent runs deterministic until the cache is cleared.
 </details>
 
 <details>
-<summary>I see "broken sides" in the catalog. what are those?</summary>
+<summary>I see "broken sides" in the catalog. What are those?</summary>
 
 When the Wikipedia infobox parser can't fully resolve a template
 parameter (`|combatant2 = {{flagicon|...}} ...`), it leaves a fragment

@@ -124,7 +124,7 @@ canonical war name (matching `battles.war`).
 | `endYear`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | int | Curated end year. |
 | `parent`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | Parent war name (e.g. "World War II" for theater entries). Empty for top-level wars. |
 
-`humanDeaths` is authoritative when present. the UI shows it directly
+`humanDeaths` is authoritative when present. The UI shows it directly
 and the rolled-up war total uses it instead of summing children. This
 is how WW2 reads 75M (including the Holocaust and famine) rather than
 the catalog-derived ~20M battle-only sum.
@@ -133,7 +133,7 @@ the catalog-derived ~20M battle-only sum.
 
 Territory snapshots live in TypeScript:
 `web/src/data/territory-snapshots.ts`. Each war has a list of dated
-snapshots. each snapshot is a map of owner key → list of country names.
+snapshots. Each snapshot is a map of owner key → list of country names.
 
 ```ts
 {
@@ -168,7 +168,7 @@ faction colors are keyed by `ColorKey`:
 
 | Key&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Hex | Use for |
 | --- | --- | --- |
-| `nazi-black`&nbsp;&nbsp; | `#1f1f1f` | Nazi factions (in arrows. territory uses feldgrau) |
+| `nazi-black`&nbsp;&nbsp; | `#1f1f1f` | Nazi factions (in arrows. Territory uses feldgrau) |
 | `soviet-red`&nbsp;&nbsp; | `#dc2626` | USSR / Red Army |
 | `imperial-japan`&nbsp;&nbsp; | `#9b1c1c` | Imperial Japanese forces |
 | `fascist-italy`&nbsp;&nbsp; | `#16732b` | Mussolini's Italy |

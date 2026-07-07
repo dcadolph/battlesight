@@ -24,12 +24,12 @@ Hit `http://localhost:8080/api/battles/stats` to verify the API is up.
 
 ## Commands Overview
 
-`battlesight` is a single long-running HTTP server. there are no
+`battlesight` is a single long-running HTTP server. There are no
 subcommands. Configuration is via flags and environment variables.
 
 | Resource&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Path | Purpose |
 | --- | --- | --- |
-| Stats&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/battles/stats` | Era / war / battle-type counts. war list with rolled totals. |
+| Stats&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/battles/stats` | Era / war / battle-type counts. War list with rolled totals. |
 | Battles&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/battles` | Paginated battle list with filters. |
 | Battle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/battles/{id}` | Single battle dossier. |
 | Replay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `GET /api/battles/{id}/replay` | Phase replay JSON. |
@@ -73,7 +73,7 @@ Curators can edit, save, and reload the browser to see changes without
 restarting.
 
 Schema validation runs on every reload. Parse errors are logged but do
-not crash the server. the previous valid version stays loaded.
+not crash the server. The previous valid version stays loaded.
 
 ## Health
 
@@ -108,11 +108,11 @@ HTTP status:
 ## FAQ
 
 <details>
-<summary>The server logs say "loaded 0 battle replays". why?</summary>
+<summary>The server logs say "loaded 0 battle replays". Why?</summary>
 
 `data/phases.json` is missing, empty, or in the wrong path. Pass
 `-phases /path/to/phases.json` or place the file at the default location.
-The server runs fine without replays. only the cinematic and the
+The server runs fine without replays. Only the cinematic and the
 "Watch the battle" affordance go quiet.
 </details>
 
@@ -120,9 +120,9 @@ The server runs fine without replays. only the cinematic and the
 <summary>I edited phases.json and the change didn't appear. Why?</summary>
 
 Two reasons. (a) The hot-reload poller only sees changes the filesystem
-reports. some editors write to a temp file and rename atomically. Try
+reports. Some editors write to a temp file and rename atomically. Try
 saving directly to the file. (b) Schema parse failed and the previous
-version stayed loaded. check the server log for `wars hot-reload failed`
+version stayed loaded. Check the server log for `wars hot-reload failed`
 or `phases hot-reload failed`.
 </details>
 
@@ -130,7 +130,7 @@ or `phases hot-reload failed`.
 <summary>How do I run the API on a different port?</summary>
 
 `-port 9090` or `BATTLESIGHT_PORT=9090`. The frontend's Vite proxy
-points at `:8080` by default. change `web/vite.config.ts` to match if
+points at `:8080` by default. Change `web/vite.config.ts` to match if
 you move the backend.
 </details>
 

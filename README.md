@@ -52,8 +52,8 @@ Documentaries do the opposite. They build a 90-minute story arc for
 can't compare wars or drill into a specific battle.
 
 BattleSight sits between the two. The catalog has the *breadth* of
-Wikipedia. the curated layer on top has the *fidelity* of a Ken Burns
-script. for every war, eventually. We are not there yet. We are
+Wikipedia. The curated layer on top has the *fidelity* of a Ken Burns
+script. For every war, eventually. We are not there yet. We are
 building toward it.
 
 ## Index
@@ -196,7 +196,7 @@ you need most:
 
 | Method&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Path | Purpose |
 | --- | --- | --- |
-| `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/stats` | Era / war / battle-type aggregations. powers the war list. |
+| `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/stats` | Era / war / battle-type aggregations. Powers the war list. |
 | `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles?war=...` | Battles in a war, ordered by date. |
 | `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/search?q=...` | Full-text search across names, sides, and commanders. |
 | `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/{id}` | Single battle dossier. |
@@ -217,16 +217,16 @@ Full list and URL-hash deep links: [docs/usage.md](docs/usage.md).
 
 ## Docs
 
-- [docs/architecture.md](docs/architecture.md). how the stack fits together
-- [docs/authoring.md](docs/authoring.md). phase replays, war narratives, territory snapshots
-- [docs/cinematic.md](docs/cinematic.md). war cinematic engine, advance logic, controls
-- [docs/territory-snapshots.md](docs/territory-snapshots.md). country-level shading model
+- [docs/architecture.md](docs/architecture.md). How the stack fits together
+- [docs/authoring.md](docs/authoring.md). Phase replays, war narratives, territory snapshots
+- [docs/cinematic.md](docs/cinematic.md). War cinematic engine, advance logic, controls
+- [docs/territory-snapshots.md](docs/territory-snapshots.md). Country-level shading model
 - [docs/api.md](docs/api.md). HTTP API + JSON schemas
 - [docs/usage.md](docs/usage.md). URL hash routing + keyboard shortcuts
-- [docs/data-quality.md](docs/data-quality.md). trust filters and curation tiers
-- [docs/faq.md](docs/faq.md). the questions that come up most often
-- [cmd/README.md](cmd/README.md). command-line tools: server, importer, curation
-- [DATA_SOURCES.md](DATA_SOURCES.md). upstream data sources and licenses
+- [docs/data-quality.md](docs/data-quality.md). Trust filters and curation tiers
+- [docs/faq.md](docs/faq.md). The questions that come up most often
+- [cmd/README.md](cmd/README.md). Command-line tools: server, importer, curation
+- [DATA_SOURCES.md](DATA_SOURCES.md). Upstream data sources and licenses
 
 ## License
 

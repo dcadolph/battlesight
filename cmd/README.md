@@ -23,6 +23,8 @@ go run ./cmd/battlesight
 | `-phases` | `data/phases.json` | Replay file, watched for hot-reload. Empty to skip. |
 | `-wars` | `data/wars.json` | War narratives, watched for hot-reload. Empty to skip. |
 
+Full flag reference and operational notes: [battlesight/README.md](battlesight/README.md).
+
 ## `import` — the ingest and enrichment pipeline
 
 Pulls battles from Wikidata, enriches them from Wikipedia, backfills
@@ -54,6 +56,8 @@ go run ./cmd/import -merge-replays drafts.json    # validate and merge replay dr
 
 The `-*-dry-run` companions to the geocode and infobox flags print the
 would-be summary without touching the database.
+
+Full pipeline reference and per-source detail: [import/README.md](import/README.md).
 
 ## `fixdates` — year and era repair
 

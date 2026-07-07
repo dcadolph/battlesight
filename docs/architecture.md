@@ -85,7 +85,7 @@ for the tactical map.
 The server polls `phases.json` and `wars.json` once per second. When the
 mtime advances, the registry reloads under a write lock. Parse errors
 log and keep the previous version. Save the file, reload the browser,
-see the change. no server restart.
+see the change. No server restart.
 
 Vite handles the frontend hot-reload separately.
 
@@ -104,5 +104,5 @@ Vite handles the frontend hot-reload separately.
    - On `ended`, calls `onEnded` after the outro pause.
    - WarPlayback's tick-advance effect closes the replay and advances to the next battle.
 
-Each step is independently observable. the cinematic stalls have been
+Each step is independently observable. The cinematic stalls have been
 debugged by inspecting which step in this chain didn't fire.

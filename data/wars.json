@@ -36,8 +36,8 @@
     "keyTerms": "UN Resolution 1701 (August 11, 2006)"
   },
   "Acehnese–Portuguese conflicts": {
-    "outcome": "| partof = the Portuguese Battles in the East",
-    "aftermath": "The opposition of Muslim traders to the Portuguese made them move to Aceh. With the Acehnese capture of Pedir and Pasai, it flourished with traders, leading to a large decrease in merchants coming to Malacca. The threat posed by the Acehnese to the Portuguese was serious as it significantly undermined Portuguese ambitions, who wanted to enforce a trade monopoly in the Indian Ocean and desiring to set the prices for themselves. During the years 1554–1567, the Portuguese attempted to stop the Acehnese trade with the Red Sea. however, these expeditions clearly failed in their purpose.",
+    "outcome": "| Partof = the Portuguese Battles in the East",
+    "aftermath": "The opposition of Muslim traders to the Portuguese made them move to Aceh. With the Acehnese capture of Pedir and Pasai, it flourished with traders, leading to a large decrease in merchants coming to Malacca. The threat posed by the Acehnese to the Portuguese was serious as it significantly undermined Portuguese ambitions, who wanted to enforce a trade monopoly in the Indian Ocean and desiring to set the prices for themselves. During the years 1554–1567, the Portuguese attempted to stop the Acehnese trade with the Red Sea. However, these expeditions clearly failed in their purpose.",
     "keyTerms": "Portuguese expulsion from Aceh (1641)",
     "humanDeaths": 20000,
     "startYear": 1521,
@@ -54,7 +54,7 @@
     "parent": "Napoleonic Wars"
   },
   "Afghan–Sikh Wars": {
-    "outcome": "| combatant1 = {{plainlist|",
+    "outcome": "| Combatant1 =",
     "keyTerms": "Battle of Jamrud (April 1837)",
     "humanDeaths": 30000,
     "startYear": 1748,
@@ -155,7 +155,7 @@
     "parent": ""
   },
   "Anglophone Crisis": {
-    "outcome": "| combatant1 = Cameroon",
+    "outcome": "| Combatant1 = Cameroon",
     "humanDeaths": 6000,
     "startYear": 2017,
     "endYear": 0,
@@ -354,7 +354,7 @@
   },
   "Byzantine–Ottoman wars": {
     "outcome": "Ottoman victory",
-    "aftermath": "The Fall of Constantinople came as a shock to the papacy, which ordered an immediate counter-attack in the form of a crusade. Only Philip the Good, Duke of Burgundy responded but under the condition that a powerful monarch assist him. however, none would do so. Pope Pius II then ordered another crusade. Again, no substantial efforts were seen by any of Europe's major leaders of the time. This forced the Pope himself to lead a crusade. His death in 1464 led to the disbanding of the crusade at the port of Ancona.",
+    "aftermath": "The Fall of Constantinople came as a shock to the papacy, which ordered an immediate counter-attack in the form of a crusade. Only Philip the Good, Duke of Burgundy responded but under the condition that a powerful monarch assist him. However, none would do so. Pope Pius II then ordered another crusade. Again, no substantial efforts were seen by any of Europe's major leaders of the time. This forced the Pope himself to lead a crusade. His death in 1464 led to the disbanding of the crusade at the port of Ancona.",
     "keyTerms": "Fall of Constantinople (May 29, 1453)",
     "humanDeaths": 250000,
     "startYear": 1265,
@@ -371,7 +371,7 @@
     "aftermath": "Two and a half centuries of war from Manzikert (1071) to the rise of the Ottomans. The Seljuk seizure of Anatolia ended Byzantine power in the region and produced the Sultanate of Rum, ancestor of the Ottoman Empire."
   },
   "Caribbean campaign of 1803–1810": {
-    "aftermath": "The fall of Guadeloupe marked the end of the final French territory in the Caribbean. the entire region was now in the hands of either the British or the Spanish, except the independent state of Haiti. The lack of French privateers and warships sparked a boom in trade operations, and the economies of the Caribbean islands experienced a resurgence. It also made a significant reduction in French international trade and had a corresponding effect on the French economy. Finally, the capture of the last French colony struck a decisive blow to the Atlantic slave trade, which had been made illegal by the British government in 1807 and was actively persecuted by the Royal Navy.",
+    "aftermath": "The fall of Guadeloupe marked the end of the final French territory in the Caribbean. The entire region was now in the hands of either the British or the Spanish, except the independent state of Haiti. The lack of French privateers and warships sparked a boom in trade operations, and the economies of the Caribbean islands experienced a resurgence. It also made a significant reduction in French international trade and had a corresponding effect on the French economy. Finally, the capture of the last French colony struck a decisive blow to the Atlantic slave trade, which had been made illegal by the British government in 1807 and was actively persecuted by the Royal Navy.",
     "humanDeaths": 25000,
     "startYear": 1803,
     "endYear": 1810,
@@ -475,7 +475,7 @@
     "outcome": "Catholic victory; Gebhard Truchsess deposed and replaced with a Wittelsbach archbishop."
   },
   "Colombian War of Independence": {
-    "outcome": "{{Collapsible list|bullets=on|title=Colombian and Allied victory",
+    "outcome": "",
     "keyTerms": "Battle of Boyacá (August 7, 1819)",
     "humanDeaths": 80000,
     "startYear": 1810,
@@ -512,7 +512,7 @@
   },
   "Creek War": {
     "outcome": "American victory",
-    "aftermath": "upright=1.00|Territory ceded by the Creek Confederation in 1814 under the Treaty of Fort Jackson",
+    "aftermath": "Territory ceded by the Creek Confederation in 1814 under the Treaty of Fort Jackson",
     "keyTerms": "Treaty of Fort Jackson (August 9, 1814)",
     "humanDeaths": 3000,
     "startYear": 1813,
@@ -538,7 +538,7 @@
     "aftermath": "Seven hundred fifty thousand dead, mostly from disease. The war exposed Russian military backwardness and triggered the reforms of Alexander II — including the emancipation of the serfs in 1861. Nightingale and battlefield journalism transformed Western expectations of military medicine and war reporting."
   },
   "Crimean–Nogai slave raids in Eastern Europe": {
-    "outcome": "{{bulletedlist",
+    "outcome": "",
     "keyTerms": "Russian annexation of Crimea (April 1783)",
     "aftermath": "Three centuries (1480s-1769) of Crimean Tatar and Nogai slave raids into Polish, Lithuanian, and Russian lands. The raids enslaved an estimated 1-3 million Slavs and Circassians for the Ottoman slave market. Russian conquest of the Crimean Khanate (1783) ended the raids."
   },
@@ -552,7 +552,7 @@
     "aftermath": "Fifty years of civil war, plague, and barbarian invasion that nearly broke the Roman Empire. Twenty-six emperors and innumerable usurpers. The Diocletianic reforms (Tetrarchy, hereditary occupations, new provincial structure) saved the Empire but transformed it into the bureaucratic late-Roman state."
   },
   "Crusades": {
-    "aftermath": "The fall of the Frankish East caused dismay rather than shock in the West and Western Christians mostly blamed the Franks' alleged immorality. Pope Nicholas IV appealed to EdwardI of England to lead a new crusade and imposed a tax to fund it, but the Gascon War with Philip IV of France ended English plans in 1294. Schemes to recover the Holy Land inspired treatises: Fidentius of Padua and Charles II of Naples urged a blockade of Egypt. James of Molay, Templar Grand Master, called for a large crusade. and the Armenian prince-turned-monk Hayton of Corycus proposed a two-stage expedition.",
+    "aftermath": "The fall of the Frankish East caused dismay rather than shock in the West and Western Christians mostly blamed the Franks' alleged immorality. Pope Nicholas IV appealed to EdwardI of England to lead a new crusade and imposed a tax to fund it, but the Gascon War with Philip IV of France ended English plans in 1294. Schemes to recover the Holy Land inspired treatises: Fidentius of Padua and Charles II of Naples urged a blockade of Egypt. James of Molay, Templar Grand Master, called for a large crusade. And the Armenian prince-turned-monk Hayton of Corycus proposed a two-stage expedition.",
     "humanDeaths": 3000000,
     "startYear": 1095,
     "endYear": 1291,
@@ -579,7 +579,7 @@
     "outcome": "Cypriot independence (1960); EOKA war ends, Cyprus becomes a republic."
   },
   "Dakota War of 1862": {
-    "aftermath": "Trials\nTrials were held from 28 September 1862 and were completed by 3 November 1862. Trials were conducted by the military for 400-odd Dakota men, 303 were found guilty and were sentenced to death. President Lincoln reviewed each case and commuted the death sentences of 265 prisoners and allowed the execution of 38 men., \nTrials were deficient in many ways, even by military standards. and the officers who oversaw them did not conduct them according to military law. The defendants were not given defense attorneys to represent them. No one explained to the defendants the proceedings either.",
+    "aftermath": "Trials\nTrials were held from 28 September 1862 and were completed by 3 November 1862. Trials were conducted by the military for 400-odd Dakota men, 303 were found guilty and were sentenced to death. President Lincoln reviewed each case and commuted the death sentences of 265 prisoners and allowed the execution of 38 men., Trials were deficient in many ways, even by military standards. And the officers who oversaw them did not conduct them according to military law. The defendants were not given defense attorneys to represent them. No one explained to the defendants the proceedings either.",
     "keyTerms": "Mankato Mass Execution (December 26, 1862)",
     "humanDeaths": 800,
     "startYear": 1862,
@@ -603,7 +603,7 @@
     "keyTerms": "Stockholm Bloodbath (November 1520)"
   },
   "Dominican Restoration War": {
-    "aftermath": "Monument to the Dominican War of Restoration\nAlthough many Dominican cities were destroyed and agriculture (apart from tobacco) across the country halted during the war years, the War of Restoration brought a new level of national pride to the Dominican Republic. The Dominican victory also showed nationalists in Cuba and Puerto Rico that Spain could be defeated. On the other hand, in local politics, leadership during the war was concentrated in the hands of a few regional caudillos, or strongmen, who could command the loyalty of the regions and were more intent on bettering themselves and their followers than the nation as a whole. That system of political power persisted until the late 20th century.\n[[Gregorio Luperón monument in Puerto Plata.",
+    "aftermath": "Monument to the Dominican War of Restoration\nAlthough many Dominican cities were destroyed and agriculture (apart from tobacco) across the country halted during the war years, the War of Restoration brought a new level of national pride to the Dominican Republic. The Dominican victory also showed nationalists in Cuba and Puerto Rico that Spain could be defeated. On the other hand, in local politics, leadership during the war was concentrated in the hands of a few regional caudillos, or strongmen, who could command the loyalty of the regions and were more intent on bettering themselves and their followers than the nation as a whole. That system of political power persisted until the late 20th century.",
     "keyTerms": "Spanish withdrawal (July 1865)",
     "humanDeaths": 30000,
     "startYear": 1863,
@@ -648,7 +648,7 @@
     "parent": "French Revolutionary Wars"
   },
   "Eastern Front (World War I)": {
-    "outcome": "{{ublist|Central Powers victory",
+    "outcome": "",
     "aftermath": "In historiography, the front is usually described as a Central Powers’ victory and a Russian defeat. Despite the Russian defeat of the Eastern Front, the failure of the German spring offensive is directly related to the fact that the Germans kept all their cavalry in the east.",
     "keyTerms": "Treaty of Brest-Litovsk (March 3, 1918)",
     "humanDeaths": 3000000,
@@ -723,7 +723,7 @@
   },
   "Falklands War": {
     "outcome": "British victory",
-    "aftermath": "The Monumento a los Caídos en Malvinas (\"Monument for the Fallen in the Falklands\") in Plaza San Martín, Buenos Aires. A member of the historic Patricios regiment stands guard|group=nb}}\nThis brief war brought many consequences for all the parties involved, besides the considerable casualty rate and large materiel loss, especially of shipping and aircraft, relative to the deployed military strengths of the opposing sides.",
+    "aftermath": "The Monumento a los Caídos en Malvinas (\"Monument for the Fallen in the Falklands\") in Plaza San Martín, Buenos Aires. A member of the historic Patricios regiment stands guard|group=nb\nThis brief war brought many consequences for all the parties involved, besides the considerable casualty rate and large materiel loss, especially of shipping and aircraft, relative to the deployed military strengths of the opposing sides.",
     "keyTerms": "Argentine surrender (June 14, 1982)",
     "humanDeaths": 1000,
     "startYear": 1982,
@@ -768,7 +768,7 @@
   },
   "First Anglo-Dutch War": {
     "outcome": "Treaty of Westminster (1654)",
-    "aftermath": "The Dutch were saved from harsh peace. In part to the leniency of Cromwell,}} but also because he feared a longer war, along with the massive economic damage to the English maritime economy. The Dutch nevertheless realized few of the objectives in their 36 articles, and had to make a few minor concessions - the acceptance of the Act of Navigation which excluded their merchants from all commerce between England and its colonies, an indemnity of £85,000 for losses of the EIC in the East Indies and £3,615 which had to be paid to the heirs of the victims of the Amboyna massacre. The island of Run in the East Indies was to be ceded to the East India Company, although the Dutch never actually returned the island. Lastly, a symbolic gesture. saluting the flag of English warships in the Channel.",
+    "aftermath": "The Dutch were saved from harsh peace. In part to the leniency of Cromwell, but also because he feared a longer war, along with the massive economic damage to the English maritime economy. The Dutch nevertheless realized few of the objectives in their 36 articles, and had to make a few minor concessions - the acceptance of the Act of Navigation which excluded their merchants from all commerce between England and its colonies, an indemnity of £85,000 for losses of the EIC in the East Indies and £3,615 which had to be paid to the heirs of the victims of the Amboyna massacre. The island of Run in the East Indies was to be ceded to the East India Company, although the Dutch never actually returned the island. Lastly, a symbolic gesture. Saluting the flag of English warships in the Channel.",
     "keyTerms": "Treaty of Westminster (April 5, 1654)",
     "humanDeaths": 4000,
     "startYear": 1652,
@@ -777,7 +777,7 @@
   },
   "First Anglo-Sikh War": {
     "outcome": "British victory",
-    "aftermath": "upright=1.1|thumb|Maharaja Dalip Singh entering his palace in Lahore, while escorted by British troops\nIn the Treaty of Lahore on 9 March 1846, the Sikhs were made to surrender the valuable region (the Jullundur Doab) between the Beas and Sutlej rivers. The Lahore Durbar was also required to pay an indemnity of 15 million rupees. Because it could not readily raise this sum, it ceded Kashmir, Hazarah and all the forts, territories, rights and interests in the hill countries situated between the Rivers Beas and Indus to the East India Company, as equivalent to 10 million rupees. In a later separate arrangement (the Treaty of Amritsar), the Raja of Jammu, Gulab Singh, purchased Kashmir from the EIC for a payment of 7.",
+    "aftermath": "Thumb|Maharaja Dalip Singh entering his palace in Lahore, while escorted by British troops\nIn the Treaty of Lahore on 9 March 1846, the Sikhs were made to surrender the valuable region (the Jullundur Doab) between the Beas and Sutlej rivers. The Lahore Durbar was also required to pay an indemnity of 15 million rupees. Because it could not readily raise this sum, it ceded Kashmir, Hazarah and all the forts, territories, rights and interests in the hill countries situated between the Rivers Beas and Indus to the East India Company, as equivalent to 10 million rupees. In a later separate arrangement (the Treaty of Amritsar), the Raja of Jammu, Gulab Singh, purchased Kashmir from the EIC for a payment of 7.",
     "humanDeaths": 25000,
     "startYear": 1845,
     "endYear": 1846,
@@ -822,7 +822,7 @@
   },
   "First Chechen War": {
     "outcome": "Chechen victory",
-    "aftermath": "The war concluded with the complete withdrawal of Russian troops and the preservation of Chechnya's de facto independence. Military analysts and historians characterize the outcome as a Chechen victory and a Russian defeat. The Foreign Military Studies Office (FMSO) case study notes that the conflict \"resulted in Russian defeat\" as federal forces failed to eradicate the rebellion or reintegrate the republic. while other international studies have described the result as a \"Pyrrhic victory\" for Chechnya. Following the peace treaty, Maskhadov was elected president of the Chechen Republic of Ichkeria in January 1997.",
+    "aftermath": "The war concluded with the complete withdrawal of Russian troops and the preservation of Chechnya's de facto independence. Military analysts and historians characterize the outcome as a Chechen victory and a Russian defeat. The Foreign Military Studies Office (FMSO) case study notes that the conflict \"resulted in Russian defeat\" as federal forces failed to eradicate the rebellion or reintegrate the republic. While other international studies have described the result as a \"Pyrrhic victory\" for Chechnya. Following the peace treaty, Maskhadov was elected president of the Chechen Republic of Ichkeria in January 1997.",
     "keyTerms": "Khasavyurt Accord (August 31, 1996)",
     "humanDeaths": 80000,
     "startYear": 1994,
@@ -903,7 +903,7 @@
   },
   "First Punic War": {
     "outcome": "Roman victory",
-    "aftermath": "upright=1.35|alt=A map of the western Mediterranean showing the territory ceded to Rome by Carthage under the treaty.|",
+    "aftermath": "Alt=A map of the western Mediterranean showing the territory ceded to Rome by Carthage under the treaty.",
     "keyTerms": "Treaty of Lutatius (241 BC)",
     "humanDeaths": 400000,
     "startYear": -264,
@@ -921,7 +921,7 @@
   },
   "First Serbian Uprising": {
     "outcome": "Ottoman victory, (see Aftermath section)",
-    "aftermath": "The Skull Tower built by the Turks with embedded Serbian skulls, as depicted in an 1863 sketch by Felix Philipp Kanitz \nAs a clause of the Treaty of Bucharest, the Ottomans agreed to grant a general amnesty to the participants of the uprising. However, as soon as Turkish rule was re-established in Serbia, villages were burned and thousands were sent into the Ottoman slave trade. Belgrade became the scene of brutal vengeance. On 17 October 1813 alone, 1,800 women and children were sold into slavery in the Ottoman Empire. Various acts of violence and confiscation of property also took place. Islamized Serbs and Albanians in particular participated in such actions.",
+    "aftermath": "The Skull Tower built by the Turks with embedded Serbian skulls, as depicted in an 1863 sketch by Felix Philipp Kanitz As a clause of the Treaty of Bucharest, the Ottomans agreed to grant a general amnesty to the participants of the uprising. However, as soon as Turkish rule was re-established in Serbia, villages were burned and thousands were sent into the Ottoman slave trade. Belgrade became the scene of brutal vengeance. On 17 October 1813 alone, 1,800 women and children were sold into slavery in the Ottoman Empire. Various acts of violence and confiscation of property also took place. Islamized Serbs and Albanians in particular participated in such actions.",
     "keyTerms": "Ottoman reconquest (October 1813)",
     "humanDeaths": 36000,
     "startYear": 1804,
@@ -1012,7 +1012,7 @@
   },
   "French and Indian War": {
     "outcome": "British victory",
-    "aftermath": "upright=1.5|The resulting peace dramatically changed the political landscape of North America, with New France ceded to the British and the Spanish.\nThe war changed economic, political, governmental, and social relations among the three European powers, their colonies, and the people who inhabited those territories. France and Britain both suffered financially because of the war, with significant long-term consequences.",
+    "aftermath": "The resulting peace dramatically changed the political landscape of North America, with New France ceded to the British and the Spanish.\nThe war changed economic, political, governmental, and social relations among the three European powers, their colonies, and the people who inhabited those territories. France and Britain both suffered financially because of the war, with significant long-term consequences.",
     "keyTerms": "Treaty of Paris (February 10, 1763)",
     "humanDeaths": 25000,
     "startYear": 1754,
@@ -1170,7 +1170,7 @@
     "parent": ""
   },
   "Guelphs and Ghibellines": {
-    "outcome": "1st phase: Peace of Constance (1186), 2nd phase: Stalemate (1392),",
+    "outcome": "1St phase: Peace of Constance (1186), 2nd phase: Stalemate (1392)",
     "keyTerms": "Battle of Montaperti (September 4, 1260)",
     "humanDeaths": 50000,
     "startYear": 1125,
@@ -1311,7 +1311,7 @@
     "keyTerms": "Surrender of Warsaw (September 27, 1939)"
   },
   "Iran–Iraq War": {
-    "aftermath": "Casualties\nThe Iran–Iraq War was the deadliest conventional war ever fought between regular armies of developing countries. while about 400,000 had been wounded and some 70,000 taken prisoner. Thousands of civilians on both sides died in air raids and ballistic missile attacks. Prisoners taken by both countries began to be released on 17 August 1990, though some were not released until more than 10 years after the end of the conflict. Cities on both sides had also been considerably damaged. While revolutionary Iran had been bloodied, Iraq was left with a large military and was a regional power, albeit with severe debt, financial problems, and labour shortages.",
+    "aftermath": "Casualties\nThe Iran–Iraq War was the deadliest conventional war ever fought between regular armies of developing countries. While about 400,000 had been wounded and some 70,000 taken prisoner. Thousands of civilians on both sides died in air raids and ballistic missile attacks. Prisoners taken by both countries began to be released on 17 August 1990, though some were not released until more than 10 years after the end of the conflict. Cities on both sides had also been considerably damaged. While revolutionary Iran had been bloodied, Iraq was left with a large military and was a regional power, albeit with severe debt, financial problems, and labour shortages.",
     "humanDeaths": 1000000,
     "startYear": 1980,
     "endYear": 1988,
@@ -1322,7 +1322,7 @@
   "Iraq War": {
     "outcome": "US-led coalition victory in the conventional phase (April 2003). Multi-decade insurgency, civil war, and counter-insurgency that followed. Combat operations formally ended 31 December 2011. a residual presence returned in 2014 against the Islamic State.",
     "aftermath": "The Ba'athist government was dismantled. Saddam Hussein was captured (December 2003), tried, and executed (December 2006). The de-Ba'athification and disbandment of the Iraqi Army created the conditions for the insurgency. An estimated 200,000 to over a million Iraqis died across the decade, depending on methodology. Sectarian civil war (2006–2008) reshaped Baghdad neighborhoods. Iran's regional influence expanded. The legitimacy of intelligence-led war was permanently damaged in Western politics by the absence of weapons of mass destruction.",
-    "keyTerms": "US–Iraq Status of Forces Agreement (2008) set the withdrawal timeline. No peace treaty in the conventional sense. the war faded into the broader counter-IS campaign.",
+    "keyTerms": "US–Iraq Status of Forces Agreement (2008) set the withdrawal timeline. No peace treaty in the conventional sense. The war faded into the broader counter-IS campaign.",
     "notable": [
       "Capture of Baghdad and the fall of Saddam (April 2003)",
       "Mahdi Army and Sunni insurgency (2003 onward)",
@@ -1372,7 +1372,7 @@
     "aftermath": "Five years of war that included the Imperial capture of Francis I at Pavia (February 1525) — a humiliation France refused to accept, repudiating the treaty as soon as Francis returned home. The next war began the following year."
   },
   "Italian War of 1542–1546": {
-    "outcome": "{{plainlist|",
+    "outcome": "",
     "aftermath": "Charles V enthroned over his defeated enemies (Giulio Clovio, mid-16th century). From left, the figures represent Suleiman the Magnificent, Pope Clement VII, Francis I, the Duke of Cleves, the Duke of Saxony and the Landgrave of Hesse.",
     "keyTerms": "Treaty of Crépy (September 19, 1544); Treaty of Ardres (June 7, 1546)",
     "humanDeaths": 50000,
@@ -1382,7 +1382,7 @@
   },
   "Italian campaign of 1796–1797": {
     "outcome": "French victory",
-    "aftermath": "The campaign demonstrated Napoleon's abilities as a leader of the French Army. Bonaparte became famous in France, and became well-known throughout all of Europe. Henri Jacques Guillaume Clarke, a French representative of the Directory, stated about Napoleon post-campaign:",
+    "aftermath": "The campaign demonstrated Napoleon's abilities as a leader of the French Army. Bonaparte became famous in France, and became well-known throughout all of Europe. Henri Jacques Guillaume Clarke, a French representative of the Directory, stated about Napoleon post-campaign",
     "keyTerms": "Treaty of Campo Formio (October 17, 1797)"
   },
   "Italo-Turkish War": {
@@ -1396,7 +1396,7 @@
   },
   "Jacobite rising of 1745": {
     "outcome": "Government victory",
-    "aftermath": "upright=0.8|alt=Lord Lovat by Hogarth| Lovat, sketched by William Hogarth at St Albans, on his way to London for trial and later execution",
+    "aftermath": "Alt=Lord Lovat by Hogarth| Lovat, sketched by William Hogarth at St Albans, on his way to London for trial and later execution",
     "keyTerms": "Battle of Culloden (April 16, 1746)",
     "humanDeaths": 4500,
     "startYear": 1745,
@@ -1431,7 +1431,7 @@
     "aftermath": "A century and a half of war between the Jurchen-led Jin dynasty and Song China. The Jin conquered the Northern Song heartland (Jingkang Incident, 1127) and drove the survivors south of the Huai. The Mongol invasion of 1232-1234 ultimately destroyed the Jin; the Southern Song held out until 1279."
   },
   "Khmelnytsky Uprising": {
-    "outcome": "{{ublist|Cossack victory",
+    "outcome": "",
     "aftermath": "The uprising is generally considered to have resulted in success or Cossack victory, as it achieved its main goals of ending Polish–Lithuanian rule over much of the Ukrainian lands and establishing the Cossack Hetmanate. However, the Cossacks' struggle to consolidate their victory, increasing external pressures, and internal divisions after Khmelnytsky's death led to instability and decline for his state during the post-uprising period. This period in Ukrainian history is known as the Ruin.",
     "keyTerms": "Treaty of Pereyaslav (January 18, 1654)",
     "humanDeaths": 200000,
@@ -1459,7 +1459,7 @@
   },
   "King William's War": {
     "outcome": "Peace of Ryswick, Status quo ante bellum",
-    "aftermath": "The Treaty of Ryswick, signed in September 1697 ended the war between the two colonial powers and reverted the colonial borders to the status quo ante bellum. The peace did not last long. and within five years, the colonies were embroiled in the next phase of the colonial wars, Queen Anne's War. After their settlement with France in 1701, the Iroquois remained neutral in that conflict and never took part in active hostilities against either side.",
+    "aftermath": "The Treaty of Ryswick, signed in September 1697 ended the war between the two colonial powers and reverted the colonial borders to the status quo ante bellum. The peace did not last long. And within five years, the colonies were embroiled in the next phase of the colonial wars, Queen Anne's War. After their settlement with France in 1701, the Iroquois remained neutral in that conflict and never took part in active hostilities against either side.",
     "keyTerms": "Treaty of Ryswick (September 1697)",
     "humanDeaths": 1500,
     "startYear": 1688,
@@ -1536,7 +1536,7 @@
     "aftermath": "Six years of war between the Tobruk-based House of Representatives (backed by the LNA under Khalifa Haftar) and the Tripoli-based GNA. Foreign intervention (Russia, Turkey, UAE, Egypt) intensified the war. The October 2020 ceasefire and Berlin Conference framework produced a fragile transitional process."
   },
   "Lithuanian Civil War (1432–1438)": {
-    "aftermath": "Švitrigaila was losing his influence in the Slavic principalities and could no longer resist Poland and Sigismund Kęstutaitis. On 4 September 1437, he attempted to reconcile with Poland: he would rule the lands that still backed him (chiefly Kiev and Volhynia), and after his death these territories would pass to the King of Poland. However, under strong protest from Sigismund, the Polish Senate declined to ratify the treaty. In 1438 Švitrigaila withdrew to Moldavia.}} The reign of Sigismund Kęstutaitis was brief, he was assassinated in 1440. Švitrigaila returned from exile in 1442 and ruled Lutsk until his death a decade later.",
+    "aftermath": "Švitrigaila was losing his influence in the Slavic principalities and could no longer resist Poland and Sigismund Kęstutaitis. On 4 September 1437, he attempted to reconcile with Poland: he would rule the lands that still backed him (chiefly Kiev and Volhynia), and after his death these territories would pass to the King of Poland. However, under strong protest from Sigismund, the Polish Senate declined to ratify the treaty. In 1438 Švitrigaila withdrew to Moldavia. The reign of Sigismund Kęstutaitis was brief, he was assassinated in 1440. Švitrigaila returned from exile in 1442 and ruled Lutsk until his death a decade later.",
     "keyTerms": "Death of Švitrigaila (1452)",
     "humanDeaths": 5000,
     "startYear": 1432,
@@ -1574,7 +1574,7 @@
   },
   "Lower Canada Rebellion": {
     "outcome": "Rebellion suppressed",
-    "aftermath": "The green, white, and red tricolour used by the between 1832 and 1838.]]\nAfter the first insurrection, the Pied-du-Courant Prison in Montreal was overfull. In July, Durham emptied it. When hostilities resumed in 1838, the prison filled with even more prisoners. Martial law was declared. This allowed the government to imprison people without reason. Ninety-nine prisoners from the second rebellion were sentenced to death. Twelve were hanged. the last hanging is dramatized in the 2001 film February 15, 1839. The government feared that the populace would sympathize with the prisoners. So, 141 prisoners from Lower and Upper Canada were instead sent to work camps in Australia.",
+    "aftermath": "The green, white, and red tricolour used by the between 1832 and 1838.\nAfter the first insurrection, the Pied-du-Courant Prison in Montreal was overfull. In July, Durham emptied it. When hostilities resumed in 1838, the prison filled with even more prisoners. Martial law was declared. This allowed the government to imprison people without reason. Ninety-nine prisoners from the second rebellion were sentenced to death. Twelve were hanged. The last hanging is dramatized in the 2001 film February 15, 1839. The government feared that the populace would sympathize with the prisoners. So, 141 prisoners from Lower and Upper Canada were instead sent to work camps in Australia.",
     "keyTerms": "Battle of Saint-Eustache (December 14, 1837)",
     "humanDeaths": 350,
     "startYear": 1837,
@@ -1582,7 +1582,7 @@
     "parent": ""
   },
   "Maccabean Revolt": {
-    "aftermath": "alt=Topographic map of Palestine at the start of the Hasmonean dynasty|Topographic map of the southern Levant at the start of the Hasmonean dynasty\n\nIn 135 BCE, Simon and two of his sons (Mattathias and Judas) were murdered by his son-in-law, Ptolemy son of Abubus, at a feast in Jericho. All five sons of Mattathias were now gone with Simon joining his brothers in death, leaving leadership to the next generation. Simon's third son, John Hyrcanus, became High Priest of Israel. King Antiochus VII would personally invade and besiege Jerusalem in 134 BCE, but after Hyrcanus paid a ransom and ceded the cities of Joppa and Gazara, the Seleucids left peacefully.",
+    "aftermath": "Alt=Topographic map of Palestine at the start of the Hasmonean dynasty|Topographic map of the southern Levant at the start of the Hasmonean dynasty In 135 BCE, Simon and two of his sons (Mattathias and Judas) were murdered by his son-in-law, Ptolemy son of Abubus, at a feast in Jericho. All five sons of Mattathias were now gone with Simon joining his brothers in death, leaving leadership to the next generation. Simon's third son, John Hyrcanus, became High Priest of Israel. King Antiochus VII would personally invade and besiege Jerusalem in 134 BCE, but after Hyrcanus paid a ransom and ceded the cities of Joppa and Gazara, the Seleucids left peacefully.",
     "keyTerms": "Rededication of the Temple (164 BC)",
     "humanDeaths": 30000,
     "startYear": -167,
@@ -1591,7 +1591,7 @@
     "outcome": "Maccabean victory; Hasmonean dynasty established, Jerusalem Temple rededicated."
   },
   "Macedonian Struggle": {
-    "aftermath": "The success of Greek efforts in Macedonia was an experience that gave confidence to the country. It helped develop an intention to annex Greek-speaking areas, and bolster Greek presence in the still Ottoman ruled Macedonia.\n \nThe events in Macedonia, specifically the consequences of the conflicts between Greek and Bulgarian national activists, including Greek massacres against the Bulgarian population in 1905 and 1906, gave rise to pogroms against the ca. 70,000–80,000-strong Greek communities that lived in Bulgaria, who were considered to share responsibility for the actions of the Greek guerrilla groups.",
+    "aftermath": "The success of Greek efforts in Macedonia was an experience that gave confidence to the country. It helped develop an intention to annex Greek-speaking areas, and bolster Greek presence in the still Ottoman ruled Macedonia. The events in Macedonia, specifically the consequences of the conflicts between Greek and Bulgarian national activists, including Greek massacres against the Bulgarian population in 1905 and 1906, gave rise to pogroms against the ca. 70,000–80,000-strong Greek communities that lived in Bulgaria, who were considered to share responsibility for the actions of the Greek guerrilla groups.",
     "keyTerms": "Death of Pavlos Melas (October 1904)",
     "humanDeaths": 8000,
     "startYear": 1904,
@@ -1628,7 +1628,7 @@
   },
   "Mercenary War": {
     "outcome": "Carthaginian victory in Africa",
-    "aftermath": "The Romans required a strong military presence on Sardinia and Corsica for at least the next seven years, as they struggled to suppress the local inhabitants. The seizure of Sardinia and Corsica by Rome and the additional indemnity fuelled resentment in Carthage. Polybius considered this act of bad faith by the Romans to be the single greatest cause of war with Carthage breaking out again nineteen years later. The role of Hamilcar Barca in the victory greatly enhanced the prestige and power of the Barcid family. Immediately after the war, Hamilcar led many of his veterans on an expedition to expand Carthaginian holdings in southern Iberia. this was to become a semi-autonomous Barcid fiefdom.",
+    "aftermath": "The Romans required a strong military presence on Sardinia and Corsica for at least the next seven years, as they struggled to suppress the local inhabitants. The seizure of Sardinia and Corsica by Rome and the additional indemnity fuelled resentment in Carthage. Polybius considered this act of bad faith by the Romans to be the single greatest cause of war with Carthage breaking out again nineteen years later. The role of Hamilcar Barca in the victory greatly enhanced the prestige and power of the Barcid family. Immediately after the war, Hamilcar led many of his veterans on an expedition to expand Carthaginian holdings in southern Iberia. This was to become a semi-autonomous Barcid fiefdom.",
     "keyTerms": "Carthaginian victory (238 BC)",
     "humanDeaths": 50000,
     "startYear": -241,
@@ -1664,7 +1664,7 @@
   },
   "Mongol invasion of Kievan Rus'": {
     "outcome": "Mongol victory",
-    "aftermath": "Carpine's account\nThe Ystoria Mongalorum, written by Italian diplomat Giovanni da Pian del Carpine () in Latin just after he visited Kiev in 1246, contains a brief passage mentioning the siege of Kiev that happened several years earlier. Although frequently cited by earlier historians, the accuracy of this account has been questioned, especially because the passage from the first redaction of Carpini's manuscript copies was substantially expanded in the second redaction, which breaks the narrative of the first, and partially contradicts it.\n{| class=\"wikitable\"! width=\"50%\" | First redaction of Carpini's Ystoria Mongalorum!",
+    "aftermath": "Carpine's account\nThe Ystoria Mongalorum, written by Italian diplomat Giovanni da Pian del Carpine () in Latin just after he visited Kiev in 1246, contains a brief passage mentioning the siege of Kiev that happened several years earlier. Although frequently cited by earlier historians, the accuracy of this account has been questioned, especially because the passage from the first redaction of Carpini's manuscript copies was substantially expanded in the second redaction, which breaks the narrative of the first, and partially contradicts it.\n{| class=\"wikitable\"! Width=\"50%\" | First redaction of Carpini's Ystoria Mongalorum!",
     "keyTerms": "Sack of Kiev (December 6, 1240)",
     "humanDeaths": 500000,
     "startYear": 1237,
@@ -1717,7 +1717,7 @@
     "aftermath": "A half-century of insurgency in the southern Philippines by Moro National Liberation Front and Moro Islamic Liberation Front, complicated by Abu Sayyaf and ISIS-affiliated factions. 120,000 dead; the 2014 framework agreement produced the Bangsamoro autonomous region in 2019."
   },
   "Moroccan–Portuguese conflicts": {
-    "outcome": "| combatant1 = border|16pxPortugal Portuguese Empire",
+    "outcome": "| Combatant1 = border|16pxPortugal Portuguese Empire",
     "aftermath": "Five years after the recapture of Mazagan, in 1774, the Governments of Morocco and Portugal concluded a Peace and Friendship Agreement, one of the oldest bilateral agreements of both nations.",
     "keyTerms": "Battle of Alcácer Quibir (August 4, 1578)",
     "humanDeaths": 50000,
@@ -1805,7 +1805,7 @@
     "keyTerms": "Battle of Batoche (May 9-12, 1885)"
   },
   "Northern Seven Years' War": {
-    "outcome": "See Peace negotiations and consequences, {{Collapsible list|bullets=yes|title=Full results|Treaty of Stettin (1570)",
+    "outcome": "See Peace negotiations and consequences",
     "keyTerms": "Treaty of Stettin (December 13, 1570)",
     "humanDeaths": 100000,
     "startYear": 1563,
@@ -1828,7 +1828,7 @@
     "keyTerms": "Capture of Warsaw (September 1831)"
   },
   "Ottoman–Habsburg wars": {
-    "outcome": "Habsburg victory{{cite book",
+    "outcome": "Habsburg victory",
     "keyTerms": "Treaty of Karlowitz (January 1699)",
     "humanDeaths": 400000,
     "startYear": 1526,
@@ -1898,7 +1898,7 @@
     "parent": ""
   },
   "Peninsular War": {
-    "aftermath": "upright=0.9|alt=Napoleon on the island of Elba.|Horace Vernet: Napoleon on the Island of Elba Awaiting the brig Inconstant. (1863)",
+    "aftermath": "Alt=Napoleon on the island of Elba.|Horace Vernet: Napoleon on the Island of Elba Awaiting the brig Inconstant. (1863)",
     "keyTerms": "Battle of Vitoria (June 21, 1813); Battle of Toulouse (April 10, 1814)",
     "humanDeaths": 600000,
     "startYear": 1808,
@@ -1953,7 +1953,7 @@
     "parent": ""
   },
   "Polish–Soviet War": {
-    "outcome": "{{ublist|Polish victory",
+    "outcome": "",
     "keyTerms": "Treaty of Riga (March 18, 1921)",
     "humanDeaths": 200000,
     "startYear": 1919,
@@ -2048,7 +2048,7 @@
     "aftermath": "A century and a half of intermittent steppe-Slavic conflict. The Cuman confederations dominated the Pontic steppe until both Cumans and Rus principalities were overrun by the Mongol invasions of 1237-1240."
   },
   "Russian Civil War": {
-    "aftermath": "upright=1.2|A map of Europe in 1923 after the revolutions of 1917–1923\nWith the end of the war, the Russian Communist Party (Bolsheviks) no longer faced an acute military threat to its existence and power. However, the perceived threat of continued popular discontent, combined with the failure of socialist revolutions in other countries, such as the German revolution of 1918–1919, contributed to the continued militarization of Soviet society.",
+    "aftermath": "A map of Europe in 1923 after the revolutions of 1917–1923\nWith the end of the war, the Russian Communist Party (Bolsheviks) no longer faced an acute military threat to its existence and power. However, the perceived threat of continued popular discontent, combined with the failure of socialist revolutions in other countries, such as the German revolution of 1918–1919, contributed to the continued militarization of Soviet society.",
     "humanDeaths": 9000000,
     "startYear": 1917,
     "endYear": 1922,
@@ -2100,7 +2100,7 @@
     "aftermath": "Nine years of war that gave Russia control of most of the Caucasus south of the Caucasus mountains. The Treaty of Gulistan transferred Daghestan, Georgia, most of Azerbaijan, and parts of Armenia from Iran to Russia — the foundation of Russian Caucasian hegemony."
   },
   "Russo-Persian War (1826–1828)": {
-    "aftermath": "Signing ceremony of the Treaty of Turkmenchay\nOn 2 February 1828, Abbas Mirza signed the Treaty of Turkmenchay, thus ceding Erivan and Nakhichevan as well as agreeing to significant war reparations and other concessions. The province of Azerbaijan and Abbas Mirza's personal fortune provided the majority of the money needed to pay for this. a minor portion came from the British, but none from the shah. Russia was able to put pressure on Iran because of the reparations obligation. The treaty also gave Russia an opportunity to get involved in Iranian politics, as the shah now required Russia's acknowledgment of the person he wanted to name as heir apparent.",
+    "aftermath": "Signing ceremony of the Treaty of Turkmenchay\nOn 2 February 1828, Abbas Mirza signed the Treaty of Turkmenchay, thus ceding Erivan and Nakhichevan as well as agreeing to significant war reparations and other concessions. The province of Azerbaijan and Abbas Mirza's personal fortune provided the majority of the money needed to pay for this. A minor portion came from the British, but none from the shah. Russia was able to put pressure on Iran because of the reparations obligation. The treaty also gave Russia an opportunity to get involved in Iranian politics, as the shah now required Russia's acknowledgment of the person he wanted to name as heir apparent.",
     "outcome": "Russian victory; Treaty of Turkmenchay (1828) cedes Iranian Armenia and the Erivan Khanate.",
     "keyTerms": "Treaty of Turkmenchay (February 21, 1828)"
   },
@@ -2110,7 +2110,7 @@
     "keyTerms": "Treaty of Värälä (1790)"
   },
   "Russo-Turkish War (1768–1774)": {
-    "outcome": "Russian victory Treaty of Küçük Kaynarca}}",
+    "outcome": "Russian victory Treaty of Küçük Kaynarca",
     "keyTerms": "Treaty of Küçük Kaynarca (July 21, 1774)",
     "humanDeaths": 120000,
     "startYear": 1768,
@@ -2119,7 +2119,7 @@
     "aftermath": "A six-year war (1768-1774) that confirmed Russian dominance on the Black Sea. The Treaty of Küçük Kaynarca opened the Black Sea to Russian shipping, gave Russia a protective role over Ottoman Christian subjects, and made the Crimean Khanate nominally independent — a prelude to annexation a decade later."
   },
   "Russo-Turkish War (1787–1792)": {
-    "outcome": "Russian victory Treaty of Jassy}}",
+    "outcome": "Russian victory Treaty of Jassy",
     "aftermath": "Accordingly, the Treaty of Jassy was signed on 9 January 1792, recognizing Russia's 1783 annexation of the Crimean Khanate. Yedisan (Odessa and Ochakov) was also ceded to Russia, and the Dniester was made the Russian frontier in Europe, while the Russian Asiatic frontier, the Kuban River, remained unchanged. The Ottoman war goal to reclaim the Crimea had failed, and if not for the French Revolution, the Ottoman Empire's situation could have been much worse.",
     "keyTerms": "Treaty of Jassy (January 9, 1792)",
     "humanDeaths": 200000,
@@ -2129,7 +2129,7 @@
   },
   "Russo-Turkish War (1806–1812)": {
     "outcome": "See",
-    "aftermath": "Although there are sources that describe the war as a Russian victory. there are some that call it indecisive, because the treaty, favourable to the Ottomans, stipulated that Russia returned all occupied lands other than Bessarabia.",
+    "aftermath": "Although there are sources that describe the war as a Russian victory. There are some that call it indecisive, because the treaty, favourable to the Ottomans, stipulated that Russia returned all occupied lands other than Bessarabia.",
     "keyTerms": "Treaty of Bucharest (May 28, 1812)",
     "humanDeaths": 100000,
     "startYear": 1806,
@@ -2193,7 +2193,7 @@
     "keyTerms": "Treaty of Lund (September 1679)"
   },
   "Second Anglo-Afghan War": {
-    "outcome": "}}",
+    "outcome": "",
     "aftermath": "With Ayub Khan defeated, the war was officially over with Abdur Rahman Khan ruling as Amir, he was seen as the real victor of the Second Anglo-Afghan War. Despite attempts by the British to hold on to Kandahar, they decided to return it to Afghanistan. Rahman confirmed the Treaty of Gandamak, whereby the British took control of the territories ceded by Yaqub Khan. The provocative policy of maintaining a British resident in Kabul was abandoned, but instead British Indian Muslim agents were to be left to smooth liaison between the governments. Britain would also handle Afghanistan's foreign policy in exchange for protection and a subsidy. The Afghan tribes maintained internal rule and local customs, and provided a continuing buffer between the British Raj and the Russian Empire.",
     "keyTerms": "Treaty of Gandamak (May 26, 1879)",
     "humanDeaths": 12000,
@@ -2277,7 +2277,7 @@
   },
   "Second French intervention in Mexico": {
     "outcome": "Mexican Republican victory",
-    "aftermath": "The republican victory transformed Mexico’s political landscape. The defeat of the French consolidated liberal hegemony and allowed central elites, now organized within the Liberal Party, to impose a state-building project over regional and peripheral powers. in spite of a constitutional prohibition of re-elections.",
+    "aftermath": "The republican victory transformed Mexico’s political landscape. The defeat of the French consolidated liberal hegemony and allowed central elites, now organized within the Liberal Party, to impose a state-building project over regional and peripheral powers. In spite of a constitutional prohibition of re-elections.",
     "keyTerms": "Execution of Maximilian (June 19, 1867)",
     "humanDeaths": 75000,
     "startYear": 1861,
@@ -2299,7 +2299,7 @@
     "outcome": "Azerbaijani victory; November 2020 ceasefire returns most of the Karabakh region to Azerbaijani control."
   },
   "Second Opium War": {
-    "outcome": "Allied victory )}}",
+    "outcome": "Allied victory )",
     "aftermath": "Qing flag seized by Anglo-French forces. The flag reads \"親兵第五隊右營\": Bodyguard, fifth squadron, right battalion (unit types are approximate), Les Invalides.",
     "keyTerms": "Treaty of Tientsin (June 26, 1858); Convention of Peking (October 24, 1860)",
     "humanDeaths": 25000,
@@ -2326,7 +2326,7 @@
     "parent": "Wars of German Unification"
   },
   "Second Seminole War": {
-    "outcome": "Nominal end to conflict. no peace treaty. approximately 4,000 Seminoles forcibly transported to Indian Territory. approximately 575 Seminoles remained in Florida. unresolved conflict led to Third Seminole War in 1855.",
+    "outcome": "Nominal end to conflict. No peace treaty. Approximately 4,000 Seminoles forcibly transported to Indian Territory. Approximately 575 Seminoles remained in Florida. Unresolved conflict led to Third Seminole War in 1855.",
     "aftermath": "Peace had come to Florida for a while. The Natives were mostly staying on the reservation, but there were minor clashes. The Florida authorities continued to press for removal of all Natives from Florida. The Natives tried to limit their contacts with the American settlers as much as possible.",
     "keyTerms": "End of organized resistance (August 1842)",
     "humanDeaths": 3000,
@@ -2353,7 +2353,7 @@
     "keyTerms": "Treaty of Berwick (1357)"
   },
   "Second War of the Diadochi": {
-    "aftermath": "The war had shifted the balance of power to such a degree that Antigonus could pose a threat to any or all of the other Diadochi. this led to Cassander, Ptolemy (with Seleucus) and Lysimachus allying against him in the Third War of the Diadochi. The territories now controlled by Antigonus would later form the basis of the Seleucid Empire.",
+    "aftermath": "The war had shifted the balance of power to such a degree that Antigonus could pose a threat to any or all of the other Diadochi. This led to Cassander, Ptolemy (with Seleucus) and Lysimachus allying against him in the Third War of the Diadochi. The territories now controlled by Antigonus would later form the basis of the Seleucid Empire.",
     "keyTerms": "Death of Antipater (319 BC)",
     "outcome": "Antigonid victory in this round; the wars continued for another two decades."
   },
@@ -2459,7 +2459,7 @@
   },
   "Taiping Rebellion": {
     "outcome": "Qing victory. The Heavenly Kingdom is crushed at Nanjing in 1864 after fourteen years of war.",
-    "aftermath": "Estimated 20 to 30 million dead across south-central China, mostly from famine and disease in the aftermath of the campaigns. The Qing dynasty survived but was structurally weakened. regional armies under Zeng Guofan and Li Hongzhang outgrew imperial control, foreshadowing the warlord era. The Yangtze basin took a generation to repopulate.",
+    "aftermath": "Estimated 20 to 30 million dead across south-central China, mostly from famine and disease in the aftermath of the campaigns. The Qing dynasty survived but was structurally weakened. Regional armies under Zeng Guofan and Li Hongzhang outgrew imperial control, foreshadowing the warlord era. The Yangtze basin took a generation to repopulate.",
     "keyTerms": "December 1850 to August 1864.",
     "humanDeaths": 25000000,
     "startYear": 1850,
@@ -2503,7 +2503,7 @@
     "aftermath": "Eleven years (73-63 BC) of war by which Rome destroyed the Pontic kingdom and brought Asia Minor, Syria, and Judea under direct Roman control. Pompey's eastern settlement reshaped the Roman empire — and provided the wealth and military prestige that fed his rivalry with Caesar a decade later."
   },
   "Third Punic War": {
-    "aftermath": "alt= a colour photograph of the remains today of part of ancient Carthage |",
+    "aftermath": "Alt= a colour photograph of the remains today of part of ancient Carthage",
     "keyTerms": "Destruction of Carthage (Spring 146 BC)",
     "humanDeaths": 320000,
     "startYear": -149,
@@ -2597,7 +2597,7 @@
   },
   "War against the Islamic State": {
     "outcome": "Coalition victory. The territorial caliphate declared by Abu Bakr al-Baghdadi in Mosul in June 2014 was destroyed by March 2019 with the fall of Baghouz, Syria. The organization persists as an insurgency and franchise.",
-    "aftermath": "Over five years of intense urban warfare reshaped Mosul, Raqqa, Fallujah, Ramadi, Tikrit, and other cities. The Syrian Democratic Forces, led by the Kurdish YPG, emerged as a US partner that strained the US–Turkey relationship for years after. Tens of thousands of civilians and combatants died. the displacement was on the scale of millions across Iraq and Syria. Baghdadi died in a US raid in Idlib (October 2019). ISIS affiliates remain active in West Africa, the Sahel, Afghanistan-Pakistan (ISIS-K), and elsewhere.",
+    "aftermath": "Over five years of intense urban warfare reshaped Mosul, Raqqa, Fallujah, Ramadi, Tikrit, and other cities. The Syrian Democratic Forces, led by the Kurdish YPG, emerged as a US partner that strained the US–Turkey relationship for years after. Tens of thousands of civilians and combatants died. The displacement was on the scale of millions across Iraq and Syria. Baghdadi died in a US raid in Idlib (October 2019). ISIS affiliates remain active in West Africa, the Sahel, Afghanistan-Pakistan (ISIS-K), and elsewhere.",
     "keyTerms": "No treaty. The end of the territorial caliphate was declared after the fall of Baghouz on 23 March 2019.",
     "notable": [
       "Fall of Mosul to ISIS and the proclamation of the caliphate (June 2014)",
@@ -2799,7 +2799,7 @@
   },
   "War of the Spanish Succession": {
     "outcome": "Treaties of Utrecht, Rastatt, and Baden",
-    "aftermath": "upright=1.3|The Royal Navy destroys a Spanish fleet off Sicily, Cape Passaro, August 1718",
+    "aftermath": "The Royal Navy destroys a Spanish fleet off Sicily, Cape Passaro, August 1718",
     "keyTerms": "Treaty of Utrecht (April 11, 1713); Treaty of Rastatt (March 7, 1714)",
     "humanDeaths": 1250000,
     "startYear": 1701,
@@ -2808,7 +2808,7 @@
   },
   "War of the Third Coalition": {
     "outcome": "French victory",
-    "aftermath": "upright=1.35|All the participants of the War of the Third Coalition. ]]\nAusterlitz and the preceding campaign profoundly altered the nature of European politics. In three months, the French had occupied Vienna, decimated two armies, and humbled the Austrian Empire. These events sharply contrast with the rigid power structures of the 18th century, when no major European capital was ever held by an enemy army. Austerlitz set the stage for a near-decade of French domination on the European continent, but one of its more immediate impacts was to goad Prussia into war in 1806.",
+    "aftermath": "All the participants of the War of the Third Coalition. Austerlitz and the preceding campaign profoundly altered the nature of European politics. In three months, the French had occupied Vienna, decimated two armies, and humbled the Austrian Empire. These events sharply contrast with the rigid power structures of the 18th century, when no major European capital was ever held by an enemy army. Austerlitz set the stage for a near-decade of French domination on the European continent, but one of its more immediate impacts was to goad Prussia into war in 1806.",
     "keyTerms": "Battle of Austerlitz (December 2, 1805); Treaty of Pressburg (December 26, 1805)",
     "humanDeaths": 80000,
     "startYear": 1803,
@@ -2834,7 +2834,7 @@
     "aftermath": "Twelve years (336-323 BC) of conquest that destroyed the Achaemenid Persian Empire and extended Greek-Macedonian power from Egypt to the Punjab. Alexander's death without a clear heir produced the Diadochi wars and the Hellenistic kingdoms that shaped Eurasian politics for centuries."
   },
   "Wars of the Diadochi": {
-    "outcome": "{{unbulleted list",
+    "outcome": "",
     "keyTerms": "Battle of Ipsus (301 BC); Battle of Corupedium (281 BC)",
     "humanDeaths": 500000,
     "startYear": -323,
@@ -2905,7 +2905,7 @@
     "aftermath": "Four years (1941-1945) of multi-sided war among Axis occupiers, the Ustaše-led Independent State of Croatia, Mihailović's Chetniks, Tito's Partisans, and various nationalist forces. Approximately 1 million dead. The Partisan victory produced socialist Yugoslavia under Tito."
   },
   "Yom Kippur War": {
-    "aftermath": "Analyses differ on the military outcome of the war. as an Israeli victory by some military historians,}} an Egyptian victory by other historians, and by others, as a military stalemate.",
+    "aftermath": "Analyses differ on the military outcome of the war. As an Israeli victory by some military historians, an Egyptian victory by other historians, and by others, as a military stalemate.",
     "keyTerms": "UN Resolution 338 (October 22, 1973)",
     "humanDeaths": 20000,
     "startYear": 1973,

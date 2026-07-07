@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="internal/logo/battlesight-eye.png" alt="BattleSight" width="400" />
+  <img src="internal/logo/battlesight-banner.png" alt="BattleSight" width="100%" />
 </p>
-
-<h1 align="center">BattleSight</h1>
 
 <p align="center">
   <em>An interactive visual encyclopedia of human conflict, from 3000 BC to today.</em>

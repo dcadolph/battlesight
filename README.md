@@ -1,8 +1,12 @@
 <p align="center">
-  <img src="internal/logo/battlesight.png" alt="BattleSight" width="280" />
+  <img src="internal/logo/battlesight-eye.png" alt="BattleSight" width="100%" />
 </p>
 
 <h1 align="center">BattleSight</h1>
+
+<p align="center">
+  <em>An interactive visual encyclopedia of human conflict, from 3000 BC to today.</em>
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/status-pre--release-f59e0b" alt="Status: pre-release" />
@@ -12,8 +16,7 @@
 </p>
 
 <p align="center">
-  <em>Status: pre-release. Data quality is uneven and the catalog is being curated.
-  Visuals and replays are iterating fast. expect breaking changes on every commit.</em>
+  <em>Pre-release. Data and visuals are iterating fast, and breaking changes land on every commit.</em>
 </p>
 
 ---
@@ -23,10 +26,10 @@
 BattleSight is an interactive visual encyclopedia of human conflict from
 3000 BC to today, rendered as a 3D globe with hand-crafted phase replays
 of the iconic battles and an auto-stepping war cinematic that walks you
-through any conflict end to end. The catalog covers about 12,000 battles
-imported from Wikipedia and Wikidata. a curated layer on top adds
-narrative, phase replays, territory snapshots, and war casualty totals
-that include civilians, famine, and genocide.
+through any conflict end to end. The catalog covers more than 13,000
+battles imported from Wikipedia and Wikidata. A curated layer on top
+adds narrative, phase replays, territory snapshots, and war casualty
+totals that include civilians, famine, and genocide.
 
 | Capability | Description |
 | --- | --- |
@@ -224,10 +227,10 @@ Full list and URL-hash deep links: [docs/usage.md](docs/usage.md).
 - [docs/usage.md](docs/usage.md). URL hash routing + keyboard shortcuts
 - [docs/data-quality.md](docs/data-quality.md). trust filters and curation tiers
 - [docs/faq.md](docs/faq.md). the questions that come up most often
-- [cmd/battlesight/README.md](cmd/battlesight/README.md). server flags and operations
-- [cmd/import/README.md](cmd/import/README.md). importer pipeline reference
+- [cmd/README.md](cmd/README.md). command-line tools: server, importer, curation
 - [DATA_SOURCES.md](DATA_SOURCES.md). upstream data sources and licenses
 
 ## License
 
-Apache 2.0. See [LICENSE](LICENSE).
+All rights reserved. This is pre-release software with no public license
+grant yet.

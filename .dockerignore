@@ -1,0 +1,10 @@
+.git
+.venv
+web/node_modules
+web/dist
+data/*.bak*
+data/*.db-wal
+data/*.db-shm
+data/cdb90
+data/.wikicache
+data/wikidata_battles_raw.json

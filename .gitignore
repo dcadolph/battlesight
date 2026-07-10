@@ -14,3 +14,7 @@ data/wikidata_battles_raw.json
 data/.wikicache/
 web/node_modules/
 web/dist/
+
+# MkDocs build output.
+/site/
+.venv/

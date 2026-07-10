@@ -1,0 +1,151 @@
+/* BattleSight brand: cartographic brass on charcoal, atlas relief. */
+
+:root {
+  --bs-brass: #c39a4b;
+  --bs-brass-bright: #e0b662;
+  --md-accent-fg-color: var(--bs-brass);
+}
+
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #141518;
+  --md-primary-fg-color: #141518;
+  --md-accent-fg-color: var(--bs-brass-bright);
+  --md-typeset-a-color: var(--bs-brass-bright);
+  --md-code-bg-color: #0d0e10;
+}
+
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #17181b;
+  --md-typeset-a-color: #9a7223;
+}
+
+/* Header stays dark charcoal in both schemes. */
+.md-header,
+.md-tabs {
+  background-color: #141518;
+  color: #ece6d8;
+}
+
+/* Hero on the landing page. */
+.bs-hero {
+  position: relative;
+  text-align: center;
+  padding: 3rem 1rem 1.25rem;
+}
+
+.bs-hero img.hero-logo {
+  width: 120px;
+  height: auto;
+  margin-bottom: 0.4rem;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.4));
+}
+
+.bs-hero h1 {
+  font-size: 3.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0.2rem 0 0.1rem;
+}
+
+.bs-hero .tagline {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--bs-brass-bright);
+  margin: 0.2rem 0;
+}
+
+.bs-hero .subtitle {
+  font-size: 1.05rem;
+  opacity: 0.82;
+  max-width: 42rem;
+  margin: 0.4rem auto 1.2rem;
+}
+
+.bs-hero .md-button {
+  margin: 0.3rem 0.35rem 0;
+}
+
+/* Cold brass glow behind the hero, like a spotlight on a map table. */
+.bs-hero::before {
+  content: "";
+  position: absolute;
+  inset: -25% 0 auto 0;
+  height: 340px;
+  background: radial-gradient(55% 100% at 50% 0%, rgba(195, 154, 75, 0.16), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Globe showcase under the hero. */
+.bs-showcase {
+  max-width: 52rem;
+  margin: 0 auto 2.6rem;
+  border-radius: 0.7rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.5);
+}
+
+.bs-showcase img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Feature cards lift on hover. */
+.md-typeset .grid.cards > ul > li,
+.md-typeset .grid > .card {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.7rem;
+  padding: 1.1rem 1.2rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+}
+
+.md-typeset .grid.cards .twemoji,
+.md-typeset .grid.cards svg {
+  color: var(--bs-brass);
+  height: 1.6rem;
+}
+
+/* Primary button in brand brass. */
+.md-typeset .md-button--primary {
+  background-color: var(--bs-brass);
+  border-color: var(--bs-brass);
+  color: #16130c;
+}
+
+.md-typeset .md-button--primary:hover {
+  background-color: var(--bs-brass-bright);
+  border-color: var(--bs-brass-bright);
+  color: #16130c;
+}
+
+/* Rounder code blocks. */
+.md-typeset pre > code {
+  border-radius: 0.5rem;
+}
+
+/* 404 page. */
+.bs-404 {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.bs-404 img {
+  width: 120px;
+  height: auto;
+  opacity: 0.9;
+  margin-bottom: 1rem;
+}
+
+.bs-404 h1 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.3rem;
+}

@@ -13,6 +13,7 @@ func main() {
 	seed := flag.String("seed", "data/battles.json", "path to JSON file to seed on startup (empty to skip)")
 	phases := flag.String("phases", "data/phases.json", "path to JSON file of battle replays (empty to skip)")
 	wars := flag.String("wars", "data/wars.json", "path to JSON file of curated war narratives (empty to skip)")
+	static := flag.String("static", "web/dist", "path to built frontend to serve on non-API routes (empty to skip)")
 	flag.Parse()
 
 	cfg := server.Config{
@@ -21,6 +22,7 @@ func main() {
 		SeedPath:   *seed,
 		PhasesPath: *phases,
 		WarsPath:   *wars,
+		StaticDir:  *static,
 	}
 
 	if err := server.Run(cfg); err != nil {

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bs-404">
+  <img src="{{ 'assets/battlesight-mark.png' | url }}" alt="">
+  <h1>Off the map.</h1>
+  <p>No battle was fought at that coordinate.</p>
+  <p><a class="md-button md-button--primary" href="{{ 'index.html' | url }}">Return to the globe</a></p>
+</div>
+{% endblock %}

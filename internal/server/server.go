@@ -7,6 +7,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -29,6 +31,11 @@ type Config struct {
 	// (Outcome, Aftermath, KeyTerms). Wars without an entry still get
 	// computed stats; this file only adds curated prose on top.
 	WarsPath string
+	// StaticDir is an optional path to the built frontend (web/dist). When it
+	// points at an existing directory, the server serves those assets on all
+	// non-API routes with an index.html fallback for client-side routing. Left
+	// empty or missing in development, where Vite serves the frontend directly.
+	StaticDir string
 }
 
 // Run starts the HTTP server and blocks until it exits.
@@ -120,6 +127,15 @@ func Run(cfg Config) error {
 		w.Write([]byte(`{"status":"ok"}`))
 	})
 
+	if cfg.StaticDir != "" {
+		if info, err := os.Stat(cfg.StaticDir); err == nil && info.IsDir() {
+			mux.Handle("/", staticHandler(cfg.StaticDir))
+			log.Printf("serving frontend from %s", cfg.StaticDir)
+		} else {
+			log.Printf("static dir %s not found, skipping frontend serving", cfg.StaticDir)
+		}
+	}
+
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	log.Printf("listening on %s", addr)
 
@@ -129,6 +145,28 @@ func Run(cfg Config) error {
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 	return srv.ListenAndServe()
+}
+
+// staticHandler serves the built frontend from dir. Requests that resolve to an
+// existing file are served as-is; anything else falls back to index.html so the
+// single-page app can handle client-side routes and deep links.
+func staticHandler(dir string) http.Handler {
+	fs := http.FileServer(http.Dir(dir))
+	index := filepath.Join(dir, "index.html")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Unmatched API routes must 404, not fall through to index.html.
+		// Returning HTML here would break clients that parse the body as JSON.
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			http.NotFound(w, r)
+			return
+		}
+		path := filepath.Join(dir, filepath.Clean(r.URL.Path))
+		if info, err := os.Stat(path); err == nil && !info.IsDir() {
+			fs.ServeHTTP(w, r)
+			return
+		}
+		http.ServeFile(w, r, index)
+	})
 }
 
 // withCORS adds permissive CORS headers for local development.

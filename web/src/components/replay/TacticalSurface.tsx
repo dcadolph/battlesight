@@ -125,10 +125,14 @@ function arrowWidth(kind: string | undefined): number {
 }
 
 // altitudeToZoom maps the legacy 0..1.5 cameraAltitude (radii on the
-// globe) to a sensible Mapbox zoom level. Tactical (0.06) → 11, operational
-// (0.55) → 7, strategic (1.5) → 5.
+// globe) to a Mapbox zoom level. The range is deliberately COMPRESSED: the
+// old mapping swung from continental (whole of England + France, battle a
+// speck) to buried-in-the-units. Now the far end never pulls past a
+// regional view and the near end keeps surroundings, so phase-to-phase
+// steps read as a gentle push, not a warp. Tactical (0.06) → ~9.5,
+// operational (0.55) → ~7.9, strategic (1.5) → ~6.7 (floored at 6.2).
 function altitudeToZoom(altitude: number): number {
-  return Math.max(4, Math.min(14, 12 - Math.log2(altitude * 6 + 1) * 1.9));
+  return Math.max(6.2, Math.min(10.6, 9.9 - Math.log2(altitude * 6 + 1) * 0.95));
 }
 
 // statusOpacity scales a unit's icon alpha by its current state. Destroyed
@@ -148,14 +152,15 @@ function statusSize(status: string | undefined): number {
   return 1.0;
 }
 
-// pitchForAltitude maps the phase camera altitude to a cinematic tilt.
-// Tight tactical framings get a strong oblique so the 3D terrain mesh
-// reads as relief; strategic pullbacks flatten toward plan view so the
-// theater map stays legible.
+// pitchForAltitude maps the phase camera altitude to a restrained tilt.
+// The base is now a flat cartographic map, not a 3D terrain mesh, so a
+// strong oblique only shears the map and hurts legibility. Keep a slight
+// tilt when tight for a touch of depth, and go flat for the theater
+// pullbacks so the atlas plate stays clean and readable.
 function pitchForAltitude(altitude: number): number {
-  if (altitude < 0.18) return 50;
-  if (altitude < 0.55) return 34;
-  return 16;
+  if (altitude < 0.18) return 18;
+  if (altitude < 0.55) return 8;
+  return 0;
 }
 
 // azimuthDeg returns the compass bearing in degrees from one lng/lat
@@ -527,87 +532,45 @@ function buildMotionLayers(trips: ResolvedTrip[], t: number, phaseIdx: number): 
   return result;
 }
 
-// Cinematic MapLibre style. No keys, no signups, CORS-open.
-// Base register: graded satellite imagery over a fast dark underlay,
-// hillshade for shadow depth, and a real 3D terrain mesh (setTerrain in
-// the map init below) so pitched cameras read actual relief. The grade
-// desaturates and darkens the imagery so the action layer (arrows,
-// units, territory) still owns the color budget. This is the
-// "documentary atlas" look: Beevor's "Stalingrad" plates shot on real
-// ground, not Google Maps with arrows.
+// Cartographic MapLibre style. No keys, no signups, CORS-open.
+// A single muted, label-free dark basemap (Carto dark_all) over a warm
+// matte, and nothing else: no streaming satellite imagery, no DEM, no
+// hillshade, no 3D terrain mesh. The old satellite + terrain stack streamed
+// slowly (a near-black frame with disjoint photo tiles floating in it) and
+// read as a tech demo. A clean cartographic base paints fast, fills
+// seamlessly over the matte, and lets the action layer (arrows, units,
+// territory) own the color budget. This is the documentary-atlas plate:
+// a map, not Google Earth.
 const OPEN_STYLE: StyleSpecification = {
   version: 8,
-  // Sky and horizon fog so pitched framings get atmospheric depth
-  // instead of a hard void above the terrain silhouette.
-  sky: {
-    'sky-color': '#0a0f1c',
-    'horizon-color': '#241d14',
-    'fog-color': '#0d0a08',
-    'sky-horizon-blend': 0.6,
-    'horizon-fog-blend': 0.55,
-    'fog-ground-blend': 0.6,
-  },
   sources: {
-    // Carto dark_nolabels. HTTP/2 multi-host CDN, so first paint is
-    // fast while the heavier satellite tiles stream in above it.
+    // Carto dark_all. Lightweight PNGs on a fast HTTP/2 multi-host CDN.
+    // The warm matte behind it means any tile still in flight is invisible
+    // rather than a black hole, so the map never looks broken mid-load.
     'dark-canvas': {
       type: 'raster',
       tiles: [
-        'https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-        'https://b.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-        'https://c.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-        'https://d.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+        'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+        'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+        'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+        'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
       ],
       tileSize: 256,
       minzoom: 0,
       maxzoom: 19,
       attribution: '(c) OpenStreetMap (c) CARTO',
     },
-    // Esri World Imagery. Real ground at every zoom; graded dark in
-    // the layer paint below.
-    satellite: {
-      type: 'raster',
-      tiles: [
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      ],
-      tileSize: 256,
-      minzoom: 0,
-      maxzoom: 19,
-      attribution: 'Imagery (c) Esri, Maxar, Earthstar Geographics',
-    },
-    // Terrarium DEM for the hillshade shadow pass.
-    'terrain-dem': {
-      type: 'raster-dem',
-      tiles: [
-        'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
-      ],
-      tileSize: 256,
-      encoding: 'terrarium',
-      maxzoom: 15,
-      attribution: 'Terrain (c) Mapzen / AWS Open Data',
-    },
-    // Second Terrarium source dedicated to the 3D terrain mesh.
-    // MapLibre wants hillshade and setTerrain on separate sources;
-    // the browser HTTP cache dedupes the actual tile fetches.
-    'terrain-dem-3d': {
-      type: 'raster-dem',
-      tiles: [
-        'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
-      ],
-      tileSize: 256,
-      encoding: 'terrarium',
-      maxzoom: 15,
-    },
   },
   layers: [
-    // Warm matte under everything. Reads as film base, not blue slate.
+    // Warm matte under everything. Reads as film base, not blue slate, and
+    // seals any gap while tiles arrive.
     {
       id: 'matte',
       type: 'background',
-      paint: { 'background-color': '#0d0a08' },
+      paint: { 'background-color': '#12100d' },
     },
-    // Fast dark underlay. Visible only while satellite tiles stream.
+    // The cartographic base. Desaturated toward the app's warm neutral and
+    // held low-contrast so the faction palette stays the loudest thing.
     {
       id: 'dark-canvas',
       type: 'raster',
@@ -615,41 +578,14 @@ const OPEN_STYLE: StyleSpecification = {
       minzoom: 0,
       maxzoom: 19,
       paint: {
-        'raster-saturation': -0.7,
-        'raster-brightness-max': 0.78,
-        'raster-contrast': 0.08,
-      },
-    },
-    // Graded satellite. Saturation and brightness pulled down so the
-    // imagery reads as documentary film ground, and the faction
-    // palette stays the loudest thing in frame.
-    {
-      id: 'satellite',
-      type: 'raster',
-      source: 'satellite',
-      minzoom: 0,
-      maxzoom: 19,
-      paint: {
-        'raster-saturation': -0.42,
-        'raster-brightness-min': 0.02,
-        'raster-brightness-max': 0.8,
-        'raster-contrast': 0.14,
+        // Lift the base out of near-black so land actually reads (Carto's
+        // dark base over desert/city is otherwise almost invisible), while
+        // staying muted enough that the action layer keeps the color budget.
+        'raster-saturation': -0.35,
+        'raster-brightness-min': 0.08,
+        'raster-brightness-max': 1.0,
+        'raster-contrast': -0.05,
         'raster-fade-duration': 300,
-      },
-    },
-    // Hillshade over the imagery. With the 3D mesh doing the actual
-    // relief, this pass just deepens shadowed slopes so ridgelines
-    // keep definition when the camera is near plan view.
-    {
-      id: 'hillshade',
-      type: 'hillshade',
-      source: 'terrain-dem',
-      paint: {
-        'hillshade-shadow-color': '#0a0806',
-        'hillshade-highlight-color': '#e7e0d2',
-        'hillshade-accent-color': '#1a1612',
-        'hillshade-exaggeration': 0.32,
-        'hillshade-illumination-direction': 335,
       },
     },
   ],
@@ -750,6 +686,12 @@ export default function TacticalSurface({
   // action never starts while a long hop flight is still in the air.
   const hopBattleIdRef = useRef('');
   const entryMsRef = useRef<number | null>(null);
+  // camGenRef bumps on every phase-camera change. Each run captures its
+  // generation so a settle/drift scheduled by a superseded phase is ignored,
+  // and the prior flight/drift is stopped before a new one starts. Overlapping
+  // MapLibre animations throw "already running" / "_onEaseFrame is not a
+  // function" and can blank the map mid-replay.
+  const camGenRef = useRef(0);
 
   const extentLatDeg = replay.extentLatDeg ?? 3;
   const extentLngDeg = (replay.extentLngDeg ?? 3) * (replay.aspectRatio ?? 1.6);
@@ -784,11 +726,12 @@ export default function TacticalSurface({
     map.addControl(overlay as unknown as maplibregl.IControl);
 
     map.on('style.load', () => {
-      // Real 3D relief. The mesh is what makes pitched framings read
-      // as ground instead of a sheared flat image.
-      map.setTerrain({ source: 'terrain-dem-3d', exaggeration: 1.2 });
+      // No 3D terrain any more; the cartographic base is flat, so there is
+      // nothing to stream after the style parses. Mark ready immediately so
+      // the loading indicator never lingers.
       setMapReady(true);
       setZoomBucket(Math.round(map.getZoom()));
+      setTerrainReady(true);
     });
     // Quantized zoom for the alpha-tier memos. Updates only when the
     // move settles AND the integer bucket actually changed, so camera
@@ -935,8 +878,8 @@ export default function TacticalSurface({
     }> = [];
     // Soften: too much fill turns push-in zooms into flat color blocks
     // and creates the hard banding the user flagged in Pointe du Hoc.
-    const fillAlpha = zoomBucket > 9 ? 30 : zoomBucket > 6 ? 50 : 70;
-    const lineAlpha = zoomBucket > 9 ? 90 : 120;
+    const fillAlpha = zoomBucket > 9 ? 20 : zoomBucket > 6 ? 32 : 44;
+    const lineAlpha = zoomBucket > 9 ? 110 : 140;
     (phase.controlRegions ?? []).forEach((r: ControlRegion) => {
       if (!r.ring || r.ring.length < 3) return;
       const color = factionColorFor(r.controller, replay) ?? '#94a3b8';
@@ -967,8 +910,12 @@ export default function TacticalSurface({
     // Country shading: brilliant when pulled back, near-invisible when
     // pushed in tight. Otherwise an Atlantic Wall flat-color band blots
     // out the action layer the way the legacy globe did at low altitude.
-    const fillAlpha = zoomBucket > 10 ? 12 : zoomBucket > 8 ? 28 : zoomBucket > 6 ? 55 : 95;
-    const lineAlpha = zoomBucket > 10 ? 35 : zoomBucket > 8 ? 70 : 120;
+    // Keep the fill a translucent WASH at every zoom (never the old opaque
+    // 95 slab that buried the base map). Control reads through the colored
+    // border more than the fill, atlas-style, so land/roads/labels stay
+    // visible under the shading.
+    const fillAlpha = zoomBucket > 10 ? 10 : zoomBucket > 8 ? 22 : zoomBucket > 6 ? 38 : 56;
+    const lineAlpha = zoomBucket > 10 ? 60 : zoomBucket > 8 ? 110 : 150;
     const out: Array<{
       polygon: Array<Array<[number, number]>>;
       fillColor: [number, number, number, number];
@@ -1209,6 +1156,11 @@ export default function TacticalSurface({
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
+    // Supersede the previous phase's camera work before starting this one:
+    // bump the generation so any pending settle/drift from it is ignored, and
+    // stop the in-flight flight or drift so the two never run at once.
+    const gen = ++camGenRef.current;
+    map.stop();
     userCameraLockRef.current = false;
     const bearing = bearingForPhase(phaseData.trips, phase.cameraBearing);
     const snap = prefersReducedMotion || phase.cameraMotion === 'snap';
@@ -1236,6 +1188,9 @@ export default function TacticalSurface({
       wrap.style.opacity = '0';
     }
     const onSettled = () => {
+      // A moveend from a superseded phase (or from the stop above) must not
+      // revive this phase's labels or start its drift.
+      if (gen !== camGenRef.current) return;
       if (wrap) {
         wrap.style.transition = 'opacity 500ms ease-out';
         wrap.style.opacity = '1';
@@ -1249,7 +1204,7 @@ export default function TacticalSurface({
     // of pitch. Linear easing so it reads as drift, not a move.
     let driftStarted = false;
     const startDrift = () => {
-      if (driftStarted || snap || userCameraLockRef.current) return;
+      if (gen !== camGenRef.current || driftStarted || snap || userCameraLockRef.current) return;
       driftStarted = true;
       const dwellMs = (phase.durationMs ?? 3000) / Math.max(0.1, speed);
       const driftMs = dwellMs - entryMs - 200;
@@ -1805,7 +1760,7 @@ export default function TacticalSurface({
       )}
 
       <div className="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded text-[9px] uppercase tracking-wider text-slate-300/60 pointer-events-none">
-        Esri World Imagery . Terrarium DEM . MapLibre
+        OpenStreetMap . CARTO . MapLibre
       </div>
     </div>
   );

@@ -1,16 +1,82 @@
 @import "tailwindcss";
 
-/* Tailwind preflight already provides the universal margin/padding
-   reset inside @layer base. An unlayered reset here would outrank
-   every layered padding and margin utility in the app. */
+/* ============================================================================
+   BattleSight design tokens.
+
+   Aesthetic target: documentary atlas (Beevor / Apple TV+), not a dark SaaS
+   dashboard. That means filmic, faintly-warm neutrals instead of cool slate,
+   restrained era accents, hairline rules, and low radius.
+
+   The neutral ramp below OVERRIDES Tailwind's built-in `slate` scale in place.
+   Every existing `slate-*` / `bg-slate-800/60` / `border-slate-700` utility
+   already scattered across the components reskins from this one block, so the
+   whole chrome shifts without touching each file. Era accent hues live in
+   theme/era.ts and are applied inline.
+   ============================================================================ */
+@theme {
+  /* Neutral ramp: a faintly warm charcoal-to-bone, low saturation, ~40deg hue.
+     Reads as film and paper, not the blue-gray of stock slate. Named over the
+     slate keys deliberately so the app inherits it for free. */
+  --color-slate-950: #0a0908;
+  --color-slate-900: #121110;
+  --color-slate-800: #1b1916;
+  --color-slate-700: #2a2721;
+  --color-slate-600: #3e3a33;
+  --color-slate-500: #59554c;
+  --color-slate-400: #8a8478;
+  --color-slate-300: #b3ac9e;
+  --color-slate-200: #d4ccbd;
+  --color-slate-100: #e6dfd0;
+  --color-slate-50:  #f2ede3;
+
+  /* Type: Inter for chrome, a warm serif for story surfaces (antiquity dossiers,
+     intro cards). Both system-available, no network cost. */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+}
+
+/* Semantic tokens for the chrome pass. Components can migrate off ad-hoc
+   `text-[10.5px]` / `slate-800/60` onto these so the type scale and surface
+   language stay coherent. Defined on :root (plain custom properties) so they
+   are usable in inline styles and arbitrary values alike. */
+:root {
+  /* Ink (text) */
+  --ink: #ece5d8;        /* primary, warm bone */
+  --ink-dim: #b3ac9e;    /* secondary */
+  --ink-faint: #8a8478;  /* captions, metadata */
+
+  /* Surfaces */
+  --bg: #0d0c0b;             /* app ground, warm near-black */
+  --surface: #1b1916;        /* panel */
+  --surface-raised: #221f1b; /* raised panel / hover */
+
+  /* Lines: hairlines, not chunky borders. The atlas reads with fine rules. */
+  --line: rgba(236, 229, 216, 0.09);
+  --line-strong: rgba(236, 229, 216, 0.16);
+
+  /* Type scale: six steps, no fractional sizes. Replaces the ~13 arbitrary
+     px sizes currently in use. cap = uppercase labels/metadata. */
+  --fs-cap: 11px;
+  --fs-sm: 13px;
+  --fs-base: 15px;
+  --fs-lg: 18px;
+  --fs-xl: 24px;
+  --fs-2xl: 33px;
+
+  /* Radius: crisp. Pills and rounded-xl read as SaaS; the atlas is squarer. */
+  --radius-sm: 3px;
+  --radius: 5px;
+}
 
 html, body, #root {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #0a0a0f;
-  color: #e2e8f0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* Dual-range slider for the timeline. Both range inputs share a track
@@ -38,16 +104,16 @@ html, body, #root {
   pointer-events: auto;
   width: 8px;
   height: 36px;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%);
-  border: 1px solid #60a5fa;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #f2ede3 0%, #cfc7b7 100%);
+  border: 1px solid rgba(236, 229, 216, 0.55);
   cursor: grab;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.55);
   margin-top: -3px;
 }
 .timeline-range::-webkit-slider-thumb:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
-  border-color: #93c5fd;
+  background: linear-gradient(180deg, #ffffff 0%, #e6dfd0 100%);
+  border-color: rgba(236, 229, 216, 0.85);
 }
 .timeline-range::-webkit-slider-thumb:active {
   cursor: grabbing;
@@ -56,15 +122,15 @@ html, body, #root {
   pointer-events: auto;
   width: 8px;
   height: 36px;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%);
-  border: 1px solid #60a5fa;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #f2ede3 0%, #cfc7b7 100%);
+  border: 1px solid rgba(236, 229, 216, 0.55);
   cursor: grab;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.55);
 }
 .timeline-range::-moz-range-thumb:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
-  border-color: #93c5fd;
+  background: linear-gradient(180deg, #ffffff 0%, #e6dfd0 100%);
+  border-color: rgba(236, 229, 216, 0.85);
 }
 .timeline-range::-moz-range-thumb:active {
   cursor: grabbing;

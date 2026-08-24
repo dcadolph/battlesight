@@ -92,7 +92,7 @@ export const CITIES: CityLabel[] = [
 // same-origin (no CORS surprises) and we control caching. ~4.6MB;
 // cached after first load. The resolution boost is what makes
 // close-zoom framings not look like a pixel smear.
-export const HI_RES_EARTH = '/textures/earth-blue-marble-8k.jpg';
+export const HI_RES_EARTH = '/textures/earth-blue-marble-4k.jpg';
 
 // TOPOLOGY_BUMP gives the globe a relief feel. Bumpy mountains and ocean
 // floor. Used as bump map on top of HI_RES_EARTH.

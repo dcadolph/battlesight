@@ -57,14 +57,18 @@ export interface CinematicOpts {
 
 export const DEFAULT_CINEMATIC: CinematicOpts = {
   sun: [-0.5, 0.3, 0.8],
-  saturation: 0.85,
-  contrast: 1.13,
-  brightness: 0.0,
-  tint: [1.03, 1.0, 0.95],
-  nightIntensity: 1.7,
-  specIntensity: 0.6,
-  fresnelIntensity: 0.5,
-  fresnelColor: [0.42, 0.6, 1.0],
+  // Documentary-atlas grade: pull further off the cartoon-bright NASA palette
+  // (lower saturation), keep editorial midtone depth, and dial back the three
+  // effects that read as "tech demo" rather than "atlas" — the glossy ocean
+  // sun-glint, the sci-fi limb glow, and the blingy city lights.
+  saturation: 0.72,
+  contrast: 1.15,
+  brightness: -0.01,
+  tint: [1.02, 1.0, 0.96],
+  nightIntensity: 1.25,
+  specIntensity: 0.38,
+  fresnelIntensity: 0.34,
+  fresnelColor: [0.5, 0.62, 0.82],
   ambient: 0.5,
   key: 2.7,
   fill: 0.5,

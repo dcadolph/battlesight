@@ -23,8 +23,26 @@ import { usePauseOnHidden } from './hooks/usePauseOnHidden';
 // The war panel and the battle replay stack (maplibre-gl, deck.gl, the
 // tactical surface) are only needed once the user opens one of them, so
 // they load as separate chunks instead of weighing down the first paint.
-const WarPlayback = lazy(() => import('./components/WarPlayback'));
-const BattleReplay = lazy(() => import('./components/replay/BattleReplay'));
+// Extracted so the same dynamic import can be triggered early (prefetch) as
+// well as rendered lazily. Prefetching warms the ~500 KB replay chunk
+// (maplibre-gl + deck.gl) while the user is still on the landing, so opening a
+// replay is instant instead of flashing a loading state.
+const importWarPlayback = () => import('./components/WarPlayback');
+const importBattleReplay = () => import('./components/replay/BattleReplay');
+const WarPlayback = lazy(importWarPlayback);
+const BattleReplay = lazy(importBattleReplay);
+
+// prefetchReplayChunks warms the heavy overlay chunks during idle time so the
+// first "Watch replay" does not wait on a cold download. Falls back to a short
+// timeout where requestIdleCallback is unavailable (older Safari).
+function prefetchReplayChunks(): void {
+  const run = () => { void importBattleReplay(); void importWarPlayback(); };
+  const ric = (window as unknown as {
+    requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+  }).requestIdleCallback;
+  if (ric) ric(run, { timeout: 3000 });
+  else window.setTimeout(run, 1500);
+}
 
 // ChunkFallback covers the viewport while a lazily loaded overlay chunk is
 // fetched. Motion is the point: a static label over black reads as a
@@ -295,6 +313,12 @@ export default function App() {
         if (b) setFeatured(b);
       })
       .catch(() => {});
+  }, []);
+
+  // Warm the heavy replay chunk during idle so opening a replay is instant
+  // rather than flashing the loading state on a cold download.
+  useEffect(() => {
+    prefetchReplayChunks();
   }, []);
 
   // Honor URL hash on first load.

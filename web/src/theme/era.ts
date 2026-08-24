@@ -21,9 +21,9 @@ export interface EraTheme {
 }
 
 const DEFAULT_THEME: EraTheme = {
-  atmosphere: '#7ab9ff',
+  atmosphere: '#7f9bbf',
   vignette: 'rgba(8, 12, 24, 0.55)',
-  accent: '#7ab9ff',
+  accent: '#7f9bbf',
   titleFont: "'Inter', system-ui, sans-serif",
   mood: 'History',
   era: '',
@@ -65,65 +65,66 @@ const SANS = "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif";
 
 const THEMES: Record<string, EraTheme> = {
   'ancient': {
-    atmosphere: '#f4c47a',
+    // Muted honey-gold, not the neon amber of a warning badge.
+    atmosphere: '#d8b57e',
     vignette: 'rgba(40, 22, 8, 0.65)',
-    accent: '#f59e0b',
+    accent: '#c99a45',
     titleFont: SERIF,
     mood: 'Antiquity',
     era: 'ancient',
   },
   'medieval': {
-    atmosphere: '#d97a5a',
+    atmosphere: '#bf7357',
     vignette: 'rgba(40, 12, 10, 0.65)',
-    accent: '#ef4444',
+    accent: '#b5503f',
     titleFont: SERIF,
     mood: 'Medieval',
     era: 'medieval',
   },
   'early-modern': {
-    atmosphere: '#b48dff',
+    atmosphere: '#9d8bc0',
     vignette: 'rgba(24, 14, 40, 0.6)',
-    accent: '#a78bfa',
+    accent: '#8e7fb5',
     titleFont: SERIF,
     mood: 'Early Modern',
     era: 'early-modern',
   },
   'napoleonic': {
-    atmosphere: '#7aa9ff',
+    atmosphere: '#7e9cbf',
     vignette: 'rgba(10, 18, 38, 0.6)',
-    accent: '#60a5fa',
+    accent: '#6b90ba',
     titleFont: SERIF,
     mood: 'Napoleonic',
     era: 'napoleonic',
   },
   'industrial': {
-    atmosphere: '#94a3b8',
+    atmosphere: '#8f97a2',
     vignette: 'rgba(14, 18, 28, 0.7)',
-    accent: '#818cf8',
+    accent: '#7b83a6',
     titleFont: SANS,
     mood: 'Industrial Age',
     era: 'industrial',
   },
   'world-war-1': {
-    atmosphere: '#e879b8',
+    atmosphere: '#bd7ba1',
     vignette: 'rgba(28, 10, 24, 0.7)',
-    accent: '#f472b6',
+    accent: '#b46e94',
     titleFont: SANS,
     mood: 'The Great War',
     era: 'world-war-1',
   },
   'interwar': {
-    atmosphere: '#d4a574',
+    atmosphere: '#bd9a6c',
     vignette: 'rgba(30, 22, 10, 0.7)',
-    accent: '#a16207',
+    accent: '#9a6a30',
     titleFont: SANS,
     mood: 'Interwar',
     era: 'interwar',
   },
   'world-war-2': {
-    atmosphere: '#fb7185',
+    atmosphere: '#c1666f',
     vignette: 'rgba(28, 8, 14, 0.7)',
-    accent: '#f43f5e',
+    accent: '#b94a53',
     titleFont: SANS,
     mood: 'World War',
     era: 'world-war-2',
@@ -131,9 +132,9 @@ const THEMES: Record<string, EraTheme> = {
   'cold-war': {
     // Steel-gray atmosphere with a desaturated jade accent reads as
     // satellite-image and tactical-map: the visual vocabulary of the era.
-    atmosphere: '#9ca3af',
+    atmosphere: '#969ba1',
     vignette: 'rgba(14, 18, 20, 0.7)',
-    accent: '#34d399',
+    accent: '#5c9d83',
     titleFont: SANS,
     mood: 'Cold War',
     era: 'cold-war',
@@ -141,9 +142,9 @@ const THEMES: Record<string, EraTheme> = {
   'contemporary': {
     // Cool cyan atmosphere; drone-and-fibre digital-age feel sits a half
     // shade brighter than cold-war so the era jump reads on the timeline.
-    atmosphere: '#67e8f9',
+    atmosphere: '#6fb3c1',
     vignette: 'rgba(8, 18, 24, 0.6)',
-    accent: '#06b6d4',
+    accent: '#3f95a8',
     titleFont: SANS,
     mood: 'Contemporary',
     era: 'contemporary',
@@ -152,9 +153,9 @@ const THEMES: Record<string, EraTheme> = {
   // DB, in-flight payloads, etc.). Reads as the contemporary theme so any
   // path that still hands us 'modern' continues to render sanely.
   'modern': {
-    atmosphere: '#67e8f9',
+    atmosphere: '#6fb3c1',
     vignette: 'rgba(8, 18, 24, 0.6)',
-    accent: '#06b6d4',
+    accent: '#3f95a8',
     titleFont: SANS,
     mood: 'Contemporary',
     era: 'contemporary',

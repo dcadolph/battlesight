@@ -4,8 +4,8 @@ import type { GlobeMethods } from 'react-globe.gl';
 import type { Battle } from '../../types/battle';
 import { ERA_COLORS } from '../../types/battle';
 import type { Feature, Geometry } from 'geojson';
-import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../../data/cities';
-import { OWNER_LABELS } from '../../data/territory-snapshots';
+import { HI_RES_EARTH, TOPOLOGY_BUMP } from '../../data/cities';
+import { OWNER_LABELS } from '../../data/territory-owners';
 import { flagForFaction } from '../../data/faction-flags';
 import { loadWorldCountries, worldCountriesCache } from '../../data/world-countries';
 import { formatNumberWithCommas } from '../../lib/format';
@@ -1000,9 +1000,9 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       onGlobeReady={() => enhanceGlobe(globeRef.current)}
       globeImageUrl={HI_RES_EARTH}
       bumpImageUrl={TOPOLOGY_BUMP}
-      backgroundImageUrl={NIGHT_SKY}
-      atmosphereColor={atmosphereColor || '#8cc6ff'}
-      atmosphereAltitude={0.18}
+      backgroundColor="#0d0c0b"
+      atmosphereColor={atmosphereColor || '#8fa6bf'}
+      atmosphereAltitude={0.15}
       pointsData={visibleBattles}
       pointLat="lat"
       pointLng="lng"

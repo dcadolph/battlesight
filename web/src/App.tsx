@@ -1,7 +1,10 @@
 import { useEffect, useState, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
 import PersistentGlobe from './components/globe/PersistentGlobe';
 import TimelineSlider from './components/TimelineSlider';
-import BattlePanel from './components/BattlePanel';
+// BattlePanel pulls in the ~2,100-entry media library; it only ever mounts
+// after a battle is selected, so lazy-load it to keep that data out of the
+// initial bundle.
+const BattlePanel = lazy(() => import('./components/BattlePanel'));
 import CommanderPanel from './components/CommanderPanel';
 import { canonCountriesForBattle } from './lib/country';
 import CommandBar from './components/CommandBar';
@@ -11,7 +14,7 @@ import HistoryPlayhead from './components/HistoryPlayhead';
 import BattleTitleCard from './components/BattleTitleCard';
 import HistoryBeatCard from './components/HistoryBeatCard';
 import { HISTORY_BEATS, type HistoryBeat } from './data/history-beats';
-import { OWNER_COLORS, OWNER_LABELS } from './data/territory-snapshots';
+import { OWNER_COLORS, OWNER_LABELS } from './data/territory-owners';
 import type { Battle } from './types/battle';
 import { themeForEra, themeForYear } from './theme/era';
 import { disableSound, soundEnabled, setSoundEra } from './audio/sound';
@@ -1051,13 +1054,15 @@ export default function App() {
           BattlePanel on top of them caused the right column to flicker as
           focus changed. */}
       {selectedBattle && !panelDismissed && !showPlayback && !historyMode && (
-        <BattlePanel
-          battle={selectedBattle}
-          onClose={handleClosePanel}
-          onWatchReplay={handleWatchReplay}
-          onShare={handleShareSelected}
-          onCommanderClick={setCommanderQuery}
-        />
+        <Suspense fallback={null}>
+          <BattlePanel
+            battle={selectedBattle}
+            onClose={handleClosePanel}
+            onWatchReplay={handleWatchReplay}
+            onShare={handleShareSelected}
+            onCommanderClick={setCommanderQuery}
+          />
+        </Suspense>
       )}
 
       {commanderQuery && (

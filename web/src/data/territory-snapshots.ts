@@ -21,6 +21,14 @@
 // colors (OWNER_COLORS) only matter when a snapshot does NOT specify a
 // bloc per faction — the bloc map collapses 60 different palette entries
 // into the four core "what side are you on" reads.
+import { OWNER_COLORS, OWNER_LABELS } from './territory-owners';
+
+// OWNER_COLORS is used internally below; both are re-exported so existing
+// consumers that import them from this module keep working unchanged. They
+// physically live in territory-owners.ts now so the eager bundle can pull the
+// maps without this file's large TERRITORY dataset.
+export { OWNER_COLORS, OWNER_LABELS };
+
 export type Bloc = 'A' | 'B' | 'C' | 'neutral';
 
 export interface TerritorySnapshot {
@@ -53,141 +61,6 @@ export interface WarTerritory {
 // territory pass. Axis powers cluster in red-orange; Allied / Coalition
 // powers in blue-cyan; neutral / Other in slate. Hex without alpha; the
 // renderer mixes alpha at paint time.
-export const OWNER_COLORS: Record<string, string> = {
-  // World War II Axis. Nazis read black (SS uniform) so red stays free for
-  // the Soviet sphere; Imperial Japan reads as blood crimson; Italy reads
-  // as fascist green. Each Axis power has its own distinct silhouette on
-  // the European map at peak occupation.
-  // Nazi Germany painted as feldgrau — the Wehrmacht's actual uniform
-  // color. Distinct enough from Soviet bright red that the Eastern Front
-  // reads as two competing forces, not one red blob. Visible on dark
-  // satellite imagery and historically iconic.
-  // Curated palette: avoid greens (which blend with forested land) and
-  // saturated mid-blues (which blend with ocean). Every shade below was
-  // chosen to read clearly against the satellite-style Earth texture.
-  // Nazi Germany gets the bright Nazi-banner red so the WW2 cinematic
-  // reads as "red Reich" at a glance. The Soviet sphere takes a deep
-  // crimson so red Reich and red USSR sit side by side on the 1941
-  // Eastern Front map without merging into one blob. The faction symbol
-  // layer (Iron Cross vs. hammer-and-sickle) seals the distinction.
-  'nazi-germany': '#dc2626',
-  'imperial-germany': '#854d0e',
-  'germany': '#a16207',
-  'japan': '#b91c1c',
-  'italy': '#ec4899',
-  'vichy': '#fb923c',
-  'ussr': '#7f1d1d',
-  'russia': '#7f1d1d',
-  'ukraine': '#facc15',
-  // Western Allies palette: each gets a different cool tone so France,
-  // UK, and the US stay distinguishable when they're side-by-side on
-  // the map (e.g. occupied Germany 1945).
-  // Western Allies palette — each cool tone is offset enough that you can
-  // see UK, US, Canada/Australia, Free French, and India as separate
-  // territories on the same map. India gets a warm orange so it reads as
-  // the Raj on the Asian rim rather than blending with the Commonwealth.
-  'us': '#2563eb',
-  'uk': '#eab308',
-  'canada': '#f43f5e',
-  'australia': '#22d3ee',
-  'new-zealand': '#06b6d4',
-  'commonwealth': '#22d3ee',
-  'india': '#ea580c',
-  'south-africa': '#d97706',
-  'france': '#1d4ed8',
-  'french-empire': '#3b82f6',
-  'china-roc': '#0ea5e9',
-  'china-prc': '#b91c1c',
-  'china': '#fb7185',
-  'poland': '#9333ea',
-  'ottoman': '#9f1239',
-  'turkey': '#06b6d4',
-  'syria': '#7c3aed',
-  'iraq': '#c026d3',
-  'iran': '#7c3aed',
-  'sweden': '#facc15',
-  'paraguay': '#9333ea',
-  'brazil': '#0d9488',
-  'uruguay': '#fbbf24',
-  'argentina-alt': '#9333ea',
-  'persia': '#7e22ce',
-  'punjab': '#ea580c',
-  'isis': '#0f1116',
-  'hts': '#475569',
-  'us-union': '#2563eb',
-  'us-confederacy': '#a16207',
-  'rome': '#b91c1c',
-  'finland': '#cbd5e1',
-  // Axis-aligned minor powers cluster in mustard/amber tones so they
-  // read as "with the Axis but not Germany" at a glance.
-  'hungary': '#854d0e',
-  'romania': '#a16207',
-  'bulgaria': '#854d0e',
-  'yugoslavia': '#9333ea',
-  'greece': '#06b6d4',
-  // Low Countries and Scandinavia: amber pre-occupation, recolored to
-  // nazi-black inside the snapshots once they fall. The amber tone gives
-  // them a distinct identity from the green saracen/turkey palette.
-  'netherlands': '#f59e0b',
-  'belgium': '#f59e0b',
-  'norway': '#f59e0b',
-  'denmark': '#f59e0b',
-  'austria-hungary': '#854d0e',
-  'serbia': '#0891b2',
-  'north-korea': '#dc2626',
-  'south-korea': '#2563eb',
-  'un-coalition': '#22d3ee',
-  'prussia': '#1e2a4a',
-  'austria': '#e5e7eb',
-  'spain': '#f97316',
-  'portugal': '#c084fc',
-  'british-empire': '#dc2626',
-  'continental-army': '#2563eb',
-  'mongol': '#b45309',
-  'crusader': '#eab308',
-  'saracen': '#7c3aed',
-  'byzantine': '#a855f7',
-  'fatimid': '#f59e0b',
-  'seljuk': '#be123c',
-  'north-vietnam': '#dc2626',
-  'south-vietnam': '#2563eb',
-  'viet-cong': '#7f1d1d',
-  'pathet-lao': '#b91c1c',
-  'khmer-rouge': '#7f1d1d',
-  'coalition': '#1d4ed8',
-  'iraq-saddam': '#365314',
-  'iraq-government': '#1d4ed8',
-  'taliban': '#0f1116',
-  'afghan-government': '#1d4ed8',
-  'imperial-japan': '#9b1c1c',
-  'roc-china': '#0891b2',
-  'mexico': '#16a34a',
-  'argentina': '#7c3aed',
-  'dutch-republic': '#ea580c',
-  'habsburg-spain': '#ca8a04',
-  'kingdom-france-bourbon': '#3b82f6',
-  'kingdom-england': '#dc2626',
-  'kingdom-scotland': '#1d4ed8',
-  'denmark-norway': '#f59e0b',
-  'sweden-empire': '#facc15',
-  'rus': '#15532f',
-  'cuba-spain': '#ca8a04',
-  'us-puerto-rico': '#1d4ed8',
-  // Ancient and medieval iconic colors. Persian deep purple matches the
-  // historical association (Tyrian-style royal purple), Greek slate-blue
-  // reads as the Aegean / Athenian world, Roman crimson against Carthage
-  // royal purple gives the Punic Wars their iconic colour clash, and so
-  // on. Kept as separate OWNER_COLORS keys so snapshot maps can reach
-  // for them directly without going through faction-palette.
-  'persian-purple': '#7c3aed',
-  'greek-slate': '#475569',
-  'roman-crimson': '#b91c1c',
-  'carthage-purple': '#6b21a8',
-  'south-korea-blue': '#1d4ed8',
-  'prussian-blue': '#1e2a4a',
-  'hamas': '#0f1116',
-  'hezbollah': '#0f1116',
-};
 
 export const TERRITORY: WarTerritory[] = [
   {
@@ -2968,98 +2841,6 @@ export const TERRITORY: WarTerritory[] = [
 // OWNER_LABELS gives each owner key a short human-readable label for the
 // faction legend during war cinematic playback. The legend reads off the
 // currently active snapshot's control map keys and looks them up here.
-export const OWNER_LABELS: Record<string, string> = {
-  'nazi-germany': 'Nazi Germany',
-  'imperial-germany': 'German Empire',
-  'germany': 'Germany',
-  'japan': 'Japan',
-  'italy': 'Italy',
-  'vichy': 'Vichy France',
-  'ussr': 'Soviet Union',
-  'russia': 'Russia',
-  'ukraine': 'Ukraine',
-  'us': 'United States',
-  'uk': 'United Kingdom',
-  'canada': 'Canada',
-  'australia': 'Australia',
-  'new-zealand': 'New Zealand',
-  'france': 'France',
-  'french-empire': 'French Empire',
-  'china-roc': 'Republic of China',
-  'china-prc': 'PRC',
-  'china': 'China',
-  'poland': 'Poland',
-  'ottoman': 'Ottoman Empire',
-  'turkey': 'Turkey',
-  'syria': 'Syria',
-  'isis': 'Islamic State',
-  'hts': 'HTS',
-  'us-union': 'Union',
-  'us-confederacy': 'Confederacy',
-  'rome': 'Rome',
-  'finland': 'Finland and Sweden',
-  'hungary': 'Hungary',
-  'romania': 'Romania',
-  'bulgaria': 'Bulgaria',
-  'yugoslavia': 'Yugoslavia',
-  'greece': 'Greece',
-  'netherlands': 'Netherlands',
-  'belgium': 'Belgium',
-  'norway': 'Norway',
-  'denmark': 'Denmark',
-  'austria-hungary': 'Austria-Hungary',
-  'serbia': 'Serbia',
-  'north-korea': 'North Korea',
-  'south-korea': 'South Korea',
-  'un-coalition': 'UN coalition',
-  'prussia': 'Prussia',
-  'austria': 'Austria',
-  'spain': 'Spain',
-  'portugal': 'Portugal',
-  'british-empire': 'British Empire',
-  'continental-army': 'Continental Army',
-  'mongol': 'Mongol Empire',
-  'crusader': 'Crusader States',
-  'saracen': 'Saracen forces',
-  'byzantine': 'Byzantine Empire',
-  'fatimid': 'Fatimid Caliphate',
-  'seljuk': 'Seljuk Empire',
-  'north-vietnam': 'North Vietnam',
-  'south-vietnam': 'South Vietnam',
-  'viet-cong': 'Viet Cong',
-  'pathet-lao': 'Pathet Lao',
-  'khmer-rouge': 'Khmer Rouge',
-  'coalition': 'Coalition forces',
-  'iraq-saddam': 'Ba’athist Iraq',
-  'iraq-government': 'Iraqi government',
-  'taliban': 'Taliban',
-  'afghan-government': 'Afghan government',
-  'imperial-japan': 'Empire of Japan',
-  'roc-china': 'Republic of China',
-  'mexico': 'Mexico',
-  'argentina': 'Argentina',
-  'dutch-republic': 'Dutch Republic',
-  'habsburg-spain': 'Habsburg Spain',
-  'kingdom-france-bourbon': 'Kingdom of France',
-  'kingdom-england': 'Kingdom of England',
-  'kingdom-scotland': 'Kingdom of Scotland',
-  'denmark-norway': 'Denmark-Norway',
-  'sweden-empire': 'Swedish Empire',
-  'rus': 'Russian forces',
-  'cuba-spain': 'Spanish Cuba',
-  'us-puerto-rico': 'US-held Puerto Rico',
-  'persian-purple': 'Persian sphere',
-  'greek-slate': 'Hellenic states',
-  'roman-crimson': 'Rome',
-  'carthage-purple': 'Carthage',
-  'south-korea-blue': 'Western-aligned',
-  'prussian-blue': 'Prussia',
-  'hamas': 'Hamas',
-  'hezbollah': 'Hezbollah',
-  'commonwealth': 'Commonwealth',
-  'india': 'British India',
-  'south-africa': 'South Africa',
-};
 
 // findSnapshot returns the territory snapshot in effect for a given war
 // at a given decimal year. Returns null only when the war has no snapshots

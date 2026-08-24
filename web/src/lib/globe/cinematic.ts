@@ -61,17 +61,17 @@ export const DEFAULT_CINEMATIC: CinematicOpts = {
   // (lower saturation), keep editorial midtone depth, and dial back the three
   // effects that read as "tech demo" rather than "atlas" — the glossy ocean
   // sun-glint, the sci-fi limb glow, and the blingy city lights.
-  saturation: 0.72,
-  contrast: 1.15,
-  brightness: -0.01,
-  tint: [1.02, 1.0, 0.96],
-  nightIntensity: 1.25,
-  specIntensity: 0.38,
-  fresnelIntensity: 0.34,
-  fresnelColor: [0.5, 0.62, 0.82],
-  ambient: 0.5,
-  key: 2.7,
-  fill: 0.5,
+  saturation: 0.6,
+  contrast: 1.2,
+  brightness: -0.05,
+  tint: [1.02, 1.0, 0.95],
+  nightIntensity: 1.3,
+  specIntensity: 0.3,
+  fresnelIntensity: 0.3,
+  fresnelColor: [0.48, 0.6, 0.8],
+  ambient: 0.42,
+  key: 2.5,
+  fill: 0.45,
 };
 
 // GlobeLike is the slice of the react-globe.gl imperative handle we touch.

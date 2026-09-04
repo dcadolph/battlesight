@@ -6,6 +6,20 @@ import (
 	"strings"
 )
 
+// Schematic phase dwell times. Curator-set durations win on the client, so
+// a generated phase that sets its own duration overrides the client fallback
+// entirely. The old 3.2s beat the arrow animations, which run up to about
+// 4.5s with stagger, so phases cut mid-motion and the whole reconstruction
+// read as a blitz.
+const (
+	// schematicPhaseMs is the dwell for a generated phase.
+	schematicPhaseMs = 5600
+	// schematicDeploymentMs is the dwell for the deployment phase, which is
+	// longer because it carries the battle intro narration and the march
+	// into position.
+	schematicDeploymentMs = 6400
+)
+
 // schematicLayout encodes the deployment geometry for a single battle.
 // The fields parameterize where the two sides start and the angle along
 // which they engage, so every schematic battle reads visually distinct
@@ -317,7 +331,7 @@ func schematicDeployment(b Battle, a, bSide Side, unitType string, terrain []Ter
 		Title:      "Deployment",
 		Narration:  narration,
 		TimeMarker: timeMarker,
-		DurationMs: 3200,
+		DurationMs: schematicDeploymentMs,
 		Terrain:    terrain,
 		Units:      units,
 		Movements:  movements,
@@ -374,7 +388,7 @@ func schematicEngagement(a, bSide Side, unitType string, layout schematicLayout)
 		Title:      "Engagement",
 		Narration:  narration,
 		TimeMarker: "Main action",
-		DurationMs: 3200,
+		DurationMs: schematicPhaseMs,
 		Units: []Unit{
 			{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: aPressX, Y: aPressY, W: 16, H: 22, Strength: 3, Status: "pressing"},
 			{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: bPressX, Y: bPressY, W: 16, H: 22, Strength: 3, Status: "pressing"},
@@ -398,7 +412,7 @@ func schematicOutcome(b Battle, a, bSide Side, unitType string, layout schematic
 			Title:      "Outcome",
 			Narration:  "The action concludes. The engagement is recorded as indecisive in the available sources.",
 			TimeMarker: "End of action",
-			DurationMs: 3200,
+			DurationMs: schematicPhaseMs,
 			Units: []Unit{
 				{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: aHoldX, Y: aHoldY, W: 16, H: 22, Strength: 2},
 				{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: bHoldX, Y: bHoldY, W: 16, H: 22, Strength: 2},
@@ -429,7 +443,7 @@ func schematicOutcome(b Battle, a, bSide Side, unitType string, layout schematic
 		Title:      "Outcome",
 		Narration:  narration,
 		TimeMarker: "End of action",
-		DurationMs: 3200,
+		DurationMs: schematicPhaseMs,
 		Units: []Unit{
 			{Label: shortFaction(a), Faction: "a", UnitType: unitType, X: aCenterX, Y: aCenterY, W: 18, H: 24, Strength: 3},
 			{Label: shortFaction(bSide), Faction: "b", UnitType: unitType, X: bBrokenX, Y: bBrokenY, W: 12, H: 18, Strength: 1, Status: loserStatus},

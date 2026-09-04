@@ -217,7 +217,167 @@ func (s *Store) Search(ctx context.Context, query string, limit, offset int) ([]
 		return nil, 0, err
 	}
 
+	// Typo tolerance. FTS5 prefix matching cannot catch a misspelling
+	// ("Isandlawana" for "Isandlwana"), so when the index returns nothing,
+	// fall back to an edit-distance pass over battle names. This only runs on
+	// the miss path, so scanning the name column is acceptable.
+	if len(battles) == 0 {
+		return s.searchFuzzy(ctx, query, limit)
+	}
+
 	return battles, total, nil
+}
+
+// searchFuzzy scores the query against every battle name by normalized edit
+// distance and returns the closest matches above a similarity floor, ordered
+// best-first. Used only as the fallback when the full-text search misses.
+func (s *Store) searchFuzzy(ctx context.Context, query string, limit int) ([]Battle, int, error) {
+	q := strings.ToLower(strings.TrimSpace(query))
+	if q == "" {
+		return []Battle{}, 0, nil
+	}
+	if limit <= 0 {
+		limit = 50
+	}
+
+	nameSQL := `SELECT b.id, b.name FROM battles b
+		WHERE b.name != ''
+		  AND (b.lat != 0 OR b.lng != 0)
+		  AND ` + trustedWarSQL("b.war")
+	rows, err := s.db.QueryContext(ctx, nameSQL)
+	if err != nil {
+		return nil, 0, fmt.Errorf("fuzzy name scan: %w", err)
+	}
+	type scored struct {
+		id    string
+		score float64
+	}
+	var cands []scored
+	for rows.Next() {
+		var id, name string
+		if err := rows.Scan(&id, &name); err != nil {
+			rows.Close()
+			return nil, 0, fmt.Errorf("fuzzy scan row: %w", err)
+		}
+		// 0.34 allows roughly one wrong character per three, enough for a
+		// genuine typo without dragging in unrelated names.
+		if sc := fuzzyScore(q, strings.ToLower(name)); sc <= 0.34 {
+			cands = append(cands, scored{id: id, score: sc})
+		}
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	}
+	if len(cands) == 0 {
+		return []Battle{}, 0, nil
+	}
+	sort.Slice(cands, func(i, j int) bool { return cands[i].score < cands[j].score })
+	if len(cands) > limit {
+		cands = cands[:limit]
+	}
+	ids := make([]string, len(cands))
+	for i, c := range cands {
+		ids[i] = c.id
+	}
+
+	battles, err := s.byIDs(ctx, ids)
+	if err != nil {
+		return nil, 0, err
+	}
+	if err := s.loadSides(ctx, battles); err != nil {
+		return nil, 0, err
+	}
+	return battles, len(battles), nil
+}
+
+// byIDs loads full battle rows for the given ids and returns them in the same
+// order the ids were supplied, so a ranked id list keeps its ranking.
+func (s *Store) byIDs(ctx context.Context, ids []string) ([]Battle, error) {
+	if len(ids) == 0 {
+		return []Battle{}, nil
+	}
+	ph := make([]string, len(ids))
+	args := make([]any, len(ids))
+	for i, id := range ids {
+		ph[i] = "?"
+		args[i] = id
+	}
+	sqlStr := `SELECT ` + prefixCols("b", battleColumns) + ` FROM battles b WHERE b.id IN (` + strings.Join(ph, ",") + `)`
+	rows, err := s.db.QueryContext(ctx, sqlStr, args...)
+	if err != nil {
+		return nil, fmt.Errorf("byIDs query: %w", err)
+	}
+	defer rows.Close()
+	battles, err := scanBattles(rows)
+	if err != nil {
+		return nil, err
+	}
+	pos := make(map[string]int, len(ids))
+	for i, id := range ids {
+		pos[id] = i
+	}
+	sort.Slice(battles, func(i, j int) bool { return pos[battles[i].ID] < pos[battles[j].ID] })
+	return battles, nil
+}
+
+// fuzzyScore returns a normalized edit-distance score (0 is perfect) between a
+// lowercased query and a lowercased candidate name. It scores against the whole
+// name and each token and keeps the best, so a short query still matches a
+// keyword inside a longer title ("isandlawana" -> "Battle of Isandlwana").
+func fuzzyScore(q, name string) float64 {
+	if q == "" || name == "" {
+		return 1
+	}
+	if strings.Contains(name, q) {
+		return 0
+	}
+	best := normEdit(q, name)
+	for _, tok := range strings.Fields(name) {
+		if d := normEdit(q, tok); d < best {
+			best = d
+		}
+	}
+	return best
+}
+
+// normEdit is Levenshtein distance normalized by the longer string's length,
+// giving a 0..1 dissimilarity independent of word length.
+func normEdit(a, b string) float64 {
+	m := max(len([]rune(a)), len([]rune(b)))
+	if m == 0 {
+		return 0
+	}
+	return float64(levenshtein(a, b)) / float64(m)
+}
+
+// levenshtein is the classic edit distance with a rolling two-row buffer.
+func levenshtein(a, b string) int {
+	ra, rb := []rune(a), []rune(b)
+	la, lb := len(ra), len(rb)
+	if la == 0 {
+		return lb
+	}
+	if lb == 0 {
+		return la
+	}
+	prev := make([]int, lb+1)
+	cur := make([]int, lb+1)
+	for j := 0; j <= lb; j++ {
+		prev[j] = j
+	}
+	for i := 1; i <= la; i++ {
+		cur[0] = i
+		for j := 1; j <= lb; j++ {
+			cost := 1
+			if ra[i-1] == rb[j-1] {
+				cost = 0
+			}
+			cur[j] = min(prev[j]+1, cur[j-1]+1, prev[j-1]+cost)
+		}
+		prev, cur = cur, prev
+	}
+	return prev[lb]
 }
 
 // BattlesByCommander returns battles where the named person appears in any

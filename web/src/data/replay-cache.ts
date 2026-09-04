@@ -9,6 +9,7 @@
 // it for the NEXT battle a beat before the current one ends, so the
 // camera glide and the data fetch overlap instead of running serially.
 import type { Replay } from '../types/replay';
+import { deriveSchematicXY } from './derive-xy';
 
 const cache: Map<string, Replay> = new Map();
 const inflight: Map<string, Promise<Replay | null>> = new Map();
@@ -23,7 +24,10 @@ function fetchReplay(battleId: string): Promise<Replay | null> {
       if (!res.ok) throw new Error('no replay');
       return res.json() as Promise<Replay>;
     })
-    .then((data) => {
+    .then((raw) => {
+      // Replays authored from geography carry no schematic placement, so
+      // fill it in once here rather than in every consumer.
+      const data = deriveSchematicXY(raw);
       cache.set(battleId, data);
       inflight.delete(battleId);
       return data;

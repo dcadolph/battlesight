@@ -533,32 +533,45 @@ function buildMotionLayers(trips: ResolvedTrip[], t: number, phaseIdx: number): 
 }
 
 // Cartographic MapLibre style. No keys, no signups, CORS-open.
-// A single muted, label-free dark basemap (Carto dark_all) over a warm
-// matte, and nothing else: no streaming satellite imagery, no DEM, no
-// hillshade, no 3D terrain mesh. The old satellite + terrain stack streamed
-// slowly (a near-black frame with disjoint photo tiles floating in it) and
-// read as a tech demo. A clean cartographic base paints fast, fills
-// seamlessly over the matte, and lets the action layer (arrows, units,
-// territory) own the color budget. This is the documentary-atlas plate:
-// a map, not Google Earth.
+// A muted, label-free dark canvas over a warm matte, with a hillshade
+// laid over it so ridges and river valleys read as terrain rather than
+// flat paper. No streaming satellite imagery and no 3D terrain mesh: the
+// old satellite stack streamed slowly and read as a tech demo. This is
+// the documentary-atlas plate, a map rather than Google Earth.
+//
+// The base was Carto dark_all until CARTO began requiring an API key and
+// started serving unauthenticated tiles with "API KEY REQUIRED" burned
+// into the image. Those tiles still return 200, so nothing errored and
+// the watermark simply appeared across every replay. Any keyless tile
+// source can do this to us, so if the plate ever looks wrong, fetch a
+// single tile and look at it before trusting the network tab.
 const OPEN_STYLE: StyleSpecification = {
   version: 8,
   sources: {
-    // Carto dark_all. Lightweight PNGs on a fast HTTP/2 multi-host CDN.
-    // The warm matte behind it means any tile still in flight is invisible
-    // rather than a black hole, so the map never looks broken mid-load.
+    // Esri World Dark Gray Canvas: keyless, CORS-open, label-free, and
+    // already the muted grade this plate wants.
     'dark-canvas': {
       type: 'raster',
       tiles: [
-        'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-        'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-        'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-        'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+        'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
       ],
       tileSize: 256,
       minzoom: 0,
-      maxzoom: 19,
-      attribution: '(c) OpenStreetMap (c) CARTO',
+      maxzoom: 16,
+      attribution: 'Esri, HERE, Garmin, (c) OpenStreetMap contributors',
+    },
+    // Hillshade over the canvas. This is what makes a battlefield look
+    // like ground: the ridge a flank anchors on and the valley a cavalry
+    // charge runs down are otherwise invisible.
+    hillshade: {
+      type: 'raster',
+      tiles: [
+        'https://services.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      minzoom: 0,
+      maxzoom: 16,
+      attribution: 'Esri, USGS, NOAA',
     },
   },
   layers: [
@@ -578,13 +591,27 @@ const OPEN_STYLE: StyleSpecification = {
       minzoom: 0,
       maxzoom: 19,
       paint: {
-        // Lift the base out of near-black so land actually reads (Carto's
-        // dark base over desert/city is otherwise almost invisible), while
-        // staying muted enough that the action layer keeps the color budget.
         'raster-saturation': -0.35,
-        'raster-brightness-min': 0.08,
-        'raster-brightness-max': 1.0,
+        'raster-brightness-min': 0.06,
+        'raster-brightness-max': 0.82,
         'raster-contrast': -0.05,
+        'raster-fade-duration': 300,
+      },
+    },
+    // Relief. The hillshade is near-white, so it is held to a low opacity
+    // and darkened: enough to model the ground, not enough to grey out the
+    // plate or steal contrast from the units.
+    {
+      id: 'hillshade',
+      type: 'raster',
+      source: 'hillshade',
+      minzoom: 0,
+      maxzoom: 19,
+      paint: {
+        'raster-opacity': 0.22,
+        'raster-saturation': -1,
+        'raster-brightness-max': 0.5,
+        'raster-contrast': 0.15,
         'raster-fade-duration': 300,
       },
     },
@@ -1760,7 +1787,7 @@ export default function TacticalSurface({
       )}
 
       <div className="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded text-[9px] uppercase tracking-wider text-slate-300/60 pointer-events-none">
-        OpenStreetMap . CARTO . MapLibre
+        Esri . USGS . OpenStreetMap . MapLibre
       </div>
     </div>
   );

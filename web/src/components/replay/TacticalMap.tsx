@@ -47,35 +47,69 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
     () => phase.units.filter((u) => !(u.x === 50 && u.y === 50)),
     [phase.units],
   );
-  // labelPlacement decides which side of each unit its label sits on and
-  // which row it takes. Units above the line's midpoint label upward and
-  // units below label downward, which splits two facing lines apart. Within
-  // a side, labels are laned by horizontal position so close neighbours
-  // step down instead of printing over each other.
+  // labelPlacement keeps unit labels off each other.
+  //
+  // Every label used to hang directly under its unit, so a battle line
+  // printed its whole order of battle into one band and the text became an
+  // unreadable pile. A label now prefers the side of the line facing away
+  // from the enemy, then takes the first row on that side where its own box
+  // hits nothing already placed. The test is against every placed label
+  // rather than only its own side, because two facing lines sit close enough
+  // that one side's downward labels collide with the other's upward ones.
   const labelPlacement = useMemo(() => {
     const out = new Map<string, { above: boolean; lane: number }>();
     if (visibleUnits.length === 0) return out;
     const midY =
       visibleUnits.reduce((sum, u) => sum + u.y, 0) / visibleUnits.length;
-    const sides: Record<'up' | 'down', Unit[]> = { up: [], down: [] };
-    for (const u of visibleUnits) {
-      sides[u.y <= midY ? 'up' : 'down'].push(u);
-    }
-    for (const key of ['up', 'down'] as const) {
-      const row = [...sides[key]].sort((a, b) => a.x - b.x);
-      let lane = 0;
-      let lastX = -Infinity;
-      for (const u of row) {
-        // A label is roughly a quarter of the field wide at this type size,
-        // so anything closer than that to its neighbour takes the next lane.
-        if (u.x - lastX < 30) lane += 1;
-        else lane = 0;
-        lastX = u.x;
-        out.set(u.label, { above: key === 'up', lane });
+
+    // Label width in user units. The text renders at font size 1.5, and a
+    // proportional face averages a bit over half its point size per
+    // character, which is close enough to pack against.
+    const halfWidth = (label: string) => Math.max(2, label.length * 0.54);
+    const gap = 1.2;
+    const rowHeight = 2.9;
+    // Two labels closer than this vertically are treated as the same row.
+    const rowBleed = 2.4;
+    const maxLane = 6;
+
+    const placed: { x1: number; x2: number; y: number }[] = [];
+    // Top units are placed first so the upper line settles before the lower
+    // one has to work around it.
+    const order = [...visibleUnits].sort((a, b) => a.y - b.y);
+
+    for (const unit of order) {
+      const center = (unit.x / 100) * viewW;
+      const half = halfWidth(unit.label);
+      const x1 = center - half;
+      const x2 = center + half;
+      const above = unit.y <= midY;
+      const offset = unitFootprint(unit).h / 2 + 2;
+
+      // The preferred side is tried first, then the other one. A line sitting
+      // near the edge of the frame runs out of rows in its preferred
+      // direction after a lane or two, and without the fallback every label
+      // that ran out collapsed back onto the same row.
+      let chosen: { above: boolean; lane: number } | null = null;
+      for (const side of [above, !above]) {
+        for (let lane = 0; lane < maxLane && !chosen; lane += 1) {
+          const y = side
+            ? unit.y - (offset + lane * rowHeight)
+            : unit.y + (offset + lane * rowHeight);
+          if (y < 3 || y > VIEW_H - 3) continue;
+          const clash = placed.some(
+            (b) => Math.abs(b.y - y) < rowBleed && x1 < b.x2 + gap && x2 > b.x1 - gap,
+          );
+          if (!clash) {
+            placed.push({ x1, x2, y });
+            chosen = { above: side, lane };
+          }
+        }
+        if (chosen) break;
       }
+      out.set(unit.label, chosen ?? { above, lane: 0 });
     }
     return out;
-  }, [visibleUnits]);
+  }, [visibleUnits, viewW]);
 
   // unitFacing points each unit at the nearest mass of the opposing army.
   // A battle line then reads as two lines meeting rather than a scatter of
@@ -883,10 +917,9 @@ function UnitLabel({ unit, viewW, above, lane }: UnitLabelProps) {
   const x = scaleX(unit.x, viewW);
   const y = unit.y;
   const h = unitFootprint(unit).h;
-  // A label pushed off the top or bottom of the field is worse than one
-  // sitting on the crowded side, so the placement flips when it would clip.
-  const lift = h / 2 + 2 + lane * 2.6;
-  const wantsAbove = above ? unit.y - lift > 4 : unit.y + lift > 96;
+  // The row height matches the one labelPlacement packed against, so the
+  // label lands exactly where the packer reserved space for it.
+  const lift = h / 2 + 2 + lane * 2.9;
   const dim = unit.status && ['broken', 'routed', 'destroyed'].includes(unit.status);
   const opacity = dim ? 0.45 : unit.status === 'destroyed' ? 0.3 : 0.92;
   return (
@@ -897,7 +930,7 @@ function UnitLabel({ unit, viewW, above, lane }: UnitLabelProps) {
     >
       <text
         x={0}
-        y={wantsAbove ? -lift : lift}
+        y={above ? -lift : lift}
         fontSize="1.5"
         textAnchor="middle"
         fill="#e2e8f0"

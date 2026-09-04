@@ -152,11 +152,6 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     const current = replay.phases[phaseIdx];
     // Reduced-motion path: skip the dwell entirely. The user can still
     // step through with the scrubber if they want to read each phase.
-    // Auto-generated schematic replays get a faster per-phase tick (3.2s
-    // each instead of 5.5s) since their movements are minimal and lingering
-    // on a deployment-only phase reads as "stuck" — three of them ran 16.5s
-    // total at the default rate, which was longer than the schematic dwell
-    // backstop and produced the deployment-loop the user reported.
     // Phase dwell. Curator-set durations win. The fallback has swung
     // both ways: 5500/3200 read as glacial solo, 3000/2000 read as
     // unfollowable inside a war cinematic (three schematic phases blew

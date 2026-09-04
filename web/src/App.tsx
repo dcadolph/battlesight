@@ -418,13 +418,13 @@ export default function App() {
     }
   }, [introVisible, replayBattle, replayCinematic]);
 
-  // Closing the dossier returns to the bare globe but keeps the battle's
-  // dot painted in place. The user can re-open the dossier by clicking
-  // the dot again. Previously we cleared selectedBattle, which erased
-  // every visual trace of "I was just looking at this." Now the marker
-  // stays but the panel goes away.
+  // Closing the dossier returns the user to a clean globe: the selection is
+  // cleared so the red marker/ring goes away too. Leaving the dot painted
+  // after an explicit close read as stale "stuck" state (a marker lingering
+  // over France while searching for an unrelated battle).
   const handleClosePanel = useCallback(() => {
-    setPanelDismissed(true);
+    setSelectedBattle(null);
+    setPanelDismissed(false);
     setReplayBattle(null);
     setReplayPhase(0);
   }, []);

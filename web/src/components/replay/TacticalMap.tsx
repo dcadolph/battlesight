@@ -47,6 +47,36 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
     () => phase.units.filter((u) => !(u.x === 50 && u.y === 50)),
     [phase.units],
   );
+  // labelPlacement decides which side of each unit its label sits on and
+  // which row it takes. Units above the line's midpoint label upward and
+  // units below label downward, which splits two facing lines apart. Within
+  // a side, labels are laned by horizontal position so close neighbours
+  // step down instead of printing over each other.
+  const labelPlacement = useMemo(() => {
+    const out = new Map<string, { above: boolean; lane: number }>();
+    if (visibleUnits.length === 0) return out;
+    const midY =
+      visibleUnits.reduce((sum, u) => sum + u.y, 0) / visibleUnits.length;
+    const sides: Record<'up' | 'down', Unit[]> = { up: [], down: [] };
+    for (const u of visibleUnits) {
+      sides[u.y <= midY ? 'up' : 'down'].push(u);
+    }
+    for (const key of ['up', 'down'] as const) {
+      const row = [...sides[key]].sort((a, b) => a.x - b.x);
+      let lane = 0;
+      let lastX = -Infinity;
+      for (const u of row) {
+        // A label is roughly a quarter of the field wide at this type size,
+        // so anything closer than that to its neighbour takes the next lane.
+        if (u.x - lastX < 30) lane += 1;
+        else lane = 0;
+        lastX = u.x;
+        out.set(u.label, { above: key === 'up', lane });
+      }
+    }
+    return out;
+  }, [visibleUnits]);
+
   const visibleMovements = useMemo(
     () => (phase.movements ?? []).filter(
       (m) => !(m.fromX === 50 && m.fromY === 50 && m.toX === 50 && m.toY === 50),
@@ -170,7 +200,14 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
               and impact pulses. Strong dark halo via paintOrder/stroke keeps
               them readable wherever they fall. */}
           {visibleUnits.map((u) => (
-            <UnitLabel key={`label-${u.label}`} unit={u} viewW={viewW} paletteCtx={paletteCtx} />
+            <UnitLabel
+              key={`label-${u.label}`}
+              unit={u}
+              viewW={viewW}
+              paletteCtx={paletteCtx}
+              above={labelPlacement.get(u.label)?.above ?? false}
+              lane={labelPlacement.get(u.label)?.lane ?? 0}
+            />
           ))}
 
           {(phase.annotations ?? []).map((a, i) => (
@@ -524,6 +561,17 @@ interface UnitProps {
   paletteCtx?: PaletteContext;
 }
 
+interface UnitLabelProps extends UnitProps {
+  // above places the label over the unit instead of under it. Units in a
+  // line otherwise stack every label in the same band and the text becomes
+  // an unreadable pile, so each side's labels are pushed outward, away from
+  // the point of contact.
+  above: boolean;
+  // lane offsets the label by a row so neighbours in the same line do not
+  // overlap each other horizontally.
+  lane: number;
+}
+
 function UnitBlock({ unit, viewW, paletteCtx }: UnitProps) {
   const color = factionColorFor(unit.faction, paletteCtx);
   const glow = factionGlowFor(unit.faction, paletteCtx);
@@ -747,10 +795,14 @@ function UnitBlock({ unit, viewW, paletteCtx }: UnitProps) {
 // keeps the arrow strokes and arrowhead pulses visible at unit-destination
 // points instead of being covered by the label that used to sit in the
 // same group as the body.
-function UnitLabel({ unit, viewW }: UnitProps) {
+function UnitLabel({ unit, viewW, above, lane }: UnitLabelProps) {
   const x = scaleX(unit.x, viewW);
   const y = unit.y;
   const h = unit.h ?? 6;
+  // A label pushed off the top or bottom of the field is worse than one
+  // sitting on the crowded side, so the placement flips when it would clip.
+  const lift = h / 2 + 2 + lane * 2.6;
+  const wantsAbove = above ? unit.y - lift > 4 : unit.y + lift > 96;
   const dim = unit.status && ['broken', 'routed', 'destroyed'].includes(unit.status);
   const opacity = dim ? 0.45 : unit.status === 'destroyed' ? 0.3 : 0.92;
   return (
@@ -761,7 +813,7 @@ function UnitLabel({ unit, viewW }: UnitProps) {
     >
       <text
         x={0}
-        y={h / 2 + 2}
+        y={wantsAbove ? -lift : lift}
         fontSize="1.5"
         textAnchor="middle"
         fill="#e2e8f0"

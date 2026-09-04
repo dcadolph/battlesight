@@ -77,6 +77,31 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
     return out;
   }, [visibleUnits]);
 
+  // unitFacing points each unit at the nearest mass of the opposing army.
+  // A battle line then reads as two lines meeting rather than a scatter of
+  // boxes, and a wheeling flank shows its turn.
+  const unitFacing = useMemo(() => {
+    const out = new Map<string, facing>();
+    for (const u of visibleUnits) {
+      const enemies = visibleUnits.filter((o) => o.faction !== u.faction);
+      if (enemies.length === 0) {
+        out.set(u.label, null);
+        continue;
+      }
+      const ex = enemies.reduce((sum, o) => sum + o.x, 0) / enemies.length;
+      const ey = enemies.reduce((sum, o) => sum + o.y, 0) / enemies.length;
+      const dx = ex - u.x;
+      const dy = ey - u.y;
+      // The schematic frame is wider than it is tall, so a horizontal gap
+      // has to beat a vertical one by more than its raw size to count as
+      // the direction the unit is facing.
+      out.set(u.label, Math.abs(dx) / 1.6 > Math.abs(dy)
+        ? dx > 0 ? 'right' : 'left'
+        : dy > 0 ? 'down' : 'up');
+    }
+    return out;
+  }, [visibleUnits]);
+
   const visibleMovements = useMemo(
     () => (phase.movements ?? []).filter(
       (m) => !(m.fromX === 50 && m.fromY === 50 && m.toX === 50 && m.toY === 50),
@@ -162,7 +187,13 @@ export default function TacticalMap({ phase, aspectRatio, paletteCtx }: Tactical
               visible, and floats labels above the rest so the text remains
               readable without burying the arrows themselves. */}
           {visibleUnits.map((u) => (
-            <UnitBlock key={`unit-${u.label}`} unit={u} viewW={viewW} paletteCtx={paletteCtx} />
+            <UnitBlock
+              key={`unit-${u.label}`}
+              unit={u}
+              viewW={viewW}
+              paletteCtx={paletteCtx}
+              front={unitFacing.get(u.label) ?? null}
+            />
           ))}
 
           {visibleMovements.map((m, i, all) => (
@@ -555,10 +586,36 @@ function TerrainShape({ terrain, viewW }: TerrainProps) {
   }
 }
 
+// unitFootprint returns a unit's schematic width and height before the
+// horizontal scale is applied.
+//
+// Strength is recorded for every unit on a 0-7 scale, but it only ever drew
+// tally marks above the plate, so a full consular army and a cavalry screen
+// rendered as the same box and the reader had to count ticks to tell them
+// apart. Size is the first thing the eye reads, so it carries strength now.
+// Units with an authored w or h keep exactly what the curator gave them.
+function unitFootprint(unit: Unit): { w: number; h: number } {
+  const strength = Math.max(0, Math.min(7, unit.strength ?? 3));
+  return {
+    w: unit.w ?? 4.8 + strength * 1.5,
+    h: unit.h ?? 4.2 + strength * 0.42,
+  };
+}
+
+// facing is the edge of a unit that points at the enemy.
+type facing = 'up' | 'down' | 'left' | 'right' | null;
+
 interface UnitProps {
   unit: Unit;
   viewW: number;
   paletteCtx?: PaletteContext;
+}
+
+interface UnitBlockProps extends UnitProps {
+  // front is the edge that faces the opposing army, drawn as a bright bar
+  // so a line of units reads as a battle line with a front, and so a
+  // formation that wheels or inverts is visible as a change in facing.
+  front: facing;
 }
 
 interface UnitLabelProps extends UnitProps {
@@ -572,13 +629,14 @@ interface UnitLabelProps extends UnitProps {
   lane: number;
 }
 
-function UnitBlock({ unit, viewW, paletteCtx }: UnitProps) {
+function UnitBlock({ unit, viewW, paletteCtx, front }: UnitBlockProps) {
   const color = factionColorFor(unit.faction, paletteCtx);
   const glow = factionGlowFor(unit.faction, paletteCtx);
   const x = scaleX(unit.x, viewW);
   const y = unit.y;
-  const w = scaleX(unit.w ?? 8, viewW) - scaleX(0, viewW);
-  const h = unit.h ?? 6;
+  const footprint = unitFootprint(unit);
+  const w = scaleX(footprint.w, viewW) - scaleX(0, viewW);
+  const h = footprint.h;
   const dim = unit.status && ['broken', 'routed', 'destroyed'].includes(unit.status);
   const dashed = unit.status === 'concealed';
   const opacity = dim ? 0.35 : unit.status === 'destroyed' ? 0.18 : 1;
@@ -704,9 +762,35 @@ function UnitBlock({ unit, viewW, paletteCtx }: UnitProps) {
     );
   })();
 
+  // The front bar sits on the edge that faces the enemy.
+  const frontBar = (() => {
+    if (!front || dim) return null;
+    const pad = Math.min(w, h) * 0.12;
+    const ends: Record<Exclude<facing, null>, [number, number, number, number]> = {
+      up: [left + pad, top, left + w - pad, top],
+      down: [left + pad, top + h, left + w - pad, top + h],
+      left: [left, top + pad, left, top + h - pad],
+      right: [left + w, top + pad, left + w, top + h - pad],
+    };
+    const [x1, y1, x2, y2] = ends[front];
+    return (
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke={color}
+        strokeWidth="1.15"
+        strokeLinecap="round"
+        opacity="0.95"
+      />
+    );
+  })();
+
   const body = (
     <g opacity={opacity}>
       {plate}
+      {frontBar}
       {glyph}
       {strengthMarks}
     </g>
@@ -798,7 +882,7 @@ function UnitBlock({ unit, viewW, paletteCtx }: UnitProps) {
 function UnitLabel({ unit, viewW, above, lane }: UnitLabelProps) {
   const x = scaleX(unit.x, viewW);
   const y = unit.y;
-  const h = unit.h ?? 6;
+  const h = unitFootprint(unit).h;
   // A label pushed off the top or bottom of the field is worse than one
   // sitting on the crowded side, so the placement flips when it would clip.
   const lift = h / 2 + 2 + lane * 2.6;

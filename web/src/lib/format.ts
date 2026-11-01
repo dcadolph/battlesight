@@ -82,6 +82,80 @@ export function formatCasualtyEstimate(n: number): string {
   return `About ${formatNumberWithCommas(n)} casualties`;
 }
 
+// DeathToll bundles the figures a war carries for its death estimate. All
+// fields are optional: a war may have only a point estimate, only a range,
+// or nothing at all. These are contested historical estimates, never
+// counts, and every formatter below renders them so a reader cannot
+// mistake one for a measurement.
+export interface DeathToll {
+  // point is the single best-available estimate.
+  point?: number;
+  // low is the low end of the published range of estimates.
+  low?: number;
+  // high is the high end of the published range of estimates.
+  high?: number;
+}
+
+// formatDeathTollCompact renders a death estimate in a tight slot.
+//   {low: 70M, high: 85M} → "70M–85M"
+//   {point: 25M}          → "~25M"
+//   {}                    → ""
+// The range form is preferred whenever a real range exists because a
+// spread is more honest and more interesting than a false precise integer.
+export function formatDeathTollCompact(t: DeathToll): string {
+  const low = t.low ?? 0;
+  const high = t.high ?? 0;
+  if (low > 0 && high > low) return `${formatCountCompact(low)}–${formatCountCompact(high)}`;
+  const p = t.point || low || high || 0;
+  if (p <= 0) return '';
+  return `~${formatCountCompact(p)}`;
+}
+
+// formatDeathTollSentence is the long-form prose variant used on outro
+// cards: "15 to 22 million dead (estimates vary)" for a range, "roughly
+// 25 million dead (estimate)" for a point figure, empty when no figure.
+export function formatDeathTollSentence(t: DeathToll): string {
+  const low = t.low ?? 0;
+  const high = t.high ?? 0;
+  if (low > 0 && high > low) {
+    // Share the unit when both ends are in the millions so the sentence
+    // reads "15 to 22 million" rather than "15 million to 22 million".
+    if (low >= 1_000_000 && high >= 1_000_000) {
+      const lm = low / 1_000_000;
+      const lowLabel = Number.isInteger(lm) ? `${lm}` : lm.toFixed(1);
+      return `${lowLabel} to ${formatCountLong(high)} dead (estimates vary)`;
+    }
+    return `${formatCountLong(low)} to ${formatCountLong(high)} dead (estimates vary)`;
+  }
+  const p = t.point || low || high || 0;
+  if (p <= 0) return '';
+  return `roughly ${formatCountLong(p)} dead (estimate)`;
+}
+
+// formatCountLong renders a count in words-adjacent long form for prose:
+// 22_000_000 → "22 million", 850_000 → "850,000".
+export function formatCountLong(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) return '0';
+  if (n >= 1_000_000) {
+    const m = n / 1_000_000;
+    return `${Number.isInteger(m) ? m : m.toFixed(1)} million`;
+  }
+  return formatNumberWithCommas(n);
+}
+
+// DEATHS_BASIS_NOTES maps a death figure's provenance class (as reported
+// by the API) to the one-line disclosure rendered next to the number.
+// "curated" figures come from the hand-maintained wars registry,
+// "battle-sum" figures are parsed out of freeform battle records, and
+// "mixed" totals add the two together, which the reader deserves to know
+// because the underlying figures were never produced under a common
+// definition of who counts.
+export const DEATHS_BASIS_NOTES: Record<string, string> = {
+  'curated': 'Curated estimate. Sources disagree on who counts, so treat the figure as an order of magnitude.',
+  'battle-sum': 'Sum of casualty figures parsed from battle records. Incomplete, and it misses deaths away from the battlefield.',
+  'mixed': 'Total mixes curated war estimates with raw battle-record sums, so its components have differing provenance.',
+};
+
 // cleanCasualtyText scrubs the worst patterns out of freeform casualty
 // strings before they render on screen. Goals:
 //   * No semicolons in user-facing prose (project-wide rule).

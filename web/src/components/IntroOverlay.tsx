@@ -11,6 +11,18 @@ interface IntroOverlayProps {
   onStart: () => void;
 }
 
+// CatalogStats is the slice of /api/battles/stats the intro needs to state
+// the catalog's real shape on the landing surface: how much is hand-built
+// and how much is imported. The curated layer and the imported catalog are
+// different products, and saying so up front beats implying uniform depth.
+interface CatalogStats {
+  totalBattles: number;
+  verifiedBattles: number;
+  documentedBattles: number;
+  indexedBattles: number;
+  replayCount: number;
+}
+
 // Era ticker beats. Each beat is one moment in the sweep with its own
 // vignette-themed accent, label, and signature battle. The intro animation
 // crossfades between these beats over a fixed duration so the user sees
@@ -56,6 +68,20 @@ export default function IntroOverlay({ featured, onDismiss, onStart }: IntroOver
   const [beatIdx, setBeatIdx] = useState(0);
   const [tickerDone, setTickerDone] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const [stats, setStats] = useState<CatalogStats | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/battles/stats')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s: CatalogStats | null) => {
+        if (!cancelled && s) setStats(s);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -153,6 +179,29 @@ export default function IntroOverlay({ featured, onDismiss, onStart }: IntroOver
           A world atlas of human conflict. Bronze chariots to FPV drones,
           named and replayed where the record allows.
         </p>
+
+        {/* Catalog composition, stated plainly. The hand-researched layer
+            and the imported catalog are different products; owning the
+            asymmetry up front is more trustworthy than implying every one
+            of 13,000 records got the curated treatment. */}
+        {stats && (
+          <div className="-mt-6 mb-8 text-[11px] leading-[1.7] text-slate-400 tabular-nums">
+            <span className="text-slate-200">{stats.totalBattles.toLocaleString('en-US')}</span> battles
+            {' · '}
+            <span className="text-slate-200">{stats.replayCount.toLocaleString('en-US')}</span> with hand-built replays
+            {' · '}
+            <span className="text-slate-200">{stats.verifiedBattles.toLocaleString('en-US')}</span> hand-curated
+            {' · '}
+            <span className="text-slate-200">
+              {Math.max(0, stats.documentedBattles - stats.verifiedBattles).toLocaleString('en-US')}
+            </span> documented imports
+            {' · '}
+            <span className="text-slate-200">{stats.indexedBattles.toLocaleString('en-US')}</span> indexed stubs
+            <div className="mt-1 text-[10px] tracking-wide text-slate-500 normal-nums">
+              Depth varies by record. Each dossier carries a tier badge that says which kind you are reading.
+            </div>
+          </div>
+        )}
 
         {/* Era ticker. Reads as a chronological flyover — the era badge,
             year, weapon-of-the-period chip, and a one-line caption swap

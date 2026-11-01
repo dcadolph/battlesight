@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { themeForYear } from '../theme/era';
-import { formatYear as fmtYear, formatCountCompact, cleanProseText } from '../lib/format';
+import {
+  formatYear as fmtYear,
+  formatDeathTollCompact,
+  cleanProseText,
+  DEATHS_BASIS_NOTES,
+} from '../lib/format';
 
 interface WarBattleRef {
   id: string;
@@ -22,11 +27,24 @@ interface WarSummary {
   dateStart?: string;
   dateEnd?: string;
   totalCasualties: number;
-  // humanDeaths is the curated total deaths from wars.json. Includes
-  // civilians, famine, and genocide. Preferred over totalCasualties when
-  // present because the battle-roll-up undercounts wars whose death toll
-  // sits mostly outside the catalog's battle records.
+  // humanDeaths is the curated point-estimate of total deaths from
+  // wars.json. Includes civilians, famine, and genocide. Preferred over
+  // totalCasualties when present because the battle-roll-up undercounts
+  // wars whose death toll sits mostly outside the catalog's battle records.
   humanDeaths?: number;
+  // deathsLow / deathsHigh bound the published range of death estimates.
+  // When both are present the card renders the range instead of a single
+  // figure, because a spread is more honest than a false precise integer.
+  deathsLow?: number;
+  deathsHigh?: number;
+  // deathsNote states what the death figure includes, since sources
+  // disagree mostly because they count different things.
+  deathsNote?: string;
+  // deathsSource attributes the death figure itself.
+  deathsSource?: string;
+  // deathsBasis is the provenance class of the displayed figure:
+  // "curated" or "battle-sum".
+  deathsBasis?: string;
   // curatedStartYear / curatedEndYear override the catalog-derived
   // yearStart / yearEnd for display: e.g. World War II reads 1931 (Mukden
   // Incident) rather than the earliest catalog battle year.
@@ -50,10 +68,9 @@ interface WarSummaryCardProps {
   onEndingBattleClick?: (battleId: string) => void;
 }
 
-// Local thin wrappers route through the shared formatters. Keeping the
-// names the rest of the file already used means the refactor stays local.
+// Local thin wrapper routes through the shared formatter. Keeping the
+// name the rest of the file already used means the refactor stays local.
 const formatYearLabel = (year: number) => fmtYear(year);
-const formatCasualties = (n: number) => (n <= 0 ? 'Unknown' : `~${formatCountCompact(n)}`);
 
 // WarSummaryCard is the curated atlas entry for a single war. Reads as a
 // page out of a reference book: era-themed accent, outcome as headline,
@@ -102,15 +119,18 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
   if (!summary) return null;
 
   // Theme the card by the midpoint year of the war. A Napoleonic-era war
-  // gets Napoleonic blue, a WW2 war gets WW2 rose; the card cohres with
+  // gets Napoleonic blue, a WW2 war gets WW2 rose; the card coheres with
   // the rest of the atmosphere on the globe.
   // Prefer the curated start / end years over the catalog-derived ones so
   // World War II reads 1931-1945 (Mukden through Tokyo Bay) rather than
   // the earliest indexed battle range.
   const displayYearStart = summary.curatedStartYear || summary.yearStart;
   const displayYearEnd = summary.curatedEndYear || summary.yearEnd;
-  // Prefer the curated humanDeaths total when present so the user sees
-  // ~75M for WW2 rather than the ~20M the battle catalog can sum.
+  // Prefer the curated humanDeaths estimate when present so the user sees
+  // ~75M for WW2 rather than the ~20M the battle catalog can sum. Every
+  // form of this figure is a contested estimate, so the card renders the
+  // published range when one exists and always marks the number as an
+  // estimate rather than a count.
   const displayCasualties = summary.humanDeaths && summary.humanDeaths > 0 ? summary.humanDeaths : summary.totalCasualties;
   const midYear = (displayYearStart + displayYearEnd) / 2;
   const theme = themeForYear(midYear);
@@ -119,7 +139,12 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
     ? `${formatYearLabel(displayYearStart)} to ${formatYearLabel(displayYearEnd)}`
     : '';
 
-  const casualtyLine = formatCasualties(displayCasualties);
+  const tollLine = formatDeathTollCompact({
+    point: displayCasualties,
+    low: summary.deathsLow,
+    high: summary.deathsHigh,
+  });
+  const basisNote = summary.deathsBasis ? DEATHS_BASIS_NOTES[summary.deathsBasis] : undefined;
   const finalVictor = summary.finalVictor || summary.victorTallies?.[0]?.name || '';
 
   return (
@@ -176,7 +201,9 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
       >
         {yearLine && <span>{yearLine}</span>}
         <span>{summary.battleCount} battles</span>
-        <span>{casualtyLine} casualties</span>
+        <span title={[summary.deathsNote, basisNote].filter(Boolean).join(' ')}>
+          {tollLine ? `${tollLine} dead (est.)` : 'Death toll unknown'}
+        </span>
         {finalVictor && (
           <span>
             Victor <span className="text-slate-200">{finalVictor}</span>
@@ -194,6 +221,18 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
               >
                 {cleanProseText(summary.aftermath)}
               </p>
+            </Section>
+          )}
+
+          {tollLine && (basisNote || summary.deathsNote || summary.deathsSource) && (
+            <Section theme={theme} label="About the death toll">
+              <div className="space-y-1.5 text-[12.5px] leading-[1.6] text-slate-400">
+                {summary.deathsNote && <p>{summary.deathsNote}</p>}
+                {basisNote && <p>{basisNote}</p>}
+                {summary.deathsSource && (
+                  <p className="text-slate-500">{summary.deathsSource}.</p>
+                )}
+              </div>
             </Section>
           )}
 

@@ -11,7 +11,7 @@ import type { MediaEntry } from '../data/media';
 import WarCinematicOverlay from './WarCinematicOverlay';
 import CloseButton from './CloseButton';
 import { usePauseOnHidden } from '../hooks/usePauseOnHidden';
-import { formatYear, formatBattleDate } from '../lib/format';
+import { formatYear, formatBattleDate, formatDeathTollCompact } from '../lib/format';
 
 interface WarPlaybackProps {
   onBattleFocus: (battle: Battle) => void;
@@ -71,10 +71,19 @@ interface WarCount {
   count: number;
   minYear: number;
   casualties: number;
-  // humanDeaths is the curated total including civilians, famine, genocide,
-  // and disease. Zero when the war has no curated override. Preferred over
-  // casualties for display when present.
+  // humanDeaths is the curated point-estimate including civilians, famine,
+  // genocide, and disease. Zero when the war has no curated override.
+  // Preferred over casualties for display when present. An estimate,
+  // never a count.
   humanDeaths?: number;
+  // deathsLow / deathsHigh bound the published range of death estimates;
+  // when present the list renders the range instead of one figure.
+  deathsLow?: number;
+  deathsHigh?: number;
+  // deathsNote states what the death figure includes.
+  deathsNote?: string;
+  // deathsSource attributes the death figure itself.
+  deathsSource?: string;
   parent?: string;
   rolledCount: number;
   rolledCasualties: number;
@@ -82,6 +91,10 @@ interface WarCount {
   // every descendant theater / campaign, falling back to descendant battle
   // sums where no curated number exists. Zero when nothing rolled up.
   rolledHumanDeaths?: number;
+  // rolledDeathsBasis is the provenance class of rolledHumanDeaths:
+  // "curated", "battle-sum", or "mixed" when the roll-up added figures of
+  // differing provenance. Mixed totals are starred in the list.
+  rolledDeathsBasis?: string;
   countries?: string[];
 }
 
@@ -94,14 +107,15 @@ function preferredTotalForWar(w: WarCount): number {
   return w.rolledHumanDeaths || w.humanDeaths || w.rolledCasualties || w.casualties || 0;
 }
 
-// formatCasualtyCompact renders large casualty totals in a tight slot: 75M
-// for 75,000,000, 4.5M for 4.5 million, 750k for hundreds of thousands.
-// Used by the war-list value column where horizontal space is at a premium.
-function formatCasualtyCompact(n: number): string {
-  if (n <= 0) return '';
-  if (n >= 10_000_000) return `${(n / 1_000_000).toFixed(0)}M`;
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  return `${(n / 1000).toFixed(0)}k`;
+// formatWarToll renders a war row's death figure for the tight list value
+// column. The published range beats the point estimate, a lone point
+// estimate always carries a "~" so it cannot read as a count, and a rolled
+// total that mixes curated and battle-record figures is starred so the
+// list says so at the point of display.
+function formatWarToll(w: WarCount, showVal: number, rolled: boolean): string {
+  const base = formatDeathTollCompact({ point: showVal, low: w.deathsLow, high: w.deathsHigh });
+  if (!base) return '';
+  return rolled && w.rolledDeathsBasis === 'mixed' ? `${base}*` : base;
 }
 
 type WarSort = 'casualties' | 'battles' | 'alpha' | 'chrono' | 'country';
@@ -240,6 +254,13 @@ interface WarSummaryData {
   battleCount: number;
   totalCasualties: number;
   humanDeaths?: number;
+  // deathsLow / deathsHigh / deathsNote / deathsBasis carry the death
+  // estimate's range and provenance through to the cinematic overlay so
+  // the closing card renders the figure as the estimate it is.
+  deathsLow?: number;
+  deathsHigh?: number;
+  deathsNote?: string;
+  deathsBasis?: string;
   curatedStartYear?: number;
   curatedEndYear?: number;
   finalVictor?: string;
@@ -1228,11 +1249,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                       </span>
                       <span className="text-[10px] text-slate-600 flex-shrink-0 tabular-nums">
                         {warSort === 'casualties' && showVal > 0
-                          ? formatCasualtyCompact(showVal)
+                          ? formatWarToll(w, showVal, w.depth === 0)
                           : warSort === 'chrono'
                           ? formatYear(showVal)
                           : warSort === 'country' && showVal > 0
-                          ? formatCasualtyCompact(showVal)
+                          ? formatWarToll(w, showVal, true)
                           : warSort === 'country'
                           ? `${w.rolledCount || w.count}`
                           : `${showVal}`}
@@ -1262,6 +1283,13 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                 <p className="text-center text-[12px] text-slate-600 py-4">No wars match</p>
               )}
             </div>
+            {(warSort === 'casualties' || warSort === 'country') && filteredWars.length > 0 && (
+              <p className="px-3 pt-3 pb-1 text-[10px] leading-[1.5] text-slate-600">
+                Death figures are historical estimates, not counts. Ranges show where published
+                estimates disagree. * marks a total that mixes curated war estimates with raw
+                battle-record sums.
+              </p>
+            )}
           </div>
         </div>
       </div>

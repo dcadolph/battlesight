@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { themeForYear } from '../theme/era';
 import { ERA_LABELS } from '../types/battle';
-import { formatYear, formatCasualtyEstimate, formatCountCompact, cleanProseText } from '../lib/format';
+import {
+  formatYear,
+  formatDeathTollCompact,
+  formatDeathTollSentence,
+  cleanProseText,
+  DEATHS_BASIS_NOTES,
+  type DeathToll,
+} from '../lib/format';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import CloseButton from './CloseButton';
 
@@ -14,9 +21,19 @@ interface WarSummaryShape {
   yearEnd: number;
   battleCount: number;
   totalCasualties: number;
-  // humanDeaths is the curated total (civilians + famine + genocide).
-  // Preferred for the stat strip and aftermath card when present.
+  // humanDeaths is the curated point-estimate (civilians + famine +
+  // genocide). Preferred for the stat strip and aftermath card when
+  // present. Always an estimate, never a count.
   humanDeaths?: number;
+  // deathsLow / deathsHigh bound the published range of death estimates;
+  // when present the stat strip shows the range instead of one figure.
+  deathsLow?: number;
+  deathsHigh?: number;
+  // deathsNote states what the death figure includes.
+  deathsNote?: string;
+  // deathsBasis is the provenance class of the displayed figure
+  // ("curated" or "battle-sum"), rendered as a footnote under the strip.
+  deathsBasis?: string;
   // curatedStartYear / curatedEndYear override the catalog years so the
   // overture and stat strip read from the curator's calendar.
   curatedStartYear?: number;
@@ -97,11 +114,12 @@ interface WarCinematicOverlayProps {
 }
 
 // formatCasualtyLine is the long-form sentence used at the bottom of the
-// aftermath card. Wraps the shared estimator with the trailing "across
-// the war" clause for context.
-function formatCasualtyLine(n: number): string {
-  const base = formatCasualtyEstimate(n);
-  return base === 'Casualty count not recorded' ? base : `${base} across the war.`;
+// aftermath card. Routes through the shared death-toll estimator so the
+// line always reads as an estimate, never as a count.
+function formatCasualtyLine(t: DeathToll): string {
+  const base = formatDeathTollSentence(t);
+  if (!base) return 'Casualty count not recorded';
+  return `${base[0].toUpperCase()}${base.slice(1)}.`;
 }
 
 // WarCinematicOverlay is the full-screen title card framing a war
@@ -128,6 +146,15 @@ export default function WarCinematicOverlay({
   const displayStart = summary?.curatedStartYear || summary?.yearStart || 0;
   const displayEnd = summary?.curatedEndYear || summary?.yearEnd || 0;
   const displayCasualties = (summary?.humanDeaths && summary.humanDeaths > 0) ? summary.humanDeaths : (summary?.totalCasualties ?? 0);
+  // The toll bundles the point estimate with the published range so every
+  // rendering below shows a range where one exists and an explicit
+  // estimate marker where one does not.
+  const toll: DeathToll = {
+    point: displayCasualties,
+    low: summary?.deathsLow,
+    high: summary?.deathsHigh,
+  };
+  const tollBasisNote = summary?.deathsBasis ? DEATHS_BASIS_NOTES[summary.deathsBasis] : undefined;
   const midYear = summary ? (displayStart + displayEnd) / 2 : 1500;
   const theme = themeForYear(midYear);
   const reducedMotion = usePrefersReducedMotion();
@@ -314,12 +341,21 @@ export default function WarCinematicOverlay({
                   accent={theme.accent}
                   reducedMotion={reducedMotion}
                   delayMs={700}
-                  label="Lives lost"
-                  value={formatCountCompact(displayCasualties)}
+                  label="Lives lost (est.)"
+                  value={formatDeathTollCompact(toll)}
                 />
               </>
             )}
           </div>
+        )}
+
+        {stage === 'aftermath' && displayCasualties > 0 && (summary?.deathsNote || tollBasisNote) && (
+          <p
+            className="mt-3 mx-auto max-w-[58ch] text-[11px] leading-[1.5] text-slate-500"
+            style={{ animation: reducedMotion ? 'none' : 'wc-rise 800ms 760ms cubic-bezier(.2,.7,.25,1) both' }}
+          >
+            {summary?.deathsNote || tollBasisNote}
+          </p>
         )}
 
         {stage === 'overture' && sides.length > 0 && (
@@ -403,7 +439,7 @@ export default function WarCinematicOverlay({
             className="mt-4 text-[12px] tracking-[0.18em] text-slate-400/90"
             style={{ animation: reducedMotion ? 'none' : 'wc-rise 800ms 1320ms cubic-bezier(.2,.7,.25,1) both' }}
           >
-            {formatCasualtyLine(displayCasualties)}
+            {formatCasualtyLine(toll)}
           </p>
         )}
 

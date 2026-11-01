@@ -9,6 +9,7 @@ import CommanderPanel from './components/CommanderPanel';
 import { canonCountriesForBattle } from './lib/country';
 import CommandBar from './components/CommandBar';
 import EraLegend from './components/EraLegend';
+import DataQualityNote from './components/DataQualityNote';
 import IntroOverlay from './components/IntroOverlay';
 import HistoryPlayhead from './components/HistoryPlayhead';
 import BattleTitleCard from './components/BattleTitleCard';
@@ -1036,6 +1037,12 @@ export default function App() {
           }}
         />
       )}
+
+      {/* Standing data-quality note. Stays on screen whenever the globe
+          is browsable so the tier system and the estimate policy are one
+          click away from every aggregate the interface renders. Hidden
+          during replay, where the full-screen overlay owns the frame. */}
+      {!replayBattle && <DataQualityNote />}
 
       {/* Era-tinted screen vignette. A soft radial mood wash at the
           edges, NOT a black mask that drains the globe. Only applied

@@ -53,8 +53,10 @@ can't compare wars or drill into a specific battle.
 
 BattleSight sits between the two. The catalog has the *breadth* of
 Wikipedia. The curated layer on top has the *fidelity* of a Ken Burns
-script. For every war, eventually. We are not there yet. We are
-building toward it.
+script. The two layers are different products, and the app says so
+plainly: of 13,220 battles, 168 have hand-built phase replays, 390 are
+hand-curated, and the rest are imports of varying depth, each labeled
+with its data-quality tier.
 
 ## Index
 
@@ -98,22 +100,19 @@ make quality        # produce data-quality report
 
 ## Data quality tiers
 
-Every battle sits in one of four tiers. Replays play from the curated
-tier. The full catalog stays searchable.
+Every battle sits in one of three tiers, shown as a badge on its
+dossier. Replays play from the reconstructed tier. The full catalog
+stays searchable.
 
-**Curated** (168): full phase replay with researched narrative and
-verified facts. Powers the cinematic, the dossier, search, and war
-cards.
+**Reconstructed** (168): hand-built phase replay with researched
+narrative and hand-checked facts. Powers the cinematic.
 
-**Verified** (390): hand-checked sides, dates, coordinates, and
-casualties, with an auto-generated schematic replay. Everywhere except
-the cinematic.
+**Documented** (~10,500): the 390 hand-curated entries plus imports
+that carry sides and a clean war attribution. The default globe view.
 
-**Imported** (most of the catalog): Wikipedia and Wikidata records with
-plausible metadata. Search and war cards.
-
-**Stub** (~600): thin imports missing a date or coordinates. Search
-only, pending curation.
+**Indexed** (~2,600): sparse Wikidata-harvested pointers, little more
+than a name, a year, and coordinates. Hidden from the default view;
+treat each as a deep link to Wikipedia.
 
 ## Architecture
 
@@ -178,6 +177,10 @@ war name (matching the `battles.war` column).
     "keyTerms": "Capitulation",
     "notable": ["Nuremberg trials", "United Nations founded"],
     "humanDeaths": 75000000,
+    "deathsLow": 70000000,
+    "deathsHigh": 85000000,
+    "deathsNote": "Combatant and civilian deaths from all causes.",
+    "deathsSource": "Range across commonly cited scholarly estimates",
     "startYear": 1931,
     "endYear": 1945,
     "parent": ""
@@ -185,9 +188,16 @@ war name (matching the `battles.war` column).
 }
 ```
 
-`humanDeaths` includes civilians, famine, and genocide. `parent` lets a
-theater roll up under its umbrella war (e.g. `Second Sino-Japanese War`
-has `"parent": "World War II"`). Hot-reload applies on the next poll.
+`humanDeaths` is the point estimate of total deaths including
+civilians, famine, and genocide. It is always rendered as an estimate.
+`deathsLow` and `deathsHigh` bound the published range where sources
+disagree; when present the UI shows the range instead of the single
+figure. `deathsNote` states what the figure includes, since two sources
+for the same war usually disagree because they count different things,
+and `deathsSource` attributes the figure itself. All four are optional.
+`parent` lets a theater roll up under its umbrella war (e.g.
+`Second Sino-Japanese War` has `"parent": "World War II"`). Hot-reload
+applies on the next poll.
 
 ## HTTP API
 
@@ -201,7 +211,7 @@ you need most:
 | `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/search?q=...` | Full-text search across names, sides, and commanders. |
 | `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/{id}` | Single battle dossier. |
 | `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/battles/{id}/replay` | Phase replay for the battle. |
-| `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/wars/{name}/summary` | War summary card with curated narrative + computed stats. |
+| `GET`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | `/api/wars/summary?name=...` | War summary card with curated narrative + computed stats. |
 
 ## Keyboard shortcuts
 

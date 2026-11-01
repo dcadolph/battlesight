@@ -23,7 +23,7 @@ const ERA_ORDER = [
   'contemporary',
 ];
 
-// EraLegend is the globe's chromatic key. Eight era chips stacked at the
+// EraLegend is the globe's chromatic key. Nine era chips stacked at the
 // top right of the viewport, each showing its color, label, and acting as
 // a one-click filter. Clicking the active era clears the filter. Hidden
 // behind any open right-side panel so it never competes with the dossier

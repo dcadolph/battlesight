@@ -215,9 +215,14 @@ export default function App() {
   //   'all' — the classic full-catalog view with every battle as a
   //     colored pillar across 5,000 years of history.
   // Persisted to localStorage so the user's pick survives reloads.
+  // First-time visitors open on "all history". The current-conflicts globe
+  // is nearly bare, so opening on it made the first frame of a catalog of
+  // 13,000 battles look like an empty planet, and the spectacle sat behind a
+  // toggle most people would never press. A returning visitor still gets
+  // whichever mode they last chose.
   const [landingMode, setLandingMode] = useState<'current' | 'all'>(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('bt.landing_mode') : null;
-    return saved === 'all' ? 'all' : 'current';
+    return saved === 'current' ? 'current' : 'all';
   });
   useEffect(() => {
     try { localStorage.setItem('bt.landing_mode', landingMode); } catch { /* best-effort persistence */ }
@@ -987,7 +992,7 @@ export default function App() {
 
       {/* Landing-mode toggle. Sits at the top-center while the dramatic
           mode globe is showing so the user can flip between "current
-          conflicts" (default, ripples on bare Earth) and "all history"
+          conflicts" (ripples on bare Earth) and "all history" (default)
           (every battle as a pillar) in one click. Hidden as soon as the
           user dives into a battle, war, or history sweep so it does not
           compete with active chrome. */}

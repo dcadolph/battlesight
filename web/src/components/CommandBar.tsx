@@ -195,6 +195,12 @@ export default function CommandBar({
   }, []);
 
   const hasFilters = !!(filters.era || filters.war || filters.battleType || filters.quality);
+  // The Filters chip appears under the search input on focus, in the same
+  // band the Wars/History rail is pinned to, so the two printed over each
+  // other. The rail steps down while the chip is showing rather than the
+  // chip being moved, because the chip belongs directly under the input it
+  // refines.
+  const filtersChipVisible = !playbackActive && (searchFocused || hasFilters);
 
   return (
     <>
@@ -403,7 +409,10 @@ export default function CommandBar({
           inline under the search input — appears on focus or when active —
           which is the natural reading order: type a query, refine with
           filters, see results. */}
-      <div className="fixed top-[126px] left-6 z-30">
+      <div
+        className="fixed left-6 z-30 transition-[top] duration-200 ease-out"
+        style={{ top: filtersChipVisible ? 152 : 126 }}
+      >
         <div className="inline-flex items-baseline gap-3.5">
           <ModeTab
             label="Wars"

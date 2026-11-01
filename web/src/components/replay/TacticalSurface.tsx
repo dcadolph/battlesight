@@ -124,15 +124,38 @@ function arrowWidth(kind: string | undefined): number {
   return 7;
 }
 
-// altitudeToZoom maps the legacy 0..1.5 cameraAltitude (radii on the
-// globe) to a Mapbox zoom level. The range is deliberately COMPRESSED: the
-// old mapping swung from continental (whole of England + France, battle a
-// speck) to buried-in-the-units. Now the far end never pulls past a
-// regional view and the near end keeps surroundings, so phase-to-phase
-// steps read as a gentle push, not a warp. Tactical (0.06) → ~9.5,
-// operational (0.55) → ~7.9, strategic (1.5) → ~6.7 (floored at 6.2).
-function altitudeToZoom(altitude: number): number {
-  return Math.max(6.2, Math.min(10.6, 9.9 - Math.log2(altitude * 6 + 1) * 0.95));
+// battlefieldZoom returns the zoom that frames a battle's own extent.
+//
+// The camera used to map cameraAltitude through a fixed curve capped at
+// zoom 10.6, which is about sixty kilometres across the viewport. Cannae's
+// battlefield is under four kilometres wide, so the entire battle drew as a
+// smudge in the middle of an empty map and its ten formations piled into
+// one blob. The cap existed because an older mapping swung to continental
+// framings, but the fix overshot: it made every battle distant.
+//
+// Framing is now derived from the ground the battle actually covers, in the
+// viewport it actually has, which is the same rule the schematic uses.
+function battlefieldZoom(
+  extentLngDeg: number,
+  extentLatDeg: number,
+  centerLat: number,
+  widthPx: number,
+  heightPx: number,
+): number {
+  const cos = Math.max(0.1, Math.cos((centerLat * Math.PI) / 180));
+  // Web Mercator lays 512 pixels of world across 360 degrees at zoom 0, and
+  // stretches latitude by 1/cos as you leave the equator.
+  const zx = Math.log2((360 * widthPx) / (512 * Math.max(extentLngDeg, 1e-4)));
+  const zy = Math.log2((360 * heightPx * cos) / (512 * Math.max(extentLatDeg, 1e-4)));
+  return Math.min(zx, zy);
+}
+
+// altitudePullback converts the curated cameraAltitude into how far to pull
+// back from the battlefield framing. A tactical phase sits nearly on the
+// ground, a strategic one lifts a few zoom levels. Altitude stays a relative
+// instruction from the curator instead of an absolute distance.
+function altitudePullback(altitude: number): number {
+  return Math.log2(1 + Math.max(0, altitude) * 20) * 0.7;
 }
 
 // statusOpacity scales a unit's icon alpha by its current state. Destroyed
@@ -592,8 +615,8 @@ const OPEN_STYLE: StyleSpecification = {
       maxzoom: 19,
       paint: {
         'raster-saturation': -0.35,
-        'raster-brightness-min': 0.06,
-        'raster-brightness-max': 0.82,
+        'raster-brightness-min': 0.04,
+        'raster-brightness-max': 0.62,
         'raster-contrast': -0.05,
         'raster-fade-duration': 300,
       },
@@ -608,10 +631,13 @@ const OPEN_STYLE: StyleSpecification = {
       minzoom: 0,
       maxzoom: 19,
       paint: {
-        'raster-opacity': 0.22,
+        // Held low. The hillshade is a near-white image, so anything higher
+        // lifts the whole plate to flat grey and the faction colors stop
+        // reading against it.
+        'raster-opacity': 0.1,
         'raster-saturation': -1,
-        'raster-brightness-max': 0.5,
-        'raster-contrast': 0.15,
+        'raster-brightness-max': 0.34,
+        'raster-contrast': 0.2,
         'raster-fade-duration': 300,
       },
     },
@@ -726,7 +752,20 @@ export default function TacticalSurface({
   const cameraLat = phase.cameraLat ?? battle.lat ?? 49.34;
   const cameraLng = phase.cameraLng ?? battle.lng ?? -0.51;
   const altitude = phase.cameraAltitude ?? 0.4;
-  const cameraZoom = altitudeToZoom(altitude);
+  // The container is measured rather than assumed so the framing is right on
+  // a phone and on a wide desktop. The fallback only matters for the very
+  // first render, before layout has run.
+  const viewportW = containerRef.current?.clientWidth || 1200;
+  const viewportH = containerRef.current?.clientHeight || 700;
+  // Padding leaves the battle room to breathe inside the frame.
+  const cameraZoom = Math.max(
+    5.5,
+    Math.min(
+      15.5,
+      battlefieldZoom(extentLngDeg * 1.35, extentLatDeg * 1.35, cameraLat, viewportW, viewportH) -
+        altitudePullback(altitude),
+    ),
+  );
   // With a real terrain mesh under the imagery, tilt is the money
   // shot: tactical framings take a strong oblique, strategic pullbacks
   // stay near plan view. Curated phases can override both angles.
@@ -1245,16 +1284,23 @@ export default function TacticalSurface({
       });
     };
 
-    const hasCurator = typeof phase.cameraLat === 'number' && typeof phase.cameraLng === 'number';
     const points: Array<[number, number]> = [];
-    if (!hasCurator) {
+    {
       for (const u of phaseData.unitPoints) points.push(u.position);
       for (const m of phaseData.trips) {
         points.push(m.from);
         points.push(m.to);
       }
     }
-    if (!hasCurator && points.length >= 2) {
+    // Every phase frames itself around the formations it is about.
+    //
+    // This fit used to run only for phases with no curated camera. Curated
+    // phases instead flew to a fixed altitude that was capped at roughly
+    // sixty kilometres across, so a four-kilometre battlefield drew as a
+    // smudge and its formations piled into a single blob. The curator's
+    // altitude is still respected, but as how far to pull back from the
+    // fighting rather than as an absolute distance from the ground.
+    if (points.length >= 2) {
       let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
       for (const [lng, lat] of points) {
         if (lng < minLng) minLng = lng;
@@ -1265,8 +1311,12 @@ export default function TacticalSurface({
       // Pad by 42% of the bbox span (or a minimum) so formations, their
       // label pills, and arrow heads all sit comfortably inside the
       // frame instead of crowding the edges.
-      const dLng = Math.max((maxLng - minLng) * 0.42, 0.014);
-      const dLat = Math.max((maxLat - minLat) * 0.42, 0.014);
+      // A tactical phase sits close on the formations; a strategic one is
+      // given room. Each zoom level of pullback doubles the ground shown,
+      // so the curator's altitude expands the box rather than replacing it.
+      const grow = 0.42 * Math.pow(2, altitudePullback(altitude));
+      const dLng = Math.max((maxLng - minLng) * grow, 0.014);
+      const dLat = Math.max((maxLat - minLat) * grow, 0.014);
       const bounds: [[number, number], [number, number]] = [
         [minLng - dLng, minLat - dLat],
         [maxLng + dLng, maxLat + dLat],
@@ -1315,7 +1365,7 @@ export default function TacticalSurface({
     // phaseIdx stands in for per-phase camera intent; phaseData carries
     // the resolved geometry the bbox and bearing derive from.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phaseIdx, phaseData, cameraLat, cameraLng, cameraZoom, cameraPitch, prefersReducedMotion, speed]);
+  }, [phaseIdx, phaseData, cameraLat, cameraLng, cameraZoom, cameraPitch, altitude, prefersReducedMotion, speed]);
 
   // The per-frame animation loop. Advances the phase clock, builds the
   // animated layer half (gliding units, growing arrows, impact

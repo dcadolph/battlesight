@@ -199,3 +199,140 @@ func TestParseCoordQuery(t *testing.T) {
 		})
 	}
 }
+
+// TestMergeDeathsBasis verifies the provenance-merge rule used by the war
+// hierarchy roll-up.
+func TestMergeDeathsBasis(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		WantResult string
+		Current    string
+		Next       string
+	}{
+		// Test 0: Empty adopts the contribution.
+		{Current: "", Next: "curated", WantResult: "curated"},
+		// Test 1: Matching classes keep the class.
+		{Current: "battle-sum", Next: "battle-sum", WantResult: "battle-sum"},
+		// Test 2: Differing classes degrade to mixed.
+		{Current: "curated", Next: "battle-sum", WantResult: "mixed"},
+		// Test 3: Mixed stays mixed against anything.
+		{Current: "mixed", Next: "curated", WantResult: "mixed"},
+		// Test 4: Empty contribution changes nothing.
+		{Current: "curated", Next: "", WantResult: "curated"},
+	}
+	for testNum, test := range tests {
+		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {
+			t.Parallel()
+			got := mergeDeathsBasis(test.Current, test.Next)
+			if diff := cmp.Diff(test.WantResult, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+// rollupResult is the projection of a WarCount that the roll-up tests
+// assert on: the rolled total and the provenance class attached to it.
+type rollupResult struct {
+	RolledHumanDeaths int64
+	RolledDeathsBasis string
+	DeathsLow         int64
+	DeathsHigh        int64
+}
+
+// TestRollupWarHierarchyDeathsBasis verifies that rolled death totals carry
+// an honest provenance class: curated when a curator's war total stands,
+// battle-sum when only battle records were summed, and mixed when the
+// roll-up added figures of differing provenance.
+func TestRollupWarHierarchyDeathsBasis(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		WantResult map[string]rollupResult
+		Name       string
+		In         []WarCount
+		Wars       map[string]WarNarrative
+	}{{
+		// Test 0: Curated parent total is authoritative; children never mix in.
+		Name: "curated parent stays curated",
+		In: []WarCount{
+			{Name: "Big War", HumanDeaths: 1000},
+			{Name: "Big War Theater", Parent: "Big War", Casualties: 400},
+		},
+		WantResult: map[string]rollupResult{
+			"Big War":         {RolledHumanDeaths: 1000, RolledDeathsBasis: "curated"},
+			"Big War Theater": {RolledHumanDeaths: 400, RolledDeathsBasis: "battle-sum"},
+		},
+	}, {
+		// Test 1: Parent without a curated total mixing curated and
+		// battle-sum children reports mixed.
+		Name: "mixed roll-up flagged",
+		In: []WarCount{
+			{Name: "Parent War"},
+			{Name: "Curated Child", Parent: "Parent War", HumanDeaths: 500},
+			{Name: "Summed Child", Parent: "Parent War", Casualties: 200},
+		},
+		WantResult: map[string]rollupResult{
+			"Parent War":    {RolledHumanDeaths: 700, RolledDeathsBasis: "mixed"},
+			"Curated Child": {RolledHumanDeaths: 500, RolledDeathsBasis: "curated"},
+			"Summed Child":  {RolledHumanDeaths: 200, RolledDeathsBasis: "battle-sum"},
+		},
+	}, {
+		// Test 2: Pure battle-sum roll-up stays battle-sum.
+		Name: "battle-sum roll-up",
+		In: []WarCount{
+			{Name: "Parent War", Casualties: 100},
+			{Name: "Child A", Parent: "Parent War", Casualties: 50},
+			{Name: "Child B", Parent: "Parent War", Casualties: 25},
+		},
+		WantResult: map[string]rollupResult{
+			"Parent War": {RolledHumanDeaths: 175, RolledDeathsBasis: "battle-sum"},
+			"Child A":    {RolledHumanDeaths: 50, RolledDeathsBasis: "battle-sum"},
+			"Child B":    {RolledHumanDeaths: 25, RolledDeathsBasis: "battle-sum"},
+		},
+	}, {
+		// Test 3: Synthetic parent inherits the curated figure, its range,
+		// and the curated basis from the wars registry.
+		Name: "synthetic parent inherits curated range",
+		In: []WarCount{
+			{Name: "Lone Theater", Parent: "Ghost War", Casualties: 10},
+		},
+		Wars: map[string]WarNarrative{
+			"Ghost War": {HumanDeaths: 9000, DeathsLow: 8000, DeathsHigh: 11000},
+		},
+		WantResult: map[string]rollupResult{
+			"Ghost War":    {RolledHumanDeaths: 9000, RolledDeathsBasis: "curated", DeathsLow: 8000, DeathsHigh: 11000},
+			"Lone Theater": {RolledHumanDeaths: 10, RolledDeathsBasis: "battle-sum"},
+		},
+	}, {
+		// Test 4: No figures anywhere leaves the basis empty.
+		Name: "no figures no basis",
+		In: []WarCount{
+			{Name: "Quiet War"},
+		},
+		WantResult: map[string]rollupResult{
+			"Quiet War": {RolledHumanDeaths: 0, RolledDeathsBasis: ""},
+		},
+	}}
+	for testNum, test := range tests {
+		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {
+			t.Parallel()
+			var wars *Wars
+			if test.Wars != nil {
+				wars = &Wars{byName: test.Wars}
+			}
+			rolled := rollupWarHierarchy(test.In, wars)
+			got := map[string]rollupResult{}
+			for _, wc := range rolled {
+				got[wc.Name] = rollupResult{
+					RolledHumanDeaths: wc.RolledHumanDeaths,
+					RolledDeathsBasis: wc.RolledDeathsBasis,
+					DeathsLow:         wc.DeathsLow,
+					DeathsHigh:        wc.DeathsHigh,
+				}
+			}
+			if diff := cmp.Diff(test.WantResult, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

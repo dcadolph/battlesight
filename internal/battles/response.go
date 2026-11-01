@@ -118,6 +118,13 @@ type StatsResponse struct {
 	TotalBattles int `json:"totalBattles"`
 	// VerifiedBattles is the count of hand-curated battles.
 	VerifiedBattles int `json:"verifiedBattles"`
+	// DocumentedBattles is the count of battles in the documented tier:
+	// curated entries plus imported entries with sides and a clean war
+	// attribution. Lets the UI state plainly how deep the catalog runs.
+	DocumentedBattles int `json:"documentedBattles"`
+	// IndexedBattles is the count of sparse Wikidata-harvested entries that
+	// carry little beyond a name and coordinates.
+	IndexedBattles int `json:"indexedBattles"`
 	// ReplayCount is the number of battles with a hand-crafted replay.
 	ReplayCount int `json:"replayCount"`
 	// YearRange is the min and max year across all battles.
@@ -154,10 +161,23 @@ type WarCount struct {
 	// (own battles only). The UI prefers HumanDeaths when present and tags
 	// this number as battle-only with an asterisk.
 	Casualties int `json:"casualties"`
-	// HumanDeaths is the curated total deaths including civilians, famine,
-	// genocide, and disease, sourced from wars.json. Zero means no curated
-	// override; UI falls back to Casualties for the displayed total.
+	// HumanDeaths is the curated point-estimate of total deaths including
+	// civilians, famine, genocide, and disease, sourced from wars.json. It
+	// is an estimate, never a count. Zero means no curated override; UI
+	// falls back to Casualties for the displayed total.
 	HumanDeaths int64 `json:"humanDeaths,omitempty"`
+	// DeathsLow is the low end of the curated range of death estimates for
+	// this war. Zero when no range is curated.
+	DeathsLow int64 `json:"deathsLow,omitempty"`
+	// DeathsHigh is the high end of the curated range of death estimates.
+	// Zero when no range is curated.
+	DeathsHigh int64 `json:"deathsHigh,omitempty"`
+	// DeathsNote states what the curated death figure includes, since the
+	// definition of who counts varies by source.
+	DeathsNote string `json:"deathsNote,omitempty"`
+	// DeathsSource attributes the curated death figure itself so provenance
+	// travels with the number rather than staying on the battle records.
+	DeathsSource string `json:"deathsSource,omitempty"`
 	// Parent is the canonical name of the parent war when this row is a
 	// theater or campaign of a larger conflict. Empty for top-level wars.
 	Parent string `json:"parent,omitempty"`
@@ -171,6 +191,12 @@ type WarCount struct {
 	// curated number so the rolled total is never less than the rolled
 	// battle sum.
 	RolledHumanDeaths int64 `json:"rolledHumanDeaths,omitempty"`
+	// RolledDeathsBasis names the provenance class of RolledHumanDeaths:
+	// "curated" when every contribution is a curated estimate, "battle-sum"
+	// when every contribution is a battle-record sum, and "mixed" when the
+	// roll-up added figures of differing provenance. The UI must say so at
+	// the point of display when the value is "mixed".
+	RolledDeathsBasis string `json:"rolledDeathsBasis,omitempty"`
 	// Countries lists the top present-day countries that fought in this war,
 	// inferred from the sides on each battle and ranked by frequency. Used by
 	// the war-list UI to group wars by belligerent.

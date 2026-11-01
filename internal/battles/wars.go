@@ -54,10 +54,29 @@ type WarSummary struct {
 	// Notable is an optional 1-3 item list of notable outcomes beyond the
 	// victor field: war crimes trials, partition, redrawn borders, etc.
 	Notable []string `json:"notable,omitempty"`
-	// HumanDeaths is the curated total deaths including civilians, famine,
-	// genocide, and disease. Zero when no curated override exists; UI then
-	// falls back to TotalCasualties (the battle-roll-up sum).
+	// HumanDeaths is the curated point-estimate of total deaths including
+	// civilians, famine, genocide, and disease. It is an estimate, never a
+	// count. Zero when no curated override exists; UI then falls back to
+	// TotalCasualties (the battle-roll-up sum).
 	HumanDeaths int64 `json:"humanDeaths,omitempty"`
+	// DeathsLow is the low end of the published range of death estimates.
+	// Zero when no range is curated.
+	DeathsLow int64 `json:"deathsLow,omitempty"`
+	// DeathsHigh is the high end of the published range of death estimates.
+	// Zero when no range is curated.
+	DeathsHigh int64 `json:"deathsHigh,omitempty"`
+	// DeathsNote states what the death figure includes (combatants,
+	// civilians, famine, disease, genocide), since definitions vary by
+	// source and are the main reason two figures for the same war disagree.
+	DeathsNote string `json:"deathsNote,omitempty"`
+	// DeathsSource attributes the death figure itself, separate from the
+	// per-battle Source field, so provenance travels with the number.
+	DeathsSource string `json:"deathsSource,omitempty"`
+	// DeathsBasis names the provenance class of the displayed figure:
+	// "curated" when HumanDeaths came from the wars registry, "battle-sum"
+	// when the only figure available is TotalCasualties summed from
+	// battle records. Set by SummarizeWar, never stored in wars.json.
+	DeathsBasis string `json:"deathsBasis,omitempty"`
 	// CuratedStartYear is the curated calendar year the war begins, when
 	// it differs from the catalog's earliest battle year. Lets WW2 start
 	// with the 1931 Mukden Incident rather than the Invasion of Poland.
@@ -108,12 +127,25 @@ type WarNarrative struct {
 	KeyTerms string `json:"keyTerms,omitempty"`
 	// Notable is an optional list of notable outcomes.
 	Notable []string `json:"notable,omitempty"`
-	// HumanDeaths is the curated total deaths including civilians, famine,
-	// and genocide. Zero means no curated override; the battle roll-up
-	// stands. Use this when the battle sum is grossly low because the war
-	// killed many more people off the battlefield (WW2 holocaust + famine,
-	// Mongol massacres, Taiping famine, etc.).
+	// HumanDeaths is the curated point-estimate of total deaths including
+	// civilians, famine, and genocide. Zero means no curated override; the
+	// battle roll-up stands. Use this when the battle sum is grossly low
+	// because the war killed many more people off the battlefield (WW2
+	// holocaust + famine, Mongol massacres, Taiping famine, etc.).
 	HumanDeaths int64 `json:"humanDeaths,omitempty"`
+	// DeathsLow is the low end of the published range of death estimates
+	// for the war. Optional; zero means no curated range.
+	DeathsLow int64 `json:"deathsLow,omitempty"`
+	// DeathsHigh is the high end of the published range of death estimates.
+	// Optional; zero means no curated range.
+	DeathsHigh int64 `json:"deathsHigh,omitempty"`
+	// DeathsNote states what the curated death figure includes. Sources
+	// disagree mostly because they count different things, so the note is
+	// the honest companion to any number.
+	DeathsNote string `json:"deathsNote,omitempty"`
+	// DeathsSource attributes the death figure itself so the reader can
+	// see where the estimate comes from.
+	DeathsSource string `json:"deathsSource,omitempty"`
 	// StartYear is the curated calendar year the war begins. Lets a
 	// curator define WW2 as starting with the Mukden Incident in 1931
 	// rather than the date of the earliest battle in the catalog.
@@ -205,9 +237,9 @@ func (w *Wars) Get(name string) (WarNarrative, bool) {
 	return n, ok
 }
 
-// casualtyPattern matches the largest comma-separated integer in a casualty
-// string ("~91,000 killed, ~280,000 wounded" → finds both numbers; the sum
-// is used). Cap at 10M per token to ignore unreasonable parses.
+// casualtyPattern matches every integer token in a casualty string
+// ("~91,000 killed, ~280,000 wounded" → finds both numbers; parseCasualties
+// sums them). Tokens above 10M are ignored as unreasonable parses.
 var casualtyPattern = regexp.MustCompile(`\d[\d,]*`)
 
 // hasBrokenSide reports whether any of the battle's sides contains residue
@@ -334,15 +366,42 @@ func SummarizeWar(ctx context.Context, store *Store, wars *Wars, name string) (W
 
 	if wars != nil {
 		if n, ok := wars.Get(name); ok {
-			sum.Outcome = n.Outcome
-			sum.Aftermath = n.Aftermath
-			sum.KeyTerms = n.KeyTerms
-			sum.Notable = n.Notable
-			sum.HumanDeaths = n.HumanDeaths
-			sum.CuratedStartYear = n.StartYear
-			sum.CuratedEndYear = n.EndYear
-			sum.Parent = n.Parent
+			applyNarrative(&sum, n)
 		}
 	}
+	sum.DeathsBasis = summaryDeathsBasis(sum)
 	return sum, nil
+}
+
+// applyNarrative copies the curated narrative slot into a computed summary.
+// Numeric overrides (HumanDeaths and its range, curated years, parent) ride
+// along with the prose so the summary carries the estimate's provenance.
+func applyNarrative(sum *WarSummary, n WarNarrative) {
+	sum.Outcome = n.Outcome
+	sum.Aftermath = n.Aftermath
+	sum.KeyTerms = n.KeyTerms
+	sum.Notable = n.Notable
+	sum.HumanDeaths = n.HumanDeaths
+	sum.DeathsLow = n.DeathsLow
+	sum.DeathsHigh = n.DeathsHigh
+	sum.DeathsNote = n.DeathsNote
+	sum.DeathsSource = n.DeathsSource
+	sum.CuratedStartYear = n.StartYear
+	sum.CuratedEndYear = n.EndYear
+	sum.Parent = n.Parent
+}
+
+// summaryDeathsBasis classifies the provenance of the death figure a
+// summary will display: "curated" when a curated estimate exists,
+// "battle-sum" when only the battle-record roll-up is available, and empty
+// when there is no figure at all.
+func summaryDeathsBasis(sum WarSummary) string {
+	switch {
+	case sum.HumanDeaths > 0 || sum.DeathsLow > 0 || sum.DeathsHigh > 0:
+		return "curated"
+	case sum.TotalCasualties > 0:
+		return "battle-sum"
+	default:
+		return ""
+	}
 }

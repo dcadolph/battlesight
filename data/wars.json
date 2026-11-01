@@ -102,7 +102,11 @@
     "humanDeaths": 750000,
     "startYear": 1861,
     "endYear": 1865,
-    "parent": ""
+    "parent": "",
+    "deathsLow": 620000,
+    "deathsHigh": 850000,
+    "deathsSource": "Range across commonly cited scholarly estimates",
+    "deathsNote": "Military deaths from combat and disease on both sides. The traditional count is 620,000 and demographic recalculation puts it near 750,000."
   },
   "American Indian Wars": {
     "keyTerms": "Wounded Knee Massacre (December 29, 1890)",
@@ -1765,7 +1769,11 @@
     "humanDeaths": 6000000,
     "startYear": 1803,
     "endYear": 1815,
-    "parent": ""
+    "parent": "",
+    "deathsLow": 3500000,
+    "deathsHigh": 6000000,
+    "deathsSource": "Range across commonly cited scholarly estimates",
+    "deathsNote": "Military and civilian deaths including famine and disease. Estimates vary with how deaths in Spain and Russia are counted."
   },
   "Neapolitan War": {
     "aftermath": "Shortly after the end of the war, the Kingdoms of Naples and Sicily were finally united to create the Kingdom of the Two Sicilies. Although the two kingdoms had been ruled by the same king since 1721, the formal union did not happen until 1816. King Ferdinand IV of Naples and III of Sicily would become King Ferdinand I of the Two Sicilies. Meanwhile, the Austrians consolidated their gains in Northern Italy into the Kingdom of Lombardy–Venetia.",
@@ -2464,7 +2472,11 @@
     "humanDeaths": 25000000,
     "startYear": 1850,
     "endYear": 1864,
-    "parent": ""
+    "parent": "",
+    "deathsLow": 20000000,
+    "deathsHigh": 30000000,
+    "deathsSource": "Census-derived estimate",
+    "deathsNote": "Deaths from combat, famine, and disease across fourteen provinces. Census-based, so causes are not separable."
   },
   "Texas Revolution": {
     "outcome": "Texian victory",
@@ -2532,7 +2544,11 @@
     "startYear": 1618,
     "endYear": 1648,
     "parent": "",
-    "aftermath": "Eight million dead. Germany was depopulated for a generation in many regions. The Westphalian principle — that states answer to no higher authority within their borders — became the bedrock of modern international order."
+    "aftermath": "Eight million dead. Germany was depopulated for a generation in many regions. The Westphalian principle — that states answer to no higher authority within their borders — became the bedrock of modern international order.",
+    "deathsLow": 4500000,
+    "deathsHigh": 8000000,
+    "deathsSource": "Range across commonly cited scholarly estimates",
+    "deathsNote": "Combat, plague, and famine deaths in Central Europe, roughly a third of the population of the German states."
   },
   "Tonkin campaign": {
     "outcome": "French victory",
@@ -2879,10 +2895,14 @@
       "Mandate system divides the former Ottoman lands",
       "Russian Revolution removed Russia from the war in 1917"
     ],
-    "humanDeaths": 40000000,
+    "humanDeaths": 17000000,
     "startYear": 1914,
     "endYear": 1918,
-    "parent": ""
+    "parent": "",
+    "deathsLow": 15000000,
+    "deathsHigh": 22000000,
+    "deathsSource": "Range across commonly cited scholarly estimates",
+    "deathsNote": "Military and civilian deaths from combat, famine, and disease. Excludes the 1918 influenza pandemic and the roughly 23 million wounded that push some totals to 40 million."
   },
   "World War II": {
     "outcome": "Unconditional surrender of Germany (8 May 1945) and Japan (2 September 1945). The Allies (Soviet Union, United States, United Kingdom, China, France) won.",
@@ -2897,7 +2917,11 @@
     "humanDeaths": 75000000,
     "startYear": 1939,
     "endYear": 1945,
-    "parent": ""
+    "parent": "",
+    "deathsLow": 70000000,
+    "deathsHigh": 85000000,
+    "deathsSource": "Range across commonly cited scholarly estimates",
+    "deathsNote": "Combatant and civilian deaths from all causes: military action, genocide including the Holocaust, famine, and disease."
   },
   "World War II in Yugoslavia": {
     "outcome": "Yugoslav Partisan–Allied victory",
@@ -2925,7 +2949,11 @@
     "parent": "",
     "outcome": "Largest contiguous land empire in history; division into four khanates after Kublai's death.",
     "aftermath": "The Mongol conquests killed an estimated 40 million people across Eurasia, depopulated central Asia, and rewrote the political map from China to Hungary. The Pax Mongolica that followed reopened the Silk Road, carried Black Death westward, and put Europe in sustained contact with East Asia for the first time since antiquity.",
-    "keyTerms": "Fragmentation of the empire after 1294"
+    "keyTerms": "Fragmentation of the empire after 1294",
+    "deathsLow": 30000000,
+    "deathsHigh": 60000000,
+    "deathsSource": "Census-derived estimate",
+    "deathsNote": "Estimated population decline across China, Central Asia, Persia, and Eastern Europe. Derived from census comparisons, so massacre, famine, disease, and migration are not separable."
   },
   "Russia-Ukraine War": {
     "humanDeaths": 500000,
@@ -3123,7 +3151,11 @@
     "parent": "",
     "outcome": "Tang victory after eight years. An Lushan dynasty collapses in succession warfare; Tang authority restored but permanently weakened.",
     "aftermath": "One of the most catastrophic rebellions in world history by death count. Census records show population decline from 53 million to under 17 million between 754 and 764 — though much of that may reflect collapsed registration rather than literal deaths. The Tang dynasty survived but never recovered its grip on the provinces, ceding power to regional military governors (jiedushi) whose autonomy seeded the dynasty's ninth-century collapse.",
-    "keyTerms": "Execution of An Qingxu (759); death of Shi Chaoyi (763)"
+    "keyTerms": "Execution of An Qingxu (759); death of Shi Chaoyi (763)",
+    "deathsLow": 13000000,
+    "deathsHigh": 36000000,
+    "deathsSource": "Census-derived estimate",
+    "deathsNote": "The 36 million figure is the raw census decline between 754 and 764, which counts unregistered and displaced people as dead. Modern estimates run from 13 million."
   },
   "First French intervention in Mexico": {
     "humanDeaths": 5000,
@@ -3177,7 +3209,9 @@
     "parent": "",
     "outcome": "Jin reunification of China under Sima Yan (Emperor Wu) in 280.",
     "aftermath": "Sixty years of warlord war ended with brief reunification under the Jin, but the institutional damage produced four centuries of disunity (the Six Dynasties period). The era became the dominant subject of Chinese historical memory — the Romance of the Three Kingdoms (14th c.) shaped East Asian narrative culture into the present.",
-    "keyTerms": "Surrender of Wu to Jin (280)"
+    "keyTerms": "Surrender of Wu to Jin (280)",
+    "deathsSource": "Census-derived estimate",
+    "deathsNote": "Census decline between the Han peak and the Jin reunification. Much of the fall reflects broken record keeping and unregistered refugees rather than deaths."
   },
   "Great Northern War": {
     "humanDeaths": 350000,
@@ -5479,7 +5513,11 @@
     "keyTerms": "Sack of Baghdad (February 1258); Battle of Ain Jalut (September 3, 1260)",
     "startYear": 1206,
     "endYear": 1294,
-    "humanDeaths": 40000000
+    "humanDeaths": 40000000,
+    "deathsLow": 30000000,
+    "deathsHigh": 60000000,
+    "deathsSource": "Census-derived estimate",
+    "deathsNote": "Estimated population decline across China, Central Asia, Persia, and Eastern Europe. Derived from census comparisons, so massacre, famine, disease, and migration are not separable."
   },
   "Cold War": {
     "outcome": "Soviet collapse 1991; United States as sole superpower.",

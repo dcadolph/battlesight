@@ -106,6 +106,10 @@ canonical war name (matching `battles.war`).
     "keyTerms": "Capitulation",
     "notable": ["Nuremberg trials", "United Nations founded"],
     "humanDeaths": 75000000,
+    "deathsLow": 70000000,
+    "deathsHigh": 85000000,
+    "deathsNote": "Combatant and civilian deaths from all causes.",
+    "deathsSource": "Range across commonly cited scholarly estimates",
     "startYear": 1931,
     "endYear": 1945,
     "parent": ""
@@ -119,15 +123,21 @@ canonical war name (matching `battles.war`).
 | `aftermath`&nbsp;&nbsp;&nbsp; | string | One-paragraph consequences. |
 | `keyTerms`&nbsp;&nbsp;&nbsp;&nbsp; | string | Treaty / surrender / armistice name. |
 | `notable`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string[] | 1-3 notable outcomes. |
-| `humanDeaths`&nbsp;&nbsp; | int | Curated total deaths (civilians + military + famine + genocide). Preferred over the battle-sum casualties. |
+| `humanDeaths`&nbsp;&nbsp; | int | Curated point estimate of total deaths (civilians + military + famine + genocide). Preferred over the battle-sum casualties. Always rendered as an estimate. |
+| `deathsLow`&nbsp;&nbsp;&nbsp; | int | Low end of the published range of death estimates. Optional. |
+| `deathsHigh`&nbsp;&nbsp;&nbsp; | int | High end of the published range. When both ends are set the UI shows the range instead of the single figure. |
+| `deathsNote`&nbsp;&nbsp;&nbsp; | string | What the figure includes (combatants, civilians, famine, disease, genocide). Sources disagree mostly because they count different things. |
+| `deathsSource`&nbsp; | string | Attribution for the death figure itself. |
 | `startYear`&nbsp;&nbsp;&nbsp; | int | Curated start year. Overrides the earliest battle year for display. |
 | `endYear`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | int | Curated end year. |
 | `parent`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | Parent war name (e.g. "World War II" for theater entries). Empty for top-level wars. |
 
 `humanDeaths` is authoritative when present. The UI shows it directly
 and the rolled-up war total uses it instead of summing children. This
-is how WW2 reads 75M (including the Holocaust and famine) rather than
-the catalog-derived ~20M battle-only sum.
+is how WW2 reads ~75M (including the Holocaust and famine) rather than
+the catalog-derived ~20M battle-only sum. Every death figure renders as
+an estimate: ranges show where published estimates disagree, and totals
+that mix curated figures with battle-record sums are marked as such.
 
 ## Territory snapshots
 

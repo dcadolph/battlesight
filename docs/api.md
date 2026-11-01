@@ -13,6 +13,7 @@ GET /api/battles/search?q=...       FTS over name, war, summary
 GET /api/battles/stats              aggregate counts (eras, wars, types)
 GET /api/battles/featured           daily rotating featured battle
 GET /api/battles/replays            list of battle IDs with replays
+GET /api/wars/summary?name=...      war summary (curated narrative + stats)
 GET /api/people/battles?name=...    battles attributed to a commander
 GET /api/health                     status
 ```

@@ -594,6 +594,13 @@ func (s *Store) Stats(ctx context.Context, wars *Wars) (StatsResponse, error) {
 		return stats, fmt.Errorf("query verified count: %w", err)
 	}
 
+	if err := s.db.QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM battles WHERE "+documentedSQL).
+		Scan(&stats.DocumentedBattles); err != nil {
+		return stats, fmt.Errorf("query documented count: %w", err)
+	}
+	stats.IndexedBattles = stats.TotalBattles - stats.DocumentedBattles
+
 	var queryErr error
 	stats.Eras, queryErr = s.nameCounts(ctx, "era")
 	if queryErr != nil {
@@ -753,6 +760,23 @@ func warParent(name string) string {
 	return ""
 }
 
+// mergeDeathsBasis folds one contribution's provenance class into a running
+// roll-up basis. An empty running basis adopts the contribution's class,
+// matching classes keep it, and differing classes degrade to "mixed" so the
+// display layer can say the total sums figures of differing provenance.
+func mergeDeathsBasis(current, next string) string {
+	switch {
+	case next == "":
+		return current
+	case current == "":
+		return next
+	case current == next:
+		return current
+	default:
+		return "mixed"
+	}
+}
+
 // rollupWarHierarchy injects synthetic parent rows and populates the rolled
 // totals so the bloodiest-wars sort surfaces canonical conflicts above their
 // theaters even when the parent has few or no direct battles of its own.
@@ -771,11 +795,16 @@ func rollupWarHierarchy(counts []WarCount, wars *Wars) []WarCount {
 		counts[i].RolledCasualties = counts[i].Casualties
 		// Seed the rolled human deaths from curated when present;
 		// otherwise from the battle sum so the rolled total is never
-		// less than what we already counted.
+		// less than what we already counted. The basis records which
+		// class of figure seeded the total so mixing is detectable.
 		if counts[i].HumanDeaths > 0 {
 			counts[i].RolledHumanDeaths = counts[i].HumanDeaths
+			counts[i].RolledDeathsBasis = "curated"
 		} else {
 			counts[i].RolledHumanDeaths = int64(counts[i].Casualties)
+			if counts[i].Casualties > 0 {
+				counts[i].RolledDeathsBasis = "battle-sum"
+			}
 		}
 		byName[counts[i].Name] = &counts[i]
 	}
@@ -795,7 +824,12 @@ func rollupWarHierarchy(counts []WarCount, wars *Wars) []WarCount {
 					if n.HumanDeaths > 0 {
 						synth.HumanDeaths = n.HumanDeaths
 						synth.RolledHumanDeaths = n.HumanDeaths
+						synth.RolledDeathsBasis = "curated"
 					}
+					synth.DeathsLow = n.DeathsLow
+					synth.DeathsHigh = n.DeathsHigh
+					synth.DeathsNote = n.DeathsNote
+					synth.DeathsSource = n.DeathsSource
 					if n.StartYear != 0 {
 						synth.MinYear = n.StartYear
 					}
@@ -831,10 +865,15 @@ func rollupWarHierarchy(counts []WarCount, wars *Wars) []WarCount {
 		// reflects what was captured.
 		if p.HumanDeaths == 0 {
 			childContrib := c.HumanDeaths
+			childBasis := "curated"
 			if childContrib == 0 {
 				childContrib = int64(c.Casualties)
+				childBasis = "battle-sum"
 			}
-			p.RolledHumanDeaths += childContrib
+			if childContrib > 0 {
+				p.RolledHumanDeaths += childContrib
+				p.RolledDeathsBasis = mergeDeathsBasis(p.RolledDeathsBasis, childBasis)
+			}
 		}
 		if c.MinYear != 0 && (p.MinYear == 0 || c.MinYear < p.MinYear) {
 			p.MinYear = c.MinYear
@@ -989,6 +1028,13 @@ func (s *Store) warCounts(ctx context.Context, wars *Wars) ([]WarCount, error) {
 			if n.HumanDeaths > 0 {
 				counts[i].HumanDeaths = n.HumanDeaths
 			}
+			// The estimate range, includes-note, and source travel with the
+			// figure so every surface that renders the number can render its
+			// provenance next to it.
+			counts[i].DeathsLow = n.DeathsLow
+			counts[i].DeathsHigh = n.DeathsHigh
+			counts[i].DeathsNote = n.DeathsNote
+			counts[i].DeathsSource = n.DeathsSource
 			// Curated start year always wins. A stray misclassified battle
 			// in the catalog can drag a war's MinYear into the wrong era
 			// (Korean War year 282 because some ancient skirmish was

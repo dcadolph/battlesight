@@ -121,7 +121,7 @@ func (s *Store) RandomVerified(ctx context.Context) (Battle, bool, error) {
 	return b, true, nil
 }
 
-// List returns battles matching the filter, sorted by year.
+// List returns battles matching the filter, sorted by year, and the total match count.
 func (s *Store) List(ctx context.Context, f Filter) ([]Battle, int, error) {
 	where, args := buildWhere(f)
 
@@ -131,9 +131,12 @@ func (s *Store) List(ctx context.Context, f Filter) ([]Battle, int, error) {
 		return nil, 0, fmt.Errorf("count battles: %w", err)
 	}
 
+	// A zero limit returns every matching row. SQLite reads a negative
+	// LIMIT as no limit, so the newest battles are never cut off by a cap
+	// applied to an oldest-first sort.
 	limit := f.Limit
 	if limit <= 0 {
-		limit = 10000
+		limit = -1
 	}
 
 	// Sort by year first so empty date_start values (year-only records) stay

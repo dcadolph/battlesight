@@ -144,8 +144,8 @@ func (h *Handler) listBattles(w http.ResponseWriter, r *http.Request) {
 	h.markTier(results)
 
 	limit := f.Limit
-	if limit <= 0 {
-		limit = 10000
+	if limit < 0 {
+		limit = 0
 	}
 
 	// When ?lean=1 is set, project to LeanBattle so the response carries

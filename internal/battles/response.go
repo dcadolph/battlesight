@@ -6,7 +6,7 @@ type ListResponse struct {
 	Battles []Battle `json:"battles"`
 	// Total is the total count matching the filter (before pagination).
 	Total int `json:"total"`
-	// Limit is the page size used.
+	// Limit is the page size used. Zero means every match was returned.
 	Limit int `json:"limit"`
 	// Offset is the starting position.
 	Offset int `json:"offset"`
@@ -57,7 +57,7 @@ type LeanListResponse struct {
 	Battles []LeanBattle `json:"battles"`
 	// Total is the unfiltered total count.
 	Total int `json:"total"`
-	// Limit is the cap applied to the response.
+	// Limit is the cap applied to the response. Zero means every match was returned.
 	Limit int `json:"limit"`
 	// Offset is the starting offset.
 	Offset int `json:"offset"`
@@ -215,7 +215,7 @@ type Filter struct {
 	YearMin int
 	// YearMax is the latest year to include.
 	YearMax int
-	// Limit is the maximum number of results (0 = default 10000).
+	// Limit is the maximum number of results. Zero returns every match.
 	Limit int
 	// Offset is the pagination offset.
 	Offset int

@@ -383,7 +383,7 @@ func SummarizeWar(ctx context.Context, store *Store, wars *Wars, name string) (W
 		return WarSummary{}, fmt.Errorf("empty war name")
 	}
 
-	results, _, err := store.List(ctx, Filter{War: name, Limit: 10000, IncludeNoCoord: true})
+	results, _, err := store.List(ctx, Filter{War: name, IncludeNoCoord: true})
 	if err != nil {
 		return WarSummary{}, fmt.Errorf("list battles for war: %w", err)
 	}

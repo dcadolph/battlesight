@@ -136,8 +136,9 @@ func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
 	defer tx.Rollback()
 
 	stmt, err := tx.PrepareContext(ctx,
-		`INSERT OR IGNORE INTO battles (id, name, year, date, date_start, date_end, lat, lng, era, war, battle_type, victor, summary, significance, source, source_id, verified, wikipedia_title)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'land', '', '', '', 'wikidata', ?, 0, ?)`)
+		`INSERT OR IGNORE INTO battles (id, name, year, date, date_start, date_end, lat, lng, era, war, battle_type,
+		 victor, summary, significance, source, source_id, verified, wikipedia_title, wikidata_date)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'land', '', '', '', 'wikidata', ?, 0, ?, ?)`)
 	if err != nil {
 		return 0, fmt.Errorf("prepare insert: %w", err)
 	}
@@ -174,7 +175,7 @@ func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
 			continue
 		}
 
-		year := parseWikidataYear(b.Date.Value)
+		year := sparqlYear(b.Date.Value)
 		date := formatWikidataDate(b.Date.Value, year)
 		lat, lng := parsePoint(b.Coords.Value)
 
@@ -189,7 +190,8 @@ func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
 
 		dr := ParseDateRange(date, year)
 
-		result, err := stmt.ExecContext(ctx, slug, name, year, date, dr.Start, dr.End, lat, lng, era, war, id, wikiTitle)
+		result, err := stmt.ExecContext(ctx, slug, name, year, date, dr.Start, dr.End, lat, lng, era, war, id, wikiTitle,
+			sparqlISODate(b.Date.Value))
 		if err != nil {
 			continue
 		}
@@ -231,6 +233,54 @@ func fetchSPARQLQuery(ctx context.Context, query string) ([]sparqlBinding, error
 	}
 
 	return result.Results.Bindings, nil
+}
+
+// sparqlISODate converts a SPARQL date literal to a padded ISO date in
+// historical year numbering. The value carries no precision, so
+// BackfillWikidataDates replaces it with the item's own time value and
+// precision. Unknown values and blanks yield "".
+func sparqlISODate(v string) string {
+	y, rest, ok := splitSPARQLDate(v)
+	if !ok {
+		return ""
+	}
+	sign := "+"
+	if y < 0 {
+		sign, y = "-", -y
+	}
+	iso, _ := paddedISO(fmt.Sprintf("%s%04d%s", sign, y, rest))
+	return iso
+}
+
+// sparqlYear reads the year of a SPARQL date literal in historical numbering,
+// or 0 when it is not a date.
+func sparqlYear(v string) int {
+	y, _, _ := splitSPARQLDate(v)
+	return y
+}
+
+// splitSPARQLDate returns the historical year of a SPARQL date literal and the
+// text after the year. The query service writes xsd:dateTime years
+// astronomically, with a year zero, so its -0053 is 54 BC. Wikidata's own JSON,
+// and every year in this catalog, count 54 BC as -54.
+func splitSPARQLDate(v string) (int, string, bool) {
+	if !wikidataTimeLiteral(v) {
+		return 0, "", false
+	}
+	neg := strings.HasPrefix(v, "-")
+	v = strings.TrimLeft(v, "+-")
+	i := strings.Index(v, "-")
+	if i <= 0 {
+		return 0, "", false
+	}
+	y, err := strconv.Atoi(v[:i])
+	if err != nil {
+		return 0, "", false
+	}
+	if neg || y == 0 {
+		y = -(y + 1)
+	}
+	return y, v[i:], true
 }
 
 // wikidataID extracts the Q-number from a Wikidata entity URI.

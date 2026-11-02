@@ -20,6 +20,10 @@ func main() {
 	dbPath := flag.String("db", "data/battlesight.db", "path to SQLite database")
 	jsonPath := flag.String("json", "", "path to curated battles JSON file")
 	wikidata := flag.Bool("wikidata", false, "import battles from Wikidata SPARQL")
+	wikidataDates := flag.Bool("wikidata-dates", false,
+		"fill the wikidata_* and infobox_* columns from Wikidata and the article for rows not yet checked")
+	rawDumpPath := flag.String("wikidata-dump", "data/wikidata_battles_raw.json",
+		"SPARQL dump that -wikidata-dates compares live years against")
 	enrich := flag.Bool("enrich", false, "fetch Wikipedia summaries for battles missing them")
 	infobox := flag.Bool("infobox", false, "fetch Wikipedia infobox data (sides, commanders, casualties)")
 	significance := flag.Bool("significance", false, "fetch Wikipedia aftermath/legacy sections for battles missing significance")
@@ -61,6 +65,7 @@ func main() {
 
 	if *all {
 		*wikidata = true
+		*wikidataDates = true
 		*enrich = true
 		*infobox = true
 		*significance = true
@@ -71,10 +76,10 @@ func main() {
 		}
 	}
 
-	if *jsonPath == "" && !*wikidata && !*enrich && !*infobox && !*significance && !*references &&
+	if *jsonPath == "" && !*wikidata && !*wikidataDates && !*enrich && !*infobox && !*significance && !*references &&
 		!*warsEnrich && !*geocodeMissing && !*geocodeDryRun && !*infoboxBackfill && !*infoboxDryRun &&
 		*mergeReplays == "" {
-		log.Fatal("at least one action required: -json, -wikidata, -enrich, -infobox, -significance, " +
+		log.Fatal("at least one action required: -json, -wikidata, -wikidata-dates, -enrich, -infobox, -significance, " +
 			"-references, -wars, -geocode-missing, -geocode-dry-run, -infobox-backfill, " +
 			"-infobox-dry-run, -merge-replays, -validate, or -all")
 	}
@@ -110,6 +115,23 @@ func main() {
 			log.Fatalf("wikidata import failed: %v", err)
 		}
 		log.Printf("imported %d battles from wikidata", count)
+		*wikidataDates = true
+	}
+
+	if *wikidataDates {
+		log.Println("checking rows against Wikidata dates, conflicts and classes...")
+		rep, err := importer.BackfillWikidataDates(ctx, database, *rawDumpPath)
+		if err != nil {
+			log.Fatalf("wikidata dates failed after %d of %d rows: %v", rep.Checked, rep.Pending, err)
+		}
+		log.Printf("wikidata dates: checked %d of %d rows, %d with a date, %d missing items, "+
+			"dump years differ on %d of %d compared", rep.Checked, rep.Pending, rep.WithDate, rep.Missing,
+			rep.DumpDisagree, rep.DumpCompared)
+		n, err := importer.BackfillInfoboxDates(ctx, database)
+		if err != nil {
+			log.Fatalf("infobox dates failed: %v", err)
+		}
+		log.Printf("infobox dates: read %d rows whose year disagrees with Wikidata", n)
 	}
 
 	if *enrich {

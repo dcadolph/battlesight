@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -50,6 +51,12 @@ type AuditRow struct {
 	WikipediaTitle string
 	// WikidataDate is the Wikidata P585 or P580 date, empty when unknown.
 	WikidataDate string
+	// WikidataPrecision is the Wikidata precision of WikidataDate, 0 when unknown.
+	WikidataPrecision int
+	// InfoboxDate is the article infobox's raw date parameter.
+	InfoboxDate string
+	// InfoboxChecked is true once the article's infobox has been read.
+	InfoboxChecked bool
 	// InstanceOf holds the Wikidata P31 labels, empty when unknown.
 	InstanceOf string
 	// Documented is true when the row passes the store's documented-tier rule.
@@ -240,8 +247,19 @@ func Mismatches(in AuditInput) []MismatchClass {
 		return r.Year != 0 && validEras[r.Era] && yearToEra(r.Year) != r.Era
 	})
 	if in.HasWikidataDate {
-		add("year-vs-wikidata", "wikidata row year disagrees with the Wikidata date", func(r *AuditRow) bool {
-			return yearDisagreesWithWikidata(r)
+		add("year-vs-wikidata", "wikidata row year disagrees with the Wikidata date and the article does not "+
+			"dispute it", func(r *AuditRow) bool {
+			return yearDisagreesWithWikidata(r) && (!r.InfoboxChecked || infoboxBacksWikidata(r.InfoboxDate,
+				parseWikidataYear(r.WikidataDate), r.Year))
+		})
+		add("year-wikidata-dispute", "article infobox names the row's year, or both years, and Wikidata "+
+			"another", func(r *AuditRow) bool {
+			return yearDisagreesWithWikidata(r) && r.InfoboxChecked && !infoboxBacksWikidata(r.InfoboxDate,
+				parseWikidataYear(r.WikidataDate), r.Year)
+		})
+		add("wikidata-year-typo", "Wikidata has the row's day and month in another year", func(r *AuditRow) bool {
+			return r.Source == "wikidata" && !r.Verified && parseWikidataYear(r.WikidataDate) != r.Year &&
+				sameDayOtherYear(DateRange{Start: r.DateStart, End: r.DateEnd}, r.WikidataDate, r.WikidataPrecision)
 		})
 	} else {
 		na("year-vs-wikidata", "wikidata row year disagrees with the Wikidata date", "no wikidata_date column yet")
@@ -250,13 +268,16 @@ func Mismatches(in AuditInput) []MismatchClass {
 	for _, t := range in.YearEnrichTitles {
 		enrich[strings.ToLower(t)] = true
 	}
-	add("year-enrich-unreconciled", "row touched by the retired year-enrich pass and not yet checked "+
-		"against Wikidata", func(r *AuditRow) bool {
+	add("year-enrich-unreconciled", "row touched by the retired year-enrich pass whose year neither "+
+		"Wikidata nor the article infobox backs", func(r *AuditRow) bool {
 		touched := enrich[strings.ToLower(r.WikipediaTitle)] || enrich[strings.ToLower(r.Name)]
 		if !touched || r.Verified {
 			return false
 		}
-		return r.WikidataDate == "" || yearDisagreesWithWikidata(r)
+		if r.WikidataDate != "" && !yearDisagreesWithWikidata(r) {
+			return false
+		}
+		return !slices.Contains(candidateYears(infoboxProse(r.InfoboxDate)), r.Year)
 	})
 	add("battle-type-invalid", "battle_type is not land, naval, siege, air or amphibious", func(r *AuditRow) bool {
 		_, ok := validBattleTypesSet[r.BattleType]
@@ -432,9 +453,16 @@ func isNonBattleClass(instanceOf string) bool {
 // yearDisagreesWithWikidata reports whether a wikidata row's year contradicts its
 // Wikidata date. A date string that names the Wikidata year is a range that starts
 // there and passes. A date string that names only the stored year does not, because
-// the retired year-enrich pass rewrote year and date together.
+// the retired year-enrich pass rewrote year and date together. A precision coarser
+// than a year names no single year and passes. An unknown precision is checked.
 func yearDisagreesWithWikidata(r *AuditRow) bool {
 	if r.Source != "wikidata" || r.Verified || r.WikidataDate == "" {
+		return false
+	}
+	if r.WikidataPrecision > 0 && r.WikidataPrecision < precisionYear {
+		return false
+	}
+	if sameDayOtherYear(DateRange{Start: r.DateStart, End: r.DateEnd}, r.WikidataDate, r.WikidataPrecision) {
 		return false
 	}
 	wy, ok := isoYear(r.WikidataDate)
@@ -671,15 +699,22 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 	}
 	in.HasWikidataDate = cols["wikidata_date"]
 	in.HasInstanceOf = cols["wikidata_instance_of"]
-	wdDate, inst := "''", "''"
+	wdDate, wdPrec, inst, ibDate, ibChecked := "''", "0", "''", "''", "''"
+	if cols["infobox_checked"] {
+		ibDate, ibChecked = "infobox_date", "infobox_checked"
+	}
 	if in.HasWikidataDate {
 		wdDate = "wikidata_date"
+	}
+	if cols["wikidata_precision"] {
+		wdPrec = "wikidata_precision"
 	}
 	if in.HasInstanceOf {
 		inst = "wikidata_instance_of"
 	}
 	q := `SELECT id, name, year, date, date_start, date_end, lat, lng, era, war, battle_type, victor,
-		summary, source, verified, wikipedia_title, ` + wdDate + `, ` + inst + `,
+		summary, source, verified, wikipedia_title, ` + wdDate + `, ` + wdPrec + `, ` + inst + `, ` + ibDate +
+		`, ` + ibChecked + `,
 		CASE WHEN ` + documentedSQL + ` THEN 1 ELSE 0 END FROM battles`
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
@@ -689,13 +724,16 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 	for rows.Next() {
 		var r AuditRow
 		var verified, documented int
+		var ibCheckedAt string
 		if err := rows.Scan(&r.ID, &r.Name, &r.Year, &r.Date, &r.DateStart, &r.DateEnd, &r.Lat, &r.Lng,
 			&r.Era, &r.War, &r.BattleType, &r.Victor, &r.Summary, &r.Source, &verified, &r.WikipediaTitle,
-			&r.WikidataDate, &r.InstanceOf, &documented); err != nil {
+			&r.WikidataDate, &r.WikidataPrecision, &r.InstanceOf, &r.InfoboxDate, &ibCheckedAt,
+			&documented); err != nil {
 			return in, fmt.Errorf("scan audit row: %w", err)
 		}
 		r.Verified = verified == 1
 		r.Documented = documented == 1
+		r.InfoboxChecked = ibCheckedAt != ""
 		in.Rows = append(in.Rows, r)
 	}
 	if err := rows.Err(); err != nil {

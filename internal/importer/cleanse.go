@@ -44,6 +44,11 @@ func Cleanse(ctx context.Context, db *sql.DB) (CleanseReport, error) {
 	} else {
 		rep.DateStringsNormalised = n
 	}
+	if n, err := reconcileSourceDates(ctx, db); err != nil {
+		return rep, err
+	} else {
+		rep.SourceDatesReconciled = n
+	}
 	if n, err := alignYearToDate(ctx, db); err != nil {
 		return rep, err
 	} else {
@@ -256,6 +261,7 @@ type CleanseReport struct {
 	SideTextFixed          int
 	MissingDatesBackfilled int
 	DateStringsNormalised  int
+	SourceDatesReconciled  int
 	YearsAligned           int
 	YearsDerived           int
 	ErasRecomputed         int
@@ -270,7 +276,7 @@ type CleanseReport struct {
 // migration do any work this start."
 func (r CleanseReport) Total() int {
 	return r.BattleTextFixed + r.SideTextFixed + r.MissingDatesBackfilled +
-		r.DateStringsNormalised + r.YearsAligned + r.YearsDerived +
+		r.DateStringsNormalised + r.SourceDatesReconciled + r.YearsAligned + r.YearsDerived +
 		r.ErasRecomputed + r.BlankSidesDropped + r.WarNamesCanonicalised +
 		r.DuplicatesRemoved + r.CoordsOverridden + r.RichSearchRowsIndexed
 }

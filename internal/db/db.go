@@ -33,6 +33,11 @@ func Open(path string) (*sql.DB, error) {
 		return nil, fmt.Errorf("run migrations: %w", err)
 	}
 
+	if err := addColumns(db); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("add columns: %w", err)
+	}
+
 	return db, nil
 }
 
@@ -83,5 +88,51 @@ func migrate(db *sql.DB) error {
 		}
 	}
 
+	return nil
+}
+
+// addedColumn is a column added to an existing table after its CREATE
+// migration. SQLite has no ADD COLUMN IF NOT EXISTS, so these run from Go.
+type addedColumn struct {
+	// Table is the table the column belongs to.
+	Table string
+	// Name is the column name.
+	Name string
+	// Decl is the column type and constraints.
+	Decl string
+}
+
+// addedColumns lists every column added after its table's CREATE migration.
+// The wikidata_* columns record what Wikidata itself says about a row, and the
+// infobox_* columns what the article's infobox date and partof say, so the cleanse pass can
+// check year, date and war against named sources.
+var addedColumns = []addedColumn{
+	{Table: "battles", Name: "wikidata_date", Decl: "TEXT NOT NULL DEFAULT ''"},
+	{Table: "battles", Name: "wikidata_precision", Decl: "INTEGER NOT NULL DEFAULT 0"},
+	{Table: "battles", Name: "wikidata_end", Decl: "TEXT NOT NULL DEFAULT ''"},
+	{Table: "battles", Name: "wikidata_end_precision", Decl: "INTEGER NOT NULL DEFAULT 0"},
+	{Table: "battles", Name: "wikidata_conflict", Decl: "TEXT NOT NULL DEFAULT ''"},
+	{Table: "battles", Name: "wikidata_instance_of", Decl: "TEXT NOT NULL DEFAULT ''"},
+	{Table: "battles", Name: "wikidata_checked", Decl: "TEXT NOT NULL DEFAULT ''"},
+	{Table: "battles", Name: "infobox_date", Decl: "TEXT NOT NULL DEFAULT ''"},
+	{Table: "battles", Name: "infobox_partof", Decl: "TEXT NOT NULL DEFAULT ''"},
+	{Table: "battles", Name: "infobox_checked", Decl: "TEXT NOT NULL DEFAULT ''"},
+}
+
+// addColumns adds each column in addedColumns that its table lacks.
+func addColumns(db *sql.DB) error {
+	for _, c := range addedColumns {
+		var n int
+		err := db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info(?) WHERE name = ?`, c.Table, c.Name).Scan(&n)
+		if err != nil {
+			return fmt.Errorf("read %s columns: %w", c.Table, err)
+		}
+		if n > 0 {
+			continue
+		}
+		if _, err := db.Exec("ALTER TABLE " + c.Table + " ADD COLUMN " + c.Name + " " + c.Decl); err != nil {
+			return fmt.Errorf("add %s.%s: %w", c.Table, c.Name, err)
+		}
+	}
 	return nil
 }

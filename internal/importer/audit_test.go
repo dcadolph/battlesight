@@ -270,6 +270,42 @@ func TestMismatches(t *testing.T) { //nolint:funlen // Test function.
 	}, { // Test 56: An empty references file is computed, not n/a.
 		Name: "reference empty", Key: "reference-orphan",
 		In: func(in *AuditInput) { in.ReferenceIDs = []string{} }, WantIDs: nil,
+	}, { // Test 57: Decade precision names no year and passes the Wikidata check.
+		Name: "wikidata decade", Key: "year-vs-wikidata",
+		Mutate: func(r *AuditRow) { r.WikidataDate, r.WikidataPrecision = "1890-01-01", 8 },
+		In:     func(in *AuditInput) { in.HasWikidataDate = true }, WantIDs: nil,
+	}, { // Test 58: Year precision is checked.
+		Name: "wikidata year precision", Key: "year-vs-wikidata",
+		Mutate: func(r *AuditRow) { r.WikidataDate, r.WikidataPrecision = "1937-01-01", 9 },
+		In:     func(in *AuditInput) { in.HasWikidataDate = true }, WantIDs: []string{"x"},
+	}, { // Test 59: An infobox naming the row's year is a dispute, not a mismatch.
+		Name: "dispute not mismatch", Key: "year-vs-wikidata",
+		Mutate: func(r *AuditRow) {
+			r.WikidataDate, r.WikidataPrecision, r.InfoboxChecked, r.InfoboxDate = "1862-01-01", 9, true, "1863"
+		},
+		In: func(in *AuditInput) { in.HasWikidataDate = true }, WantIDs: nil,
+	}, { // Test 60: The same row is counted as a dispute.
+		Name: "dispute", Key: "year-wikidata-dispute",
+		Mutate: func(r *AuditRow) {
+			r.WikidataDate, r.WikidataPrecision, r.InfoboxChecked, r.InfoboxDate = "1862-01-01", 9, true, "1863"
+		},
+		In: func(in *AuditInput) { in.HasWikidataDate = true }, WantIDs: []string{"x"},
+	}, { // Test 61: Same day and month in another year is a Wikidata typo.
+		Name: "typo", Key: "wikidata-year-typo",
+		Mutate: func(r *AuditRow) {
+			r.DateEnd, r.Date, r.WikidataDate, r.WikidataPrecision = "1863-07-01", "1 July 1863", "2000-07-01", 11
+		},
+		In: func(in *AuditInput) { in.HasWikidataDate = true }, WantIDs: []string{"x"},
+	}, { // Test 62: A typo row is not a year mismatch.
+		Name: "typo not mismatch", Key: "year-vs-wikidata",
+		Mutate: func(r *AuditRow) {
+			r.DateEnd, r.Date, r.WikidataDate, r.WikidataPrecision = "1863-07-01", "1 July 1863", "2000-07-01", 11
+		},
+		In: func(in *AuditInput) { in.HasWikidataDate = true }, WantIDs: nil,
+	}, { // Test 63: A year-enrich row whose infobox names its year is reconciled.
+		Name: "year enrich infobox", Key: "year-enrich-unreconciled",
+		Mutate: func(r *AuditRow) { r.InfoboxChecked, r.InfoboxDate = true, "{{Start date|1863|7|1}}" },
+		In:     func(in *AuditInput) { in.YearEnrichTitles = []string{"battle of x"} }, WantIDs: nil,
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {
@@ -356,27 +392,43 @@ func TestLoadAuditInput(t *testing.T) {
 		got.Documented = append(got.Documented, r.Documented)
 	}
 	want := summary{IDs: []string{"a", "b"}, Documented: []bool{true, false}, Sides: 1,
-		Titles: []string{"Battle of Pochonbo"}}
+		Titles: []string{"Battle of Pochonbo"}, HasWikidataDate: true}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("mismatch (-want +got):\n%s", diff)
 	}
 
-	if _, err := conn.ExecContext(ctx, `ALTER TABLE battles ADD COLUMN wikidata_date TEXT NOT NULL DEFAULT ''`); err != nil {
-		t.Fatalf("add column: %v", err)
-	}
-	if _, err := conn.ExecContext(ctx, `UPDATE battles SET wikidata_date = '1937-06-04' WHERE id = 'b'`); err != nil {
-		t.Fatalf("set wikidata date: %v", err)
+	if _, err := conn.ExecContext(ctx, `UPDATE battles SET wikidata_date = '1937-06-04',
+		wikidata_instance_of = 'battle' WHERE id = 'b'`); err != nil {
+		t.Fatalf("set wikidata facts: %v", err)
 	}
 	in, err = LoadAuditInput(ctx, conn, battles.DocumentedCondition(), filepath.Join(dir, "missing"))
 	if err != nil {
 		t.Fatalf("reload: %v", err)
 	}
-	if !in.HasWikidataDate || in.HasInstanceOf || len(in.YearEnrichTitles) != 0 {
+	if !in.HasWikidataDate || !in.HasInstanceOf || len(in.YearEnrichTitles) != 0 {
 		t.Errorf("columns: wikidata_date %v instance_of %v titles %v", in.HasWikidataDate, in.HasInstanceOf,
 			in.YearEnrichTitles)
 	}
 	if diff := cmp.Diff("1937-06-04", in.Rows[1].WikidataDate); diff != "" {
 		t.Errorf("wikidata date mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff("battle", in.Rows[1].InstanceOf); diff != "" {
+		t.Errorf("instance of mismatch (-want +got):\n%s", diff)
+	}
+
+	// A database from before the wikidata_* columns, as a read-only open sees it.
+	for _, col := range []string{"wikidata_date", "wikidata_instance_of"} {
+		if _, err := conn.ExecContext(ctx, `ALTER TABLE battles DROP COLUMN `+col); err != nil {
+			t.Fatalf("drop %s: %v", col, err)
+		}
+	}
+	in, err = LoadAuditInput(ctx, conn, battles.DocumentedCondition(), "")
+	if err != nil {
+		t.Fatalf("reload old schema: %v", err)
+	}
+	if in.HasWikidataDate || in.HasInstanceOf || in.Rows[1].WikidataDate != "" {
+		t.Errorf("old schema: wikidata_date %v instance_of %v value %q", in.HasWikidataDate, in.HasInstanceOf,
+			in.Rows[1].WikidataDate)
 	}
 }
 

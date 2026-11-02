@@ -99,7 +99,24 @@ function ChunkFallback({ label }: { label: string }) {
 // app previously stopped at -500 which dropped every Bronze Age battle
 // off the front of the bar.
 const MIN_YEAR = -3000;
-const MAX_YEAR = 2025;
+// MAX_YEAR is the current year, so the timeline and the history sweep reach
+// today's battles without a code change each January.
+const MAX_YEAR = new Date().getFullYear();
+
+// initialYearRange reads yearMin and yearMax from the page query string so a
+// shared link such as /?yearMax=1945 opens on that range. Values clamp to the
+// timeline bounds and a reversed pair is swapped.
+function initialYearRange(): [number, number] {
+  const q = new URLSearchParams(window.location.search);
+  const read = (key: string, fallback: number): number => {
+    const v = parseInt(q.get(key) ?? '', 10);
+    if (!Number.isFinite(v)) return fallback;
+    return Math.min(MAX_YEAR, Math.max(MIN_YEAR, v));
+  };
+  const lo = read('yearMin', MIN_YEAR);
+  const hi = read('yearMax', MAX_YEAR);
+  return lo <= hi ? [lo, hi] : [hi, lo];
+}
 
 interface Filters {
   era: string;
@@ -135,7 +152,7 @@ function writeHash(state: { battleId?: string; phase?: number; replay?: boolean 
 
 export default function App() {
   const [battles, setBattles] = useState<Battle[]>([]);
-  const [yearRange, setYearRange] = useState<[number, number]>([MIN_YEAR, MAX_YEAR]);
+  const [yearRange, setYearRange] = useState<[number, number]>(initialYearRange);
   const [selectedBattle, setSelectedBattle] = useState<Battle | null>(null);
   // panelDismissed lets the user close the BattlePanel dossier without
   // wiping selectedBattle — the battle's dot stays painted on the globe
@@ -419,6 +436,24 @@ export default function App() {
     // Picking any battle ends the intro overlay. Otherwise the featured-battle
     // card stays on top of whatever the user just chose and the click reads
     // as "nothing happened."
+    if (introVisible) {
+      setIntroVisible(false);
+      localStorage.setItem('bt.intro_seen', '1');
+    }
+  }, [introVisible, replayBattle, replayCinematic]);
+
+  // handleWarFocus selects the battle WarPlayback is stepping to. It differs
+  // from handleBattleClick in one way: a cinematic replay is WarPlayback's own
+  // overlay, so it stays open and the cinematic keeps running. Routing these
+  // focus calls through handleBattleClick halted every cinematic on its first
+  // battle, because opening the replay re-ran the focus with a replay up.
+  const handleWarFocus = useCallback((battle: Battle) => {
+    if (replayBattle && !replayCinematic) {
+      setReplayBattle(null);
+      setReplayPhase(0);
+    }
+    setSelectedBattle(battle);
+    setPanelDismissed(false);
     if (introVisible) {
       setIntroVisible(false);
       localStorage.setItem('bt.intro_seen', '1');
@@ -1214,7 +1249,7 @@ export default function App() {
       {showPlayback && (
         <Suspense fallback={<ChunkFallback label="Preparing the war atlas" />}>
           <WarPlayback
-            onBattleFocus={handleBattleClick}
+            onBattleFocus={handleWarFocus}
             onBattlesLoaded={setPlaybackBattles}
             onClose={() => { setInitialWar(''); handlePlaybackClose(); }}
             onWarSelected={handleWarSelected}

@@ -186,9 +186,11 @@ type spanRow struct {
 // year is the error and takes Wikidata's date. When the Wikidata year is the
 // row's year, or Wikidata gives none, nothing ties the row to the war and the
 // war clears. A Wikidata year outside the span that differs from the row's
-// year is left for a human, since then Wikidata itself is in doubt.
+// year is left for a human, since then Wikidata itself is in doubt. So is a
+// decade or century date (precision under 9), which names no year: the 2020s
+// stored as 2020-01-01 must not clear a 2022 war.
 func planSpanFix(r spanRow, wars WarNames) (spanFix, bool) {
-	if !wars.outsideSpan(r.War, r.Year) {
+	if !wars.outsideSpan(r.War, r.Year) || r.WikidataDate != "" && r.Precision < 9 {
 		return spanFix{}, false
 	}
 	span, _ := wars.spanOf(r.War)

@@ -195,6 +195,9 @@ func TestPlanSpanFix(t *testing.T) {
 		Row:        spanRow{ID: "arbedo", Year: 1422, War: "the Gallic Wars", WikidataDate: "1422-06-30", Precision: 11},
 		WantResult: spanFix{ID: "arbedo", Year: 1422},
 		WantOK:     true,
+	}, { // Test 8: A decade date names no year and is left for a human, Battle of Vasylivka.
+		Row: spanRow{ID: "vasylivka", Year: 1940, Date: "1940", War: "Korean War", WikidataDate: "1940-01-01",
+			Precision: 8},
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {

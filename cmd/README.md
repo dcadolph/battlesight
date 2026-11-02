@@ -42,6 +42,7 @@ go run ./cmd/import -merge-replays drafts.json    # validate and merge replay dr
 | --- | --- |
 | `-json <file>` | Import a curated battles JSON file. |
 | `-wikidata` | Pull the battle catalog from Wikidata SPARQL. |
+| `-wikidata-wars` | Name the war of war-less wikidata rows from Wikidata P607 or a war-class P361 target. |
 | `-enrich` | Fetch Wikipedia summaries for battles missing them. |
 | `-infobox` | Fetch sides, commanders, and casualties from infoboxes. |
 | `-significance` | Fetch aftermath and legacy sections. |

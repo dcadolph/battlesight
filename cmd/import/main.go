@@ -24,6 +24,8 @@ func main() {
 		"fill the wikidata_* and infobox_* columns from Wikidata and the article for rows not yet checked")
 	rawDumpPath := flag.String("wikidata-dump", "data/wikidata_battles_raw.json",
 		"SPARQL dump that -wikidata-dates compares live years against")
+	wikidataWars := flag.Bool("wikidata-wars", false,
+		"name the war of each war-less wikidata row from Wikidata P607, else a war-class P361 target")
 	coordsFromSource := flag.Bool("coords-from-source", false,
 		"check coordinates against Wikidata P625 and the Wikipedia articles, fill 0,0 rows and move points no source backs")
 	landPath := flag.String("land", "data/land-50m.json", "world-atlas land TopoJSON that -coords-from-source reads")
@@ -71,6 +73,7 @@ func main() {
 	if *all {
 		*wikidata = true
 		*wikidataDates = true
+		*wikidataWars = true
 		*coordsFromSource = true
 		*resolveTitles = true
 		*enrich = true
@@ -83,10 +86,10 @@ func main() {
 		}
 	}
 
-	if *jsonPath == "" && !*wikidata && !*wikidataDates && !*coordsFromSource && !*resolveTitles && !*enrich && !*infobox && !*significance && !*references &&
+	if *jsonPath == "" && !*wikidata && !*wikidataDates && !*wikidataWars && !*coordsFromSource && !*resolveTitles && !*enrich && !*infobox && !*significance && !*references &&
 		!*warsEnrich && !*geocodeMissing && !*geocodeDryRun && !*infoboxBackfill && !*infoboxDryRun &&
 		*mergeReplays == "" {
-		log.Fatal("at least one action required: -json, -wikidata, -wikidata-dates, -coords-from-source, -resolve-titles, -enrich, -infobox, -significance, " +
+		log.Fatal("at least one action required: -json, -wikidata, -wikidata-dates, -wikidata-wars, -coords-from-source, -resolve-titles, -enrich, -infobox, -significance, " +
 			"-references, -wars, -geocode-missing, -geocode-dry-run, -infobox-backfill, " +
 			"-infobox-dry-run, -merge-replays, -validate, or -all")
 	}
@@ -123,6 +126,7 @@ func main() {
 		}
 		log.Printf("imported %d battles from wikidata", count)
 		*wikidataDates = true
+		*wikidataWars = true
 	}
 
 	if *wikidataDates {
@@ -139,6 +143,16 @@ func main() {
 			log.Fatalf("infobox dates failed: %v", err)
 		}
 		log.Printf("infobox dates: read %d rows whose year disagrees with Wikidata", n)
+	}
+
+	if *wikidataWars {
+		log.Println("naming wars for war-less rows from Wikidata...")
+		rep, err := importer.WikidataWars(ctx, database)
+		if err != nil {
+			log.Fatalf("wikidata wars failed after %d rows: %v", rep.Rows, err)
+		}
+		log.Printf("wikidata wars: %d rows, %d from P607, %d from a P361 war, %d with none", rep.Rows,
+			rep.FromConflict, rep.FromPartOf, rep.None)
 	}
 
 	if *coordsFromSource {
@@ -308,10 +322,48 @@ func runValidate(jsonPath string) error {
 	}
 	fmt.Fprintf(os.Stdout, "validated %d replay(s): %d error(s)\n", len(replays), len(replayRep.Errors))
 
-	if n := len(rep.Errors) + len(dupRep.Errors) + len(replayRep.Errors); n > 0 {
+	warsRep, nWars, nSnaps, err := validateWarKeys(filepath.Dir(jsonPath), raw)
+	if err != nil {
+		return err
+	}
+	if formatted := warsRep.FormatReport(); formatted != "" {
+		fmt.Fprint(os.Stderr, formatted)
+	}
+	fmt.Fprintf(os.Stdout, "validated %d war(s) and %d snapshot key(s): %d error(s)\n", nWars, nSnaps,
+		len(warsRep.Errors))
+
+	if n := len(rep.Errors) + len(dupRep.Errors) + len(replayRep.Errors) + len(warsRep.Errors); n > 0 {
 		return fmt.Errorf("%d blocking issue(s) found", n)
 	}
 	return nil
+}
+
+// validateWarKeys checks the war keys in wars.json next to the curated data,
+// the territory snapshot keys in the frontend source, and the curated
+// battles' war names. A missing snapshot source is skipped.
+func validateWarKeys(dataDir string, curated []battles.Battle) (importer.ValidationReport, int, int, error) {
+	var rep importer.ValidationReport
+	warsPath := filepath.Join(dataDir, "wars.json")
+	data, err := os.ReadFile(warsPath)
+	if err != nil {
+		return rep, 0, 0, fmt.Errorf("read %s: %w", warsPath, err)
+	}
+	var wars map[string]battles.WarNarrative
+	if err := json.Unmarshal(data, &wars); err != nil {
+		return rep, 0, 0, fmt.Errorf("parse %s: %w", warsPath, err)
+	}
+	var keys []string
+	snapPath := filepath.Join(dataDir, "..", "web", "src", "data", "territory-snapshots.ts")
+	src, err := os.ReadFile(snapPath)
+	switch {
+	case errors.Is(err, os.ErrNotExist):
+		log.Printf("validate: %s not found, snapshot keys not checked", snapPath)
+	case err != nil:
+		return rep, 0, 0, fmt.Errorf("read %s: %w", snapPath, err)
+	default:
+		keys = importer.SnapshotWarKeys(string(src))
+	}
+	return importer.ValidateWars(wars, keys, curated), len(wars), len(keys), nil
 }
 
 // loadValidationReplays reads the served replay file. A missing file is not an error.

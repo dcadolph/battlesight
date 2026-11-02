@@ -285,6 +285,28 @@ func (w *Wars) Get(name string) (WarNarrative, bool) {
 	return n, ok
 }
 
+// Names returns the set of canonical war names.
+func (w *Wars) Names() map[string]bool {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	out := make(map[string]bool, len(w.byName))
+	for n := range w.byName {
+		out[n] = true
+	}
+	return out
+}
+
+// Aliases returns a copy of the alias to canonical war name map.
+func (w *Wars) Aliases() map[string]string {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	out := make(map[string]string, len(w.aliasOf))
+	for a, c := range w.aliasOf {
+		out[a] = c
+	}
+	return out
+}
+
 // Canonical returns the canonical war name for name, which is name itself
 // unless it is an alias.
 func (w *Wars) Canonical(name string) string {

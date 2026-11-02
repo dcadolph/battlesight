@@ -29,8 +29,8 @@ const (
 	coordRequestPause = 2 * time.Second
 	// coordSPARQLBatch is how many Q-ids one query service request asks about.
 	coordSPARQLBatch = 200
-	// coordBusyPause is the wait before the one retry of a busy query service.
-	coordBusyPause = time.Minute
+	// sparqlBusyPause is the wait before the one retry of a busy query service.
+	sparqlBusyPause = time.Minute
 	// wikidataPreferredRank is the rank IRI of a preferred statement.
 	wikidataPreferredRank = "http://wikiba.se/ontology#PreferredRank"
 	// wikidataEntityPrefix prefixes every item IRI in a query result.
@@ -561,22 +561,9 @@ type coordSPARQLRow struct {
 }
 
 // patientCoordSPARQL runs coordSPARQLQuery for one batch. A busy query service
-// gets one retry after coordBusyPause, then the run stops with ErrSPARQLBusy.
+// gets one retry after sparqlBusyPause, then the run stops with ErrSPARQLBusy.
 func patientCoordSPARQL(ctx context.Context, batch []string) ([]coordSPARQLRow, error) {
-	vals := make([]string, len(batch))
-	for i, q := range batch {
-		vals[i] = "wd:" + q
-	}
-	query := fmt.Sprintf(coordSPARQLQuery, strings.Join(vals, " "))
-	rows, err := fetchSPARQL[coordSPARQLRow](ctx, query)
-	if !errors.Is(err, ErrSPARQLBusy) {
-		return rows, err
-	}
-	log.Printf("coords-from-source: query service busy, waiting %s for one retry", coordBusyPause)
-	if err := sleepCtx(ctx, coordBusyPause); err != nil {
-		return nil, err
-	}
-	return fetchSPARQL[coordSPARQLRow](ctx, query)
+	return patientSPARQL[coordSPARQLRow](ctx, "coords-from-source", fmt.Sprintf(coordSPARQLQuery, entityValues(batch)))
 }
 
 // coordFactsFromRows groups query rows by Q-id into the Earth P625 values,

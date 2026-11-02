@@ -158,20 +158,22 @@ type warFamily struct {
 	Allowed []string
 }
 
-// warFamilies drives the variant-key class until wars.json carries aliases.
+// warFamilies catches a spelling of a modern war that wars.json does not yet
+// list as an alias, which applyWarAliases would leave in place.
 var warFamilies = []warFamily{{
 	Match: regexp.MustCompile(`russo-ukrainian|russia-ukraine|invasion of ukraine|war in donbas`),
 	Allowed: []string{"Russo-Ukrainian War", "Russian invasion of Ukraine", "War in Donbas (2014–2022)",
 		"Ukrainian Kursk Oblast Incursion"},
 }, {
-	Match:   regexp.MustCompile(`yemen`),
-	Allowed: []string{"Yemeni Civil War"},
+	Match: regexp.MustCompile(`yemen`),
+	Allowed: []string{"Yemeni Civil War", "Al-Qaeda insurgency in Yemen", "Houthi insurgency", "Yemeni Revolution",
+		"Yemeni revolt in the Wilayah of al-Andalus"},
 }, {
 	Match:   regexp.MustCompile(`gaza war|israel.hamas war`),
-	Allowed: []string{"Gaza war"},
+	Allowed: []string{"Gaza war", "2014 Gaza War"},
 }, {
 	Match:   regexp.MustCompile(`iran.israel|israel.iran`),
-	Allowed: []string{"Iran–Israel direct strikes 2024"},
+	Allowed: []string{"Iran–Israel direct strikes 2024", "Twelve-Day War"},
 }}
 
 // waterName flags names that describe battles fought on water, which the

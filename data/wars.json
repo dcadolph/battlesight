@@ -137,7 +137,7 @@
     "humanDeaths": 25000,
     "startYear": 1799,
     "endYear": 1799,
-    "parent": "Second Coalition",
+    "parent": "War of the Second Coalition",
     "outcome": "French-Batavian victory; Convention of Alkmaar (October 1799) evacuates Allied forces."
   },
   "Anglo-Scottish Wars": {
@@ -2075,10 +2075,16 @@
       "Ukrainian incursion into Kursk Oblast (August 2024), the first foreign occupation of Russian territory since World War II",
       "Tactical innovations: FPV drones, naval drones, Storm Shadow and ATACMS strikes into occupied territory"
     ],
-    "parent": "Russia-Ukraine War",
+    "parent": "Russo-Ukrainian War",
     "startYear": 2022,
     "endYear": 0,
-    "humanDeaths": 500000
+    "humanDeaths": 500000,
+    "aliases": [
+      "northern front of the Russian invasion of Ukraine",
+      "Russo-Ukrainian war (2022–present)",
+      "full-scale Russo-Ukrainian war",
+      "southern front of the Russo-Ukrainian war"
+    ]
   },
   "Russo-Georgian War": {
     "outcome": "Russian victory",
@@ -2166,7 +2172,11 @@
     "humanDeaths": 500000,
     "startYear": 2014,
     "endYear": 0,
-    "parent": ""
+    "parent": "",
+    "aliases": [
+      "Russia-Ukraine War",
+      "Russo-Ukrainian war"
+    ]
   },
   "Rákóczi's War of Independence": {
     "outcome": "Victory of Holy Roman Empire",
@@ -2937,11 +2947,6 @@
     "parent": "",
     "outcome": "Egyptian-Syrian initial gains reversed; Israel pushes within striking distance of Cairo and Damascus before UN ceasefire."
   },
-  "northern front of the Russian invasion of Ukraine": {
-    "outcome": "Ukrainian victory",
-    "aftermath": "After Ukraine had fully retaken Kyiv Oblast, its military began to mop up pockets of isolated Russian troops who had been left behind in the retreat. The Institute for the Study of War assessed that these remnant groups did not offer organized resistance. The Institute for the Study of War also said that some of the Russian units that were pulled back to Belarus and western Russia would \"remain combat ineffective for a protracted period\".",
-    "keyTerms": "Russian withdrawal from Kyiv axis (March-April 2022)"
-  },
   "Mongol invasions": {
     "humanDeaths": 40000000,
     "startYear": 1206,
@@ -2954,15 +2959,6 @@
     "deathsHigh": 60000000,
     "deathsSource": "Census-derived estimate",
     "deathsNote": "Estimated population decline across China, Central Asia, Persia, and Eastern Europe. Derived from census comparisons, so massacre, famine, disease, and migration are not separable."
-  },
-  "Russia-Ukraine War": {
-    "humanDeaths": 500000,
-    "startYear": 2014,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing as of late 2025.",
-    "aftermath": "A war that began in 2014 with the annexation of Crimea expanded in February 2022 into the largest European war since 1945. Russia controls the Donbas and southern strip; Ukraine retains its government, sovereignty, and a flow of Western weapons. NATO expanded to include Finland and Sweden in response.",
-    "keyTerms": "Russian recognition of Donetsk and Luhansk (February 21 2022); full-scale invasion (February 24 2022)"
   },
   "Seven Years' War": {
     "humanDeaths": 1500000,
@@ -3115,7 +3111,27 @@
     "parent": "",
     "outcome": "Ongoing as of late 2025; Houthi de-facto control of the north, internationally recognised government in the south.",
     "aftermath": "A decade of war that has produced what the UN has repeatedly called the world's worst humanitarian crisis. 380,000 dead, mostly from war-induced famine and disease, in a war complicated by Saudi-Emirati-Iranian proxy involvement.",
-    "keyTerms": "Stockholm Agreement (December 2018)"
+    "keyTerms": "Houthi seizure of Sana'a (September 2014); Saudi-Houthi truce (April 2022)",
+    "aliases": [
+      "Yemeni Civil War (2014–present)",
+      "Yemeni Crisis and the Yemeni Civil War (2014–present)",
+      "Yemeni Civil War (2014–present) and the Saudi Arabian-led intervention in Yemen"
+    ]
+  },
+  "Al-Qaeda insurgency in Yemen": {
+    "parent": "",
+    "aliases": [
+      "Al-Qaeda insurgency in Yemen and the Yemeni crisis",
+      "Al-Qaeda insurgency in Yemen and the Yemeni crisis during the revolution",
+      "Al-Qaeda insurgency in Yemen and the South Yemen insurgency"
+    ]
+  },
+  "Houthi insurgency": {
+    "parent": "",
+    "aliases": [
+      "Houthi insurgency and Yemeni crisis",
+      "Houthi insurgency and the Yemeni revolution"
+    ]
   },
   "First Libyan Civil War": {
     "humanDeaths": 30000,
@@ -3407,18 +3423,25 @@
     "startYear": 2023,
     "endYear": 0,
     "humanDeaths": 50000,
-    "outcome": "Ongoing as of late 2025.",
+    "outcome": "Ongoing as of late 2025; January 2025 ceasefire framework partially holds.",
     "aftermath": "The Hamas attack of October 7 2023 killed 1,200 Israelis and triggered the most destructive Israeli military operation since 1948, with Gaza casualty estimates exceeding 50,000. Regional escalation drew in Hezbollah, the Houthis, and Iran in direct strike exchanges through 2024.",
-    "keyTerms": "January 2025 ceasefire framework"
+    "keyTerms": "January 2025 ceasefire framework",
+    "aliases": [
+      "Israel–Hamas war"
+    ]
   },
-  "Iran-Israel direct strikes 2024": {
-    "parent": "",
+  "Iran–Israel direct strikes 2024": {
+    "outcome": "See Iran-Israel war 2024 — canonical entry.",
+    "aftermath": "Eight months of direct Iran-Israel exchanges including the April 2024 Iranian missile/drone barrage (Operation True Promise) and Israeli counterstrikes on Iranian air defences. The most significant direct state-on-state exchange in the Iran-Israel rivalry since 1979.",
+    "keyTerms": "Operation True Promise (April 2024)",
     "startYear": 2024,
     "endYear": 2024,
     "humanDeaths": 1000,
-    "outcome": "See Iran-Israel war 2024 — canonical entry.",
-    "aftermath": "See Iran-Israel war 2024.",
-    "keyTerms": "Operation True Promise (April 2024)"
+    "aliases": [
+      "Iran-Israel direct strikes 2024",
+      "Iran-Israel war 2024",
+      "2024 Iran–Israel conflict"
+    ]
   },
   "Israel-Hezbollah conflict 2024": {
     "parent": "",
@@ -3935,19 +3958,26 @@
     "humanDeaths": 30000,
     "startYear": 2024,
     "endYear": 0,
-    "parent": "Russia-Ukraine War",
+    "parent": "Russo-Ukrainian War",
     "outcome": "Ongoing; Ukrainian forces hold a salient in Kursk Oblast through 2024-2025.",
     "aftermath": "Ukraine's August 2024 cross-border offensive into Kursk Oblast — the first foreign army incursion into Russian sovereign territory since WWII. The operation diverted Russian forces from eastern Ukraine and put pressure on the Putin government domestically.",
-    "keyTerms": "Cross-border offensive (August 6, 2024)"
+    "keyTerms": "Cross-border offensive (August 6, 2024)",
+    "aliases": [
+      "Kursk campaign"
+    ]
   },
   "Sudanese Civil War (2023–present)": {
     "humanDeaths": 150000,
     "startYear": 2023,
     "endYear": 0,
     "parent": "",
-    "outcome": "Ongoing as of late 2025.",
+    "outcome": "Ongoing; SAF-RSF civil war devastating Khartoum, Darfur, and Kordofan.",
     "aftermath": "A war between the Sudanese Armed Forces and the Rapid Support Forces that erupted in Khartoum in April 2023, after the breakdown of the joint transitional government. 150,000+ dead, 11 million displaced, full state collapse across Darfur.",
-    "keyTerms": "Outbreak of fighting in Khartoum (April 15, 2023)"
+    "keyTerms": "Outbreak of fighting in Khartoum (April 15, 2023)",
+    "aliases": [
+      "Sudan war (2023–present)",
+      "Sudanese civil war (2023–present)"
+    ]
   },
   "Myanmar civil war": {
     "humanDeaths": 60000,
@@ -5335,15 +5365,6 @@
     "aftermath": "Two and a half centuries of intermittent war ended by Kit Carson's scorched-earth campaign in Canyon de Chelly (1864). 8,000 Navajos were forced on the Long Walk to Bosque Redondo before being allowed to return to a reservation on their homelands.",
     "keyTerms": "Treaty of Bosque Redondo (June 1868)"
   },
-  "Israel–Hamas war": {
-    "humanDeaths": 50000,
-    "startYear": 2023,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing as of late 2025; January 2025 ceasefire framework partially holds.",
-    "aftermath": "See Gaza war — canonical entry.",
-    "keyTerms": "January 2025 ceasefire framework"
-  },
   "Russian War of Independence": {
     "outcome": "Russian victory; Mongol Yoke ended at Great Stand on the Ugra (1480).",
     "aftermath": "Two centuries of Mongol overlordship ended with the bloodless standoff on the Ugra River. Ivan III's subsequent consolidation of Muscovy produced the foundations of the modern Russian state.",
@@ -5354,11 +5375,6 @@
     "aftermath": "Either the 1894-1895 first war (see First Sino-Japanese War) or the 1937-1945 second war (see Second Sino-Japanese War).",
     "keyTerms": "See specific entry"
   },
-  "Iran-Israel war 2024": {
-    "outcome": "See Iran-Israel direct strikes 2024.",
-    "aftermath": "Eight months of direct Iran-Israel exchanges including the April 2024 Iranian missile/drone barrage (Operation True Promise) and Israeli counterstrikes on Iranian air defences. The most significant direct state-on-state exchange in the Iran-Israel rivalry since 1979.",
-    "keyTerms": "Operation True Promise (April 13, 2024)"
-  },
   "War in Donbas (2014–2022)": {
     "outcome": "Frozen conflict until February 2022; superseded by the Russian full-scale invasion.",
     "aftermath": "Eight years of low-intensity war in eastern Ukraine between Ukrainian forces and Russian-backed separatists in the Donetsk and Luhansk People's Republics. 14,000+ killed, 1.5 million displaced. The conflict was effectively absorbed into the wider Russo-Ukrainian War when Russia launched its full-scale invasion February 24, 2022.",
@@ -5366,7 +5382,10 @@
     "startYear": 2014,
     "endYear": 2022,
     "humanDeaths": 14000,
-    "parent": "Russo-Ukrainian War"
+    "parent": "Russo-Ukrainian War",
+    "aliases": [
+      "War in Donbas"
+    ]
   },
   "Mughal–Sikh Wars": {
     "outcome": "Sikh ascendancy by mid-18th century with the rise of the Sikh confederacies (misls).",
@@ -5391,13 +5410,6 @@
     "keyTerms": "JNIM merger (March 2017); Operation Serval (January 2013)",
     "startYear": 2002,
     "humanDeaths": 30000
-  },
-  "Sudan war (2023–present)": {
-    "outcome": "Ongoing; SAF-RSF civil war devastating Khartoum, Darfur, and Kordofan.",
-    "aftermath": "Ongoing civil war between the Sudanese Armed Forces (al-Burhan) and the Rapid Support Forces (Hemedti) that began April 15, 2023. 10+ million displaced — the largest displacement crisis in the world. Famine declared in Darfur in 2024. The war is destroying the institutions of the Sudanese state.",
-    "keyTerms": "RSF assault on Khartoum (April 15, 2023); fall of El Geneina (June 2023)",
-    "startYear": 2023,
-    "humanDeaths": 150000
   },
   "Polish–Bolshevik War": {
     "outcome": "Polish victory at the Battle of Warsaw (Miracle on the Vistula); Treaty of Riga (1921).",
@@ -5723,15 +5735,6 @@
     "aftermath": "Sixty-five years of war that began with Charles VIII's invasion of Italy in 1494 and ended with Spain dominant from Naples to Milan. The wars produced the modern military profession — the Spanish tercio, the Italian fortification school — and bankrupted both Spain and France.",
     "keyTerms": "Peace of Cateau-Cambrésis (April 3, 1559)"
   },
-  "Yemeni Crisis and the Yemeni Civil War (2014–present)": {
-    "humanDeaths": 380000,
-    "startYear": 2014,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing.",
-    "aftermath": "See Yemeni Civil War — canonical entry.",
-    "keyTerms": "Stockholm Agreement (2018)"
-  },
   "Third Anglo-Maratha War": {
     "humanDeaths": 30000,
     "startYear": 1775,
@@ -5867,13 +5870,6 @@
     "startYear": 1727,
     "endYear": 1729,
     "humanDeaths": 5000
-  },
-  "Yemeni Civil War (2014–present)": {
-    "outcome": "Ongoing; Houthi-Saudi ceasefire (April 2022) holds intermittently.",
-    "aftermath": "A decade-long war between the Houthi movement and the internationally recognized government, with Saudi-led coalition intervention (2015) and Iranian Houthi support. Mass humanitarian crisis; 377,000+ killed by 2022.",
-    "keyTerms": "Houthi seizure of Sana'a (September 2014); Saudi-Houthi truce (April 2022)",
-    "startYear": 2014,
-    "humanDeaths": 377000
   },
   "Myanmar civil war (2021–present)": {
     "outcome": "Ongoing; junta losing ground to NUG/PDF and ethnic resistance organizations.",
@@ -6160,11 +6156,6 @@
     "startYear": 1378,
     "endYear": 1381,
     "humanDeaths": 10000
-  },
-  "Yemeni Civil War (2014–present) and the Saudi Arabian-led intervention in Yemen": {
-    "outcome": "See Yemeni Civil War.",
-    "aftermath": "See Yemeni Civil War (2014–present).",
-    "keyTerms": "Saudi-Houthi truce (April 2022)"
   },
   "Tunisian–Algerian War (1705)": {
     "outcome": "Hussein I (Husainid dynasty) victory; consolidation of independent Beylik of Tunis.",

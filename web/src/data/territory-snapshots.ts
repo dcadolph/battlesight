@@ -237,10 +237,8 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    // Duplicate snapshot block — original Russo-Ukrainian War above carries
-    // the real data. Kept for the older 'Russia-Ukraine War' key just in
-    // case any legacy data still references that spelling, but contains
-    // identical control maps. Safe to remove if no battles ever map here.
+    // War in Donbas is the 2014 to 2022 child of the Russo-Ukrainian War. Its
+    // snapshots run from the annexation of Crimea to the full-scale invasion.
     war: 'War in Donbas (2014–2022)',
     snapshots: [
       {
@@ -1453,7 +1451,7 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Iran-Israel direct strikes 2024',
+    war: 'Iran–Israel direct strikes 2024',
     snapshots: [
       {
         year: 2024.3,
@@ -1478,7 +1476,7 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Israel–Hamas war',
+    war: 'Gaza war',
     snapshots: [
       {
         year: 2023.78,
@@ -1984,19 +1982,6 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Hundred Years\' War',
-    snapshots: [
-      {
-        year: 1429.3,
-        label: 'April 1429: Joan of Arc and the Siege of Orléans',
-        control: {
-          'continental-army': ['France'],
-          'british-empire': ['United Kingdom'],
-        },
-      },
-    ],
-  },
-  {
     war: 'Wars of the Roses',
     snapshots: [
       {
@@ -2004,33 +1989,6 @@ export const TERRITORY: WarTerritory[] = [
         label: 'May 1471: Battle of Tewkesbury',
         control: {
           'redcoat-red': ['United Kingdom'],
-        },
-      },
-    ],
-  },
-  {
-    war: 'Crimean War',
-    snapshots: [
-      {
-        year: 1854.6,
-        label: 'September 1854: Allied landing in the Crimea',
-        control: {
-          'ottoman': ['Turkey'],
-          'us': ['United Kingdom', 'France', 'Italy'],
-          'russia': ['Russia', 'Belarus', 'Ukraine', 'Estonia', 'Latvia', 'Lithuania', 'Moldova', 'Georgia', 'Armenia', 'Azerbaijan', 'Kazakhstan'],
-        },
-      },
-    ],
-  },
-  {
-    war: 'Vietnam War',
-    snapshots: [
-      {
-        year: 1965.5,
-        label: 'July 1965: US ground escalation',
-        control: {
-          'north-vietnam': ['Vietnam'],
-          'us': ['United States', 'Australia', 'New Zealand', 'Thailand', 'Philippines', 'South Korea'],
         },
       },
     ],
@@ -2049,12 +2007,6 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Korean War',
-    // Korean War already has snapshots above (line 593). Skip — leaving
-    // here as a placeholder if curators want sub-phase entries later.
-    snapshots: [],
-  },
-  {
     war: 'Eighty Years\' War',
     snapshots: [
       {
@@ -2063,40 +2015,6 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'continental-army': ['Netherlands'],
           'spain': ['Spain', 'Belgium', 'Luxembourg', 'Portugal'],
-        },
-      },
-    ],
-  },
-  {
-    war: 'Thirty Years\' War',
-    snapshots: [
-      {
-        year: 1631.5,
-        label: 'September 1631: Battle of Breitenfeld',
-        control: {
-          'sweden': ['Sweden', 'Finland', 'Norway'],
-          'continental-army': ['Netherlands'],
-          'nazi-germany': ['Austria', 'Czechia', 'Hungary'],
-          'spain': ['Spain'],
-          'france': ['France'],
-        },
-      },
-    ],
-  },
-  {
-    war: 'Seven Years\' War',
-    snapshots: [
-      {
-        year: 1759.8,
-        label: '1759: Annus Mirabilis',
-        control: {
-          'british-empire': ['United Kingdom', 'India', 'Canada'],
-          'continental-army': ['United States'],
-          'france': ['France', 'Algeria'],
-          'spain': ['Spain', 'Mexico'],
-          'prussia': ['Germany'],
-          'austria': ['Austria', 'Hungary', 'Czechia'],
-          'russia': ['Russia', 'Ukraine', 'Belarus'],
         },
       },
     ],
@@ -2173,19 +2091,6 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    war: 'Franco-Prussian War',
-    snapshots: [
-      {
-        year: 1870.7,
-        label: 'September 1870: Sedan and the Siege of Paris',
-        control: {
-          'prussia': ['Germany'],
-          'france': ['France', 'Algeria'],
-        },
-      },
-    ],
-  },
-  {
     war: 'Austro-Prussian War',
     snapshots: [
       {
@@ -2213,11 +2118,6 @@ export const TERRITORY: WarTerritory[] = [
         },
       },
     ],
-  },
-  {
-    war: 'War of the Spanish Succession',
-    // already in earlier snapshots; leaving as placeholder
-    snapshots: [],
   },
   {
     war: 'First English Civil War',
@@ -2302,22 +2202,6 @@ export const TERRITORY: WarTerritory[] = [
         control: {
           'nazi-germany': ['Spain'],
           'portugal': ['Portugal'],
-        },
-      },
-    ],
-  },
-  {
-    war: 'Italian War of 1521–1526',
-    snapshots: [
-      {
-        year: 1525.2,
-        label: 'February 1525: Battle of Pavia',
-        control: {
-          'continental-army': ['France'],
-          'spain': ['Spain'],
-          'nazi-germany': ['Austria', 'Czechia', 'Germany', 'Hungary'],
-          'italy': ['Italy'],
-          'british-empire': ['United Kingdom'],
         },
       },
     ],

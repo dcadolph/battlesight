@@ -37,6 +37,7 @@ updates the rows it owns. You can run a single stage or chain them with
 | --- | --- | --- |
 | Wikidata pull&nbsp;&nbsp; | `-wikidata` | SPARQL query for all entities of type `military operation` with coordinates. Inserts/updates `battles` rows. |
 | Wikidata facts&nbsp;&nbsp; | `-wikidata-dates` | Reads each unchecked wikidata row's item with `wbgetentities` (50 per call, cached per Q-id under `wikidata-dates` and `wikidata-labels`) and stores the P585 or P580 date with its precision, the P582 end, the P607 conflict labels and the P31 class labels in the `wikidata_*` columns. Cleanse then reconciles year, date and war against them. Runs after `-wikidata` on its own. Resumable. |
+| Wikidata wars | `-wikidata-wars` | For each war-less, unverified wikidata row, asks the query service for the item's P607 conflicts and P361 part-of targets (200 per query, cached per Q-id under `wikidata-wars` and `wikidata-war-targets`) and stores the war in `wikidata_conflict`: every P607 conflict, else each P361 target whose P31 class reads as a war, campaign, revolt or similar and never a battle, siege, list or region. Cleanse then files the row under that war, else under the first link of the infobox `partof`, and rewrites wars.json aliases to their canonical war. Runs after `-wikidata` on its own. Resumable. |
 | Coordinates&nbsp;&nbsp; | `-coords-from-source` | Checks every unverified wikidata row's point against Wikidata P625, then the English article's coordinate, then the other language articles' coordinates (P625 and sitelinks 50 Q-ids per call cached under `wikidata-coords`, article coordinates 50 titles per call cached under `geodata-<lang>`, one request per second). A point within 50 km of a source is kept and the source is recorded in `coord_source`. Otherwise the point moves to the source another source agrees with, or to the only source there is. Sources that disagree, or a lone source that is the stored point with a lost sign or swapped axes, leave the row alone and list it. Rows in the cleanse coordinate overrides are never read. Land rows whose Wikidata class is naval battle are retyped naval. Every move is logged with its old and new point. |
 | Title redirects | `-resolve-titles` | Resolves every stored Wikipedia title through normalization and redirects (50 per call, cached under `title-canonical`) and lists the titles that redirect or name no article. It writes nothing to the database. `cmd/quality -mismatch` reads the cache for its `title-redirect` and `title-missing` classes. |
 | Wikipedia enrichment&nbsp;&nbsp; | `-enrich` | Fetches REST API summary for each battle. Populates `wikipedia_title`, `wikipedia_extract`. |
@@ -47,7 +48,7 @@ updates the rows it owns. You can run a single stage or chain them with
 | Curated JSON seed&nbsp;&nbsp; | `-json <path>` | Insert/update from a hand-curated JSON file. Used for editorial overrides. |
 | Validate only&nbsp;&nbsp; | `-validate` | Parses every curated file (phases.json, wars.json, territory snapshots) and exits non-zero on any error. CI uses this. |
 
-The `-all` flag chains: `-wikidata -wikidata-dates -coords-from-source -resolve-titles -enrich -infobox -significance -references -wars`.
+The `-all` flag chains: `-wikidata -wikidata-dates -wikidata-wars -coords-from-source -resolve-titles -enrich -infobox -significance -references -wars`.
 
 ## Global Flags
 
@@ -66,6 +67,7 @@ The `-all` flag chains: `-wikidata -wikidata-dates -coords-from-source -resolve-
 | --- | --- | --- |
 | `-wikidata`&nbsp;&nbsp;&nbsp; | bool | Run the Wikidata SPARQL pull stage. |
 | `-wikidata-dates` | bool | Fill the `wikidata_*` columns for rows not yet checked. |
+| `-wikidata-wars` | bool | Name the war of war-less wikidata rows from Wikidata P607 or a war-class P361 target. |
 | `-coords-from-source` | bool | Check coordinates against Wikidata P625 and the Wikipedia articles. |
 | `-land` | string | Land TopoJSON that `-coords-from-source` reads (default `data/land-50m.json`). |
 | `-resolve-titles` | bool | Report Wikipedia titles that redirect or name no article. |

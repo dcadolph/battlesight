@@ -22,9 +22,17 @@ import (
 // Order of operations matters: text normalisation happens first so the
 // year/era/canonicalisation passes operate on clean strings. War-name
 // canonicalisation runs last because it needs the cleaned-up names to group
-// variants correctly.
-func Cleanse(ctx context.Context, db *sql.DB) (CleanseReport, error) {
+// variants correctly. wars carries the canonical war names and aliases from
+// wars.json, which win over any spelling the rows vote for.
+func Cleanse(ctx context.Context, db *sql.DB, wars WarNames) (CleanseReport, error) {
 	var rep CleanseReport
+	// War fill runs first so the text, era and variant passes below see
+	// the filled war on the same start.
+	if n, err := fillWarFromWikidata(ctx, db); err != nil {
+		return rep, err
+	} else {
+		rep.WarsFilled = n
+	}
 	if n, err := cleanseBattleText(ctx, db); err != nil {
 		return rep, err
 	} else {
@@ -70,10 +78,15 @@ func Cleanse(ctx context.Context, db *sql.DB) (CleanseReport, error) {
 	} else {
 		rep.BlankSidesDropped = n
 	}
-	if n, err := canonicaliseWarNames(ctx, db); err != nil {
+	if n, err := canonicaliseWarNames(ctx, db, wars.Keys); err != nil {
 		return rep, err
 	} else {
 		rep.WarNamesCanonicalised = n
+	}
+	if n, err := applyWarAliases(ctx, db, wars.Aliases); err != nil {
+		return rep, err
+	} else {
+		rep.WarAliasesApplied = n
 	}
 	if n, err := dropNonBattles(ctx, db); err != nil {
 		return rep, err
@@ -278,7 +291,11 @@ type CleanseReport struct {
 	ErasRecomputed         int
 	BlankSidesDropped      int
 	WarNamesCanonicalised  int
-	NonBattlesDropped      int
+	// WarsFilled counts war-less rows given a war from Wikidata or the infobox.
+	WarsFilled int
+	// WarAliasesApplied counts rows moved from a war alias to its canonical name.
+	WarAliasesApplied int
+	NonBattlesDropped int
 	// TwinsMerged counts allowlist pairs and redirect twins folded into one row.
 	TwinsMerged           int
 	DuplicatesRemoved     int
@@ -291,7 +308,7 @@ type CleanseReport struct {
 func (r CleanseReport) Total() int {
 	return r.BattleTextFixed + r.SideTextFixed + r.MissingDatesBackfilled +
 		r.DateStringsNormalised + r.SourceDatesReconciled + r.YearsAligned + r.YearsDerived +
-		r.ErasRecomputed + r.BlankSidesDropped + r.WarNamesCanonicalised +
+		r.ErasRecomputed + r.BlankSidesDropped + r.WarNamesCanonicalised + r.WarsFilled + r.WarAliasesApplied +
 		r.NonBattlesDropped + r.TwinsMerged + r.DuplicatesRemoved + r.CoordsOverridden + r.RichSearchRowsIndexed
 }
 
@@ -1075,7 +1092,7 @@ type warCount struct {
 //     under its parent (American Civil War, World War I, etc.).
 //  2. Collapse spelling variants of the same war (dash style, leading
 //     "the") onto the variant with the most battles.
-func canonicaliseWarNames(ctx context.Context, db *sql.DB) (int, error) {
+func canonicaliseWarNames(ctx context.Context, db *sql.DB, keys map[string]bool) (int, error) {
 	loadCounts := func() ([]warCount, error) {
 		rows, err := db.QueryContext(ctx,
 			`SELECT war, COUNT(*) FROM battles WHERE war != '' GROUP BY war`)
@@ -1173,7 +1190,12 @@ func canonicaliseWarNames(ctx context.Context, db *sql.DB) (int, error) {
 		// counts tilt the other way. "Second World War", "Great War", British
 		// "theatre", and parenthetical "(World War I/II)" labels all carry an
 		// alias scent the user does not want surfaced.
+		// A wars.json key outranks every other rule, so curated rows filed
+		// under it are never outvoted.
 		sort.Slice(variants, func(i, j int) bool {
+			if iKey, jKey := keys[variants[i].name], keys[variants[j].name]; iKey != jKey {
+				return iKey
+			}
 			iAlias := hasAliasPhrase(variants[i].name)
 			jAlias := hasAliasPhrase(variants[j].name)
 			if iAlias != jAlias {

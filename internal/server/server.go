@@ -67,20 +67,37 @@ func Run(cfg Config) error {
 		log.Printf("repaired date_start/date_end for %d battles", updated)
 	}
 
+	// Wars load before Cleanse because Cleanse files rows under the
+	// canonical war names and aliases that wars.json defines.
+	wars := battles.NewWars()
+	if cfg.WarsPath != "" {
+		n, err := wars.Load(cfg.WarsPath)
+		if err != nil {
+			log.Printf("warning: failed to load wars narratives from %s: %v", cfg.WarsPath, err)
+		} else if n > 0 {
+			log.Printf("loaded %d war narratives from %s", n, cfg.WarsPath)
+		}
+		go wars.Watch(context.Background(), cfg.WarsPath, time.Second)
+	}
+
 	// Cleanse: strip wiki/HTML markup leftovers, back-fill missing date
 	// strings, align off-by-one BC years to the prose date, recompute era,
-	// canonicalise war-name spelling variants, drop rows Wikidata says are
-	// not battles, and merge duplicate Wikipedia rows. Idempotent. Drives the
-	// audit error count toward zero on every start.
-	if rep, err := importer.Cleanse(context.Background(), database); err != nil {
+	// fill war-less rows from their sources, canonicalise war-name spelling
+	// variants and aliases, drop rows Wikidata says are not battles, and merge
+	// duplicate Wikipedia rows. Idempotent. Drives the audit error count
+	// toward zero on every start.
+	if rep, err := importer.Cleanse(context.Background(), database,
+		importer.WarNames{Keys: wars.Names(), Aliases: wars.Aliases()}); err != nil {
 		return fmt.Errorf("cleanse data: %w", err)
 	} else if rep.Total() > 0 {
 		log.Printf("cleansed data: %d battle text, %d sides, %d missing-date backfilled, %d dates normalized, "+
 			"%d reconciled with Wikidata, %d years aligned, %d years derived, %d eras recomputed, "+
-			"%d blank sides dropped, %d war-name variants merged, %d non-battles dropped, %d twins merged, %d duplicates removed",
+			"%d blank sides dropped, %d wars filled, %d war-name variants merged, %d war aliases applied, "+
+			"%d non-battles dropped, %d twins merged, %d duplicates removed",
 			rep.BattleTextFixed, rep.SideTextFixed, rep.MissingDatesBackfilled, rep.DateStringsNormalised,
 			rep.SourceDatesReconciled, rep.YearsAligned, rep.YearsDerived, rep.ErasRecomputed,
-			rep.BlankSidesDropped, rep.WarNamesCanonicalised, rep.NonBattlesDropped, rep.TwinsMerged, rep.DuplicatesRemoved)
+			rep.BlankSidesDropped, rep.WarsFilled, rep.WarNamesCanonicalised, rep.WarAliasesApplied,
+			rep.NonBattlesDropped, rep.TwinsMerged, rep.DuplicatesRemoved)
 	}
 
 	replays := battles.NewReplays()
@@ -95,17 +112,6 @@ func Run(cfg Config) error {
 		// content without restarting the server, save the file, reload the
 		// browser, see the change. The poll interval is 1s.
 		go replays.Watch(context.Background(), cfg.PhasesPath, time.Second)
-	}
-
-	wars := battles.NewWars()
-	if cfg.WarsPath != "" {
-		n, err := wars.Load(cfg.WarsPath)
-		if err != nil {
-			log.Printf("warning: failed to load wars narratives from %s: %v", cfg.WarsPath, err)
-		} else if n > 0 {
-			log.Printf("loaded %d war narratives from %s", n, cfg.WarsPath)
-		}
-		go wars.Watch(context.Background(), cfg.WarsPath, time.Second)
 	}
 
 	store := battles.NewStore(database)

@@ -471,7 +471,7 @@
     "lat": 25.4583,
     "lng": -100.975,
     "era": "industrial",
-    "war": "Mexican–American War",
+    "war": "Mexican-American War",
     "battleType": "land",
     "wikipediaTitle": "Battle of Buena Vista",
     "sides": [
@@ -709,7 +709,7 @@
     "lat": 14.5547,
     "lng": 120.7689,
     "era": "industrial",
-    "war": "Spanish-American War",
+    "war": "Spanish–American War",
     "battleType": "naval",
     "wikipediaTitle": "Battle of Manila Bay",
     "sides": [
@@ -738,7 +738,7 @@
     "lat": 19.9806,
     "lng": -75.7472,
     "era": "industrial",
-    "war": "Spanish-American War",
+    "war": "Spanish–American War",
     "battleType": "land",
     "wikipediaTitle": "Battle of San Juan Hill",
     "sides": [
@@ -883,7 +883,7 @@
     "lat": 33.0833,
     "lng": 70.1167,
     "era": "cold-war",
-    "war": "Soviet-Afghan War",
+    "war": "Soviet–Afghan War",
     "battleType": "land",
     "wikipediaTitle": "Battle for Hill 3234",
     "sides": [
@@ -1028,7 +1028,7 @@
     "lat": 26.0103,
     "lng": -97.4628,
     "era": "industrial",
-    "war": "Mexican–American War",
+    "war": "Mexican-American War",
     "battleType": "land",
     "wikipediaTitle": "Battle of Palo Alto",
     "sides": [
@@ -1057,7 +1057,7 @@
     "lat": 19.4225,
     "lng": -99.1817,
     "era": "industrial",
-    "war": "Mexican–American War",
+    "war": "Mexican-American War",
     "battleType": "land",
     "wikipediaTitle": "Battle of Chapultepec",
     "sides": [
@@ -1231,7 +1231,7 @@
     "lat": 19.965,
     "lng": -75.91,
     "era": "industrial",
-    "war": "Spanish-American War",
+    "war": "Spanish–American War",
     "battleType": "naval",
     "wikipediaTitle": "Battle of Santiago de Cuba",
     "sides": [

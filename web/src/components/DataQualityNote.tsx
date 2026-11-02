@@ -16,10 +16,10 @@ export default function DataQualityNote() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-24 left-4 z-30 select-none">
+    <div>
       {open && (
         <div
-          className="mb-2 w-[320px] max-w-[86vw] rounded-xl p-4 backdrop-blur-md"
+          className="absolute bottom-full left-0 mb-2 w-[320px] max-w-[86vw] rounded-xl p-4 backdrop-blur-md"
           style={{
             background: 'rgba(8, 10, 18, 0.92)',
             border: '1px solid rgba(148, 163, 184, 0.22)',

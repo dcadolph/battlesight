@@ -9,6 +9,7 @@ import CommanderPanel from './components/CommanderPanel';
 import { canonCountriesForBattle } from './lib/country';
 import CommandBar from './components/CommandBar';
 import EraLegend from './components/EraLegend';
+import AboutNote from './components/AboutNote';
 import DataQualityNote from './components/DataQualityNote';
 import IntroOverlay from './components/IntroOverlay';
 import HistoryPlayhead from './components/HistoryPlayhead';
@@ -1043,11 +1044,18 @@ export default function App() {
         />
       )}
 
-      {/* Standing data-quality note. Stays on screen whenever the globe
-          is browsable so the tier system and the estimate policy are one
-          click away from every aggregate the interface renders. Hidden
-          during replay, where the full-screen overlay owns the frame. */}
-      {!replayBattle && <DataQualityNote />}
+      {/* Standing data-quality and pre-release notes. They stay on screen
+          whenever the globe is browsable so the tier system, the estimate
+          policy, and the credits are one click away. The row is the
+          positioning context, so either card opens at the same left edge.
+          Hidden during replay, where the full-screen overlay owns the
+          frame. */}
+      {!replayBattle && (
+        <div className="fixed bottom-24 left-4 z-30 flex items-center gap-2 select-none">
+          <DataQualityNote />
+          <AboutNote />
+        </div>
+      )}
 
       {/* Era-tinted screen vignette. A soft radial mood wash at the
           edges, NOT a black mask that drains the globe. Only applied

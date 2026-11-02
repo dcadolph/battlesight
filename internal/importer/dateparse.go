@@ -98,12 +98,16 @@ var (
 	bcRe = regexp.MustCompile(`(?i)(\d+)\s*BC`)
 	// ISO-ish "1939-09-01"
 	isoRe = regexp.MustCompile(`(\d{4})-(\d{2})-(\d{2})`)
+	// qualifierRe matches the early, mid and late qualifiers Wikipedia puts in
+	// front of a month or year ("late January 2026", "mid-1940"). The parser
+	// drops them so the month or year beneath still bounds the range.
+	qualifierRe = regexp.MustCompile(`(?i)\b(?:early|mid|late)(?:\s+|-)`)
 )
 
 // ParseDateRange extracts start and end ISO dates from a Wikipedia date string.
 // Returns empty strings for unparseable dates.
 func ParseDateRange(s string, fallbackYear int) DateRange {
-	s = strings.TrimSpace(s)
+	s = strings.TrimSpace(qualifierRe.ReplaceAllString(s, ""))
 	if s == "" || s == "0" {
 		return yearFallback(fallbackYear)
 	}

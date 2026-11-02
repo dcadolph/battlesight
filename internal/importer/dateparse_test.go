@@ -19,6 +19,12 @@ func TestParseDateRange(t *testing.T) {
 	}{
 		{Name: "iso single", In: "1939-09-01", Want: DateRange{Start: "1939-09-01", End: "1939-09-01"}},
 		{Name: "dmy", In: "14 July 1864", Want: DateRange{Start: "1864-07-14", End: "1864-07-14"}},
+		{Name: "late month end", In: "18 July 2024 – late January 2026", Want: DateRange{Start: "2024-07-18", End: "2026-01-31"}},
+		{Name: "early month end", In: "19 April – early May 1940", Want: DateRange{Start: "1940-04-19", End: "1940-05-31"}},
+		{Name: "qualified month range", In: "Late May – late June 1342", Want: DateRange{Start: "1342-05-01", End: "1342-06-30"}},
+		{Name: "mid month end", In: "19 October – mid November 1983", Want: DateRange{Start: "1983-10-19", End: "1983-11-30"}},
+		{Name: "qualified year", In: "Late 1299", Want: DateRange{Start: "1299-12-31", End: "1299-12-31"}},
+		{Name: "qualified year range", In: "1475 – early 1476", Want: DateRange{Start: "1475-01-01", End: "1476-12-31"}},
 		{Name: "mdy with comma", In: "July 14, 1864", Want: DateRange{Start: "1864-07-14", End: "1864-07-14"}},
 		{Name: "day range mdy", In: "July 14-15, 1864", Want: DateRange{Start: "1864-07-14", End: "1864-07-15"}},
 		{Name: "full range with en-dash", In: "10 July 1940 – 31 October 1940", Want: DateRange{Start: "1940-07-10", End: "1940-10-31"}},

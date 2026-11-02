@@ -29,15 +29,6 @@ func testAuditSide(id string) AuditSide {
 	return AuditSide{BattleID: id, Name: "United States", Commander: "George Meade"}
 }
 
-// mismatchIDs indexes a report by class key.
-func mismatchIDs(classes []MismatchClass) map[string][]string {
-	out := make(map[string][]string, len(classes))
-	for _, c := range classes {
-		out[c.Key] = c.IDs
-	}
-	return out
-}
-
 // TestMismatchesClean pins that a clean row lands in no class and that the
 // classes needing later columns report n/a.
 func TestMismatchesClean(t *testing.T) {

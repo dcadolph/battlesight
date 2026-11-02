@@ -28,12 +28,17 @@ const nominatimUserAgent = "battlesight-importer/1.0 (personal project; contact 
 // shared Nominatim service requires of bulk users.
 const nominatimInterval = time.Second
 
-// nominatimMinImportance is the score at which a Nominatim hit is trusted outright.
-const nominatimMinImportance = 0.3
-
 // nominatimMaxBBoxSpan rejects hits whose bounding box spans more degrees than
-// this in either dimension: country-level blobs, not battle sites.
-const nominatimMaxBBoxSpan = 5.0
+// this in either dimension: provinces and countries, not battle sites.
+const nominatimMaxBBoxSpan = 1.5
+
+// nominatimNonPlace lists the Nominatim categories of businesses, buildings and
+// infrastructure, which share a battle's place name but are not its site.
+var nominatimNonPlace = map[string]bool{
+	"shop": true, "amenity": true, "tourism": true, "office": true, "craft": true, "building": true,
+	"highway": true, "railway": true, "leisure": true, "man_made": true, "aeroway": true, "club": true,
+	"emergency": true, "healthcare": true, "public_transport": true,
+}
 
 // backfillPlaceCacheNS is the disk cache namespace for Nominatim responses.
 const backfillPlaceCacheNS = "nominatim-place"
@@ -1184,6 +1189,8 @@ type nominatimResult struct {
 	Importance float64 `json:"importance"`
 	// DisplayName is the full human-readable place hierarchy.
 	DisplayName string `json:"display_name"`
+	// Category is the OSM key of the hit, such as place, boundary or shop.
+	Category string `json:"category"`
 	// BoundingBox is [south, north, west, east] in decimal-degree strings.
 	BoundingBox []string `json:"boundingbox"`
 }
@@ -1287,10 +1294,11 @@ func firstNominatimResult(body []byte) *nominatimResult {
 	return &results[0]
 }
 
-// nominatimAcceptable gates one hit against the confidence rules: valid
-// coordinates, a bounding box no wider than nominatimMaxBBoxSpan degrees, and
-// either an importance of nominatimMinImportance or a place-name token echoed
-// in the display name. An empty reason means the hit is accepted.
+// nominatimAcceptable returns the hit's coordinates, or the reason it is not
+// a battle site: unparseable or 0,0 coordinates, a bounding box wider than a
+// city, a business or building, or a display name that lacks the place's
+// first distinctive token, the most specific locality the infobox names.
+// Importance alone never accepts, since a deli named for a city scores well.
 func nominatimAcceptable(hit nominatimResult, place string) (float64, float64, string) {
 	lat, errLat := strconv.ParseFloat(hit.Lat, 64)
 	lng, errLng := strconv.ParseFloat(hit.Lon, 64)
@@ -1308,13 +1316,26 @@ func nominatimAcceptable(hit nominatimResult, place string) (float64, float64, s
 			}
 		}
 	}
-	if hit.Importance >= nominatimMinImportance {
-		return lat, lng, ""
+	if nominatimNonPlace[hit.Category] {
+		return 0, 0, "not-a-place"
 	}
-	if placeTokenInDisplay(place, hit.DisplayName) {
-		return lat, lng, ""
+	tok := firstPlaceToken(place)
+	if tok == "" || !strings.Contains(strings.ToLower(hit.DisplayName), tok) {
+		return 0, 0, "low-confidence"
 	}
-	return 0, 0, "low-confidence"
+	return lat, lng, ""
+}
+
+// firstPlaceToken returns the first distinctive lowercased token of the place
+// string, skipping short words and stopwords, or "" when there is none.
+func firstPlaceToken(place string) string {
+	for _, tok := range strings.FieldsFunc(place, func(r rune) bool { return !unicode.IsLetter(r) }) {
+		tok = strings.ToLower(tok)
+		if len(tok) >= 3 && !bfTokenStopwords[tok] {
+			return tok
+		}
+	}
+	return ""
 }
 
 // bfTokenStopwords lists place-string tokens too generic to count as a match
@@ -1329,23 +1350,6 @@ var bfTokenStopwords = map[string]bool{
 	"bay": true, "island": true, "islands": true, "coast": true, "city": true,
 	"town": true, "village": true, "fort": true, "castle": true, "between": true,
 	"today": true, "now": true, "formerly": true, "currently": true, "site": true,
-}
-
-// placeTokenInDisplay reports whether any distinctive token of the place
-// string appears in the display name, case-insensitively.
-func placeTokenInDisplay(place, displayName string) bool {
-	display := strings.ToLower(displayName)
-	tokens := strings.FieldsFunc(place, func(r rune) bool { return !unicode.IsLetter(r) })
-	for _, tok := range tokens {
-		tok = strings.ToLower(tok)
-		if len(tok) < 3 || bfTokenStopwords[tok] {
-			continue
-		}
-		if strings.Contains(display, tok) {
-			return true
-		}
-	}
-	return false
 }
 
 // bfPlaceNoiseRe strips leading locality prepositions and era qualifiers that

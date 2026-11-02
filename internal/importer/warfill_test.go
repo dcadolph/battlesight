@@ -104,6 +104,7 @@ func TestFillAndAliasWars(t *testing.T) {
 		{ID: "has-war", Source: "wikidata", War: "Russia-Ukraine War", Conflict: "Gaza war"},
 		{ID: "no-source", Source: "wikidata"},
 		{ID: "out-of-region", Source: "wikidata", Conflict: "Russo-Ukrainian War", Lat: 47, Lng: 6},
+		{ID: "capitalized", Source: "wikidata", War: "Eastern front of the invasion"},
 	})
 	ctx := context.Background()
 	filled, err := fillWarFromWikidata(ctx, conn)
@@ -113,15 +114,16 @@ func TestFillAndAliasWars(t *testing.T) {
 	if diff := cmp.Diff(2, filled); diff != "" {
 		t.Errorf("filled mismatch (-want +got):\n%s", diff)
 	}
-	aliases := map[string]string{"Israel–Hamas war": "Gaza war", "Russia-Ukraine War": "Russo-Ukrainian War"}
+	aliases := map[string]string{"Israel–Hamas war": "Gaza war", "Russia-Ukraine War": "Russo-Ukrainian War",
+		"eastern front of the invasion": "Russian invasion of Ukraine"}
 	moved, err := applyWarAliases(ctx, conn, aliases)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(2, moved); diff != "" {
+	if diff := cmp.Diff(3, moved); diff != "" {
 		t.Errorf("moved mismatch (-want +got):\n%s", diff)
 	}
-	want := []string{"curated:", "filled:Gaza war", "from-partof:Gaza war", "has-war:Russo-Ukrainian War",
+	want := []string{"capitalized:Russian invasion of Ukraine", "curated:", "filled:Gaza war", "from-partof:Gaza war", "has-war:Russo-Ukrainian War",
 		"no-source:", "out-of-region:", "verified:"}
 	got := queryStrings(t, conn, `SELECT id || ':' || war FROM battles ORDER BY id`)
 	if diff := cmp.Diff(want, got); diff != "" {

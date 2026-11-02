@@ -180,8 +180,9 @@ func fillWarFromWikidata(ctx context.Context, db *sql.DB) (int, error) {
 	return len(fills), nil
 }
 
-// applyWarAliases rewrites every row filed under a war alias to the canonical
-// war name from wars.json.
+// applyWarAliases rewrites every row filed under a war alias, in any case, to
+// the canonical war name from wars.json. Text cleanse capitalizes a Wikidata
+// label that starts lower case, so an exact match would miss filled rows.
 func applyWarAliases(ctx context.Context, db *sql.DB, aliases map[string]string) (int, error) {
 	if len(aliases) == 0 {
 		return 0, nil
@@ -191,7 +192,7 @@ func applyWarAliases(ctx context.Context, db *sql.DB, aliases map[string]string)
 		return 0, fmt.Errorf("begin war alias tx: %w", err)
 	}
 	defer tx.Rollback()
-	stmt, err := tx.PrepareContext(ctx, `UPDATE battles SET war = ? WHERE war = ?`)
+	stmt, err := tx.PrepareContext(ctx, `UPDATE battles SET war = ? WHERE war = ? COLLATE NOCASE AND war != ?`)
 	if err != nil {
 		return 0, fmt.Errorf("prepare war alias: %w", err)
 	}
@@ -203,7 +204,7 @@ func applyWarAliases(ctx context.Context, db *sql.DB, aliases map[string]string)
 	sort.Strings(from)
 	var n int
 	for _, a := range from {
-		res, err := stmt.ExecContext(ctx, aliases[a], a)
+		res, err := stmt.ExecContext(ctx, aliases[a], a, aliases[a])
 		if err != nil {
 			return n, fmt.Errorf("rewrite war alias %q: %w", a, err)
 		}

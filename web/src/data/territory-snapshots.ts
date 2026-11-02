@@ -242,85 +242,33 @@ export const TERRITORY: WarTerritory[] = [
     war: 'War in Donbas (2014–2022)',
     snapshots: [
       {
+        // Source: Russo-Ukrainian war, English Wikipedia, revision 1382955232, read 2026-11-02.
         year: 2014.2,
         label: 'February 2014: Crimea annexed, Donbas insurgency',
         control: {
           'russia': ['Russia', 'Belarus'],
           'ukraine': ['Ukraine'],
-          'us': ['United States'],
-          'uk': ['United Kingdom'],
         },
       },
       {
+        // Source: Russo-Ukrainian war, English Wikipedia, revision 1382955232, read 2026-11-02.
+        year: 2015.12,
+        label: 'February 2015: Minsk II signed, the front settles',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+        },
+      },
+      {
+        // Source: Russo-Ukrainian war (2022–present), English Wikipedia, revision 1382590021, read 2026-11-02.
         year: 2022.16,
-        label: 'February 24 2022: Full-scale invasion',
+        label: '24 February 2022: Full-scale invasion ends the Donbas phase',
         control: {
           'russia': ['Russia', 'Belarus'],
           'ukraine': ['Ukraine'],
           'us': ['United States', 'Canada'],
           'uk': ['United Kingdom'],
-          'australia': ['Australia'],
-          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
-        },
-      },
-      {
-        year: 2022.7,
-        label: 'September 2022: Kharkiv counter-offensive',
-        control: {
-          'russia': ['Russia', 'Belarus'],
-          'ukraine': ['Ukraine'],
-          'us': ['United States', 'Canada'],
-          'uk': ['United Kingdom'],
-          'australia': ['Australia'],
-          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
-        },
-      },
-      {
-        year: 2022.85,
-        label: 'November 2022: Kherson liberated',
-        control: {
-          'russia': ['Russia', 'Belarus'],
-          'ukraine': ['Ukraine'],
-          'us': ['United States', 'Canada'],
-          'uk': ['United Kingdom'],
-          'australia': ['Australia'],
-          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
-        },
-      },
-      {
-        year: 2023.5,
-        label: 'Summer 2023: Ukrainian counter-offensive grinds south',
-        control: {
-          'russia': ['Russia', 'Belarus'],
-          'ukraine': ['Ukraine'],
-          'us': ['United States', 'Canada'],
-          'uk': ['United Kingdom'],
-          'australia': ['Australia'],
-          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
-        },
-      },
-      {
-        year: 2024.2,
-        label: 'February 2024: Avdiivka falls, Russia presses west',
-        control: {
-          'russia': ['Russia', 'Belarus'],
-          'ukraine': ['Ukraine'],
-          'us': ['United States', 'Canada'],
-          'uk': ['United Kingdom'],
-          'australia': ['Australia'],
-          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
-        },
-      },
-      {
-        year: 2024.62,
-        label: 'August 2024: Ukraine launches Kursk incursion',
-        control: {
-          'russia': ['Russia', 'Belarus'],
-          'ukraine': ['Ukraine'],
-          'us': ['United States', 'Canada'],
-          'uk': ['United Kingdom'],
-          'australia': ['Australia'],
-          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Bulgaria', 'Hungary', 'Czechia', 'Slovakia', 'Slovenia', 'Croatia', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway', 'Denmark', 'Netherlands', 'Belgium', 'Luxembourg', 'Ireland', 'Portugal', 'Greece', 'Austria'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
         },
       },
     ],
@@ -1407,17 +1355,33 @@ export const TERRITORY: WarTerritory[] = [
     ],
   },
   {
-    // Aliased under both names so battles tagged "Russo-Ukrainian War" (the
-    // DB-canonical name, 204 battles) AND "Russian invasion of Ukraine" (9
-    // battles) both surface the same territory shading. The previous keying
-    // left the 204-battle bucket with NO snapshot match → no colored
-    // territory → polygons fell back to the generic blue stub, which
-    // rendered both Russia and Ukraine as the same blue tint.
+    // The Russo-Ukrainian War runs from 2014 to the present. Control stays
+    // country-level, so the snapshots carry the war's turns as labels: the
+    // world-atlas polygons cannot show occupied oblasts.
     war: 'Russo-Ukrainian War',
     snapshots: [
       {
+        // Source: Russo-Ukrainian war, English Wikipedia, revision 1382955232, read 2026-11-02.
+        year: 2014.15,
+        label: 'February 2014: Russia occupies Crimea',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+        },
+      },
+      {
+        // Source: Russo-Ukrainian war, English Wikipedia, revision 1382955232, read 2026-11-02.
+        year: 2014.3,
+        label: 'April 2014: Russian-backed forces start the Donbas war',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+        },
+      },
+      {
+        // Source: Russo-Ukrainian war (2022–present), English Wikipedia, revision 1382590021, read 2026-11-02.
         year: 2022.16,
-        label: 'February 24 2022: Full-scale invasion',
+        label: '24 February 2022: Full-scale invasion',
         control: {
           'russia': ['Russia', 'Belarus'],
           'ukraine': ['Ukraine'],
@@ -1427,8 +1391,9 @@ export const TERRITORY: WarTerritory[] = [
         },
       },
       {
+        // Source: Russo-Ukrainian war (2022–present), English Wikipedia, revision 1382590021, read 2026-11-02.
         year: 2022.7,
-        label: 'September 2022: Kharkiv counter-offensive',
+        label: 'September 2022: Kharkiv counteroffensive',
         control: {
           'russia': ['Russia', 'Belarus'],
           'ukraine': ['Ukraine'],
@@ -1438,10 +1403,99 @@ export const TERRITORY: WarTerritory[] = [
         },
       },
       {
-        year: 2024.62,
-        label: 'August 2024: Ukraine breaches into Kursk Oblast',
+        // Source: Russo-Ukrainian war (2022–present), English Wikipedia, revision 1382590021, read 2026-11-02.
+        year: 2022.86,
+        label: 'November 2022: Kherson liberated',
         control: {
           'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
+        },
+      },
+      {
+        // Source: Battle of Bakhmut, English Wikipedia, revision 1383035091, read 2026-11-02.
+        year: 2023.38,
+        label: 'May 2023: Bakhmut falls to Russia',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
+        },
+      },
+      {
+        // Source: Battle of Avdiivka (2023–2024), English Wikipedia, revision 1378237508, read 2026-11-02.
+        year: 2024.13,
+        label: 'February 2024: Avdiivka falls to Russia',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
+        },
+      },
+      {
+        // Source: Kursk campaign, English Wikipedia, revision 1382583935, read 2026-11-02.
+        year: 2024.6,
+        label: 'August 2024: Ukraine pushes into Kursk Oblast',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
+        },
+      },
+      {
+        // Source: Kursk campaign, English Wikipedia, revision 1382583935, read 2026-11-02.
+        year: 2024.85,
+        label: 'November 2024: North Korean troops join Russia in Kursk Oblast',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'north-korea': ['North Korea'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
+        },
+      },
+      {
+        // Source: Kursk campaign, English Wikipedia, revision 1382583935, read 2026-11-02.
+        year: 2025.19,
+        label: 'March 2025: Russia retakes most of Kursk Oblast',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'north-korea': ['North Korea'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
+        },
+      },
+      {
+        // Source: Pokrovsk offensive, English Wikipedia, revision 1372998088, read 2026-11-02.
+        year: 2026.07,
+        label: 'January 2026: Russia takes Pokrovsk and Myrnohrad',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'north-korea': ['North Korea'],
+          'ukraine': ['Ukraine'],
+          'us': ['United States', 'Canada'],
+          'uk': ['United Kingdom'],
+          'france': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Romania', 'Estonia', 'Latvia', 'Lithuania', 'Finland', 'Sweden', 'Norway'],
+        },
+      },
+      {
+        // Source: Russo-Ukrainian war, English Wikipedia, revision 1382955232, read 2026-11-02.
+        year: 2026.7,
+        label: 'September 2026: Russia holds about a fifth of Ukraine',
+        control: {
+          'russia': ['Russia', 'Belarus'],
+          'north-korea': ['North Korea'],
           'ukraine': ['Ukraine'],
           'us': ['United States', 'Canada'],
           'uk': ['United Kingdom'],
@@ -1457,21 +1511,60 @@ export const TERRITORY: WarTerritory[] = [
         year: 2024.3,
         label: 'April 2024: Iran fires 300 drones and missiles at Israel',
         control: {
-          'persian-purple': ['Iran', 'Iraq', 'Syria'],
+          'iran': ['Iran', 'Iraq', 'Syria'],
           'us': ['United States'],
           'uk': ['United Kingdom', 'Jordan'],
-          'south-korea-blue': ['Israel'],
+          'israel': ['Israel'],
         },
       },
       {
         year: 2024.78,
         label: 'October 2024: Israel strikes deep into Iran',
         control: {
-          'persian-purple': ['Iran', 'Iraq', 'Syria'],
+          'iran': ['Iran', 'Iraq', 'Syria'],
           'us': ['United States'],
           'uk': ['United Kingdom', 'Jordan'],
-          'south-korea-blue': ['Israel'],
+          'israel': ['Israel'],
         },
+      },
+    ],
+  },
+  {
+    // The Twelve-Day War, 13 to 24 June 2025.
+    war: 'Twelve-Day War',
+    snapshots: [
+      {
+        // Source: Twelve-Day War, English Wikipedia, revision 1382848372, read 2026-11-02.
+        year: 2025.45,
+        label: '13 June 2025: Israel strikes Iran\'s nuclear and military sites',
+        control: {
+          'iran': ['Iran'],
+          'israel': ['Israel'],
+          'us': ['United States'],
+        },
+        bloc: { 'iran': 'A', 'israel': 'B', 'us': 'B' },
+      },
+      {
+        // Source: Twelve-Day War, English Wikipedia, revision 1382848372, read 2026-11-02. Qatar hosts the US base Iran struck.
+        year: 2025.47,
+        label: '22 June 2025: US bombs three nuclear sites, Iran fires on a US base in Qatar',
+        control: {
+          'iran': ['Iran'],
+          'israel': ['Israel'],
+          'us': ['United States', 'Qatar'],
+        },
+        bloc: { 'iran': 'A', 'israel': 'B', 'us': 'B' },
+      },
+      {
+        // Source: Twelve-Day War, English Wikipedia, revision 1382848372, read 2026-11-02.
+        year: 2025.48,
+        label: '24 June 2025: Ceasefire under US pressure',
+        control: {
+          'iran': ['Iran'],
+          'israel': ['Israel'],
+          'us': ['United States', 'Qatar'],
+        },
+        bloc: { 'iran': 'A', 'israel': 'B', 'us': 'B' },
       },
     ],
   },
@@ -1483,19 +1576,19 @@ export const TERRITORY: WarTerritory[] = [
         label: 'October 7 2023: Hamas attack, Israeli response begins',
         control: {
           'hamas': ['Palestine'],
-          'south-korea-blue': ['Israel'],
-          'persian-purple': ['Iran', 'Lebanon', 'Syria'],
+          'israel': ['Israel'],
+          'iran': ['Iran', 'Lebanon', 'Syria'],
           'us': ['United States'],
           'uk': ['United Kingdom', 'Egypt', 'Jordan'],
         },
       },
       {
         year: 2024.5,
-        label: 'Mid-2024: Rafah operation, regional escalation',
+        label: 'May 2024: Rafah offensive, regional escalation',
         control: {
           'hamas': ['Palestine'],
-          'south-korea-blue': ['Israel'],
-          'persian-purple': ['Iran', 'Lebanon', 'Syria'],
+          'israel': ['Israel'],
+          'iran': ['Iran', 'Lebanon', 'Syria'],
           'us': ['United States'],
           'uk': ['United Kingdom', 'Egypt', 'Jordan'],
         },
@@ -1505,8 +1598,20 @@ export const TERRITORY: WarTerritory[] = [
         label: 'January 2025: First-phase ceasefire',
         control: {
           'hamas': ['Palestine'],
-          'south-korea-blue': ['Israel'],
-          'persian-purple': ['Iran', 'Lebanon', 'Syria'],
+          'israel': ['Israel'],
+          'iran': ['Iran', 'Lebanon', 'Syria'],
+          'us': ['United States'],
+          'uk': ['United Kingdom', 'Egypt', 'Jordan'],
+        },
+      },
+      {
+        // Source: Gaza war, English Wikipedia, revision 1383137069, read 2026-11-02.
+        year: 2025.78,
+        label: '10 October 2025: Ceasefire under a US-backed peace plan',
+        control: {
+          'hamas': ['Palestine'],
+          'israel': ['Israel'],
+          'iran': ['Iran', 'Lebanon', 'Syria'],
           'us': ['United States'],
           'uk': ['United Kingdom', 'Egypt', 'Jordan'],
         },
@@ -1520,20 +1625,20 @@ export const TERRITORY: WarTerritory[] = [
         year: 2024.7,
         label: 'September 2024: Pager attacks, leadership decapitated',
         control: {
-          'persian-purple': ['Iran', 'Lebanon', 'Syria'],
+          'iran': ['Iran', 'Lebanon', 'Syria'],
           'us': ['United States'],
           'uk': ['United Kingdom'],
-          'south-korea-blue': ['Israel'],
+          'israel': ['Israel'],
         },
       },
       {
         year: 2024.9,
         label: 'November 2024: Ground incursion, ceasefire',
         control: {
-          'persian-purple': ['Iran', 'Lebanon', 'Syria'],
+          'iran': ['Iran', 'Lebanon', 'Syria'],
           'us': ['United States'],
           'uk': ['United Kingdom'],
-          'south-korea-blue': ['Israel'],
+          'israel': ['Israel'],
         },
       },
     ],

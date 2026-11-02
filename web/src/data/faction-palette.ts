@@ -30,6 +30,8 @@ export type ColorKey =
   | 'isis-black'
   | 'ukraine-blue'
   | 'russia-modern-red'
+  | 'israel-blue'
+  | 'iran-green'
   // American Civil War.
   | 'union-blue'
   | 'confederate-gray'
@@ -83,6 +85,8 @@ const PALETTE: Record<ColorKey, Palette> = {
   'isis-black': { primary: '#0f1116', glow: 'rgba(15,17,22,0.55)' },
   'ukraine-blue': { primary: '#facc15', glow: 'rgba(250,204,21,0.45)' },
   'russia-modern-red': { primary: '#a5121b', glow: 'rgba(165,18,27,0.45)' },
+  'israel-blue': { primary: '#0038b8', glow: 'rgba(0,56,184,0.45)' },
+  'iran-green': { primary: '#239f40', glow: 'rgba(35,159,64,0.45)' },
   // American Civil War.
   'union-blue': { primary: '#1e3a8a', glow: 'rgba(30,58,138,0.45)' },
   'confederate-gray': { primary: '#6b7280', glow: 'rgba(107,114,128,0.45)' },
@@ -159,6 +163,10 @@ export function detectColorKey(name: string): ColorKey | null {
   // Modern Russia / Ukraine.
   if (/(ukrainian|ukraine|\bzsu\b|\bafu\b|kyiv government)/.test(s)) return 'ukraine-blue';
   if (/(russian federation|russian armed|wagner|donetsk|luhansk|\bvdv\b)/.test(s)) return 'russia-modern-red';
+
+  // Modern Israel and Iran.
+  if (/(\bisraeli?\b|\bidf\b)/.test(s)) return 'israel-blue';
+  if (/(\biran\b|iranian|\birgc\b|islamic revolutionary guard|islamic republic)/.test(s)) return 'iran-green';
 
   // American Civil War.
   if (/(\bconfederate|confederacy|\bcsa\b|johnny reb|army of northern virginia|army of tennessee|stonewall|lee'?s army)/.test(s)) {

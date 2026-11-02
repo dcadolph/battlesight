@@ -159,13 +159,20 @@
     "parent": ""
   },
   "Anglophone Crisis": {
-    "outcome": "| Combatant1 = Cameroon",
+    "outcome": "Ongoing as of November 2026.",
     "humanDeaths": 6000,
     "startYear": 2017,
     "endYear": 0,
     "parent": "",
     "aftermath": "A seven-year-and-counting conflict between the Cameroonian government and Ambazonian separatists from the country's Anglophone Northwest and Southwest regions. The war has displaced 600,000+ and killed perhaps 6,000-10,000. No political settlement has been reached.",
-    "keyTerms": "Declaration of Ambazonia (October 1, 2017)"
+    "keyTerms": "Declaration of Ambazonia (October 1, 2017)",
+    "sources": [
+      {
+        "title": "Anglophone Crisis",
+        "revision": 1382691839,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Angolan Wars": {
     "aftermath": "Portuguese territory in Angola.The Angolan Wars had a profound impact in the region. Kongo suffered a severe demographic loss as a result of conflict and civil-war, as did Ndongo, which was annexed by Portugal. Ndongo was the first African kingdom to be annexed by Europeans. Popular memory of the depredations of the cannibal Imbangala in particular lingered long in Kongo.",
@@ -1618,8 +1625,18 @@
     "startYear": 2012,
     "endYear": 0,
     "parent": "",
-    "outcome": "Ongoing; Tuareg-Islamist offensive of 2012 reversed by French intervention but jihadist insurgency continues.",
-    "aftermath": "A decade-long war that began with the 2012 Tuareg revolt and the AQIM/Ansar Dine takeover of northern Mali. French Operation Serval (2013) and the EU/UN missions stabilised the south but the insurgency mutated. Wagner Group replaced French forces in 2022."
+    "outcome": "Ongoing as of November 2026.",
+    "aftermath": "A decade-long war that began with the 2012 Tuareg revolt and the AQIM/Ansar Dine takeover of northern Mali. French Operation Serval (2013) and the EU/UN missions stabilised the south but the insurgency mutated. Wagner Group replaced French forces in 2022.",
+    "aliases": [
+      "Northern Mali conflict"
+    ],
+    "sources": [
+      {
+        "title": "Mali War",
+        "revision": 1383184061,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Mauritius campaign of 1809–1811": {
     "outcome": "British victory",
@@ -2072,8 +2089,8 @@
     "keyTerms": "Treaty creating the USSR (December 1922)"
   },
   "Russian invasion of Ukraine": {
-    "outcome": "Ongoing as of mid-2026. The full-scale invasion began before dawn on 24 February 2022 with cruise missile strikes across Ukraine and ground crossings from Belarus, Russia, and Crimea.",
-    "aftermath": "The initial Russian plan to seize Kyiv and decapitate the government within 72 hours failed at Hostomel and along the highways north of the capital. By April 2022 Russian forces had withdrawn from northern Ukraine and shifted focus to the Donbas and the southern land bridge to Crimea. The war has produced the largest tank engagements, drone campaigns, and urban sieges in Europe since 1945. Estimated casualties exceed 500,000 across both sides. The Wagner Group's June 2023 mutiny was a domestic political consequence. Prigozhin died two months later in a plane crash widely attributed to the Kremlin.",
+    "outcome": "Ongoing as of November 2026. Peace negotiations have stalled, and Russia has repeatedly refused calls for a ceasefire.",
+    "aftermath": "Russian troops withdrew from northern Ukraine and the outskirts of Kyiv by April 2022, and the Bucha massacre was uncovered after their withdrawal. Russia took Mariupol after a destructive siege. Ukrainian counteroffensives from August 2022 liberated most of Kharkiv Oblast and, in November, the city of Kherson, and Russia declared the annexation of four partly occupied provinces. After small but steady Russian advances in the east in the first half of 2024, Ukraine launched a cross-border offensive into Russia's Kursk Oblast in August 2024, where North Korean soldiers were sent to help Russia.",
     "keyTerms": "No peace treaty. The Black Sea Grain Initiative (July 2022 to July 2023) was the most significant negotiated agreement before its Russian withdrawal.",
     "notable": [
       "Failed Russian offensive on Kyiv ends the initial war plan",
@@ -2090,7 +2107,15 @@
       "northern front of the Russian invasion of Ukraine",
       "Russo-Ukrainian war (2022–present)",
       "full-scale Russo-Ukrainian war",
-      "southern front of the Russo-Ukrainian war"
+      "southern front of the Russo-Ukrainian war",
+      "eastern front of the Russian invasion of Ukraine"
+    ],
+    "sources": [
+      {
+        "title": "Russo-Ukrainian war (2022–present)",
+        "revision": 1382590021,
+        "fetched": "2026-11-02"
+      }
     ]
   },
   "Russo-Georgian War": {
@@ -2167,13 +2192,13 @@
     "parent": ""
   },
   "Russo-Ukrainian War": {
-    "outcome": "Ongoing as of mid-2026. No internationally recognized resolution. The full-scale Russian invasion began 24 February 2022.",
-    "aftermath": "Hundreds of thousands of casualties on both sides. Several million Ukrainians displaced as refugees across Europe. NATO expanded to include Finland (2023) and Sweden (2024). Western sanctions reshaped European energy markets. The war is the largest in Europe since 1945 and remains undetermined.",
-    "keyTerms": "No treaty. Ceasefires and exchanges have been local and partial.",
+    "outcome": "Ongoing as of November 2026. Russia occupies roughly 20 percent of Ukraine as of September 2026, including Crimea, annexed in 2014, and parts of four southeastern oblasts it declared annexed in 2022. Peace negotiations have stalled, and Russia has repeatedly refused calls for a ceasefire.",
+    "aftermath": "The war began in February 2014, when Russia occupied and annexed Crimea and backed separatist forces that started a war in the Donbas. That front stayed largely static after the Minsk II agreements of February 2015, which were never fully implemented. Russia's full-scale invasion on 24 February 2022 made it the largest war in Europe since World War II. About 8 million Ukrainians have been internally displaced and 6 to 7 million have fled the country, and the International Criminal Court has issued arrest warrants for Vladimir Putin and other Russian officials.",
+    "keyTerms": "No settlement. Minsk II (February 2015) was never fully implemented.",
     "notable": [
-      "Largest interstate war in Europe since 1945",
-      "NATO expansion to include Finland and Sweden",
-      "European energy market restructured away from Russian gas",
+      "Largest war in Europe since World War II",
+      "NATO expansion to include Finland (2023) and Sweden (2024)",
+      "Ukrainian cross-border offensive into Russia's Kursk Oblast (August 2024)",
       "ICC arrest warrant issued for Vladimir Putin (March 2023)"
     ],
     "humanDeaths": 500000,
@@ -2183,6 +2208,27 @@
     "aliases": [
       "Russia-Ukraine War",
       "Russo-Ukrainian war"
+    ],
+    "deathsLow": 500000,
+    "deathsHigh": 850000,
+    "deathsNote": "Military and civilian deaths since 2014. Low: Le Monde's estimate of about 500,000 total deaths by February 2026. High: the BBC News Russian and Mediazona estimate of up to 633,384 Russian dead to 30 October 2026, plus the BBC's estimate of 200,000 Ukrainian dead to 19 February 2026 and 14,200 to 14,400 deaths in the Donbas war of 2014 to 2021. Confirmed by name: 285,023 Russian dead (Mediazona) and 106,285 Ukrainian dead (UALosses).",
+    "deathsSource": "Casualties of the Russo-Ukrainian war, English Wikipedia, revision 1383272485.",
+    "sources": [
+      {
+        "title": "Russo-Ukrainian war",
+        "revision": 1382955232,
+        "fetched": "2026-11-02"
+      },
+      {
+        "title": "Russo-Ukrainian war (2022–present)",
+        "revision": 1382590021,
+        "fetched": "2026-11-02"
+      },
+      {
+        "title": "Casualties of the Russo-Ukrainian war",
+        "revision": 1383272485,
+        "fetched": "2026-11-02"
+      }
     ]
   },
   "Rákóczi's War of Independence": {
@@ -3107,22 +3153,41 @@
     "startYear": 2009,
     "endYear": 0,
     "parent": "",
-    "outcome": "Ongoing; Boko Haram split (2016) into Boko Haram and Islamic State West Africa Province (ISWAP).",
+    "outcome": "Ongoing as of November 2026. Boko Haram split in 2016, and the Islamic State West Africa Province fights as a rival group.",
     "aftermath": "A decade-and-a-half Salafi-jihadist insurgency in northeastern Nigeria, Lake Chad basin, and adjacent states. 50,000+ dead, two million displaced, the Chibok schoolgirls kidnapping (April 2014) that briefly made the war a global cause.",
-    "keyTerms": "Death of Abubakar Shekau (May 2021)"
+    "keyTerms": "Death of Abubakar Shekau (May 2021)",
+    "sources": [
+      {
+        "title": "Boko Haram insurgency",
+        "revision": 1382960387,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Yemeni Civil War": {
     "humanDeaths": 380000,
     "startYear": 2014,
     "endYear": 0,
     "parent": "",
-    "outcome": "Ongoing as of late 2025; Houthi de-facto control of the north, internationally recognised government in the south.",
+    "outcome": "Ongoing as of November 2026, mainly between the Presidential Leadership Council and the Houthi-led Supreme Political Council. Houthi forces escalated the war in September 2026, starting the Bab al-Mandab Strait crisis.",
     "aftermath": "A decade of war that has produced what the UN has repeatedly called the world's worst humanitarian crisis. 380,000 dead, mostly from war-induced famine and disease, in a war complicated by Saudi-Emirati-Iranian proxy involvement.",
     "keyTerms": "Houthi seizure of Sana'a (September 2014); Saudi-Houthi truce (April 2022)",
     "aliases": [
       "Yemeni Civil War (2014–present)",
       "Yemeni Crisis and the Yemeni Civil War (2014–present)",
       "Yemeni Civil War (2014–present) and the Saudi Arabian-led intervention in Yemen"
+    ],
+    "sources": [
+      {
+        "title": "Yemeni civil war (2014–present)",
+        "revision": 1383239813,
+        "fetched": "2026-11-02"
+      },
+      {
+        "title": "2026 Iran war",
+        "revision": 1383366158,
+        "fetched": "2026-11-02"
+      }
     ]
   },
   "Al-Qaeda insurgency in Yemen": {
@@ -3326,15 +3391,6 @@
     "aftermath": "Six years of war that confirmed Louis XIV as Europe's dominant monarch and produced the borders of the modern Low Countries. The Dutch Republic survived but lost its informal hegemony; William III's defensive coalitions against France would dominate his life.",
     "keyTerms": "Treaty of Nijmegen (August 10, 1678)"
   },
-  "Northern Mali conflict": {
-    "humanDeaths": 15000,
-    "startYear": 2012,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "See Mali War.",
-    "aftermath": "See Mali War.",
-    "keyTerms": "Operation Serval"
-  },
   "German campaign of the Sixth Coalition": {
     "humanDeaths": 750000,
     "startYear": 1813,
@@ -3429,17 +3485,28 @@
     "parent": "",
     "startYear": 2023,
     "endYear": 0,
-    "humanDeaths": 50000,
-    "outcome": "Ongoing as of late 2025; January 2025 ceasefire framework partially holds.",
-    "aftermath": "The Hamas attack of October 7 2023 killed 1,200 Israelis and triggered the most destructive Israeli military operation since 1948, with Gaza casualty estimates exceeding 50,000. Regional escalation drew in Hezbollah, the Houthis, and Iran in direct strike exchanges through 2024.",
-    "keyTerms": "January 2025 ceasefire framework",
+    "humanDeaths": 76000,
+    "outcome": "Ongoing as of November 2026. A ceasefire under phase one of a US-backed peace plan took effect on 10 October 2025, but Israeli airstrikes and military operations have continued, and Israel controls about 65 percent of the Gaza Strip along the Yellow Line as of October 2026.",
+    "aftermath": "Hamas led an attack on Israel on 7 October 2023 that killed 1,195 Israelis and foreign nationals and took 251 hostages. The Israeli offensive that followed has killed more than 74,000 Palestinians in Gaza, a figure studies in The Lancet indicate is likely a significant undercount. Many scholars and international organizations have concluded that Israel's actions in Gaza constitute genocide, which Israel denies. Under the peace plan the Hamas civil administration in Gaza resigned on 6 July 2026.",
+    "keyTerms": "Phase one of the US-backed peace plan (10 October 2025); disarmament agreement (31 July 2026).",
     "aliases": [
       "Israel–Hamas war"
+    ],
+    "deathsLow": 76000,
+    "deathsHigh": 83500,
+    "deathsNote": "Low: the Gaza Health Ministry's 74,016 dead plus 2,046 or more dead in Israel. High: 81,416 or more reported dead in Gaza to September 2026, including about 7,400 missing and presumed dead, plus the Israeli dead.",
+    "deathsSource": "Gaza war, English Wikipedia, revision 1383137069.",
+    "sources": [
+      {
+        "title": "Gaza war",
+        "revision": 1383137069,
+        "fetched": "2026-11-02"
+      }
     ]
   },
   "Iran–Israel direct strikes 2024": {
-    "outcome": "See Iran-Israel war 2024 — canonical entry.",
-    "aftermath": "Eight months of direct Iran-Israel exchanges including the April 2024 Iranian missile/drone barrage (Operation True Promise) and Israeli counterstrikes on Iranian air defences. The most significant direct state-on-state exchange in the Iran-Israel rivalry since 1979.",
+    "outcome": "Direct exchanges ended with Israel's strikes on Iran on 26 October 2024, the prelude to the Twelve-Day War of June 2025.",
+    "aftermath": "In 2024 the Iran–Israel proxy conflict escalated into direct confrontation. Israel bombed an Iranian consulate complex in Damascus on 1 April, Iran struck Israel on 13 April, and Israel retaliated on 19 April. Hamas political leader Ismail Haniyeh was assassinated in Tehran on 31 July. Iran fired missiles at Israel on 1 October, and Israel struck Iran again on 26 October.",
     "keyTerms": "Operation True Promise (April 2024)",
     "startYear": 2024,
     "endYear": 2024,
@@ -3448,6 +3515,82 @@
       "Iran-Israel direct strikes 2024",
       "Iran-Israel war 2024",
       "2024 Iran–Israel conflict"
+    ],
+    "sources": [
+      {
+        "title": "2024 Iran–Israel conflict",
+        "revision": 1381716956,
+        "fetched": "2026-11-02"
+      }
+    ]
+  },
+  "Twelve-Day War": {
+    "outcome": "Inconclusive. Israel and Iran agreed to a ceasefire under US pressure on 24 June 2025.",
+    "aftermath": "Israel opened the war on 13 June 2025 with surprise strikes on Iranian military and nuclear facilities, killing senior commanders, nuclear scientists and civilians and damaging air defenses. Iran answered with more than 550 ballistic missiles and over 1,000 drones. The United States bombed three Iranian nuclear sites on 22 June, and Iran retaliated with missiles at a US base in Qatar.",
+    "keyTerms": "Ceasefire (24 June 2025).",
+    "startYear": 2025,
+    "endYear": 2025,
+    "parent": "",
+    "humanDeaths": 1093,
+    "deathsLow": 1093,
+    "deathsHigh": 1223,
+    "deathsNote": "Low: 1,060 dead per Iran plus 33 dead per Israel. High: 1,190 dead in Iran per HRANA plus the Israeli dead.",
+    "deathsSource": "Twelve-Day War, English Wikipedia, revision 1382848372.",
+    "aliases": [
+      "Iran–Israel war (2025)",
+      "2025 Iran–Israel war"
+    ],
+    "sources": [
+      {
+        "title": "Twelve-Day War",
+        "revision": 1382848372,
+        "fetched": "2026-11-02"
+      }
+    ]
+  },
+  "2026 Iran war": {
+    "outcome": "Ongoing as of November 2026. A ceasefire between the United States and Iran from 28 June collapsed on 8 July 2026 after Iran attacked commercial vessels in the Strait of Hormuz.",
+    "aftermath": "The United States and Israel opened the war on 28 February 2026 with hundreds of air strikes across Iran that killed Supreme Leader Ali Khamenei. Iran answered with missile and drone attacks on Israel and US bases and blocked the Strait of Hormuz, and fighting resumed between Hezbollah and Israel. A two-week ceasefire from 8 April broke down, and a memorandum signed on 17 June lifted the dual blockade. The war caused the largest supply disruption the global oil market has seen.",
+    "keyTerms": "Islamabad Talks (12 to 13 April 2026); memorandum to end the war (17 June 2026).",
+    "startYear": 2026,
+    "endYear": 0,
+    "parent": "",
+    "humanDeaths": 3375,
+    "deathsLow": 3375,
+    "deathsHigh": 3684,
+    "deathsNote": "Deaths in Iran: 3,375 or more per the WHO and 3,684 per HRANA. Deaths elsewhere, including 23 US service members, are not included.",
+    "deathsSource": "2026 Iran war infobox, English Wikipedia, revision 1383126806.",
+    "sources": [
+      {
+        "title": "2026 Iran war",
+        "revision": 1383366158,
+        "fetched": "2026-11-02"
+      },
+      {
+        "title": "Template:2026 Iran war infobox",
+        "revision": 1383126806,
+        "fetched": "2026-11-02"
+      }
+    ]
+  },
+  "2026 Lebanon war": {
+    "outcome": "Ongoing as of November 2026. A temporary ceasefire has held on paper since 16 April 2026, with continued Israeli airstrikes.",
+    "aftermath": "Hezbollah struck Israel on 2 March 2026 in response to the US and Israeli war on Iran. Israel resumed airstrikes across Lebanon and began ground operations in southern Lebanon on 16 March, with heavy fighting at Bint Jbeil. Israeli strikes have killed more than 4,000 people in Lebanon and displaced over 1 million.",
+    "startYear": 2026,
+    "endYear": 0,
+    "parent": "",
+    "humanDeaths": 4000,
+    "deathsNote": "More than 4,000 killed by Israeli strikes in Lebanon.",
+    "deathsSource": "2026 Lebanon war, English Wikipedia, revision 1383122457.",
+    "aliases": [
+      "2026 Lebanon War"
+    ],
+    "sources": [
+      {
+        "title": "2026 Lebanon war",
+        "revision": 1383122457,
+        "fetched": "2026-11-02"
+      }
     ]
   },
   "Israel-Hezbollah conflict 2024": {
@@ -3455,9 +3598,20 @@
     "startYear": 2024,
     "endYear": 2024,
     "humanDeaths": 5000,
-    "outcome": "Israeli operational victory; November 2024 ceasefire.",
-    "aftermath": "See above.",
-    "keyTerms": "Ceasefire (November 26, 2024)"
+    "outcome": "Israeli victory. A ceasefire mediated by France and the United States took effect on 27 November 2024, though some attacks continued.",
+    "aftermath": "Hezbollah opened fire on northern Israel on 8 October 2023 in support of Hamas. In September 2024 Israel began a war in Lebanon with attacks on pagers and electronic devices, the assassination of Hezbollah leader Hassan Nasrallah and a bombing campaign across the country, and on 1 October it invaded across the Blue Line.",
+    "keyTerms": "Ceasefire (27 November 2024).",
+    "aliases": [
+      "2024 Lebanon war",
+      "2024 Israeli invasion of Lebanon"
+    ],
+    "sources": [
+      {
+        "title": "2024 Lebanon war",
+        "revision": 1382791893,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Second Anglo-Boer War": {
     "humanDeaths": 75000,
@@ -3896,9 +4050,16 @@
     "startYear": 1833,
     "endYear": 0,
     "parent": "",
-    "outcome": "British sovereignty reaffirmed by the 1982 Falklands War.",
+    "outcome": "Unresolved as of November 2026. The 1982 Falklands War confirmed British control, and Argentina maintains its claim.",
     "aftermath": "Two centuries of Anglo-Argentine sovereignty dispute over the Falkland Islands/Islas Malvinas. The 1982 war definitively confirmed British control; Argentine claims persist diplomatically into the 2020s.",
-    "keyTerms": "Falklands War (April-June 1982)"
+    "keyTerms": "Falklands War (April-June 1982)",
+    "sources": [
+      {
+        "title": "Falkland Islands sovereignty dispute",
+        "revision": 1382335341,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Invasion of Grenada": {
     "humanDeaths": 90,
@@ -3918,14 +4079,25 @@
     "aftermath": "Operation Just Cause — a five-day US invasion to remove Manuel Noriega. The operation involved 27,000 US troops and produced the first combat use of the F-117 stealth fighter. Noriega was extradited to Florida and convicted of drug trafficking.",
     "keyTerms": "Operation Just Cause (December 20, 1989)"
   },
-  "Libyan Crisis (2011–present)": {
+  "Libyan crisis": {
     "humanDeaths": 30000,
     "startYear": 2011,
     "endYear": 0,
     "parent": "",
-    "outcome": "Ongoing; rival administrations in Tripoli (GNU) and Tobruk/Benghazi (LNA).",
+    "outcome": "Ongoing as of November 2026. As of April 2026 the UN-recognized Government of National Unity in Tripoli and the Government of National Stability in Benghazi are rivals.",
     "aftermath": "A decade-and-a-half crisis covering the original 2011 civil war, the post-Gaddafi militia order, the 2014-2020 second civil war, the 2020 Berlin Conference ceasefire, and the contested transitional process since.",
-    "keyTerms": "Berlin Conference (January 2020)"
+    "keyTerms": "Berlin Conference (January 2020)",
+    "aliases": [
+      "Libyan Crisis (2011–present)",
+      "Libyan Crisis"
+    ],
+    "sources": [
+      {
+        "title": "Libyan crisis",
+        "revision": 1378352207,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Syrian civil war": {
     "humanDeaths": 600000,
@@ -3997,22 +4169,21 @@
     "startYear": 2023,
     "endYear": 0,
     "parent": "",
-    "outcome": "Ongoing; SAF-RSF civil war devastating Khartoum, Darfur, and Kordofan.",
+    "outcome": "Ongoing as of November 2026, between the Sudanese Armed Forces and the Rapid Support Forces, across Khartoum, Darfur and Kordofan.",
     "aftermath": "A war between the Sudanese Armed Forces and the Rapid Support Forces that erupted in Khartoum in April 2023, after the breakdown of the joint transitional government. 150,000+ dead, 11 million displaced, full state collapse across Darfur.",
     "keyTerms": "Outbreak of fighting in Khartoum (April 15, 2023)",
     "aliases": [
       "Sudan war (2023–present)",
-      "Sudanese civil war (2023–present)"
+      "Sudanese civil war (2023–present)",
+      "Sudanese civil war"
+    ],
+    "sources": [
+      {
+        "title": "Sudanese civil war (2023–present)",
+        "revision": 1383179082,
+        "fetched": "2026-11-02"
+      }
     ]
-  },
-  "Myanmar civil war": {
-    "humanDeaths": 60000,
-    "startYear": 2021,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing.",
-    "aftermath": "See Myanmar civil war (2021–present).",
-    "keyTerms": "February 2021 coup"
   },
   "Eight-Nation Alliance": {
     "humanDeaths": 32000,
@@ -4516,14 +4687,24 @@
     "aftermath": "Five months of resistance war by the short-lived Republic of Formosa against Japanese takeover after Shimonoseki. Japanese rule lasted fifty years until 1945.",
     "keyTerms": "Surrender of Tainan (October 1895)"
   },
-  "Jihadist insurgency in Niger": {
+  "Islamist insurgency in Niger": {
     "humanDeaths": 4000,
     "startYear": 2015,
     "endYear": 0,
     "parent": "",
-    "outcome": "Ongoing; July 2023 coup ended French security partnership.",
+    "outcome": "Ongoing as of November 2026.",
     "aftermath": "A decade-long jihadist insurgency along Niger's Mali and Burkina Faso borders. The July 2023 coup against President Bazoum produced a junta that expelled French and US forces and joined Mali and Burkina Faso in the Alliance of Sahel States.",
-    "keyTerms": "Niger coup (July 26, 2023)"
+    "keyTerms": "Niger coup (July 26, 2023)",
+    "aliases": [
+      "Jihadist insurgency in Niger"
+    ],
+    "sources": [
+      {
+        "title": "Islamist insurgency in Niger",
+        "revision": 1383060174,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Murid War": {
     "humanDeaths": 30000,
@@ -4606,14 +4787,25 @@
     "aftermath": "Twenty-one years of US military presence in Nicaragua, including the long war against Sandino's nationalist guerrillas. US withdrawal in 1933 left the Somoza-controlled National Guard in charge; the Somoza dynasty ruled until 1979.",
     "keyTerms": "US Marine withdrawal (January 1933)"
   },
-  "War in Somalia": {
-    "humanDeaths": 500000,
+  "War in Somalia (2006–2009)": {
+    "outcome": "Somali insurgent victory. Ethiopian forces withdrew from Mogadishu and most of Somalia in 2009.",
+    "aftermath": "Ethiopian forces, backed by the United States, invaded Somalia in December 2006 to depose the Islamic Courts Union and install the Transitional Federal Government. The occupation gave rise to al-Shabaab and an Islamist insurgency that recaptured most of southern and central Somalia, and African Union troops deployed in 2007.",
+    "keyTerms": "AMISOM deployment (2007); Ethiopian withdrawal (2009).",
     "startYear": 2006,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing as of late 2025; Federal Government of Somalia + AMISOM/ATMIS hold Mogadishu and major towns; Al-Shabaab controls much of the rural south and centre.",
-    "aftermath": "A successor war to the Somali Civil War that began in 2006 with the ICU's rise and Ethiopian intervention. The African Union mission has had 23,000+ troops on the ground; Al-Shabaab has carried out bombings as far as Nairobi and Kampala.",
-    "keyTerms": "AMISOM established (2007); transition to ATMIS (2022)"
+    "endYear": 2009,
+    "parent": "Somali Civil War",
+    "aliases": [
+      "War in Somalia",
+      "Somalia War (2006–2009)",
+      "Ethiopian invasion of Somalia (2006–2009)"
+    ],
+    "sources": [
+      {
+        "title": "War in Somalia (2006–2009)",
+        "revision": 1382777263,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "War of the Bar Confederation": {
     "humanDeaths": 100000,
@@ -4926,9 +5118,16 @@
     "startYear": 2004,
     "endYear": 0,
     "parent": "",
-    "outcome": "Ongoing; Pakistan Army operations have reduced but not eliminated the TTP insurgency.",
+    "outcome": "Ongoing as of November 2026, as a low-level insurgency.",
     "aftermath": "Two decades of war in Pakistan's northwest tribal areas, tied to the Afghan War next door. Pakistan Army operations Zarb-e-Azb (2014) and Radd-ul-Fasaad (2017) reasserted state control over Swat and Waziristan; cross-border TTP attacks intensified again after the 2021 Taliban takeover of Kabul.",
-    "keyTerms": "Operation Zarb-e-Azb (2014); Peshawar school massacre (December 2014)"
+    "keyTerms": "Operation Zarb-e-Azb (2014); Peshawar school massacre (December 2014)",
+    "sources": [
+      {
+        "title": "Insurgency in Khyber Pakhtunkhwa",
+        "revision": 1383060851,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Irish Clan Wars": {
     "humanDeaths": 10000,
@@ -5438,11 +5637,18 @@
     "humanDeaths": 600000
   },
   "Insurgency in the Maghreb": {
-    "outcome": "Ongoing; jihadist insurgency fragmented and weakened by 2017.",
+    "outcome": "Ongoing as of November 2026, centered on AQIM and its splinters in the Sahel.",
     "aftermath": "Sahel/Maghreb jihadist insurgency centered on AQIM and its splinters. The 2013 French Operation Serval in Mali pushed the insurgency south; the 2017 JNIM merger consolidated remaining factions. State authority in much of the Sahel collapsed after 2020 coups.",
     "keyTerms": "JNIM merger (March 2017); Operation Serval (January 2013)",
     "startYear": 2002,
-    "humanDeaths": 30000
+    "humanDeaths": 30000,
+    "sources": [
+      {
+        "title": "Insurgency in the Maghreb (2002–present)",
+        "revision": 1383064553,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Polish–Bolshevik War": {
     "outcome": "Polish victory at the Battle of Warsaw (Miracle on the Vistula); Treaty of Riga (1921).",
@@ -5586,11 +5792,18 @@
     "keyTerms": "See Mongol invasions and conquests"
   },
   "Israeli–Palestinian conflict": {
-    "outcome": "Ongoing; the central unresolved territorial conflict in the modern Middle East.",
+    "outcome": "Ongoing as of November 2026. The peace process is halted.",
     "aftermath": "Over 75 years of intermittent war between Israel and Palestinian Arab populations, encompassing the 1948 Arab-Israeli war, multiple Israeli-Arab wars, the First and Second Intifadas, the Oslo process, and the ongoing Israel-Hamas war that began October 7, 2023.",
     "keyTerms": "UN Partition Plan (November 29, 1947); Oslo Accords (September 13, 1993)",
     "startYear": 1947,
-    "humanDeaths": 200000
+    "humanDeaths": 200000,
+    "sources": [
+      {
+        "title": "Israeli–Palestinian conflict",
+        "revision": 1382732116,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "1982 Lebanon War": {
     "outcome": "Israeli operational victory; PLO expelled to Tunis; sectarian war continues until 1990.",
@@ -5617,11 +5830,18 @@
     "humanDeaths": 20000
   },
   "War on Terror": {
-    "outcome": "Ongoing; declared aim of eliminating al-Qaeda largely achieved by mid-2010s; broader regional instability persists.",
+    "outcome": "Ongoing as of November 2026. The declared aim of eliminating al-Qaeda was largely met by the mid-2010s, and wider regional instability persists.",
     "aftermath": "Two-decade global counter-terror campaign launched after September 11, 2001 — including the Afghanistan War, the Iraq War, drone campaigns in Pakistan/Yemen/Somalia, the rise and defeat of ISIS, and an enormous expansion of US/Western intelligence and special-operations capabilities.",
     "keyTerms": "September 11 attacks (2001); Death of Osama bin Laden (May 2, 2011); Fall of Kabul (August 15, 2021)",
     "startYear": 2001,
-    "humanDeaths": 1000000
+    "humanDeaths": 1000000,
+    "sources": [
+      {
+        "title": "War on terror",
+        "revision": 1383253016,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Hittite Wars": {
     "outcome": "Bronze Age Collapse (c. 1200 BC) ends the Hittite Empire.",
@@ -5818,27 +6038,36 @@
     "startYear": 2015,
     "endYear": 0,
     "parent": "",
-    "outcome": "Ongoing; multiple military coups (2022) reflect state collapse under jihadist pressure.",
+    "outcome": "Ongoing as of November 2026. About 30 percent of the country is estimated to be under jihadist control.",
     "aftermath": "A decade of jihadist insurgency (JNIM, ISGS) that has displaced two million people and produced two coups in 2022 alone. Burkina Faso joined Mali and Niger in expelling French forces and shifted to Russian (Wagner/Africa Corps) security partnership.",
-    "keyTerms": "September 2022 coup"
-  },
-  "Myanmar civil war (2021–present) and the Myanmar conflict": {
-    "humanDeaths": 60000,
-    "startYear": 2021,
-    "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing as of late 2025.",
-    "aftermath": "A war between the State Administration Council military junta and the National Unity Government plus pre-existing ethnic armed organisations following the February 2021 coup. 60,000 dead, three million displaced, and the partial collapse of the military's territorial control in Rakhine, Chin, Kachin, and northern Shan states.",
-    "keyTerms": "February 2021 coup; Operation 1027 (October 2023)"
+    "keyTerms": "September 2022 coup",
+    "aliases": [
+      "Jihadist insurgency in Burkina Faso"
+    ],
+    "sources": [
+      {
+        "title": "Islamist insurgency in Burkina Faso",
+        "revision": 1383060011,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Somali Civil War (2009–present)": {
-    "humanDeaths": 500000,
-    "startYear": 1991,
+    "outcome": "Ongoing as of November 2026.",
+    "aftermath": "The current phase of the Somali Civil War began in 2009 and is concentrated in southern and central Somalia, mainly between the Federal Government of Somalia, assisted by African Union forces, and the Islamist militant group al-Shabaab.",
+    "startYear": 2009,
     "endYear": 0,
-    "parent": "",
-    "outcome": "Ongoing; the original 1991 civil war evolved into the War in Somalia after 2006.",
-    "aftermath": "Three decades of state collapse since the fall of Siad Barre in 1991. The war has produced perhaps 500,000 dead, the world's longest-standing collapsed state, and the piracy crisis off the Horn of Africa.",
-    "keyTerms": "Fall of Siad Barre (January 1991)"
+    "parent": "Somali Civil War",
+    "aliases": [
+      "War in Somalia (2009-present)"
+    ],
+    "sources": [
+      {
+        "title": "Somali Civil War (2009–present)",
+        "revision": 1381957523,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Assyrian conquest of Elam": {
     "outcome": "Neo-Assyrian conquest of the Aramean kingdoms by Tiglath-Pileser III; Damascus falls 732 BC.",
@@ -5905,11 +6134,25 @@
     "humanDeaths": 5000
   },
   "Myanmar civil war (2021–present)": {
-    "outcome": "Ongoing; junta losing ground to NUG/PDF and ethnic resistance organizations.",
-    "aftermath": "Civil war triggered by the February 2021 military coup against the elected NLD government. National Unity Government (NUG) leads resistance with allied Peoples Defence Forces (PDF) and longstanding ethnic armed organizations. As of 2025 the junta has lost effective control of much of the country.",
+    "outcome": "Ongoing as of November 2026.",
+    "aftermath": "The civil war began after the military coup of 1 February 2021. Mass anti-coup demonstrations met a violent crackdown by the Tatmadaw, and the country's longstanding insurgencies escalated. The National Unity Government leads the resistance with allied People's Defense Forces and ethnic armed organizations.",
     "keyTerms": "Coup (February 1, 2021); 1027 Operation by Three Brotherhood Alliance (October 2023)",
     "startYear": 2021,
-    "humanDeaths": 50000
+    "humanDeaths": 50000,
+    "endYear": 0,
+    "parent": "",
+    "aliases": [
+      "Myanmar civil war",
+      "Myanmar civil war (2021–present) and the Myanmar conflict",
+      "Myanmar civil war (2021–present) and Myanmar conflict"
+    ],
+    "sources": [
+      {
+        "title": "Myanmar civil war (2021–present)",
+        "revision": 1383018406,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Spanish protectorate in Morocco": {
     "outcome": "Spanish consolidation of the protectorate by 1927; ended with Moroccan independence (1956).",
@@ -5926,13 +6169,6 @@
     "startYear": 1656,
     "endYear": 1658,
     "humanDeaths": 30000
-  },
-  "Jihadist insurgency in Burkina Faso": {
-    "outcome": "Ongoing; multiple military coups (2022) reflect state collapse under jihadist pressure.",
-    "aftermath": "A decade of jihadist insurgency (JNIM, ISGS) that has displaced two million people and produced two coups in 2022 alone. Burkina Faso joined Mali and Niger in expelling French forces and shifted to Russian (Wagner/Africa Corps) security partnership.",
-    "keyTerms": "September 2022 coup",
-    "startYear": 2015,
-    "humanDeaths": 50000
   },
   "War of the Seventh Coalition": {
     "outcome": "Coalition victory at Waterloo (June 18, 1815); Napoleon abdicates and is exiled to Saint Helena.",
@@ -5959,11 +6195,18 @@
     "humanDeaths": 500000
   },
   "Somali Civil War": {
-    "outcome": "Ongoing; transitional federal government since 2012, but al-Shabaab and clan factions still control significant territory.",
+    "outcome": "Ongoing as of November 2026. The federal government holds Mogadishu, while al-Shabaab and clan factions still control significant territory.",
     "aftermath": "Three and a half decades of war that began with the 1991 collapse of the Siad Barre regime. Includes the 1993 US/UN Operation Restore Hope and Battle of Mogadishu; the rise and ongoing insurgency of al-Shabaab; ATMIS/AMISOM peace-keeping operations. State authority remains contested.",
     "keyTerms": "Battle of Mogadishu (October 3-4, 1993); Founding of Federal Government (2012)",
     "startYear": 1991,
-    "humanDeaths": 500000
+    "humanDeaths": 500000,
+    "sources": [
+      {
+        "title": "Somali Civil War",
+        "revision": 1383135981,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Thousand Days' War": {
     "outcome": "Conservative government victory; Treaty of Neerlandia (1902) and Treaty of Wisconsin (1902) end the conflict.",
@@ -6169,11 +6412,6 @@
     "aftermath": "See specific Iraq War entries.",
     "keyTerms": "See Iraq War entries"
   },
-  "War in Somalia (2009-present)": {
-    "outcome": "Ongoing; al-Shabaab insurgency continues against the federal government.",
-    "aftermath": "See Somali Civil War.",
-    "keyTerms": "See Somali Civil War"
-  },
   "War of the Polish Succession (1587-1588)": {
     "outcome": "Sigismund III Vasa victory at Pitschen (1588); confirmed as king of Poland.",
     "aftermath": "A brief contested election after Stephen Báthory's death. Maximilian III of Austria challenged Sigismund III Vasa's election; defeat at Pitschen (1588) ended his claim.",
@@ -6245,5 +6483,17 @@
     "startYear": 1938,
     "endYear": 1938,
     "humanDeaths": 0
+  },
+  "Yemeni revolution": {
+    "outcome": "Saleh handed power to his deputy Abdrabbuh Mansur Hadi under a Gulf Cooperation Council agreement",
+    "aftermath": "Protests and armed uprisings ran from January 2011 to February 2012, alongside the wider Arab Spring, and ended Saleh's rule.",
+    "keyTerms": "GCC initiative, February 2012",
+    "startYear": 2011,
+    "endYear": 2012,
+    "parent": "",
+    "aliases": [
+      "Yemeni Revolution",
+      "2011 Yemeni revolution"
+    ]
   }
 }

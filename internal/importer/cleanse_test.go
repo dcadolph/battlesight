@@ -1,10 +1,14 @@
 package importer
 
 import (
+	"context"
 	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/dcadolph/battlesight/internal/db"
 )
 
 // TestNormaliseText pins every real garbage pattern we've seen in the
@@ -286,5 +290,58 @@ func TestYearToEra(t *testing.T) {
 		if got != test.Want {
 			t.Errorf("YearToEra(%d): want %q got %q", test.Year, test.Want, got)
 		}
+	}
+}
+
+func TestBackfillMissingDate(t *testing.T) {
+	t.Parallel()
+	conn, err := db.Open(filepath.Join(t.TempDir(), "dates.db"))
+	if err != nil {
+		t.Fatalf("open: %v", err)
+	}
+	t.Cleanup(func() { conn.Close() })
+	seeds := []struct {
+		ID       string
+		Date     string
+		Source   string
+		WDDate   string
+		Year     int
+		Prec     int
+		Verified int
+	}{
+		{ID: "empty-dated", Date: "", Source: "wikidata", Year: 1850},
+		{ID: "zero-dated", Date: "0", Source: "wikidata", Year: -490},
+		{ID: "zero-undated", Date: "0", Source: "wikidata"},
+		{ID: "empty-undated", Date: "", Source: "wikidata"},
+		{ID: "verified-zero", Date: "0", Source: "wikidata", Verified: 1},
+		{ID: "curated-empty", Date: "", Source: "curated", Year: 1700},
+		{ID: "has-date", Date: "4 October 1923", Source: "wikidata", Year: 1923},
+		{ID: "wikidata-day", Date: "0", Source: "wikidata", Year: 2014, WDDate: "2014-03-14", Prec: 11},
+		{ID: "captured", Date: "| place = Black Sea", Source: "wikidata", Year: 1773, WDDate: "1773-07-04", Prec: 11},
+		{ID: "equals-kept", Date: "1066 (Julian = 1066)", Source: "wikidata", Year: 1066},
+	}
+	for _, s := range seeds {
+		if _, err := conn.ExecContext(context.Background(), `INSERT INTO battles (id, name, year, date, date_start,
+			date_end, lat, lng, era, war, battle_type, victor, summary, significance, source, source_id, verified,
+			wikipedia_title, wikidata_date, wikidata_precision)
+			VALUES (?, ?, ?, ?, '', '', 0, 0, '', '', 'land', '', '', '', ?, '', ?, '', ?, ?)`,
+			s.ID, s.ID, s.Year, s.Date, s.Source, s.Verified, s.WDDate, s.Prec); err != nil {
+			t.Fatalf("insert %s: %v", s.ID, err)
+		}
+	}
+	n, err := backfillMissingDate(context.Background(), conn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(5, n); diff != "" {
+		t.Errorf("updated mismatch (-want +got):\n%s", diff)
+	}
+	want := []string{"captured:4 July 1773|1773-07-04|1773-07-04", "curated-empty:||",
+		"empty-dated:1850|1850-12-31|1850-12-31", "empty-undated:||", "equals-kept:1066 (Julian = 1066)||",
+		"has-date:4 October 1923||", "verified-zero:0||", "wikidata-day:14 March 2014|2014-03-14|2014-03-14",
+		"zero-dated:490 BC|-0490-12-31|-0490-12-31", "zero-undated:||"}
+	got := queryStrings(t, conn, `SELECT id || ':' || date || '|' || date_start || '|' || date_end FROM battles ORDER BY id`)
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("rows mismatch (-want +got):\n%s", diff)
 	}
 }

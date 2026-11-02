@@ -3,6 +3,9 @@
 -- filter with Civil War, Revolutionary War, etc. battles.
 UPDATE battles SET era = '' WHERE year = 0 AND era = 'ancient';
 
+-- "modern" left the taxonomy when it split at 1991 into cold-war and contemporary.
+UPDATE battles SET era = '' WHERE era = 'modern';
+
 -- Backfill era from war name where the war is unambiguous. Each statement
 -- only touches rows still missing an era, so it is safe to re-run.
 UPDATE battles SET era = 'napoleonic'  WHERE era = '' AND year = 0 AND war LIKE '%American Revolutionary%';
@@ -18,16 +21,15 @@ UPDATE battles SET era = 'world-war-1' WHERE era = '' AND year = 0 AND war LIKE 
 UPDATE battles SET era = 'world-war-1' WHERE era = '' AND year = 0 AND war LIKE '%First World War%';
 UPDATE battles SET era = 'world-war-2' WHERE era = '' AND year = 0 AND war LIKE '%World War II%';
 UPDATE battles SET era = 'world-war-2' WHERE era = '' AND year = 0 AND war LIKE '%Second World War%';
-UPDATE battles SET era = 'modern'      WHERE era = '' AND year = 0 AND war LIKE '%Korean War%';
-UPDATE battles SET era = 'modern'      WHERE era = '' AND year = 0 AND war LIKE '%Vietnam War%';
-UPDATE battles SET era = 'modern'      WHERE era = '' AND year = 0 AND war LIKE '%Gulf War%';
-UPDATE battles SET era = 'modern'      WHERE era = '' AND year = 0 AND war LIKE '%Iraq War%';
-UPDATE battles SET era = 'modern'      WHERE era = '' AND year = 0 AND war LIKE '%Afghan%';
-UPDATE battles SET era = 'modern'      WHERE era = '' AND year = 0 AND war LIKE '%Cold War%';
-UPDATE battles SET era = 'modern'      WHERE era = '' AND year = 0 AND war LIKE '%Falklands%';
-UPDATE battles SET era = 'modern'      WHERE era = '' AND year = 0 AND war LIKE '%Yom Kippur%';
-UPDATE battles SET era = 'modern'      WHERE era = '' AND year = 0 AND war LIKE '%Six-Day%';
-UPDATE battles SET era = 'modern'      WHERE era = '' AND year = 0 AND war LIKE '%Arab-Israeli%';
+UPDATE battles SET era = 'cold-war'    WHERE era = '' AND year = 0 AND war LIKE '%Korean War%';
+UPDATE battles SET era = 'cold-war'    WHERE era = '' AND year = 0 AND war LIKE '%Vietnam War%';
+UPDATE battles SET era = 'cold-war'    WHERE era = '' AND year = 0 AND war LIKE '%Gulf War%';
+UPDATE battles SET era = 'contemporary' WHERE era = '' AND year = 0 AND war LIKE '%Iraq War%';
+UPDATE battles SET era = 'cold-war'    WHERE era = '' AND year = 0 AND war LIKE '%Cold War%';
+UPDATE battles SET era = 'cold-war'    WHERE era = '' AND year = 0 AND war LIKE '%Falklands%';
+UPDATE battles SET era = 'cold-war'    WHERE era = '' AND year = 0 AND war LIKE '%Yom Kippur%';
+UPDATE battles SET era = 'cold-war'    WHERE era = '' AND year = 0 AND war LIKE '%Six-Day%';
+UPDATE battles SET era = 'cold-war'    WHERE era = '' AND year = 0 AND war LIKE '%Arab-Israeli%';
 UPDATE battles SET era = 'medieval'    WHERE era = '' AND year = 0 AND war LIKE '%Hundred Years%';
 UPDATE battles SET era = 'medieval'    WHERE era = '' AND year = 0 AND war LIKE '%Crusade%';
 UPDATE battles SET era = 'medieval'    WHERE era = '' AND year = 0 AND war LIKE '%Mongol%';

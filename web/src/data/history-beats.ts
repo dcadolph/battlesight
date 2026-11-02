@@ -555,4 +555,81 @@ export const HISTORY_BEATS: HistoryBeat[] = [
     date: '24 February – 20 May 2022',
     battleId: 'mariupol-2022',
   },
+  // Source: Battle of Bakhmut, English Wikipedia, revision 1383035091, read 2026-11-02.
+  {
+    year: 2023,
+    headline: 'Bakhmut',
+    sub: 'Wagner Group mercenaries lead a ten-month assault on the Donbas city, which some analysts call the bloodiest battle since World War II. Russia takes it in May.',
+    era: 'contemporary',
+    region: 'Europe',
+    date: 'July 2022 – 20 May 2023',
+    battleId: 'bakhmut-2022-2023',
+  },
+  // Source: Gaza war, English Wikipedia, revision 1383137069, read 2026-11-02.
+  {
+    year: 2023,
+    headline: 'October 7',
+    sub: 'Hamas leads an attack on southern Israel that kills 1,195 people and takes 251 hostages. The Israeli offensive on Gaza that follows becomes the Gaza war.',
+    era: 'contemporary',
+    region: 'Middle East',
+    date: '7 October 2023',
+    battleId: 're-im-music-festival-2023',
+  },
+  // Source: Battle of Avdiivka (2023–2024), English Wikipedia, revision 1378237508, read 2026-11-02.
+  {
+    year: 2024,
+    headline: 'Avdiivka',
+    sub: 'Russia assaults one of the most fortified towns in Ukraine, the gateway to Donetsk, in one of the bloodiest battles of the war. Ukraine withdraws on 17 February.',
+    era: 'contemporary',
+    region: 'Europe',
+    date: '10 October 2023 – 17 February 2024',
+    battleId: 'avdiivka-2023-2024',
+  },
+  // Source: Kursk campaign, English Wikipedia, revision 1382583935, read 2026-11-02.
+  {
+    year: 2024,
+    headline: 'Kursk',
+    sub: 'Ukrainian forces cross into Russia\'s Kursk Oblast and take 28 settlements in the first week by the Russian count. Russian reserves rush in, and from November North Korean soldiers fight beside them.',
+    era: 'contemporary',
+    region: 'Europe',
+    date: '6 August 2024',
+    battleId: 'kursk-incursion-2024',
+  },
+  // Source: Kursk campaign, English Wikipedia, revision 1382583935, read 2026-11-02.
+  {
+    year: 2025,
+    headline: 'Kursk retaken',
+    sub: 'A Russian counterattack drives most of the Ukrainian force out of Kursk Oblast by 11 March, seven months after the incursion began.',
+    era: 'contemporary',
+    region: 'Europe',
+    date: 'March 2025',
+  },
+  // Source: Twelve-Day War, English Wikipedia, revision 1382848372, read 2026-11-02.
+  {
+    year: 2025,
+    headline: 'Twelve-Day War',
+    sub: 'Israel strikes Iran\'s nuclear and military sites, Iran answers with more than 550 ballistic missiles, and US bombers hit three nuclear sites before a ceasefire on 24 June.',
+    era: 'contemporary',
+    region: 'Middle East',
+    date: '13 – 24 June 2025',
+  },
+  // Source: Pokrovsk offensive, English Wikipedia, revision 1372998088, read 2026-11-02.
+  {
+    year: 2026,
+    headline: 'Pokrovsk',
+    sub: 'Russia takes Pokrovsk and Myrnohrad after an offensive that began in July 2024, but fails to turn the capture into a wider breakthrough in Donetsk.',
+    era: 'contemporary',
+    region: 'Europe',
+    date: '18 July 2024 – January 2026',
+    battleId: 'pokrovsk-2024-2025',
+  },
+  // Source: 2026 Iran war, English Wikipedia, revision 1383366158, read 2026-11-02.
+  {
+    year: 2026,
+    headline: 'Iran',
+    sub: 'US and Israeli air strikes across Iran kill Supreme Leader Ali Khamenei and open a war that spreads to Lebanon, the Gulf and the Strait of Hormuz.',
+    era: 'contemporary',
+    region: 'Middle East',
+    date: '28 February 2026',
+  },
 ];

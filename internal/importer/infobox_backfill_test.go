@@ -478,15 +478,15 @@ func TestNominatimAcceptable(t *testing.T) {
 		WantLat    float64
 		WantLng    float64
 		WantReason string
-	}{{ // Test 0: High importance accepts outright.
+	}{{ // Test 0: The first place token in the display name accepts.
 		In: nominatimResult{
-			Lat: "45.9599", Lon: "18.6867", Importance: 0.55,
+			Lat: "45.9599", Lon: "18.6867", Importance: 0.55, Category: "place",
 			DisplayName: "Mohács, Baranya, Hungary",
 			BoundingBox: []string{"45.94", "45.98", "18.66", "18.71"},
 		},
 		InPlace: "Mohács field, Hungary",
 		WantLat: 45.9599, WantLng: 18.6867,
-	}, { // Test 1: Low importance rescued by a place token in the display name.
+	}, { // Test 1: Low importance accepts when the first token matches.
 		In: nominatimResult{
 			Lat: "19.9678", Lon: "-75.8339", Importance: 0.13,
 			DisplayName: "Aguadores, Santiago de Cuba, Cuba",
@@ -494,7 +494,7 @@ func TestNominatimAcceptable(t *testing.T) {
 		},
 		InPlace: "Aguadores river mouth",
 		WantLat: 19.9678, WantLng: -75.8339,
-	}, { // Test 2: Low importance with no token overlap is rejected.
+	}, { // Test 2: No token overlap is rejected.
 		In: nominatimResult{
 			Lat: "10.0", Lon: "20.0", Importance: 0.12,
 			DisplayName: "Somewhere Else Entirely",
@@ -524,20 +524,44 @@ func TestNominatimAcceptable(t *testing.T) {
 		},
 		InPlace:    "Null Island",
 		WantReason: "invalid-coord",
-	}, { // Test 6: Missing bounding box still accepts on importance.
+	}, { // Test 6: Missing bounding box still accepts on the token.
 		In: nominatimResult{
 			Lat: "45.9599", Lon: "18.6867", Importance: 0.4,
 			DisplayName: "Mohács, Hungary",
 		},
 		InPlace: "Mohács",
 		WantLat: 45.9599, WantLng: 18.6867,
-	}, { // Test 7: Stopword tokens do not rescue a low-importance hit.
+	}, { // Test 7: Stopword tokens never match.
 		In: nominatimResult{
 			Lat: "10.0", Lon: "20.0", Importance: 0.1,
 			DisplayName: "The Northern River District",
 			BoundingBox: []string{"9.9", "10.1", "19.9", "20.1"},
 		},
 		InPlace:    "north of the river",
+		WantReason: "low-confidence",
+	}, { // Test 8: A shop named for the city is not the battle site.
+		In: nominatimResult{
+			Lat: "47.5997", Lon: "-122.3167", Importance: 0.39, Category: "shop",
+			DisplayName: "Saigon Vietnam Deli, South Jackson Street, Seattle, Washington, United States",
+			BoundingBox: []string{"47.59", "47.60", "-122.32", "-122.31"},
+		},
+		InPlace:    "Saigon, Vietnam",
+		WantReason: "not-a-place",
+	}, { // Test 9: A province matching only the region token is rejected.
+		In: nominatimResult{
+			Lat: "42.6194", Lon: "-7.8631", Importance: 0.71, Category: "boundary",
+			DisplayName: "Galicia, España",
+			BoundingBox: []string{"41.80", "43.79", "-9.30", "-6.73"},
+		},
+		InPlace:    "Przemyśl, Galicia",
+		WantReason: "bbox-too-large",
+	}, { // Test 10: High importance without the locality token is rejected.
+		In: nominatimResult{
+			Lat: "42.0", Lon: "-7.8", Importance: 0.71, Category: "place",
+			DisplayName: "Galicia, España",
+			BoundingBox: []string{"41.9", "42.1", "-7.9", "-7.7"},
+		},
+		InPlace:    "Przemyśl, Galicia",
 		WantReason: "low-confidence",
 	}}
 	for testNum, test := range tests {

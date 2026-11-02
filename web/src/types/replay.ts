@@ -475,11 +475,13 @@ function colorFamily(key: ColorKey): ColorFamily {
     case 'south-vietnam-blue':
     case 'nationalist-china':
     case 'ukraine-blue':
+    case 'israel-blue':
     case 'defender-blue':
       return 'blue';
     case 'fascist-italy':
     case 'saracen-green':
     case 'russian-green':
+    case 'iran-green':
       return 'green';
     case 'persian-purple':
     case 'carthage-purple':

@@ -17,7 +17,7 @@ import (
 
 var (
 	infoboxRe    = regexp.MustCompile(`(?si)\{\{[Ii]nfobox (?:military conflict|battle|military engagement)(.*?)\n\}\}`)
-	fieldRe      = regexp.MustCompile(`(?m)^\s*\|\s*(\w+)\s*=\s*(.*)$`)
+	fieldRe      = regexp.MustCompile(`(?m)^[ \t]*\|[ \t]*(\w+)[ \t]*=[ \t]*(.*)$`)
 	wikiLink     = regexp.MustCompile(`\[\[(?:[^|\]]*\|)?([^\]]+)\]\]`)
 	htmlTag      = regexp.MustCompile(`<[^>]+>`)
 	refTag       = regexp.MustCompile(`(?s)<ref[^>]*>.*?</ref>|<ref[^/]*/?>`)

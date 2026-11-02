@@ -409,6 +409,18 @@ func TestFactsFromClaims(t *testing.T) {
 	}, { // Test 3: Unknown value snaks carry no date.
 		Claims:    `{"P585":[{"rank":"normal","mainsnak":{"snaktype":"somevalue"}}]}`,
 		WantFacts: wikidataFacts{},
+	}, { // Test 4: A decade point in time yields to a dated start and end.
+		Claims: `{"P585":[` + timeClaim("normal", "+2020-00-00T00:00:00Z", 8) + `],` +
+			`"P580":[` + timeClaim("normal", "+2022-00-00T00:00:00Z", 9) + `],` +
+			`"P582":[` + timeClaim("normal", "+2023-12-00T00:00:00Z", 10) + `]}`,
+		WantFacts: wikidataFacts{Date: "2022-01-01", Precision: 9, End: "2023-12-01", EndPrecision: 10},
+	}, { // Test 5: A decade point in time stays when the start is no finer.
+		Claims: `{"P585":[` + timeClaim("normal", "+1950-00-00T00:00:00Z", 8) + `],` +
+			`"P580":[` + timeClaim("normal", "+1940-00-00T00:00:00Z", 8) + `]}`,
+		WantFacts: wikidataFacts{Date: "1950-01-01", Precision: 8},
+	}, { // Test 6: A decade point in time with no start stays.
+		Claims:    `{"P585":[` + timeClaim("normal", "+1820-00-00T00:00:00Z", 8) + `]}`,
+		WantFacts: wikidataFacts{Date: "1820-01-01", Precision: 8},
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {
@@ -458,6 +470,8 @@ func TestInfoboxField(t *testing.T) {
 		In: "Battle text {{One source|date=October 2025}}", WantDate: "",
 	}, { // Test 3: Infobox without a date.
 		In: "{{Infobox military conflict\n| place = X\n}}", WantDate: "",
+	}, { // Test 4: An empty date never reads the next parameter as its value.
+		In: "{{Infobox military conflict\n| date =\n| place = Kidodi\n}}", WantDate: "",
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {

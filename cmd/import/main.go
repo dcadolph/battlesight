@@ -145,10 +145,11 @@ func main() {
 			os.Exit(3)
 		}
 		log.Printf("wikidata refresh: %d catalog items, %d new; inserted %d, skipped %d removed on purpose, "+
-			"%d already titled, %d named like an existing row, %d unlabeled; %d rows in scope, %d items gone, "+
-			"%d facts moved, %d dates rendered again, %d titles set, %d coordinates filled", rep.Fetched, rep.New,
-			rep.Inserted, rep.SkippedRemoved, rep.SkippedTitle, rep.SkippedName, rep.SkippedLabel, rep.InScope,
-			rep.Missing, rep.FactsChanged, rep.DatesRewritten, rep.TitlesSet, rep.CoordsFilled)
+			"%d already titled, %d named like an existing row, %d unlabeled, %d with no article to date or place "+
+			"them; %d rows in scope, %d items gone, %d facts moved, %d dates rendered again, %d titles set, "+
+			"%d coordinates filled", rep.Fetched, rep.New, rep.Inserted, rep.SkippedRemoved, rep.SkippedTitle,
+			rep.SkippedName, rep.SkippedLabel, rep.SkippedUnsourced, rep.InScope, rep.Missing, rep.FactsChanged,
+			rep.DatesRewritten, rep.TitlesSet, rep.CoordsFilled)
 		if !*refreshDryRun {
 			*wikidataWars = true
 		}

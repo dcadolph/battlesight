@@ -168,7 +168,7 @@ var warFamilies = []warFamily{{
 		"Ukrainian Kursk Oblast Incursion"},
 }, {
 	Match: regexp.MustCompile(`yemen`),
-	Allowed: []string{"Yemeni Civil War", "Al-Qaeda insurgency in Yemen", "Houthi insurgency", "Yemeni Revolution",
+	Allowed: []string{"Yemeni Civil War", "Al-Qaeda insurgency in Yemen", "Houthi insurgency", "Yemeni revolution",
 		"Yemeni revolt in the Wilayah of al-Andalus"},
 }, {
 	Match:   regexp.MustCompile(`gaza war|israel.hamas war`),

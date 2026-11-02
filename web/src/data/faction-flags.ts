@@ -109,6 +109,7 @@ export const FACTION_FLAGS: Record<string, FlagSource[]> = {
   'ottoman': [{ url: historic('ottoman'), minYear: 1453, maxYear: 1922 }],
   'seljuk': [{ url: historic('ottoman'), minYear: 1037, maxYear: 1308 }],
   'iran': [{ url: flagcdn('ir'), minYear: 1979, maxYear: 9999 }],
+  'israel': [{ url: flagcdn('il'), minYear: 1948, maxYear: 9999 }],
   'iraq': [{ url: flagcdn('iq'), minYear: 1932, maxYear: 9999 }],
   'iraq-saddam': [{ url: flagcdn('iq'), minYear: 1979, maxYear: 2003 }],
   'iraq-government': [{ url: flagcdn('iq'), minYear: 2003, maxYear: 9999 }],

@@ -32,6 +32,8 @@ type RefreshReport struct {
 	SkippedLabel int
 	// SkippedRemoved counts new Q-ids a cleanse pass removed on purpose, as a non-battle or a merged duplicate.
 	SkippedRemoved int
+	// SkippedUnsourced counts new Q-ids with no English article and no date or no point, which no stage can fill.
+	SkippedUnsourced int
 	// InScope is the number of existing rows whose Wikidata facts were read again.
 	InScope int
 	// Missing counts in-scope rows whose item Wikidata no longer has.
@@ -56,7 +58,7 @@ type factsFunc func(ctx context.Context, qids []string) (map[string]wikidataFact
 // RefreshWikidata brings the wikidata rows up to date with Wikidata. It inserts
 // every battle the catalog queries return that no row carries yet, matched by
 // Q-id and never by name and never an item a cleanse pass removed, and reads the live facts of every unverified wikidata
-// row dated since the given year or not dated at all. For those rows it stores
+// row dated since the given year, not dated at all, or dated coarser than a year. For those rows it stores
 // the facts, renders the date columns again when the Wikidata date or end
 // moved, takes the item's English article when the row has none or the stored
 // title redirects to it, and takes the item's coordinates when the row sits at
@@ -138,7 +140,8 @@ func refreshWikidata(ctx context.Context, db *sql.DB, since int, dryRun bool, ca
 	var scope []refreshRow
 	scopeQIDs := map[string]bool{}
 	for _, r := range existing {
-		if r.source == "wikidata" && !r.verified && r.qid != "" && (r.year >= since || r.year == 0) {
+		if r.source == "wikidata" && !r.verified && r.qid != "" && (r.year >= since || r.year == 0 ||
+			r.prec != 0 && r.prec < precisionYear) {
 			scope = append(scope, r)
 			scopeQIDs[r.qid] = true
 		}
@@ -170,6 +173,9 @@ func refreshWikidata(ctx context.Context, db *sql.DB, since int, dryRun bool, ca
 			continue
 		case "name":
 			rep.SkippedName++
+			continue
+		case "unsourced":
+			rep.SkippedUnsourced++
 			continue
 		}
 		ids[ins.id] = true
@@ -294,7 +300,8 @@ type refreshInsert struct {
 // planRefreshInsert builds the row for a new Q-id, or names why it is skipped:
 // "label" for no English label, "title" when its article is some row's stored
 // title, "name" when a curated row or a row of the same or a neighboring year
-// has its name.
+// has its name, and "unsourced" when it has no English article and lacks a
+// date or a point, since the article is the only later source for either.
 func planRefreshInsert(q string, it catalogItem, f wikidataFacts, labels map[string]string, titles, ids map[string]bool,
 	names map[string][]int, curatedNames map[string]bool) (refreshInsert, string) {
 	ins := refreshInsert{name: it.label, qid: q, title: wikipediaTitle(it.article), wdDate: f.Date, prec: f.Precision,
@@ -327,6 +334,9 @@ func planRefreshInsert(q string, it catalogItem, f wikidataFacts, labels map[str
 	}
 	ins.era = yearToEra(ins.year)
 	ins.lat, ins.lng = parsePoint(it.coords)
+	if ins.title == "" && (ins.year == 0 || ins.lat == 0 && ins.lng == 0) {
+		return ins, "unsourced"
+	}
 	ins.id = slugify(ins.name)
 	if ids[ins.id] && ins.year != 0 {
 		ins.id = slugify(ins.name) + "-" + yearSlug(ins.year)

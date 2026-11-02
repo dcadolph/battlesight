@@ -131,6 +131,13 @@ canonical war name (matching `battles.war`).
 | `startYear`&nbsp;&nbsp;&nbsp; | int | Curated start year. Overrides the earliest battle year for display. |
 | `endYear`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | int | Curated end year. |
 | `parent`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string | Parent war name (e.g. "World War II" for theater entries). Empty for top-level wars. |
+| `aliases`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | string[] | Other names rows carry for this war. Cleanse files those rows under the key, in any letter case. An alias may not be another key or another entry's alias. |
+| `sources`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | object[] | The articles the text was written from, each `{title, revision, fetched}`: the English Wikipedia title, the revision id read, and the `YYYY-MM-DD` day it was read. Required for a war that started in 2022 or later or that has a start year and no end year. |
+
+An open or recent war is written from the live article, never from
+memory, and `-validate` refuses one without `sources`. Its outcome
+names the month it was read ("Ongoing as of November 2026"), never a
+season such as "late 2025".
 
 `humanDeaths` is authoritative when present. The UI shows it directly
 and the rolled-up war total uses it instead of summing children. This

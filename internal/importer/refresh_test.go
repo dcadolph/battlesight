@@ -78,6 +78,8 @@ func testRefreshSeeds() []refreshSeed {
 		{ID: "gone", Name: "Gone", Source: "wikidata", QID: "Q8", Year: 2024, Lat: 1},
 		{ID: "battle-of-new-town", Name: "Battle of New Town", Source: "wikidata", QID: "Q9", Year: 1800, Lat: 1},
 		{ID: "battle-of-himera", Name: "Battle of Himera", Source: "wikidata", QID: "Q20", Year: -480, Lat: 1},
+		{ID: "decade", Name: "Decade", Source: "wikidata", QID: "Q22", Year: 2020, Lat: 1, WDDate: "+2020-01-01",
+			WDPrec: 8},
 	}
 }
 
@@ -100,6 +102,9 @@ func testRefreshSources(t *testing.T) (catalogFunc, factsFunc, canonicalTitleFun
 			b("Q14", "Q14", "2025-03-01T00:00:00Z", "Point(2 2)", ""),
 			b("Q15", "Battle of Removed", "2025-04-01T00:00:00Z", "Point(3 3)", ""),
 			b("Q21", "Battle of Himera", "-0408-01-01T00:00:00Z", "Point(13.8 38)", ""),
+			b("Q16", "Battle of Nowhere", "2025-06-01T00:00:00Z", "", ""),
+			b("Q17", "Battle of Sometime", "", "Point(4 4)", ""),
+			b("Q18", "Battle of Placeless", "2025-06-01T00:00:00Z", "", "https://en.wikipedia.org/wiki/Battle_of_Placeless"),
 		}, nil
 	}
 	live := map[string]wikidataFacts{
@@ -114,6 +119,9 @@ func testRefreshSources(t *testing.T) (catalogFunc, factsFunc, canonicalTitleFun
 		"Q13": {Date: "+2025-03-01", Precision: 10},
 		"Q15": {Date: "+2025-04-01", Precision: 10},
 		"Q21": {Date: "-0409-00-00", Precision: 9},
+		"Q16": {Date: "+2025-06-01", Precision: 11},
+		"Q22": {Date: "+2022-01-01", Precision: 9, End: "+2023-12-01", EndPrecision: 10},
+		"Q18": {Date: "+2025-06-01", Precision: 11},
 	}
 	facts := func(_ context.Context, qids []string) (map[string]wikidataFacts, map[string]string, error) {
 		out := map[string]wikidataFacts{}
@@ -146,9 +154,10 @@ func TestRefreshWikidata(t *testing.T) {
 		t.Fatal(err)
 	}
 	wantRep := RefreshReport{
-		Fetched: 9, New: 7, Inserted: 3, SkippedRemoved: 1, SkippedTitle: 1, SkippedName: 1, SkippedLabel: 1,
-		InScope: 5, Missing: 1,
-		FactsChanged: 1, DatesRewritten: 1, TitlesSet: 1, CoordsFilled: 1,
+		Fetched: 12, New: 10, Inserted: 4, SkippedRemoved: 1, SkippedTitle: 1, SkippedName: 1, SkippedLabel: 1,
+		SkippedUnsourced: 2,
+		InScope:          6, Missing: 1,
+		FactsChanged: 2, DatesRewritten: 2, TitlesSet: 1, CoordsFilled: 1,
 	}
 	if diff := cmp.Diff(wantRep, rep); diff != "" {
 		t.Errorf("report mismatch (-want +got):\n%s", diff)
@@ -162,7 +171,9 @@ func TestRefreshWikidata(t *testing.T) {
 		"battle-of-new|2026|1 February 2026|2026-02-01|2026-02-01|Battle of New|48.0||2026-11-02|",
 		"battle-of-new-town|1800|stored|2000-01-01|2000-12-31||1.0|||Kept war",
 		"battle-of-new-town-2025|2025|March 2025|2025-03-01|2025-03-31||2.0||2026-11-02|",
+		"battle-of-placeless|2025|1 June 2025|2025-06-01|2025-06-01|Battle of Placeless|0.0||2026-11-02|",
 		"curated|2024|stored|2000-01-01|2000-12-31|Battle of Curated|1.0|||Kept war",
+		"decade|2022|2022 – December 2023|2022-01-01|2023-12-31||1.0||2026-11-02|Kept war",
 		"gone|2024|stored|2000-01-01|2000-12-31||1.0|||Kept war",
 		"moved|2024|July 2024 – 1 December 2025|2024-07-01|2025-12-01|Moved|1.0|Russo-Ukrainian War|2026-11-02|Kept war",
 		"old|1990|stored|2000-01-01|2000-12-31||1.0|||Kept war",

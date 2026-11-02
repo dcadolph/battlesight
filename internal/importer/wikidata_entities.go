@@ -23,7 +23,7 @@ const (
 	// wikidataEntityBatch is the wbgetentities id cap for unauthenticated clients.
 	wikidataEntityBatch = 50
 	// wikidataFactsNamespace caches the date, conflict and class facts per Q-id.
-	wikidataFactsNamespace = "wikidata-dates"
+	wikidataFactsNamespace = "wikidata-dates-v2"
 	// wikidataLabelsNamespace caches English labels per Q-id.
 	wikidataLabelsNamespace = "wikidata-labels"
 )
@@ -460,12 +460,16 @@ func doWikidataEntities(ctx context.Context, api string, qids []string, props st
 }
 
 // factsFromClaims extracts the date, conflict and class facts from an item's claims.
+// The point in time wins unless it is coarser than a year and the start time is finer,
+// since a decade or century P585 beside a dated P580 only names the era.
 func factsFromClaims(claims map[string][]wikidataClaim) wikidataFacts {
 	var f wikidataFacts
-	if d, p, ok := bestTime(claims["P585"]); ok {
-		f.Date, f.Precision = d, p
-	} else if d, p, ok := bestTime(claims["P580"]); ok {
-		f.Date, f.Precision = d, p
+	point, pointPrec, havePoint := bestTime(claims["P585"])
+	start, startPrec, haveStart := bestTime(claims["P580"])
+	if havePoint && (!haveStart || pointPrec >= precisionYear || startPrec <= pointPrec) {
+		f.Date, f.Precision = point, pointPrec
+	} else if haveStart {
+		f.Date, f.Precision = start, startPrec
 		if e, ep, ok := bestTime(claims["P582"]); ok {
 			f.End, f.EndPrecision = e, ep
 		}

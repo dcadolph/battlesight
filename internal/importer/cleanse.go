@@ -713,27 +713,49 @@ func cleanseSides(ctx context.Context, db *sql.DB) (int, error) {
 
 // --- Date back-fill ---------------------------------------------------------
 
+// paramCaptureRe matches a value that is really the next infobox parameter,
+// captured when an empty parameter line was read as if it held a value.
+var paramCaptureRe = regexp.MustCompile(`^\s*\|?\s*\w+\s*=`)
+
 // backfillMissingDate fills in the user-facing `date` column for rows that
-// only carry `year`. The fall-back is the plain "1850" or "490 BC" string,
-// matching what users see elsewhere when no finer date is available.
+// have none. The Wikidata date renders first, since it is the source of
+// truth for wikidata rows. Without one the fall-back is the plain "1850" or
+// "490 BC" string, matching what users see elsewhere when no finer date is
+// available. The legacy "0" placeholder and a captured infobox parameter
+// count as missing, and an undated row's date becomes the empty string, so
+// the catalog has one placeholder. Curated and verified rows are never touched.
 func backfillMissingDate(ctx context.Context, db *sql.DB) (int, error) {
-	rows, err := db.QueryContext(ctx,
-		`SELECT id, year FROM battles WHERE date = '' AND year != 0`)
+	rows, err := db.QueryContext(ctx, `SELECT id, year, date, wikidata_date, wikidata_precision, wikidata_end,
+		wikidata_end_precision FROM battles WHERE source != 'curated' AND verified = 0
+		AND (date = '' OR date = '0' OR date LIKE '%=%')`)
 	if err != nil {
 		return 0, fmt.Errorf("scan missing-date battles: %w", err)
 	}
-	type row struct {
-		id   string
-		year int
+	type fill struct {
+		id, date string
+		dr       DateRange
 	}
-	var batch []row
+	var batch []fill
 	for rows.Next() {
-		var r row
-		if err := rows.Scan(&r.id, &r.year); err != nil {
+		var id, date, wdDate, wdEnd string
+		var year, prec, endPrec int
+		if err := rows.Scan(&id, &year, &date, &wdDate, &prec, &wdEnd, &endPrec); err != nil {
 			rows.Close()
 			return 0, fmt.Errorf("scan missing-date row: %w", err)
 		}
-		batch = append(batch, r)
+		if strings.Contains(date, "=") && !paramCaptureRe.MatchString(date) {
+			continue
+		}
+		f := fill{id: id}
+		if display, dr, ok := renderWikidataDate(wdDate, prec, wdEnd, endPrec); ok {
+			f.date, f.dr = display, dr
+		} else if year != 0 {
+			f.date, f.dr = formatYearLabel(year), yearFallback(year)
+		}
+		if f.date == date {
+			continue
+		}
+		batch = append(batch, f)
 	}
 	rows.Close()
 	if err := rows.Err(); err != nil {
@@ -752,19 +774,15 @@ func backfillMissingDate(ctx context.Context, db *sql.DB) (int, error) {
 	}
 	defer stmt.Close()
 
-	var updated int
-	for _, r := range batch {
-		date := formatYearLabel(r.year)
-		dr := yearFallback(r.year)
-		if _, err := stmt.ExecContext(ctx, date, dr.Start, dr.End, r.id); err != nil {
-			return updated, fmt.Errorf("backfill date for %s: %w", r.id, err)
+	for _, f := range batch {
+		if _, err := stmt.ExecContext(ctx, f.date, f.dr.Start, f.dr.End, f.id); err != nil {
+			return 0, fmt.Errorf("backfill date for %s: %w", f.id, err)
 		}
-		updated++
 	}
 	if err := tx.Commit(); err != nil {
 		return 0, fmt.Errorf("commit date backfill: %w", err)
 	}
-	return updated, nil
+	return len(batch), nil
 }
 
 // formatYearLabel mirrors what the UI shows ("490 BC" / "1066").

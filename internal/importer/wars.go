@@ -10,18 +10,13 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/dcadolph/battlesight/internal/battles"
 )
 
-// warNarrative mirrors battles.WarNarrative on the importer side so we can
-// read and write data/wars.json without pulling the battles package in
-// (avoids a dependency cycle). Field tags must match exactly so the same
-// JSON file round-trips between import and serve.
-type warNarrative struct {
-	Outcome   string   `json:"outcome,omitempty"`
-	Aftermath string   `json:"aftermath,omitempty"`
-	KeyTerms  string   `json:"keyTerms,omitempty"`
-	Notable   []string `json:"notable,omitempty"`
-}
+// warNarrative is one wars.json entry. It is the served type itself, so every
+// curated field survives a read and rewrite of the file.
+type warNarrative = battles.WarNarrative
 
 // minBattlesForWarEnrich is the floor on how many battles a war must have
 // in our catalog before we go fetch a Wikipedia article for it. Wars with
@@ -126,7 +121,8 @@ func narrativeRichness(n warNarrative) int {
 
 // mergeWarNarrative produces the union of two narratives: prefer the
 // non-empty value, and use the longer of two non-empty strings so a
-// fuller aftermath replaces a shorter one. Lists merge with dedup.
+// fuller aftermath replaces a shorter one. Lists merge with dedup. Every
+// other curated field of a is kept as it was.
 func mergeWarNarrative(a, b warNarrative) warNarrative {
 	pick := func(x, y string) string {
 		if x == "" {
@@ -141,11 +137,11 @@ func mergeWarNarrative(a, b warNarrative) warNarrative {
 		}
 		return x
 	}
-	out := warNarrative{
-		Outcome:   pick(a.Outcome, b.Outcome),
-		Aftermath: pick(a.Aftermath, b.Aftermath),
-		KeyTerms:  pick(a.KeyTerms, b.KeyTerms),
-	}
+	out := a
+	out.Outcome = pick(a.Outcome, b.Outcome)
+	out.Aftermath = pick(a.Aftermath, b.Aftermath)
+	out.KeyTerms = pick(a.KeyTerms, b.KeyTerms)
+	out.Notable = nil
 	seen := map[string]bool{}
 	for _, n := range a.Notable {
 		if !seen[n] {

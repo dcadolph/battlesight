@@ -186,7 +186,7 @@ func loadDumpYears(path string) (map[string]int, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read raw dump: %w", err)
 	}
-	var dump sparqlResponse
+	var dump sparqlResponse[sparqlBinding]
 	if err := json.Unmarshal(raw, &dump); err != nil {
 		return nil, fmt.Errorf("decode raw dump: %w", err)
 	}

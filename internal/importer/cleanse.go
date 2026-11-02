@@ -80,6 +80,11 @@ func Cleanse(ctx context.Context, db *sql.DB) (CleanseReport, error) {
 	} else {
 		rep.NonBattlesDropped = n
 	}
+	if n, err := mergeDuplicates(ctx, db); err != nil {
+		return rep, err
+	} else {
+		rep.TwinsMerged = n
+	}
 	if n, err := deduplicateWikipedia(ctx, db); err != nil {
 		return rep, err
 	} else {
@@ -274,9 +279,11 @@ type CleanseReport struct {
 	BlankSidesDropped      int
 	WarNamesCanonicalised  int
 	NonBattlesDropped      int
-	DuplicatesRemoved      int
-	CoordsOverridden       int
-	RichSearchRowsIndexed  int
+	// TwinsMerged counts allowlist pairs and redirect twins folded into one row.
+	TwinsMerged           int
+	DuplicatesRemoved     int
+	CoordsOverridden      int
+	RichSearchRowsIndexed int
 }
 
 // Total returns the sum of every fix bucket. Cheap signal for "did the
@@ -285,7 +292,7 @@ func (r CleanseReport) Total() int {
 	return r.BattleTextFixed + r.SideTextFixed + r.MissingDatesBackfilled +
 		r.DateStringsNormalised + r.SourceDatesReconciled + r.YearsAligned + r.YearsDerived +
 		r.ErasRecomputed + r.BlankSidesDropped + r.WarNamesCanonicalised +
-		r.NonBattlesDropped + r.DuplicatesRemoved + r.CoordsOverridden + r.RichSearchRowsIndexed
+		r.NonBattlesDropped + r.TwinsMerged + r.DuplicatesRemoved + r.CoordsOverridden + r.RichSearchRowsIndexed
 }
 
 // --- Text normalisation -----------------------------------------------------
@@ -1323,28 +1330,29 @@ func canonWarKey(w string) string {
 
 // --- Wikipedia-title duplicates --------------------------------------------
 
-// deduplicateWikipedia removes duplicate rows that share a wikipedia_title.
-// Keeps the row with the most filled fields (sides count, summary length, and
-// verified flag). The discarded row's sides and references are dropped via
-// foreign-key cascade.
+// deduplicateWikipedia merges rows that share a wikipedia_title. The kept row
+// is curated before wikidata, then verified, then the one with more sides,
+// then the longer summary, then the lower id. A curated row is never the
+// deleted side. The others fold in through mergeRow, which carries their
+// names and aliases.
 func deduplicateWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 	rows, err := db.QueryContext(ctx, `
-		SELECT id, name, wikipedia_title, verified, COALESCE(LENGTH(summary), 0),
+		SELECT id, name, wikipedia_title, source, verified, COALESCE(LENGTH(summary), 0),
 		       (SELECT COUNT(*) FROM battle_sides s WHERE s.battle_id = battles.id)
 		FROM battles WHERE wikipedia_title != ''`)
 	if err != nil {
 		return 0, fmt.Errorf("scan duplicates: %w", err)
 	}
 	type row struct {
-		id, name, title string
-		verified        int
-		summary         int
-		sides           int
+		id, name, title, source string
+		verified                int
+		summary                 int
+		sides                   int
 	}
 	groups := make(map[string][]row)
 	for rows.Next() {
 		var r row
-		if err := rows.Scan(&r.id, &r.name, &r.title, &r.verified, &r.summary, &r.sides); err != nil {
+		if err := rows.Scan(&r.id, &r.name, &r.title, &r.source, &r.verified, &r.summary, &r.sides); err != nil {
 			rows.Close()
 			return 0, fmt.Errorf("scan duplicate row: %w", err)
 		}
@@ -1366,11 +1374,11 @@ func deduplicateWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 		if len(dupes) < 2 {
 			continue
 		}
-		// Sort so the row to KEEP is first. Verified beats non-verified, more
-		// sides beats fewer, longer summary beats shorter, alphabetical id is
-		// the tie-breaker so the result is deterministic.
 		sort.Slice(dupes, func(i, j int) bool {
 			a, b := dupes[i], dupes[j]
+			if ac, bc := a.source == "curated", b.source == "curated"; ac != bc {
+				return ac
+			}
 			if a.verified != b.verified {
 				return a.verified > b.verified
 			}
@@ -1384,18 +1392,13 @@ func deduplicateWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 		})
 		keep := dupes[0]
 		for _, d := range dupes[1:] {
-			if err := carryAlias(ctx, tx, keep.id, keep.name, d.name); err != nil {
-				return removed, err
+			if d.source == "curated" {
+				log.Printf("dedupe: %s and %s are both curated on %s: kept both", keep.id, d.id, d.title)
+				continue
 			}
 			log.Printf("dedupe: merged %s (%s) into %s (%s): %s", d.id, d.name, keep.id, keep.name, d.title)
-			if _, err := tx.ExecContext(ctx, `DELETE FROM battle_sides WHERE battle_id = ?`, d.id); err != nil {
-				return removed, fmt.Errorf("delete sides for %s: %w", d.id, err)
-			}
-			if _, err := tx.ExecContext(ctx, `DELETE FROM battle_references WHERE battle_id = ?`, d.id); err != nil {
-				return removed, fmt.Errorf("delete refs for %s: %w", d.id, err)
-			}
-			if _, err := tx.ExecContext(ctx, `DELETE FROM battles WHERE id = ?`, d.id); err != nil {
-				return removed, fmt.Errorf("delete duplicate %s: %w", d.id, err)
+			if err := mergeRow(ctx, tx, keep.id, keep.name, d.id, d.name); err != nil {
+				return removed, err
 			}
 			removed++
 		}
@@ -1406,9 +1409,10 @@ func deduplicateWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 	return removed, nil
 }
 
-// carryAlias records a merged row's name as an alias of the kept row, unless it
-// matches the kept name or an alias the kept row already has.
-func carryAlias(ctx context.Context, tx *sql.Tx, keepID, keepName, name string) error {
+// carryAlias records a merged row's name or alias, with its attribution text,
+// as an alias of the kept row, unless it matches the kept name or an alias the
+// kept row already has.
+func carryAlias(ctx context.Context, tx *sql.Tx, keepID, keepName, name, byText string) error {
 	if name == "" || strings.EqualFold(name, keepName) {
 		return nil
 	}
@@ -1421,8 +1425,8 @@ func carryAlias(ctx context.Context, tx *sql.Tx, keepID, keepName, name string) 
 		return nil
 	}
 	if _, err := tx.ExecContext(ctx, `INSERT INTO battle_aliases (battle_id, alias_index, name, by_text)
-		VALUES (?, (SELECT COALESCE(MAX(alias_index) + 1, 0) FROM battle_aliases WHERE battle_id = ?), ?, '')`,
-		keepID, keepID, name); err != nil {
+		VALUES (?, (SELECT COALESCE(MAX(alias_index) + 1, 0) FROM battle_aliases WHERE battle_id = ?), ?, ?)`,
+		keepID, keepID, name, byText); err != nil {
 		return fmt.Errorf("carry alias to %s: %w", keepID, err)
 	}
 	return nil

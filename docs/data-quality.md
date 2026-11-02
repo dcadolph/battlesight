@@ -45,14 +45,25 @@ of Salvore are examples. Curated and hand-checked records are never
 dropped. An item with no class on Wikidata is kept.
 
 Two records are merged when they carry the same Wikipedia title. A
-hand-checked record wins, then the one with more sides, then the longer
-summary, and the other record's name becomes a search alias. Titles that
-only redirect to one article are not merged, because the target is often
-a parent article that covers several distinct battles (Siversk, Kreminna
-and Lyman all redirect to the Battle of Donbas). Records with similar
-names in the same place and year are not merged when Wikidata or
-Wikipedia treats them as separate events, so the First and Second Battles
-of Gaza stay apart.
+curated record always survives, then a hand-checked one, then the one
+with more sides, then the longer summary. The other record's name and
+every alias it carried become search aliases of the survivor.
+
+Two Wikidata records are also merged when they are spelling twins of one
+event: both titles lead to the same article, exactly one of them is that
+article's own title, the years match, no ordinal or number sits on one
+side only, and the names differ by little more than spelling ("Bembezi"
+and "Bembesi", "Wad Kaltabu" and "Wadkaltabu"). The record whose title is
+the article survives and takes the other's sides only when it has none.
+Coordinates play no part, because a twin often carries a bad geocode.
+Titles that only redirect to a parent article never merge, because the
+parent covers several distinct battles (Siversk, Kreminna and Lyman all
+redirect to the Battle of Donbas), and the First and Second Battles of a
+place stay apart. Alternate names the spelling rule cannot see, such as
+Klushino and Kruszyn, merge only from a reviewed list in
+`data/duplicates.json`. Curated and hand-checked records are never merged
+by either rule. A twin of a curated record is listed by the audit and
+settled by a curated edit.
 
 ## Spotting an indexed record
 

@@ -14,7 +14,7 @@ import (
 )
 
 // geocodeUserAgent identifies the backfill tool per Wikimedia API etiquette.
-const geocodeUserAgent = "battlesight-importer/1.0 (personal project)"
+const geocodeUserAgent = "BattleSight/1.0 (https://github.com/dcadolph/battlesight)"
 
 // geocodeBatchSize is the MediaWiki title cap per query for unauthenticated clients.
 const geocodeBatchSize = 50
@@ -171,7 +171,7 @@ func GeocodeMissing(ctx context.Context, db *sql.DB, dryRun bool) (GeocodeSummar
 		end := min(start+geocodeBatchSize, len(titles))
 		batch := titles[start:end]
 
-		resp, err := fetchGeocodeBatch(ctx, batch)
+		resp, err := fetchGeocodeBatch(ctx, wikipediaAPI, batch)
 		if err != nil {
 			return sum, fmt.Errorf("geocode batch %d-%d: %w", start, end, err)
 		}
@@ -232,11 +232,11 @@ func applyGeocodeUpdates(ctx context.Context, db *sql.DB, updates []geocodeUpdat
 	return nil
 }
 
-// fetchGeocodeBatch queries the coordinates API for one batch of titles,
-// retrying once when the server answers 429 or maxlag. The retry waits the
-// server's Retry-After when given, with geocodeRetryPause as the floor.
-func fetchGeocodeBatch(ctx context.Context, titles []string) (*geocodeResponse, error) {
-	resp, wait, err := doGeocodeRequest(ctx, titles)
+// fetchGeocodeBatch queries the coordinates API at api for one batch of
+// titles, retrying once when the server answers 429 or maxlag. The retry waits
+// the server's Retry-After when given, with geocodeRetryPause as the floor.
+func fetchGeocodeBatch(ctx context.Context, api string, titles []string) (*geocodeResponse, error) {
+	resp, wait, err := doGeocodeRequest(ctx, api, titles)
 	if err != nil || wait <= 0 {
 		return resp, err
 	}
@@ -246,20 +246,20 @@ func fetchGeocodeBatch(ctx context.Context, titles []string) (*geocodeResponse, 
 		return nil, ctx.Err()
 	case <-time.After(wait):
 	}
-	resp, wait, err = doGeocodeRequest(ctx, titles)
+	resp, wait, err = doGeocodeRequest(ctx, api, titles)
 	if err != nil {
 		return nil, err
 	}
 	if wait > 0 {
-		return nil, fmt.Errorf("geocode api still busy after retry")
+		return nil, ErrWikipediaBusy
 	}
 	return resp, nil
 }
 
-// doGeocodeRequest performs one coordinates API call. A positive wait reports
-// that the server asked for a pause (429 or maxlag) and the caller may retry
-// once after waiting that long.
-func doGeocodeRequest(ctx context.Context, titles []string) (*geocodeResponse, time.Duration, error) {
+// doGeocodeRequest performs one coordinates API call against api. A positive
+// wait reports that the server asked for a pause (429 or maxlag) and the caller
+// may retry once after waiting that long.
+func doGeocodeRequest(ctx context.Context, api string, titles []string) (*geocodeResponse, time.Duration, error) {
 	params := url.Values{
 		"action":    {"query"},
 		"prop":      {"coordinates"},
@@ -270,7 +270,7 @@ func doGeocodeRequest(ctx context.Context, titles []string) (*geocodeResponse, t
 		"format":    {"json"},
 		"maxlag":    {"5"},
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, wikipediaAPI+"?"+params.Encode(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, api+"?"+params.Encode(), nil)
 	if err != nil {
 		return nil, 0, fmt.Errorf("build geocode request: %w", err)
 	}

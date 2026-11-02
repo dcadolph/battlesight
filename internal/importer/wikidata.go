@@ -72,9 +72,12 @@ WHERE {
 
 var pointRegex = regexp.MustCompile(`Point\(([0-9.\-]+)\s+([0-9.\-]+)\)`)
 
-type sparqlResponse struct {
+// sparqlResponse is a SPARQL JSON result whose rows decode into T.
+type sparqlResponse[T any] struct {
+	// Results holds the result rows.
 	Results struct {
-		Bindings []sparqlBinding `json:"bindings"`
+		// Bindings holds one entry per result row.
+		Bindings []T `json:"bindings"`
 	} `json:"results"`
 }
 
@@ -209,6 +212,12 @@ func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
 
 // fetchSPARQLQuery queries Wikidata with the given SPARQL and returns the result bindings.
 func fetchSPARQLQuery(ctx context.Context, query string) ([]sparqlBinding, error) {
+	return fetchSPARQL[sparqlBinding](ctx, query)
+}
+
+// fetchSPARQL queries Wikidata with the given SPARQL and decodes each result
+// row into T. A 429 or a 502, 503 or 504 gateway answer is reported as ErrSPARQLBusy.
+func fetchSPARQL[T any](ctx context.Context, query string) ([]T, error) {
 	params := url.Values{"query": {query}}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, wikidataSPARQL+"?"+params.Encode(), nil)
 	if err != nil {
@@ -223,11 +232,15 @@ func fetchSPARQLQuery(ctx context.Context, query string) ([]sparqlBinding, error
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	switch resp.StatusCode {
+	case http.StatusOK:
+	case http.StatusTooManyRequests, http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusGatewayTimeout:
+		return nil, fmt.Errorf("%w: status %d", ErrSPARQLBusy, resp.StatusCode)
+	default:
 		return nil, fmt.Errorf("sparql returned %d", resp.StatusCode)
 	}
 
-	var result sparqlResponse
+	var result sparqlResponse[T]
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("decode sparql response: %w", err)
 	}

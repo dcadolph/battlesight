@@ -63,6 +63,8 @@ type AuditRow struct {
 	InstanceOf string
 	// Documented is true when the row passes the store's documented-tier rule.
 	Documented bool
+	// CoordSource names the source the coordinates agree with, empty when none does.
+	CoordSource string
 }
 
 // AuditSide is the slice of a battle_sides row the audit reads.
@@ -100,6 +102,8 @@ type AuditInput struct {
 	// CanonicalTitles maps a stored Wikipedia title to the article it resolves
 	// to, "" for a missing page. Titles absent from the map are taken as canonical.
 	CanonicalTitles map[string]string
+	// Duplicates holds the reviewed twin allowlist from data/duplicates.json.
+	Duplicates []DuplicatePair
 }
 
 // MismatchClass is one kind of data defect with the rows that show it.
@@ -303,16 +307,16 @@ func Mismatches(in AuditInput) []MismatchClass {
 		return r.Lat < -90 || r.Lat > 90 || r.Lng < -180 || r.Lng > 180
 	})
 	if in.Land != nil {
-		add("land-in-ocean", fmt.Sprintf("land battle more than %d km off the coast", landTolKM),
-			func(r *AuditRow) bool {
-				if r.Lat == 0 && r.Lng == 0 {
-					return false
-				}
-				if r.BattleType == "naval" || r.BattleType == "amphibious" || waterName.MatchString(r.Name) {
-					return false
-				}
-				return !in.Land.OnLand(r.Lat, r.Lng, landTolKM)
-			})
+		add("land-in-ocean", fmt.Sprintf("land battle more than %d km off the coast that no source places there",
+			landTolKM), func(r *AuditRow) bool {
+			if (r.Lat == 0 && r.Lng == 0) || r.CoordSource != "" {
+				return false
+			}
+			if r.BattleType == "naval" || r.BattleType == "amphibious" || waterName.MatchString(r.Name) {
+				return false
+			}
+			return !in.Land.OnLand(r.Lat, r.Lng, landTolKM)
+		})
 	} else {
 		na("land-in-ocean", "land battle in the ocean", "no land mask loaded")
 	}
@@ -379,8 +383,21 @@ func Mismatches(in AuditInput) []MismatchClass {
 		return r.WikipediaTitle != "" && ok && c == ""
 	})
 	near := nearDuplicateRows(in.Rows, in.CanonicalTitles)
-	add("near-duplicate", "same year, within 2 km, same name, no source keeps them apart",
+	tw := auditTwinRows(in.Rows)
+	for _, p := range redirectTwins(tw, in.CanonicalTitles) {
+		near[p.Anchor.ID], near[p.Twin.ID] = true, true
+	}
+	for id := range unappliedDuplicates(in.Rows, in.Duplicates) {
+		near[id] = true
+	}
+	add("near-duplicate", "same event on two rows: redirect twin, allowlisted pair, or same name within 2 km",
 		func(r *AuditRow) bool { return near[r.ID] })
+	ctwin := map[string]bool{}
+	for _, p := range curatedTwins(tw, in.CanonicalTitles) {
+		ctwin[p.Anchor.ID], ctwin[p.Twin.ID] = true, true
+	}
+	add("curated-twin", "a curated or verified row and a twin of it, settled only by a curated edit",
+		func(r *AuditRow) bool { return ctwin[r.ID] })
 	if in.HasInstanceOf {
 		add("non-battle", "Wikidata says the item is not a military event", func(r *AuditRow) bool {
 			return r.Source == "wikidata" && !r.Verified && IsNonBattle(r.InstanceOf)
@@ -626,6 +643,34 @@ func nearDuplicateRows(rows []AuditRow, canon map[string]string) map[string]bool
 	return out
 }
 
+// auditTwinRows converts audit rows to the rows the twin rules read.
+func auditTwinRows(rows []AuditRow) []twinRow {
+	out := make([]twinRow, 0, len(rows))
+	for _, r := range rows {
+		if r.WikipediaTitle == "" {
+			continue
+		}
+		out = append(out, twinRow{ID: r.ID, Name: r.Name, Year: r.Year, Title: r.WikipediaTitle,
+			Source: r.Source, Verified: r.Verified})
+	}
+	return out
+}
+
+// unappliedDuplicates marks both rows of every allowlist pair still present.
+func unappliedDuplicates(rows []AuditRow, pairs []DuplicatePair) map[string]bool {
+	have := map[string]bool{}
+	for _, r := range rows {
+		have[r.ID] = true
+	}
+	out := map[string]bool{}
+	for _, p := range pairs {
+		if have[p.Keep] && have[p.Merge] {
+			out[p.Keep], out[p.Merge] = true, true
+		}
+	}
+	return out
+}
+
 // keptApart reports whether a source separates two rows: distinct Wikidata
 // items, or a Wikipedia title that names an article on both. Two different
 // titles are two events, and one shared title is the dup-wikipedia-title class.
@@ -721,7 +766,10 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 	}
 	in.HasWikidataDate = cols["wikidata_date"]
 	in.HasInstanceOf = cols["wikidata_instance_of"]
-	wdDate, wdPrec, inst, ibDate, ibChecked := "''", "0", "''", "''", "''"
+	wdDate, wdPrec, inst, ibDate, ibChecked, coordSrc := "''", "0", "''", "''", "''", "''"
+	if cols["coord_source"] {
+		coordSrc = "coord_source"
+	}
 	if cols["infobox_checked"] {
 		ibDate, ibChecked = "infobox_date", "infobox_checked"
 	}
@@ -737,7 +785,7 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 	q := `SELECT id, name, year, date, date_start, date_end, lat, lng, era, war, battle_type, victor,
 		summary, source, verified, wikipedia_title, source_id, ` + wdDate + `, ` + wdPrec + `, ` + inst + `, ` + ibDate +
 		`, ` + ibChecked + `,
-		CASE WHEN ` + documentedSQL + ` THEN 1 ELSE 0 END FROM battles`
+		CASE WHEN ` + documentedSQL + ` THEN 1 ELSE 0 END, ` + coordSrc + ` FROM battles`
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return in, fmt.Errorf("query audit rows: %w", err)
@@ -750,7 +798,7 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 		if err := rows.Scan(&r.ID, &r.Name, &r.Year, &r.Date, &r.DateStart, &r.DateEnd, &r.Lat, &r.Lng,
 			&r.Era, &r.War, &r.BattleType, &r.Victor, &r.Summary, &r.Source, &verified, &r.WikipediaTitle,
 			&r.SourceID, &r.WikidataDate, &r.WikidataPrecision, &r.InstanceOf, &r.InfoboxDate, &ibCheckedAt,
-			&documented); err != nil {
+			&documented, &r.CoordSource); err != nil {
 			return in, fmt.Errorf("scan audit row: %w", err)
 		}
 		r.Verified = verified == 1
@@ -779,6 +827,9 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 	}
 
 	in.CanonicalTitles = cachedCanonicalTitles(in.Rows)
+	if in.Duplicates, err = LoadDuplicates(duplicatesPath); err != nil {
+		return in, err
+	}
 	in.YearEnrichTitles, err = yearEnrichTitles(yearEnrichDir)
 	return in, err
 }

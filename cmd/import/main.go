@@ -24,6 +24,9 @@ func main() {
 		"fill the wikidata_* and infobox_* columns from Wikidata and the article for rows not yet checked")
 	rawDumpPath := flag.String("wikidata-dump", "data/wikidata_battles_raw.json",
 		"SPARQL dump that -wikidata-dates compares live years against")
+	coordsFromSource := flag.Bool("coords-from-source", false,
+		"check coordinates against Wikidata P625 and the Wikipedia articles, fill 0,0 rows and move points no source backs")
+	landPath := flag.String("land", "data/land-50m.json", "world-atlas land TopoJSON that -coords-from-source reads")
 	resolveTitles := flag.Bool("resolve-titles", false,
 		"resolve every Wikipedia title through redirects and report missing and redirected titles")
 	enrich := flag.Bool("enrich", false, "fetch Wikipedia summaries for battles missing them")
@@ -68,6 +71,7 @@ func main() {
 	if *all {
 		*wikidata = true
 		*wikidataDates = true
+		*coordsFromSource = true
 		*resolveTitles = true
 		*enrich = true
 		*infobox = true
@@ -79,10 +83,10 @@ func main() {
 		}
 	}
 
-	if *jsonPath == "" && !*wikidata && !*wikidataDates && !*resolveTitles && !*enrich && !*infobox && !*significance && !*references &&
+	if *jsonPath == "" && !*wikidata && !*wikidataDates && !*coordsFromSource && !*resolveTitles && !*enrich && !*infobox && !*significance && !*references &&
 		!*warsEnrich && !*geocodeMissing && !*geocodeDryRun && !*infoboxBackfill && !*infoboxDryRun &&
 		*mergeReplays == "" {
-		log.Fatal("at least one action required: -json, -wikidata, -wikidata-dates, -resolve-titles, -enrich, -infobox, -significance, " +
+		log.Fatal("at least one action required: -json, -wikidata, -wikidata-dates, -coords-from-source, -resolve-titles, -enrich, -infobox, -significance, " +
 			"-references, -wars, -geocode-missing, -geocode-dry-run, -infobox-backfill, " +
 			"-infobox-dry-run, -merge-replays, -validate, or -all")
 	}
@@ -135,6 +139,21 @@ func main() {
 			log.Fatalf("infobox dates failed: %v", err)
 		}
 		log.Printf("infobox dates: read %d rows whose year disagrees with Wikidata", n)
+	}
+
+	if *coordsFromSource {
+		log.Println("checking coordinates against Wikidata and the Wikipedia articles...")
+		land, err := importer.LoadLandMask(*landPath)
+		if err != nil {
+			log.Fatalf("coords from source: %v", err)
+		}
+		rep, err := importer.CoordsFromSource(ctx, database, land)
+		if err != nil {
+			log.Fatalf("coords from source failed: %v", err)
+		}
+		log.Printf("coords from source: %d rows, %d sourced, %d moved, %d disputed, %d with no source "+
+			"(%d still at 0,0), %d retyped naval", rep.Rows, rep.Sourced, len(rep.Moves), len(rep.Disputed),
+			rep.Unsourced, rep.ZeroUnsourced, rep.Naval)
 	}
 
 	if *resolveTitles {
@@ -267,6 +286,17 @@ func runValidate(jsonPath string) error {
 	fmt.Fprintf(os.Stdout, "validated %d battle(s): %d error(s), %d warning(s)\n",
 		len(raw), len(rep.Errors), len(rep.Warnings))
 
+	dupPath := filepath.Join(filepath.Dir(jsonPath), "duplicates.json")
+	pairs, err := importer.LoadDuplicates(dupPath)
+	if err != nil {
+		return err
+	}
+	dupRep := importer.ValidateDuplicates(pairs, raw)
+	if formatted := dupRep.FormatReport(); formatted != "" {
+		fmt.Fprint(os.Stderr, formatted)
+	}
+	fmt.Fprintf(os.Stdout, "validated %d duplicate pair(s): %d error(s)\n", len(pairs), len(dupRep.Errors))
+
 	phasesPath := filepath.Join(filepath.Dir(jsonPath), "phases.json")
 	replays, err := loadValidationReplays(phasesPath)
 	if err != nil {
@@ -278,7 +308,7 @@ func runValidate(jsonPath string) error {
 	}
 	fmt.Fprintf(os.Stdout, "validated %d replay(s): %d error(s)\n", len(replays), len(replayRep.Errors))
 
-	if n := len(rep.Errors) + len(replayRep.Errors); n > 0 {
+	if n := len(rep.Errors) + len(dupRep.Errors) + len(replayRep.Errors); n > 0 {
 		return fmt.Errorf("%d blocking issue(s) found", n)
 	}
 	return nil

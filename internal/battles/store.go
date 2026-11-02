@@ -354,11 +354,11 @@ func normEdit(a, b string) float64 {
 	if m == 0 {
 		return 0
 	}
-	return float64(levenshtein(a, b)) / float64(m)
+	return float64(Levenshtein(a, b)) / float64(m)
 }
 
-// levenshtein is the classic edit distance with a rolling two-row buffer.
-func levenshtein(a, b string) int {
+// Levenshtein is the classic edit distance over runes with a rolling two-row buffer.
+func Levenshtein(a, b string) int {
 	ra, rb := []rune(a), []rune(b)
 	la, lb := len(ra), len(rb)
 	if la == 0 {

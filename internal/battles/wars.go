@@ -156,19 +156,58 @@ type WarNarrative struct {
 	// of. The frontend uses this to roll children up under their parent
 	// in the war list. Empty string means top-level.
 	Parent string `json:"parent,omitempty"`
+	// Aliases lists the other spellings of this war's name. A battle or a
+	// territory snapshot keyed by an alias resolves to this entry.
+	Aliases []string `json:"aliases,omitempty"`
 }
 
 // Wars is a thread-safe registry of curated war narratives loaded from a
 // JSON file. Behaves like Replays — supports hot-reload via Watch so
 // curators can iterate without restarting.
 type Wars struct {
-	mu     sync.RWMutex
+	// mu guards byName and aliasOf.
+	mu sync.RWMutex
+	// byName maps a canonical war name to its narrative.
 	byName map[string]WarNarrative
+	// aliasOf maps each alias to its canonical war name.
+	aliasOf map[string]string
 }
 
 // NewWars returns an empty narrative registry.
 func NewWars() *Wars {
-	return &Wars{byName: map[string]WarNarrative{}}
+	return &Wars{byName: map[string]WarNarrative{}, aliasOf: map[string]string{}}
+}
+
+// WarAliases returns the alias to canonical name map for a wars registry,
+// refusing an alias listed twice, an alias that is also a war key, and an
+// entry that names itself as an alias.
+func WarAliases(wars map[string]WarNarrative) (map[string]string, error) {
+	out := map[string]string{}
+	for _, name := range sortedNames(wars) {
+		for _, a := range wars[name].Aliases {
+			switch prev, dup := out[a]; {
+			case a == name:
+				return nil, fmt.Errorf("%w: %q lists itself", ErrWarAlias, name)
+			case dup:
+				return nil, fmt.Errorf("%w: %q is an alias of both %q and %q", ErrWarAlias, a, prev, name)
+			}
+			if _, isKey := wars[a]; isKey {
+				return nil, fmt.Errorf("%w: %q is a war key and an alias of %q", ErrWarAlias, a, name)
+			}
+			out[a] = name
+		}
+	}
+	return out, nil
+}
+
+// sortedNames returns the registry keys in order so errors are deterministic.
+func sortedNames(wars map[string]WarNarrative) []string {
+	out := make([]string, 0, len(wars))
+	for k := range wars {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
 }
 
 // Load reads curated narrative data from a JSON file keyed by war name.
@@ -185,8 +224,13 @@ func (w *Wars) Load(path string) (int, error) {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return 0, fmt.Errorf("parse wars json: %w", err)
 	}
+	aliases, err := WarAliases(raw)
+	if err != nil {
+		return 0, fmt.Errorf("wars json: %w", err)
+	}
 	w.mu.Lock()
 	w.byName = raw
+	w.aliasOf = aliases
 	w.mu.Unlock()
 	return len(raw), nil
 }
@@ -229,12 +273,27 @@ func (w *Wars) Watch(ctx context.Context, path string, interval time.Duration) {
 	}
 }
 
-// Get returns the curated narrative for a war, or zero value if absent.
+// Get returns the curated narrative for a war or one of its aliases, or the
+// zero value if absent.
 func (w *Wars) Get(name string) (WarNarrative, bool) {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
+	if c, ok := w.aliasOf[name]; ok {
+		name = c
+	}
 	n, ok := w.byName[name]
 	return n, ok
+}
+
+// Canonical returns the canonical war name for name, which is name itself
+// unless it is an alias.
+func (w *Wars) Canonical(name string) string {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	if c, ok := w.aliasOf[name]; ok {
+		return c
+	}
+	return name
 }
 
 // casualtyPattern matches every integer token in a casualty string

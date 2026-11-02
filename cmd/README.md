@@ -46,6 +46,7 @@ go run ./cmd/import -merge-replays drafts.json    # validate and merge replay dr
 | `-infobox` | Fetch sides, commanders, and casualties from infoboxes. |
 | `-significance` | Fetch aftermath and legacy sections. |
 | `-references` | Extract citation URLs into `battle_references`. |
+| `-coords-from-source` | Check coordinates against Wikidata P625 and the Wikipedia articles, fill 0,0 rows and move points no source backs. |
 | `-geocode-missing` | Backfill coordinates from the Wikipedia coordinates API. |
 | `-infobox-backfill` | Backfill coordinates and dates from infobox text. |
 | `-wars` | Enrich `data/wars.json` for wars with enough battles. |

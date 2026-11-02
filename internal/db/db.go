@@ -105,7 +105,8 @@ type addedColumn struct {
 // addedColumns lists every column added after its table's CREATE migration.
 // The wikidata_* columns record what Wikidata itself says about a row, and the
 // infobox_* columns what the article's infobox date and partof say, so the cleanse pass can
-// check year, date and war against named sources.
+// check year, date and war against named sources. coord_source names the source the
+// row's coordinates agree with, and coord_checked the day the sources were last read.
 var addedColumns = []addedColumn{
 	{Table: "battles", Name: "wikidata_date", Decl: "TEXT NOT NULL DEFAULT ''"},
 	{Table: "battles", Name: "wikidata_precision", Decl: "INTEGER NOT NULL DEFAULT 0"},
@@ -117,6 +118,8 @@ var addedColumns = []addedColumn{
 	{Table: "battles", Name: "infobox_date", Decl: "TEXT NOT NULL DEFAULT ''"},
 	{Table: "battles", Name: "infobox_partof", Decl: "TEXT NOT NULL DEFAULT ''"},
 	{Table: "battles", Name: "infobox_checked", Decl: "TEXT NOT NULL DEFAULT ''"},
+	{Table: "battles", Name: "coord_source", Decl: "TEXT NOT NULL DEFAULT ''"},
+	{Table: "battles", Name: "coord_checked", Decl: "TEXT NOT NULL DEFAULT ''"},
 }
 
 // addColumns adds each column in addedColumns that its table lacks.

@@ -381,6 +381,51 @@ func TestMismatches(t *testing.T) { //nolint:funlen // Test function.
 		Mutate: func(r *AuditRow) {
 			r.Year, r.DateStart, r.DateEnd, r.Era = 1316, "1317-01-01", "1326-04-06", yearToEra(1316)
 		}, WantIDs: []string{"x"},
+	}, { // Test 79: Island battle a source places off the 1:50m coast is fine.
+		Name: "sourced at sea", Key: "land-in-ocean", WithLand: true,
+		Mutate: func(r *AuditRow) { r.Lat, r.Lng, r.CoordSource = 0, -30, "wikidata" }, WantIDs: nil,
+	}, { // Test 80: A redirect twin far from its anchor is a near duplicate.
+		Name: "redirect twin", Key: "near-duplicate",
+		Mutate: func(r *AuditRow) { r.Name, r.WikipediaTitle = "Battle of Bembezi", "Battle of Bembezi" },
+		In: func(in *AuditInput) {
+			r := testAuditRow("y")
+			r.Name, r.WikipediaTitle, r.Lat = "Battle of Bembesi", "Battle of Bembesi", 0
+			in.Rows = append(in.Rows, r)
+			in.CanonicalTitles = map[string]string{"Battle of Bembezi": "Battle of Bembezi",
+				"Battle of Bembesi": "Battle of Bembezi"}
+		}, WantIDs: []string{"x", "y"},
+	}, { // Test 81: An allowlist pair still on two rows is a near duplicate.
+		Name: "unapplied allowlist", Key: "near-duplicate",
+		In: func(in *AuditInput) {
+			r := testAuditRow("y")
+			r.Lat = 0
+			in.Rows = append(in.Rows, r)
+			in.Duplicates = []DuplicatePair{{Keep: "x", Merge: "y"}, {Keep: "x", Merge: "gone"}}
+		}, WantIDs: []string{"x", "y"},
+	}, { // Test 82: A curated row's twin lands in curated-twin.
+		Name: "curated redirect twin", Key: "curated-twin",
+		Mutate: func(r *AuditRow) {
+			r.Name, r.WikipediaTitle, r.Source, r.SourceID = "Battle of El Geneina", "Battle of El Geneina", "curated", ""
+		},
+		In: func(in *AuditInput) {
+			r := testAuditRow("y")
+			r.Name, r.WikipediaTitle = "Battle of Geneina", "Battle of Geneina"
+			in.Rows = append(in.Rows, r)
+			in.CanonicalTitles = map[string]string{"Battle of El Geneina": "Battle of Geneina",
+				"Battle of Geneina": "Battle of Geneina"}
+		}, WantIDs: []string{"x", "y"},
+	}, { // Test 83: A curated twin is not counted as a near duplicate.
+		Name: "curated twin not near", Key: "near-duplicate",
+		Mutate: func(r *AuditRow) {
+			r.Name, r.WikipediaTitle, r.Source, r.SourceID = "Battle of El Geneina", "Battle of El Geneina", "curated", ""
+		},
+		In: func(in *AuditInput) {
+			r := testAuditRow("y")
+			r.Name, r.WikipediaTitle, r.Lat = "Battle of Geneina", "Battle of Geneina", 0
+			in.Rows = append(in.Rows, r)
+			in.CanonicalTitles = map[string]string{"Battle of El Geneina": "Battle of Geneina",
+				"Battle of Geneina": "Battle of Geneina"}
+		}, WantIDs: nil,
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {

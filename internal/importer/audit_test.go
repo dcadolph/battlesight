@@ -366,6 +366,21 @@ func TestMismatches(t *testing.T) { //nolint:funlen // Test function.
 		Name: "missing not redirect", Key: "title-redirect",
 		In:      func(in *AuditInput) { in.CanonicalTitles = map[string]string{"Battle of x": ""} },
 		WantIDs: nil,
+	}, { // Test 76: A year inside a multi-year span agrees with it.
+		Name: "year inside span", Key: "year-date-start",
+		Mutate: func(r *AuditRow) {
+			r.Year, r.DateStart, r.DateEnd, r.Era = 1326, "1317-01-01", "1326-04-06", yearToEra(1326)
+		}, WantIDs: nil,
+	}, { // Test 77: A year after the span's end disagrees with it.
+		Name: "year after span", Key: "year-date-start",
+		Mutate: func(r *AuditRow) {
+			r.Year, r.DateStart, r.DateEnd, r.Era = 1327, "1317-01-01", "1326-04-06", yearToEra(1327)
+		}, WantIDs: []string{"x"},
+	}, { // Test 78: A year before the span's start disagrees with it.
+		Name: "year before span", Key: "year-date-start",
+		Mutate: func(r *AuditRow) {
+			r.Year, r.DateStart, r.DateEnd, r.Era = 1316, "1317-01-01", "1326-04-06", yearToEra(1316)
+		}, WantIDs: []string{"x"},
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {

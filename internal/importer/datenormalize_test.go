@@ -164,7 +164,7 @@ func TestCanonicalISODate(t *testing.T) {
 		WantRange: DateRange{Start: "0043-12-31", End: "0043-12-31"}, WantOK: true,
 	}, { // Test 3: First of the month under the guard is a month-precision value.
 		In: "2022 – 05 – 01", Coarse: true, WantDisplay: "May 2022",
-		WantRange: DateRange{Start: "2022-05-01", End: "2022-05-28"}, WantOK: true,
+		WantRange: DateRange{Start: "2022-05-01", End: "2022-05-31"}, WantOK: true,
 	}, { // Test 4: Without the guard 1 January is a real day.
 		In: "1945-01-01", WantDisplay: "1 January 1945",
 		WantRange: DateRange{Start: "1945-01-01", End: "1945-01-01"}, WantOK: true,
@@ -271,7 +271,7 @@ func TestCanoniseDateStrings(t *testing.T) {
 	want := map[string][3]string{
 		"taoussa": {"4 October 2023", "2023-10-04", "2023-10-04"},
 		"roman":   {"43", "0043-12-31", "0043-12-31"},
-		"month":   {"May 2022", "2022-05-01", "2022-05-28"},
+		"month":   {"May 2022", "2022-05-01", "2022-05-31"},
 		"poland":  {"1 September – 6 October 1939", "1939-09-01", "1939-10-06"},
 		"newyear": {"1 January 1945", "1945-01-01", "1945-01-01"},
 		"us":      {"1 September 1939", "1939-09-01", "1939-09-01"},

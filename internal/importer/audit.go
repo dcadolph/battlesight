@@ -227,10 +227,18 @@ func Mismatches(in AuditInput) []MismatchClass {
 	add("endash-iso-month", "ISO year-month mangled into en-dash form", func(r *AuditRow) bool {
 		return reEnDashISOMonth.MatchString(r.Date)
 	})
-	add("year-date-start", "year disagrees with the year of date_start", func(r *AuditRow) bool {
-		y, ok := isoYear(r.DateStart)
-		return ok && r.Year != 0 && y != r.Year
-	})
+	add("year-date-start", "year falls outside the years of date_start to date_end",
+		func(r *AuditRow) bool {
+			start, ok := isoYear(r.DateStart)
+			if !ok || r.Year == 0 {
+				return false
+			}
+			end, ok := isoYear(r.DateEnd)
+			if !ok || end < start {
+				end = start
+			}
+			return r.Year < start || r.Year > end
+		})
 	add("bad-iso-date", "date_start or date_end is not an ISO date", func(r *AuditRow) bool {
 		return (r.DateStart != "" && !reISODate.MatchString(r.DateStart)) ||
 			(r.DateEnd != "" && !reISODate.MatchString(r.DateEnd))

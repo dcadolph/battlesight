@@ -112,7 +112,7 @@ func canonicalISODate(s string, coarse bool) (string, DateRange, bool) {
 		case coarse && d.Day == 1:
 			return fmt.Sprintf("%s %d", monthNames[d.Month], d.Year), DateRange{
 				Start: fmt.Sprintf("%04d-%02d-01", d.Year, d.Month),
-				End:   fmt.Sprintf("%04d-%02d-28", d.Year, d.Month),
+				End:   fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, monthEnd(d.Year, d.Month)),
 			}, true
 		}
 		return d.prose(), DateRange{Start: d.iso(), End: d.iso()}, true

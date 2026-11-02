@@ -22,7 +22,7 @@ func TestParseDateRange(t *testing.T) {
 		{Name: "mdy with comma", In: "July 14, 1864", Want: DateRange{Start: "1864-07-14", End: "1864-07-14"}},
 		{Name: "day range mdy", In: "July 14-15, 1864", Want: DateRange{Start: "1864-07-14", End: "1864-07-15"}},
 		{Name: "full range with en-dash", In: "10 July 1940 – 31 October 1940", Want: DateRange{Start: "1940-07-10", End: "1940-10-31"}},
-		{Name: "month-year only", In: "September 1939", Want: DateRange{Start: "1939-09-01", End: "1939-09-28"}},
+		{Name: "month-year only", In: "September 1939", Want: DateRange{Start: "1939-09-01", End: "1939-09-30"}},
 		{Name: "year only", In: "1939", Want: DateRange{Start: "1939-12-31", End: "1939-12-31"}},
 		{Name: "bc year", In: "490 BC", Want: DateRange{Start: "-0490-12-31", End: "-0490-12-31"}},
 		{Name: "empty falls back", In: "", Year: 1815, Want: DateRange{Start: "1815-12-31", End: "1815-12-31"}},
@@ -49,7 +49,31 @@ func TestParseDateRange(t *testing.T) {
 		// July 1915" by stealing the trailing "14" out of "1914" and produced
 		// date_start=1915-07-14, date_end=1915-07-11 (inverted).
 		{Name: "month-year start to dmy end, rufiji delta", In: "October 1914 – 11 July 1915", Want: DateRange{Start: "1914-10-01", End: "1915-07-11"}},
-		{Name: "dmy start to month-year end", In: "11 July 1914 – October 1915", Want: DateRange{Start: "1914-07-11", End: "1915-10-28"}},
+		{Name: "dmy start to month-year end", In: "11 July 1914 – October 1915", Want: DateRange{Start: "1914-07-11", End: "1915-10-31"}},
+		// Range shapes whose start used to come back as the end date, or as the
+		// year fallback. MigrateDates and reconcile must agree on each one.
+		{Name: "month to month", In: "January – February 1889", Want: DateRange{Start: "1889-01-01", End: "1889-02-28"}},
+		{Name: "month to month, comma", In: "January – July, 1618", Want: DateRange{Start: "1618-01-01", End: "1618-07-31"}},
+		{Name: "month slash month", In: "October/November 958", Want: DateRange{Start: "0958-10-01", End: "0958-11-30"}},
+		{Name: "month or month", In: "August or September 1210", Want: DateRange{Start: "1210-08-01", End: "1210-09-30"}},
+		{Name: "month-year to month-year", In: "December 1757 – June 1758", Want: DateRange{Start: "1757-12-01", End: "1758-06-30"}},
+		{Name: "year to dmy", In: "1591 – 3 January 1594", Want: DateRange{Start: "1591-01-01", End: "1594-01-03"}},
+		{Name: "year to month-year", In: "198 – March 199", Want: DateRange{Start: "0198-01-01", End: "0199-03-31"}},
+		{Name: "dmy to year", In: "3 January 1591 – 1594", Want: DateRange{Start: "1591-01-03", End: "1594-12-31"}},
+		{Name: "month-year to year", In: "March 1591 – 1594", Want: DateRange{Start: "1591-03-01", End: "1594-12-31"}},
+		{Name: "year range", In: "1125 – 1126", Want: DateRange{Start: "1125-01-01", End: "1126-12-31"}},
+		{Name: "day-month to month-year", In: "25 April – July 1920", Want: DateRange{Start: "1920-04-25", End: "1920-07-31"}},
+		{Name: "month to dmy", In: "January – 11 February 1756", Want: DateRange{Start: "1756-01-01", End: "1756-02-11"}},
+		{Name: "mdy to dmy", In: "June 25 to 9 July 1944", Want: DateRange{Start: "1944-06-25", End: "1944-07-09"}},
+		{Name: "day to day", In: "25 to 28 December 1307", Want: DateRange{Start: "1307-12-25", End: "1307-12-28"}},
+		{Name: "day and day", In: "9 and 11 March 1416", Want: DateRange{Start: "1416-03-09", End: "1416-03-11"}},
+		{Name: "mdy day or day", In: "August 8 or 9, 1775", Want: DateRange{Start: "1775-08-08", End: "1775-08-09"}},
+		{Name: "full range with to", In: "16 August 1419 to 1 November 1420", Want: DateRange{Start: "1419-08-16", End: "1420-11-01"}},
+		{Name: "dmy comma year", In: "10 December, 1578", Want: DateRange{Start: "1578-12-10", End: "1578-12-10"}},
+		{Name: "month comma year", In: "January, 1136", Want: DateRange{Start: "1136-01-01", End: "1136-01-31"}},
+		{Name: "leap february", In: "February 1840", Want: DateRange{Start: "1840-02-01", End: "1840-02-29"}},
+		{Name: "inverted month range falls through", In: "August – July 1801", Want: DateRange{Start: "1801-07-01", End: "1801-07-31"}},
+		{Name: "earlier date beats a later range", In: "1st phase: July 2006, 2nd phase: September – October 2006", Want: DateRange{Start: "2006-07-01", End: "2006-07-31"}},
 	}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {

@@ -35,7 +35,7 @@ func TestRenderWikidataDate(t *testing.T) {
 		WantDisplay: "1 March 1896", WantRange: DateRange{Start: "1896-03-01", End: "1896-03-01"}, Want: true,
 	}, { // Test 1: Month precision.
 		Start: "1896-03-01", StartPrec: 10,
-		WantDisplay: "March 1896", WantRange: DateRange{Start: "1896-03-01", End: "1896-03-28"}, Want: true,
+		WantDisplay: "March 1896", WantRange: DateRange{Start: "1896-03-01", End: "1896-03-31"}, Want: true,
 	}, { // Test 2: Year precision.
 		Start: "1937-01-01", StartPrec: 9,
 		WantDisplay: "1937", WantRange: DateRange{Start: "1937-12-31", End: "1937-12-31"}, Want: true,
@@ -61,7 +61,7 @@ func TestRenderWikidataDate(t *testing.T) {
 		WantDisplay: "1618 – 1648", WantRange: DateRange{Start: "1618-01-01", End: "1648-12-31"}, Want: true,
 	}, { // Test 10: Same month at month precision collapses to one month.
 		Start: "1940-05-01", StartPrec: 10, End: "1940-05-01", EndPrec: 10,
-		WantDisplay: "May 1940", WantRange: DateRange{Start: "1940-05-01", End: "1940-05-28"}, Want: true,
+		WantDisplay: "May 1940", WantRange: DateRange{Start: "1940-05-01", End: "1940-05-31"}, Want: true,
 	}, { // Test 11: An end before the start is ignored.
 		Start: "1940-05-10", StartPrec: 11, End: "1940-05-01", EndPrec: 11,
 		WantDisplay: "10 May 1940", WantRange: DateRange{Start: "1940-05-10", End: "1940-05-10"}, Want: true,
@@ -86,6 +86,39 @@ func TestRenderWikidataDate(t *testing.T) {
 	}
 }
 
+// TestRenderWikidataDateParsesBack confirms every range renderWikidataDate
+// stores is the range ParseDateRange reads back from its display string.
+// MigrateDates reparses every date at startup, so any disagreement flips the
+// row on one start and reconcile flips it back on the next.
+func TestRenderWikidataDateParsesBack(t *testing.T) {
+	t.Parallel()
+	type point struct {
+		ISO  string
+		Prec int
+	}
+	starts := []point{{"1889-01-05", 9}, {"1889-01-05", 10}, {"1889-01-05", 11}}
+	ends := []point{
+		{"", 0},
+		{"1889-01-20", 11}, {"1889-02-17", 9}, {"1889-02-17", 10}, {"1889-02-17", 11},
+		{"1891-03-17", 9}, {"1891-03-17", 10}, {"1891-03-17", 11},
+	}
+	for _, s := range starts {
+		for _, e := range ends {
+			name := fmt.Sprintf("%s@%d to %s@%d", s.ISO, s.Prec, e.ISO, e.Prec)
+			t.Run(name, func(t *testing.T) {
+				t.Parallel()
+				display, dr, ok := renderWikidataDate(s.ISO, s.Prec, e.ISO, e.Prec)
+				if !ok {
+					t.Fatalf("render failed")
+				}
+				if diff := cmp.Diff(dr, ParseDateRange(display, 1889)); diff != "" {
+					t.Errorf("%q parses back differently (-stored +parsed):\n%s", display, diff)
+				}
+			})
+		}
+	}
+}
+
 // testReconcileRow returns an unverified wikidata row that agrees with its
 // Wikidata facts, so planReconcile leaves it alone.
 func testReconcileRow() reconcileRow {
@@ -105,7 +138,7 @@ func TestPlanReconcile(t *testing.T) {
 		Mutate: func(r *reconcileRow) {}, Want: false,
 	}, { // Test 1: Template-poisoned year and date reset from Wikidata.
 		Mutate: func(r *reconcileRow) {
-			r.Year, r.Date, r.DateStart, r.DateEnd = 2026, "March 2026", "2026-03-01", "2026-03-28"
+			r.Year, r.Date, r.DateStart, r.DateEnd = 2026, "March 2026", "2026-03-01", "2026-03-31"
 		},
 		WantFix: reconcileFix{Year: 1937, Date: "4 June 1937", Range: DateRange{Start: "1937-06-04", End: "1937-06-04"}},
 		Want:    true,
@@ -121,7 +154,7 @@ func TestPlanReconcile(t *testing.T) {
 		Want: false,
 	}, { // Test 4: A true first-of-month day lost to the padded-day guard comes back.
 		Mutate: func(r *reconcileRow) {
-			r.Year, r.Date, r.DateStart, r.DateEnd = 1896, "March 1896", "1896-03-01", "1896-03-28"
+			r.Year, r.Date, r.DateStart, r.DateEnd = 1896, "March 1896", "1896-03-01", "1896-03-31"
 			r.WikidataDate, r.Verified = "1896-03-01", true
 		},
 		WantFix: reconcileFix{Year: 1896, Date: "1 March 1896", Range: DateRange{Start: "1896-03-01", End: "1896-03-01"}},
@@ -138,11 +171,11 @@ func TestPlanReconcile(t *testing.T) {
 			r.Year, r.Date, r.DateStart, r.DateEnd = 1900, "1900", "1900-12-31", "1900-12-31"
 			r.WikidataDate, r.Precision = "1900-01-01", 10
 		},
-		WantFix: reconcileFix{Year: 1900, Date: "January 1900", Range: DateRange{Start: "1900-01-01", End: "1900-01-28"}},
+		WantFix: reconcileFix{Year: 1900, Date: "January 1900", Range: DateRange{Start: "1900-01-01", End: "1900-01-31"}},
 		Want:    true,
 	}, { // Test 7: Month precision on the first already rendered as the month does not change.
 		Mutate: func(r *reconcileRow) {
-			r.Year, r.Date, r.DateStart, r.DateEnd = 1896, "March 1896", "1896-03-01", "1896-03-28"
+			r.Year, r.Date, r.DateStart, r.DateEnd = 1896, "March 1896", "1896-03-01", "1896-03-31"
 			r.WikidataDate, r.Precision = "1896-03-01", 10
 		},
 		Want: false,
@@ -199,14 +232,14 @@ func TestPlanReconcile(t *testing.T) {
 		Want: false,
 	}, { // Test 18: The infobox names the Wikidata year, so the template year resets.
 		Mutate: func(r *reconcileRow) {
-			r.Year, r.Date, r.DateStart, r.DateEnd = 2026, "March 2026", "2026-03-01", "2026-03-28"
+			r.Year, r.Date, r.DateStart, r.DateEnd = 2026, "March 2026", "2026-03-01", "2026-03-31"
 			r.InfoboxDate = "{{Start date|1937|6|4|df=y}}"
 		},
 		WantFix: reconcileFix{Year: 1937, Date: "4 June 1937", Range: DateRange{Start: "1937-06-04", End: "1937-06-04"}},
 		Want:    true,
 	}, { // Test 19: Before the infobox is read the year is not reset.
 		Mutate: func(r *reconcileRow) {
-			r.Year, r.Date, r.DateStart, r.DateEnd = 2026, "March 2026", "2026-03-01", "2026-03-28"
+			r.Year, r.Date, r.DateStart, r.DateEnd = 2026, "March 2026", "2026-03-01", "2026-03-31"
 			r.InfoboxChecked = false
 		},
 		Want: false,
@@ -218,14 +251,14 @@ func TestPlanReconcile(t *testing.T) {
 		Want: false,
 	}, { // Test 21: An infobox naming no year backs Wikidata.
 		Mutate: func(r *reconcileRow) {
-			r.Year, r.Date, r.DateStart, r.DateEnd = 2026, "March 2026", "2026-03-01", "2026-03-28"
+			r.Year, r.Date, r.DateStart, r.DateEnd = 2026, "March 2026", "2026-03-01", "2026-03-31"
 			r.InfoboxDate = "Spring"
 		},
 		WantFix: reconcileFix{Year: 1937, Date: "4 June 1937", Range: DateRange{Start: "1937-06-04", End: "1937-06-04"}},
 		Want:    true,
 	}, { // Test 22: A start lost to the padded-day guard comes back with its Wikidata end.
 		Mutate: func(r *reconcileRow) {
-			r.Year, r.Date, r.DateStart, r.DateEnd = 1916, "June 1916", "1916-06-01", "1916-06-28"
+			r.Year, r.Date, r.DateStart, r.DateEnd = 1916, "June 1916", "1916-06-01", "1916-06-30"
 			r.WikidataDate, r.WikidataEnd, r.EndPrecision = "1916-06-01", "1916-06-07", 11
 		},
 		WantFix: reconcileFix{Year: 1916, Date: "1 – 7 June 1916", Range: DateRange{Start: "1916-06-01", End: "1916-06-07"}},
@@ -511,7 +544,7 @@ func TestReconcileSourceDates(t *testing.T) {
 		wikidata_conflict, wikidata_checked, infobox_checked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'land', '', '',
 		'', ?, ?, 0, ?, ?, ?, ?, ?)`
 	rows := [][]any{
-		{"pochonbo", "Battle of Pochonbo", 2026, "March 2026", "2026-03-01", "2026-03-28", 41.1, 128.2,
+		{"pochonbo", "Battle of Pochonbo", 2026, "March 2026", "2026-03-01", "2026-03-31", 41.1, 128.2,
 			"contemporary", "Russo-Ukrainian War", "wikidata", "Q1", "1937-06-04", 11, "Second Sino-Japanese War",
 			"2026-11-01", "2026-11-01"},
 		{"unchecked", "Battle of Unchecked", 1999, "1999", "1999-12-31", "1999-12-31", 41.1, 128.2,

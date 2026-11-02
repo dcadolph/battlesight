@@ -9,7 +9,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // Wikidata time precisions used by the reconcile pass.
@@ -106,8 +105,7 @@ func (t wikidataTime) periodEnd() string {
 	case t.Precision >= precisionDay:
 		return fmt.Sprintf("%04d-%02d-%02d", t.Year, t.Month, t.Day)
 	case t.Precision == precisionMonth:
-		last := time.Date(t.Year, time.Month(t.Month)+1, 0, 0, 0, 0, 0, time.UTC).Day()
-		return fmt.Sprintf("%04d-%02d-%02d", t.Year, t.Month, last)
+		return fmt.Sprintf("%04d-%02d-%02d", t.Year, t.Month, monthEnd(t.Year, t.Month))
 	}
 	return fmt.Sprintf("%04d-12-31", t.Year)
 }

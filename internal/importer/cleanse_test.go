@@ -67,6 +67,10 @@ func TestCapitalizeSentences(t *testing.T) {
 		{Name: "ellipsis untouched", In: "He paused... then charged.", Want: "He paused... then charged."},
 		{Name: "already clean", In: "The battle began. It ended by noon.", Want: "The battle began. It ended by noon."},
 		{Name: "empty", In: "", Want: ""},
+		{Name: "leading ordinal keeps case", In: "26th of July Movement", Want: "26th of July Movement"},
+		{Name: "leading ordinal repaired", In: "17Th Division withdrew.", Want: "17th Division withdrew."},
+		{Name: "leading ordinal 2nd repaired", In: "2Nd Rifle Company", Want: "2nd Rifle Company"},
+		{Name: "number then word untouched", In: "300 Spartans held.", Want: "300 Spartans held."},
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", i, test.Name), func(t *testing.T) {

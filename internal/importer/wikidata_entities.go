@@ -600,7 +600,11 @@ func BackfillInfoboxDates(ctx context.Context, db *sql.DB) (int, error) {
 			return 0, fmt.Errorf("wikitext batch at %d: %w", start, err)
 		}
 		for _, t := range batch {
-			dates[t] = [2]string{infoboxField(texts[t], "date"), infoboxField(texts[t], "partof")}
+			partof := infoboxField(texts[t], "partof")
+			if partof == "" {
+				partof = infoboxField(texts[t], "part_of")
+			}
+			dates[t] = [2]string{infoboxField(texts[t], "date"), partof}
 		}
 	}
 

@@ -729,6 +729,12 @@ func cleanInfoboxText(s string) string {
 // Formatting wrappers listed in bfUnwrapTemplates are replaced by their last
 // positional parameter instead of vanishing.
 func dropTemplates(s string) string {
+	return dropTemplatesWith(s, templateReplacement)
+}
+
+// dropTemplatesWith replaces every top-level {{...}} template in s with what
+// repl renders for its full span, handling nesting.
+func dropTemplatesWith(s string, repl func(span string) string) string {
 	var b strings.Builder
 	i := 0
 	for i < len(s) {
@@ -738,7 +744,7 @@ func dropTemplates(s string) string {
 				b.WriteString(s[i:])
 				break
 			}
-			b.WriteString(templateReplacement(span))
+			b.WriteString(repl(span))
 			i += len(span)
 			continue
 		}
@@ -787,7 +793,7 @@ func templateReplacement(span string) string {
 func positionalParams(parts []string) []string {
 	var pos []string
 	for _, p := range parts {
-		if eq := strings.Index(p, "="); eq >= 0 {
+		if eq := topLevelEquals(p); eq >= 0 {
 			key := strings.TrimSpace(p[:eq])
 			if _, err := strconv.Atoi(key); err != nil {
 				continue
@@ -797,6 +803,33 @@ func positionalParams(parts []string) []string {
 		pos = append(pos, strings.TrimSpace(p))
 	}
 	return pos
+}
+
+// topLevelEquals returns the index of the first "=" in a template parameter
+// that sits outside nested {{...}} templates and [[...]] links, or -1. An "="
+// inside a nested citation such as {{sfn|Smith|p=4}} does not name the
+// parameter.
+func topLevelEquals(p string) int {
+	tpl, link := 0, 0
+	for i := 0; i < len(p); i++ {
+		switch {
+		case strings.HasPrefix(p[i:], "{{"):
+			tpl++
+			i++
+		case strings.HasPrefix(p[i:], "}}") && tpl > 0:
+			tpl--
+			i++
+		case strings.HasPrefix(p[i:], "[["):
+			link++
+			i++
+		case strings.HasPrefix(p[i:], "]]") && link > 0:
+			link--
+			i++
+		case p[i] == '=' && tpl == 0 && link == 0:
+			return i
+		}
+	}
+	return -1
 }
 
 // dateTemplateText renders a date template's positional parameters back to

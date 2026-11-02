@@ -27,7 +27,13 @@ import (
 func Cleanse(ctx context.Context, db *sql.DB, wars WarNames) (CleanseReport, error) {
 	var rep CleanseReport
 	// War fill runs first so the text, era and variant passes below see
-	// the filled war on the same start.
+	// the filled war on the same start. Unsourced wars clear just before it
+	// so the fill can replace them.
+	if n, err := clearNonConflictWars(ctx, db, wars); err != nil {
+		return rep, err
+	} else {
+		rep.WarsCleared = n
+	}
 	if n, err := fillWarFromWikidata(ctx, db); err != nil {
 		return rep, err
 	} else {
@@ -291,6 +297,8 @@ type CleanseReport struct {
 	ErasRecomputed         int
 	BlankSidesDropped      int
 	WarNamesCanonicalised  int
+	// WarsCleared counts rows whose war named no conflict and stood on no source.
+	WarsCleared int
 	// WarsFilled counts war-less rows given a war from Wikidata or the infobox.
 	WarsFilled int
 	// WarAliasesApplied counts rows moved from a war alias to its canonical name.
@@ -308,8 +316,9 @@ type CleanseReport struct {
 func (r CleanseReport) Total() int {
 	return r.BattleTextFixed + r.SideTextFixed + r.MissingDatesBackfilled +
 		r.DateStringsNormalised + r.SourceDatesReconciled + r.YearsAligned + r.YearsDerived +
-		r.ErasRecomputed + r.BlankSidesDropped + r.WarNamesCanonicalised + r.WarsFilled + r.WarAliasesApplied +
-		r.NonBattlesDropped + r.TwinsMerged + r.DuplicatesRemoved + r.CoordsOverridden + r.RichSearchRowsIndexed
+		r.ErasRecomputed + r.BlankSidesDropped + r.WarNamesCanonicalised + r.WarsCleared + r.WarsFilled +
+		r.WarAliasesApplied + r.NonBattlesDropped + r.TwinsMerged + r.DuplicatesRemoved + r.CoordsOverridden +
+		r.RichSearchRowsIndexed
 }
 
 // --- Text normalisation -----------------------------------------------------
@@ -390,10 +399,18 @@ var sentenceAbbrev = map[string]bool{
 // real significance to begin with, so the caller blanks it for re-curation.
 var reCaptionLead = regexp.MustCompile(`(?i)^\s*(?:thumb|thumbnail|frame|frameless|bottom|upright(?:=[0-9.]+)?|alt=|File:|Image:|\d+\s*px)\b`)
 
+// reLeadOrdinal matches a leading ordinal whose suffix was capitalized, as in
+// "26Th of July Movement".
+var reLeadOrdinal = regexp.MustCompile(`^(\W*\d+)(St|Nd|Rd|Th)\b`)
+
 // upperInitial capitalizes the first letter of s, leaving leading markup or
-// punctuation untouched.
+// punctuation untouched. A value that starts with a number keeps its case,
+// and a leading ordinal suffix capitalized by an earlier pass is lowered.
 func upperInitial(s string) string {
 	for i, r := range s {
+		if unicode.IsDigit(r) {
+			return reLeadOrdinal.ReplaceAllStringFunc(s, strings.ToLower)
+		}
 		if unicode.IsLetter(r) {
 			if unicode.IsLower(r) {
 				return s[:i] + string(unicode.ToUpper(r)) + s[i+len(string(r)):]

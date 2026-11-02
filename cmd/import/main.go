@@ -32,7 +32,8 @@ func main() {
 	resolveTitles := flag.Bool("resolve-titles", false,
 		"resolve every Wikipedia title through redirects and report missing and redirected titles")
 	enrich := flag.Bool("enrich", false, "fetch Wikipedia summaries for battles missing them")
-	infobox := flag.Bool("infobox", false, "fetch Wikipedia infobox data (sides, commanders, casualties)")
+	infobox := flag.Bool("infobox", false,
+		"fill missing sides, victor and infobox partof on unverified wikidata rows from the article infobox")
 	significance := flag.Bool("significance", false, "fetch Wikipedia aftermath/legacy sections for battles missing significance")
 	references := flag.Bool("references", false, "extract citation URLs from Wikipedia articles into battle_references")
 	geocodeMissing := flag.Bool("geocode-missing", false, "backfill coordinates from the Wikipedia coordinates API for battles at lat=0 lng=0")
@@ -196,19 +197,15 @@ func main() {
 	}
 
 	if *infobox {
-		log.Println("enriching with Wikipedia infobox data (sides, commanders, casualties, dates)...")
-		count, err := importer.EnrichInfoboxes(ctx, database)
+		log.Println("filling sides, victors and partof from Wikipedia infoboxes...")
+		rep, err := importer.EnrichInfoboxes(ctx, database)
+		log.Printf("infobox: %d candidates, %d read, %d no article, %d no infobox, "+
+			"%d through a rename redirect, %d redirect to a parent or shared article; "+
+			"wrote sides %d, victors %d, partof %d; %d fields dropped for leftover markup",
+			rep.Candidates, rep.Read, rep.NoArticle, rep.NoInfobox, rep.RedirectFollowed,
+			rep.RedirectSkipped, rep.SidesAdded, rep.VictorsSet, rep.PartofSet, rep.BrokenFields)
 		if err != nil {
-			log.Fatalf("infobox enrichment failed: %v", err)
-		}
-		log.Printf("enriched %d battles with infobox data", count)
-
-		log.Println("enriching coordinates from Wikipedia for battles missing them...")
-		coordCount, err := importer.EnrichCoordinates(ctx, database)
-		if err != nil {
-			log.Printf("coordinate enrichment failed: %v (continuing)", err)
-		} else {
-			log.Printf("enriched %d battles with coordinates", coordCount)
+			log.Fatalf("infobox enrichment failed after writing the rows above: %v", err)
 		}
 	}
 

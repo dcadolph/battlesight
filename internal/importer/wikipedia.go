@@ -25,11 +25,20 @@ type wikiPage struct {
 	Extract string `json:"extract"`
 }
 
-// EnrichFromWikipedia fetches summaries from Wikipedia for battles that have
-// a wikipedia_title but no summary. Processes in batches of 20 with rate limiting.
+// EnrichFromWikipedia fetches summaries from Wikipedia for unverified wikidata
+// battles that have a wikipedia_title but no summary. The summary endpoint
+// follows redirects, so a title the -resolve-titles cache shows redirecting
+// anywhere but a rename of the same event (see renameRedirect) is skipped:
+// its summary would describe a parent campaign, a person or a place. Run
+// -resolve-titles first so new titles are in that cache. Processes in batches
+// of 20 with rate limiting.
 func EnrichFromWikipedia(ctx context.Context, db *sql.DB) (int, error) {
-	rows, err := db.QueryContext(ctx,
-		`SELECT id, wikipedia_title FROM battles WHERE wikipedia_title != '' AND summary = ''`)
+	owned, shared, err := redirectOwnership(ctx, db, cachedCanonicalTitle)
+	if err != nil {
+		return 0, err
+	}
+	rows, err := db.QueryContext(ctx, `SELECT id, wikipedia_title FROM battles
+		WHERE wikipedia_title != '' AND summary = '' AND source = 'wikidata' AND verified = 0`)
 	if err != nil {
 		return 0, fmt.Errorf("query battles needing enrichment: %w", err)
 	}
@@ -45,6 +54,11 @@ func EnrichFromWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 		if err := rows.Scan(&br.id, &br.title); err != nil {
 			rows.Close()
 			return 0, fmt.Errorf("scan battle: %w", err)
+		}
+		if c, ok := cachedCanonicalTitle(br.title); ok && c != "" && c != br.title &&
+			!renameRedirect(br.title, c, owned, shared) {
+			log.Printf("summary: %q redirects to %q, not a rename: skipped", br.title, c)
+			continue
 		}
 		pending = append(pending, br)
 	}

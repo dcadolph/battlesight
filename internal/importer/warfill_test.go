@@ -35,6 +35,12 @@ func TestWarFromSources(t *testing.T) {
 	}, { // Test 6: Underscores in a link become spaces.
 		Partof: "[[Kargil_War]]", WantResult: "Kargil War",
 	}, { // Test 7: Nothing given.
+	}, { // Test 8: A state is not a war, the next link that names a conflict is.
+		Partof: "[[Holy Roman Empire]]'s part in the [[Italian Wars]]", WantResult: "Italian Wars",
+	}, { // Test 9: A period, a dynasty or a person alone is not a war.
+		Partof: "[[Sengoku period]], [[Rustamid dynasty]], [[Bardylis]]",
+	}, { // Test 10: Theaters, insurgencies and disputes are conflicts.
+		Partof: "[[Karenni theater]] of the [[Myanmar civil war (2021–present)]]", WantResult: "Karenni theater",
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {
@@ -160,5 +166,50 @@ func TestCanonicaliseWarNamesPrefersKeys(t *testing.T) {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
 		})
+	}
+}
+
+// TestClearNonConflictWars verifies only unsourced wars on unverified wikidata
+// rows clear, and that the fill then refills what a source supports.
+func TestClearNonConflictWars(t *testing.T) {
+	t.Parallel()
+	conn := openWarDB(t, []warSeed{
+		{ID: "junk", Source: "wikidata", War: "The"},
+		{ID: "period", Source: "wikidata", War: "Sengoku period", Partof: "[[Sengoku period]]"},
+		{ID: "refill", Source: "wikidata", War: "Holy Roman Empire", Partof: "[[Holy Roman Empire]] in the [[Italian Wars]]"},
+		{ID: "own-label", Source: "wikidata", War: "Year of the Four Emperors", Conflict: "Year of the Four Emperors"},
+		{ID: "label-case", Source: "wikidata", War: "The Ten Thousand", Conflict: "the Ten Thousand"},
+		{ID: "key", Source: "wikidata", War: "Bakumatsu"},
+		{ID: "alias", Source: "wikidata", War: "Old name"},
+		{ID: "named", Source: "wikidata", War: "Fronde"},
+		{ID: "march", Source: "wikidata", War: "Sherman's March to the Sea"},
+		{ID: "curated", Source: "curated", War: "The"},
+		{ID: "verified", Source: "wikidata", Verified: 1, War: "The"},
+	})
+	ctx := context.Background()
+	wars := WarNames{Keys: map[string]bool{"Bakumatsu": true}, Aliases: map[string]string{"Old name": "Bakumatsu"}}
+	cleared, err := clearNonConflictWars(ctx, conn, wars)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(3, cleared); diff != "" {
+		t.Errorf("cleared mismatch (-want +got):\n%s", diff)
+	}
+	if _, err := fillWarFromWikidata(ctx, conn); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"alias:Old name", "curated:The", "junk:", "key:Bakumatsu", "label-case:The Ten Thousand",
+		"march:Sherman's March to the Sea", "named:Fronde",
+		"own-label:Year of the Four Emperors", "period:", "refill:Italian Wars", "verified:The"}
+	got := queryStrings(t, conn, `SELECT id || ':' || war FROM battles ORDER BY id`)
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("rows mismatch (-want +got):\n%s", diff)
+	}
+	again, err := clearNonConflictWars(ctx, conn, wars)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(0, again); diff != "" {
+		t.Errorf("second clear mismatch (-want +got):\n%s", diff)
 	}
 }

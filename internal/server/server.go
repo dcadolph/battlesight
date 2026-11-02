@@ -92,11 +92,12 @@ func Run(cfg Config) error {
 	} else if rep.Total() > 0 {
 		log.Printf("cleansed data: %d battle text, %d sides, %d missing-date backfilled, %d dates normalized, "+
 			"%d reconciled with Wikidata, %d years aligned, %d years derived, %d eras recomputed, "+
-			"%d blank sides dropped, %d wars filled, %d war-name variants merged, %d war aliases applied, "+
+			"%d blank sides dropped, %d unsourced wars cleared, %d wars filled, %d war-name variants merged, "+
+			"%d war aliases applied, "+
 			"%d non-battles dropped, %d twins merged, %d duplicates removed",
 			rep.BattleTextFixed, rep.SideTextFixed, rep.MissingDatesBackfilled, rep.DateStringsNormalised,
 			rep.SourceDatesReconciled, rep.YearsAligned, rep.YearsDerived, rep.ErasRecomputed,
-			rep.BlankSidesDropped, rep.WarsFilled, rep.WarNamesCanonicalised, rep.WarAliasesApplied,
+			rep.BlankSidesDropped, rep.WarsCleared, rep.WarsFilled, rep.WarNamesCanonicalised, rep.WarAliasesApplied,
 			rep.NonBattlesDropped, rep.TwinsMerged, rep.DuplicatesRemoved)
 	}
 

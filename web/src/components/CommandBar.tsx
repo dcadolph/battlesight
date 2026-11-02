@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 import { formatYear } from '../lib/format';
+import { useIsPhone } from '../hooks/useIsPhone';
+import SupportUkraineButton from './SupportUkraineButton';
 
 // SEARCH_ALIASES rewrites well-known nicknames to a canonical query the
 // FTS index can match. Without this, "d-day" hits the Six-Day War (the
@@ -66,6 +68,12 @@ interface CommandBarProps {
   // "Battles attributed to X" suggestion that appears above the battle
   // results.
   onCommanderSelect?: (name: string) => void;
+  // hideSearch hides the search box and the mode rail while a phone
+  // bottom sheet is open, so nothing floats over the dossier text.
+  hideSearch?: boolean;
+  // showDonate shows the Support Ukraine button in the masthead. Off while
+  // an overlay's home row carries it instead.
+  showDonate?: boolean;
 }
 
 export default function CommandBar({
@@ -81,7 +89,10 @@ export default function CommandBar({
   onResetView,
   onWarSelect,
   onCommanderSelect,
+  hideSearch = false,
+  showDonate = true,
 }: CommandBarProps) {
+  const phone = useIsPhone();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Battle[]>([]);
   const [warResults, setWarResults] = useState<NameCount[]>([]);
@@ -208,7 +219,14 @@ export default function CommandBar({
           then the mode rail. Reads as an editorial masthead rather than a
           dashboard navbar. Tight tracking, hairline dividers, single
           accent. The vertical rhythm is the same 8px grid throughout. */}
-      <div className="fixed top-5 left-6 z-40 select-none">
+      {/* On a phone the masthead is its own row: wordmark left, the
+          Support Ukraine button right, nothing positioned over either. */}
+      <div
+        className={phone
+          ? 'fixed top-3 left-4 right-4 z-[45] flex items-center justify-between gap-3 select-none'
+          : 'fixed top-5 left-6 z-[45] flex items-center gap-4 select-none'}
+      >
+      <div>
         <div className="flex items-baseline gap-3">
           <button
             type="button"
@@ -242,9 +260,13 @@ export default function CommandBar({
           )}
         </div>
       </div>
+      {showDonate && <SupportUkraineButton />}
+      </div>
 
-      {/* Search. z-[100] so its dropdown floats above the mode rail (z-30). */}
-      <div className="fixed top-[78px] left-6 z-[100] w-[268px]">
+      {/* Search. z-[100] so its dropdown floats above the mode rail (z-30).
+          Full width under the masthead on a phone. */}
+      {!hideSearch && (
+      <div className={phone ? 'fixed top-[68px] left-4 right-4 z-[100]' : 'fixed top-[78px] left-6 z-[100] w-[268px]'}>
         <div className="relative">
           <svg
             className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
@@ -271,7 +293,7 @@ export default function CommandBar({
             }}
             onBlur={() => setTimeout(() => { setSearchOpen(false); setSearchFocused(false); }, 200)}
             placeholder="Search battles, wars, places…"
-            className="w-full h-9 pl-9 pr-9 bg-[#0d0f17]/85 backdrop-blur-md border border-slate-700/40 rounded-md text-[12.5px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-300/50 focus:bg-[#11141e]/90 transition-colors"
+            className={`w-full ${phone ? 'h-11 text-[16px]' : 'h-9 text-[12.5px]'} pl-9 pr-9 bg-[#0d0f17]/85 backdrop-blur-md border border-slate-700/40 rounded-md text-white placeholder-slate-500 focus:outline-none focus:border-amber-300/50 focus:bg-[#11141e]/90 transition-colors`}
             style={{ letterSpacing: '0.01em' }}
           />
           {query && (
@@ -402,6 +424,7 @@ export default function CommandBar({
           </div>
         )}
       </div>
+      )}
 
       {/* Mode rail — Wars / History only. Filters used to live here but felt
           orphaned (Filters is an attribute of search/browse, not a top-level
@@ -409,9 +432,10 @@ export default function CommandBar({
           inline under the search input — appears on focus or when active —
           which is the natural reading order: type a query, refine with
           filters, see results. */}
+      {!hideSearch && (
       <div
-        className="fixed left-6 z-30 transition-[top] duration-200 ease-out"
-        style={{ top: filtersChipVisible ? 152 : 126 }}
+        className={`fixed ${phone ? 'left-4' : 'left-6'} z-30 transition-[top] duration-200 ease-out`}
+        style={{ top: phone ? (filtersChipVisible ? 158 : 128) : (filtersChipVisible ? 152 : 126) }}
       >
         <div className="inline-flex items-baseline gap-3.5">
           <ModeTab
@@ -428,10 +452,11 @@ export default function CommandBar({
           />
         </div>
       </div>
+      )}
 
       {/* Filter panel */}
-      {!playbackActive && panel === 'filters' && stats && (
-        <div className="fixed top-[156px] left-6 z-30 w-64 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3">
+      {!playbackActive && !hideSearch && panel === 'filters' && stats && (
+        <div className={`fixed ${phone ? 'top-[184px] left-4 right-4' : 'top-[156px] left-6 w-64'} z-30 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3`}>
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-[10px] text-slate-600 uppercase tracking-wider">Tier</label>

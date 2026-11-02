@@ -4,6 +4,7 @@ import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 import { themeForEra } from '../theme/era';
 import { formatYear } from '../lib/format';
 import CloseButton from './CloseButton';
+import { useIsPhone } from '../hooks/useIsPhone';
 
 interface IntroOverlayProps {
   featured: Battle;
@@ -69,6 +70,7 @@ export default function IntroOverlay({ featured, onDismiss, onStart }: IntroOver
   const [tickerDone, setTickerDone] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const [stats, setStats] = useState<CatalogStats | null>(null);
+  const phone = useIsPhone();
 
   useEffect(() => {
     let cancelled = false;
@@ -102,6 +104,61 @@ export default function IntroOverlay({ featured, onDismiss, onStart }: IntroOver
   const beat = BEATS[beatIdx];
   const beatColor = ERA_COLORS[beat.era] || color;
   const beatLabel = ERA_LABELS[beat.era] || beat.era;
+
+  // On a phone the full-screen sweep reads as a wall of text over a globe
+  // nobody can see. Show the globe first with a small dismissible featured
+  // card at the bottom instead.
+  if (phone) {
+    return (
+      <div
+        className="fixed left-3 right-3 bottom-3 z-50 rounded-2xl px-4 pt-3 pb-4"
+        role="dialog"
+        aria-label="Today's featured battle"
+        data-testid="intro-card"
+        style={{
+          background: 'rgba(8,10,18,0.92)',
+          border: `1px solid ${color}40`,
+          boxShadow: '0 24px 56px -16px rgba(0,0,0,0.7)',
+          animation: 'intro-card-in 500ms cubic-bezier(.2,.65,.25,1) both',
+        }}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[10px] uppercase tracking-[0.24em] text-slate-400">
+            Today's featured battle
+          </span>
+          <CloseButton onClick={onDismiss} label="Close (Esc)" tone="elevated" large />
+        </div>
+        <div className="text-white text-[19px] font-semibold tracking-tight" style={{ fontFamily: theme.titleFont }}>
+          {featured.name}
+        </div>
+        <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500 mt-0.5 tabular-nums truncate">
+          {featured.date || formatYear(featured.year)}
+          {featured.war ? ` · ${featured.war}` : ''}
+        </div>
+        <div className="flex gap-2 mt-3">
+          <button
+            onClick={onStart}
+            className="flex-1 inline-flex items-center justify-center h-11 rounded-full text-[13px] font-semibold text-white"
+            style={{ background: `linear-gradient(180deg, ${color} 0%, ${color}cc 100%)` }}
+          >
+            {featured.hasReplay ? 'Watch the replay' : 'Open this battle'}
+          </button>
+          <button
+            onClick={onDismiss}
+            className="flex-1 inline-flex items-center justify-center h-11 rounded-full text-[13px] font-semibold text-slate-200 border border-slate-600/60"
+          >
+            Explore the globe
+          </button>
+        </div>
+        <style>{`
+          @keyframes intro-card-in {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div

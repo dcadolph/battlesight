@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
+import { useIsPhone } from '../hooks/useIsPhone';
 
 interface EraLegendProps {
   // selectedEra is the currently active era filter, "" when none.
@@ -27,16 +29,42 @@ const ERA_ORDER = [
 // top right of the viewport, each showing its color, label, and acting as
 // a one-click filter. Clicking the active era clears the filter. Hidden
 // behind any open right-side panel so it never competes with the dossier
-// or war card; visible whenever the user is browsing the bare globe.
+// or war card; visible whenever the user is browsing the bare globe. On a
+// phone it starts as a collapsed chip at the bottom right, clear of the
+// header, and opens upward on a tap.
 export default function EraLegend({ selectedEra, onSelect }: EraLegendProps) {
+  const phone = useIsPhone();
+  const [open, setOpen] = useState(false);
+  const expanded = !phone || open;
   return (
     <div
-      className="fixed top-4 right-5 z-20 select-none"
+      className={phone ? 'fixed bottom-[164px] right-4 z-30 select-none' : 'fixed top-4 right-5 z-20 select-none'}
       role="group"
       aria-label="Era legend; click to filter the globe by era"
     >
+      {phone && (
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full text-[10px] uppercase tracking-[0.2em] font-semibold backdrop-blur-md"
+          style={{
+            background: 'rgba(8, 10, 18, 0.7)',
+            border: '1px solid rgba(148, 163, 184, 0.25)',
+            color: open || selectedEra ? '#e2e8f0' : '#94a3b8',
+          }}
+        >
+          <span
+            aria-hidden="true"
+            className="inline-block rounded-full"
+            style={{ width: 6, height: 6, background: selectedEra ? ERA_COLORS[selectedEra] : '#60a5fa' }}
+          />
+          {selectedEra ? ERA_LABELS[selectedEra] ?? selectedEra : 'Eras'}
+        </button>
+      )}
+      {expanded && (
       <div
-        className="rounded-2xl backdrop-blur-md p-1.5"
+        className={`rounded-2xl backdrop-blur-md p-1.5${phone ? ' absolute bottom-full right-0 mb-2' : ''}`}
         style={{
           background: 'rgba(8, 10, 18, 0.55)',
           border: '1px solid rgba(148, 163, 184, 0.12)',
@@ -57,7 +85,10 @@ export default function EraLegend({ selectedEra, onSelect }: EraLegendProps) {
               <li key={era}>
                 <button
                   type="button"
-                  onClick={() => onSelect(isActive ? '' : era)}
+                  onClick={() => {
+                    onSelect(isActive ? '' : era);
+                    if (phone) setOpen(false);
+                  }}
                   className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
                   style={{
                     background: isActive ? `${color}26` : 'transparent',
@@ -91,6 +122,7 @@ export default function EraLegend({ selectedEra, onSelect }: EraLegendProps) {
           })}
         </ul>
       </div>
+      )}
     </div>
   );
 }

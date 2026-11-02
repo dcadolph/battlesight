@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { themeForYear } from '../theme/era';
+import { DONATE_URL } from './SupportUkraineButton';
 import {
   formatYear as fmtYear,
   formatDeathTollCompact,
@@ -308,9 +309,24 @@ export default function WarSummaryCard({ warName, emphasize, onEndingBattleClick
           )}
         </div>
       )}
+      {UKRAINE_WAR_RE.test(warName) && (
+        <a
+          href={DONATE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-3 border-t text-[12.5px] font-semibold"
+          style={{ borderColor: 'rgba(255,215,0,0.25)', color: '#ffd700', background: 'rgba(0,87,183,0.18)' }}
+        >
+          Support Ukraine's defense through United24
+          <span aria-hidden="true" className="ml-auto">→</span>
+        </a>
+      )}
     </div>
   );
 }
+
+// UKRAINE_WAR_RE matches the Russo-Ukrainian War and its named phases.
+const UKRAINE_WAR_RE = /russo-ukrainian|russian invasion of ukraine|war in donbas/i;
 
 // Section is the reusable label + content pair shared across the war
 // card's expanded body. Tight tracked label in the era accent, then the

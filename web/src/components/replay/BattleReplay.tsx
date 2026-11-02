@@ -606,10 +606,11 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
       `}</style>
 
       {/* Top bar */}
-      {/* paddingLeft clears the app's fixed home anchor pill. */}
+      {/* The left padding clears the app's fixed home row (home pill and
+          Support Ukraine button). On a phone the row sits above the header
+          content instead. */}
       <header
-        className="flex items-center justify-between px-6 py-3 border-b border-slate-800/80 bg-[#0a0d18]/90"
-        style={{ paddingLeft: 178 }}
+        className="flex items-center justify-between px-6 py-3 pl-[340px] max-sm:pl-4 max-sm:pt-[62px] max-sm:flex-wrap max-sm:gap-2 border-b border-slate-800/80 bg-[#0a0d18]/90"
       >
         <div className="flex items-center gap-3 min-w-0">
           <span

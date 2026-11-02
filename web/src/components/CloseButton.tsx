@@ -19,6 +19,8 @@ interface CloseButtonProps {
   // blends into the panel; "elevated" gives a slightly stronger contrast
   // when the background is busy enough that the ghost vanishes.
   tone?: 'ghost' | 'elevated';
+  // large makes the target 44 px for touch screens.
+  large?: boolean;
 }
 
 export default function CloseButton({
@@ -26,6 +28,7 @@ export default function CloseButton({
   label = 'Close (Esc)',
   sticky = false,
   tone = 'ghost',
+  large = false,
 }: CloseButtonProps) {
   const stickyClasses = sticky ? 'sticky top-3 z-10' : '';
   const toneClasses =
@@ -35,7 +38,7 @@ export default function CloseButton({
   return (
     <button
       onClick={onClick}
-      className={`${stickyClasses} inline-flex items-center justify-center w-9 h-9 rounded-full backdrop-blur border ${toneClasses} transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-300/70`}
+      className={`${stickyClasses} inline-flex items-center justify-center ${large ? 'w-11 h-11' : 'w-9 h-9'} rounded-full backdrop-blur border ${toneClasses} transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-300/70`}
       aria-label={label}
       title={label}
     >

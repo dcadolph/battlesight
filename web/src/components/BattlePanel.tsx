@@ -4,6 +4,7 @@ import { ERA_COLORS, ERA_LABELS, TIER_LABELS, TIER_DESCRIPTIONS, regionalEraCont
 import { themeForEra } from '../theme/era';
 import { formatYear, formatBattleDate, cleanCasualtyText, cleanProseText } from '../lib/format';
 import CloseButton from './CloseButton';
+import { useIsPhone } from '../hooks/useIsPhone';
 import { resolveMediaFor } from '../data/media';
 import type { MediaEntry } from '../data/media';
 
@@ -131,6 +132,7 @@ function splitTopCommander(s: string | undefined): string {
 export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, onCommanderClick }: BattlePanelProps) {
   const color = ERA_COLORS[battle.era] || '#ffffff';
   const theme = themeForEra(battle.era);
+  const phone = useIsPhone();
   // fetched holds the full battle record from the API. Display falls back
   // to the lean prop until the fetch for this battle id lands, so switching
   // battles never shows the previous battle's detail.
@@ -164,13 +166,20 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
   const stakeReusesSummary = !!stake && !!detail.summary && stake.trim() === detail.summary.trim();
 
   return (
-    <div className="fixed top-0 right-0 h-full w-[420px] max-w-[90vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 overflow-y-auto">
+    // On a phone the dossier is a bottom sheet under the masthead, so the
+    // globe and the header stay visible above it.
+    <div
+      data-testid="battle-panel"
+      className={phone
+        ? 'fixed left-0 right-0 bottom-0 h-[60vh] z-30 bg-[#0f1019]/97 backdrop-blur-xl border-t border-slate-700 rounded-t-2xl overflow-y-auto overscroll-contain'
+        : 'fixed top-0 right-0 h-full w-[420px] max-w-[90vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 overflow-y-auto'}
+    >
       {/* Sticky close mark. The shared CloseButton component anchors the
           exit affordance in the same place with the same style as every
           other dismissable surface in the app, so the user always knows
           how to leave whatever they opened. */}
       <div className="sticky top-3 z-10 ml-auto mr-3 mt-3" style={{ float: 'right' }}>
-        <CloseButton onClick={onClose} label="Close panel (Esc)" />
+        <CloseButton onClick={onClose} label="Close panel (Esc)" tone={phone ? 'elevated' : 'ghost'} large={phone} />
       </div>
       <div className="p-6 pt-2 clear-both">
 
@@ -194,7 +203,7 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
           style={{
             fontFamily: theme.titleFont,
             fontWeight: 600,
-            fontSize: '42px',
+            fontSize: phone ? '30px' : '42px',
             lineHeight: 1.02,
             letterSpacing: '-0.01em',
           }}

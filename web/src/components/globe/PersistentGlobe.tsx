@@ -15,6 +15,7 @@ import { findCountry, arcDistance } from '../../lib/globe/geometry';
 import { hexToRgba, darkenHex } from '../../lib/globe/colors';
 import { buildFactionLabelElement } from '../../lib/globe/faction-label';
 import { enhanceGlobe } from '../../lib/globe/cinematic';
+import { isCurrentConflict } from '../../lib/current-wars';
 
 // PersistentGlobe is the single Three.js scene mounted at app root. In
 // this first cut it behaves identically to the old BattleGlobe — same
@@ -63,53 +64,21 @@ interface PersistentGlobeProps {
   // them as rippling pulses on a bare Earth. 'all': existing behavior
   // with every battle in the catalog as a colored pillar.
   landingMode?: 'current' | 'all';
+  // currentWars is the server's set of ongoing war names. The 'current'
+  // landing shows only battles whose war is in it.
+  currentWars?: Set<string>;
+  // onVisibleCount receives the number of battles the globe draws, so the
+  // chrome can say how many current-conflict battles are on screen.
+  onVisibleCount?: (n: number) => void;
   // paused halts the globe's render loop entirely. Set while a battle
   // replay covers the screen so the hidden globe stops burning GPU
   // frames behind the opaque overlay.
   paused?: boolean;
 }
 
-// CURRENT_CONFLICT_KEYWORDS matches the war field (lowercased) for
-// ongoing post-2014 conflicts that should surface on the "current
-// conflicts" default landing. Substring match so longer variants
-// ("Russo-Ukrainian War / War in Donbas") still hit.
-const CURRENT_CONFLICT_KEYWORDS = [
-  'russo-ukrainian',
-  'russian invasion of ukraine',
-  'war in donbas',
-  'syrian civil war',
-  'syrian war',
-  'iraq war',
-  'war in iraq',
-  'war against the islamic state',
-  'isil',
-  'islamic state',
-  'israel-hamas',
-  'israel–hamas',
-  'gaza war',
-  'palestine',
-  'sudan civil war',
-  'sudanese civil war',
-  'yemen',
-  'yemeni civil war',
-  'libyan civil war',
-  'second libyan civil war',
-  'myanmar civil war',
-  'myanmar conflict',
-  'cabo delgado',
-  'somali civil war',
-  'tigray war',
-  'second nagorno-karabakh',
-  'sahel',
-];
-
-function isCurrentConflict(b: Battle): boolean {
-  const w = (b.war || '').toLowerCase();
-  if (!w) return false;
-  const y = b.year ?? 0;
-  if (y < 2014) return false;
-  return CURRENT_CONFLICT_KEYWORDS.some((kw) => w.includes(kw));
-}
+// EMPTY_WARS is the stable default for currentWars, so the memo above does
+// not see a new set on every render.
+const EMPTY_WARS: Set<string> = new Set();
 
 // conflictColor maps a war name to a theater-family color so the
 // landing globe's pulses sort by region at a glance: red for the
@@ -183,7 +152,7 @@ function battleMagnitude(b: Battle): number {
   return Math.max(0, Math.min(1, (v - 2) / 4));
 }
 
-export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, warFactionAnchors, warSnapshotYear, landingMode = 'current', paused = false }: PersistentGlobeProps) {
+export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, warFactionAnchors, warSnapshotYear, landingMode = 'current', currentWars = EMPTY_WARS, onVisibleCount, paused = false }: PersistentGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
@@ -234,11 +203,14 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       // Gaza, Sudan, Yemen, Syria, Myanmar, etc. — first impression is
       // "what's happening now," not "every battle ever." A toggle in the
       // chrome flips landingMode to 'all' for the full historical view.
-      if (dramatic && landingMode === 'current' && !isCurrentConflict(b)) return false;
+      if (dramatic && landingMode === 'current' && !isCurrentConflict(b, currentWars)) return false;
       return true;
     }),
-    [battles, yearRange, dramatic, landingMode],
+    [battles, yearRange, dramatic, landingMode, currentWars],
   );
+  useEffect(() => {
+    onVisibleCount?.(visibleBattles.length);
+  }, [onVisibleCount, visibleBattles]);
 
   const replayRings = useMemo(
     () => visibleBattles

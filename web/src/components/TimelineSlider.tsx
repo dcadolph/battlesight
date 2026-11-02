@@ -103,20 +103,20 @@ export default function TimelineSlider({ min, max, value, onChange, battleCount,
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-[#070912f5] via-[#070912cc] to-transparent pt-5 pb-4 pointer-events-none">
-      <div className="px-10 pointer-events-auto">
+      <div className="px-10 max-sm:px-4 pointer-events-auto">
         {/* Refined readout. Year endpoints set in a display serif so they
             read like the chapter mark on a print spread, not a form value.
             "TO" set tracked small-caps in between, terse and quiet. */}
-        <div className="mb-3 flex items-baseline justify-center gap-4 tabular-nums">
+        <div className="mb-3 flex items-baseline justify-center gap-4 max-sm:gap-2 whitespace-nowrap tabular-nums">
           <span
-            className="text-slate-100 text-[22px] font-light tracking-tight"
+            className="text-slate-100 text-[22px] max-sm:text-[17px] font-light tracking-tight"
             style={{ fontFamily: SERIF_DISPLAY }}
           >
             {formatYear(value[0])}
           </span>
           <span className="text-slate-600 text-[10px] uppercase tracking-[0.32em]">to</span>
           <span
-            className="text-slate-100 text-[22px] font-light tracking-tight"
+            className="text-slate-100 text-[22px] max-sm:text-[17px] font-light tracking-tight"
             style={{ fontFamily: SERIF_DISPLAY }}
           >
             {formatYear(value[1])}
@@ -232,7 +232,9 @@ export default function TimelineSlider({ min, max, value, onChange, battleCount,
             pill whose era overlaps the active window lights up. Replaces the
             on-track labels so narrow eras (WWI / WWII / Modern) keep their
             jump affordance even though they fit no inline label. */}
-        <div className="mt-2.5 flex items-center justify-center gap-1.5 flex-wrap">
+        {/* Hidden on a phone, where three wrapped rows of pills crowd the
+            globe and the era chip already filters by era. */}
+        <div className="mt-2.5 flex items-center justify-center gap-1.5 flex-wrap max-sm:hidden">
           {eras.map(([key]) => {
             const range = ERA_RANGES[key];
             if (!range) return null;

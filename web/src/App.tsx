@@ -21,6 +21,9 @@ import type { Battle } from './types/battle';
 import { themeForEra, themeForYear } from './theme/era';
 import { disableSound, soundEnabled, setSoundEra } from './audio/sound';
 import { usePauseOnHidden } from './hooks/usePauseOnHidden';
+import { useIsPhone } from './hooks/useIsPhone';
+import { useCurrentWars } from './lib/current-wars';
+import SupportUkraineButton from './components/SupportUkraineButton';
 
 // The war panel and the battle replay stack (maplibre-gl, deck.gl, the
 // tactical surface) are only needed once the user opens one of them, so
@@ -117,6 +120,9 @@ function initialYearRange(): [number, number] {
   const hi = read('yearMax', MAX_YEAR);
   return lo <= hi ? [lo, hi] : [hi, lo];
 }
+
+// LANDING_MODE_KEY stores the visitor's landing pick.
+const LANDING_MODE_KEY = 'bt.landing_mode2';
 
 interface Filters {
   era: string;
@@ -233,18 +239,24 @@ export default function App() {
   //   'all' — the classic full-catalog view with every battle as a
   //     colored pillar across 5,000 years of history.
   // Persisted to localStorage so the user's pick survives reloads.
-  // First-time visitors open on "all history". The current-conflicts globe
-  // is nearly bare, so opening on it made the first frame of a catalog of
-  // 13,000 battles look like an empty planet, and the spectacle sat behind a
-  // toggle most people would never press. A returning visitor still gets
-  // whichever mode they last chose.
+  // Every visitor opens on current conflicts: the battles being fought now,
+  // not the whole catalog at once. The storage key is new so a pick of
+  // 'all' saved under the old all-history default does not keep anyone
+  // from seeing the new default once.
   const [landingMode, setLandingMode] = useState<'current' | 'all'>(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('bt.landing_mode') : null;
-    return saved === 'current' ? 'current' : 'all';
+    try {
+      return localStorage.getItem(LANDING_MODE_KEY) === 'all' ? 'all' : 'current';
+    } catch {
+      return 'current';
+    }
   });
   useEffect(() => {
-    try { localStorage.setItem('bt.landing_mode', landingMode); } catch { /* best-effort persistence */ }
+    try { localStorage.setItem(LANDING_MODE_KEY, landingMode); } catch { /* best-effort persistence */ }
   }, [landingMode]);
+  const currentWars = useCurrentWars();
+  const phone = useIsPhone();
+  // visibleCount is how many battles the globe draws, reported by it.
+  const [visibleCount, setVisibleCount] = useState(0);
   // historyMode is true whenever the user is in the play-history overlay,
   // even when paused. historyPaused gates the RAF loop without exiting the
   // mode, so the playhead stays on screen and the Resume button works.
@@ -811,6 +823,14 @@ export default function App() {
   } else if (playbackBattles) {
     globeBattles = playbackBattles;
   }
+  // The current-conflicts filter applies to the browsing globe only. A
+  // history sweep and any search filter need the whole catalog.
+  const hasFilters = !!(filters.era || filters.war || filters.battleType || filters.quality);
+  const globeLanding: 'current' | 'all' = historyMode || hasFilters ? 'all' : landingMode;
+  const showingCurrent = showPillars && globeLanding === 'current';
+  // phoneSheetOpen is true while the dossier bottom sheet owns a phone
+  // screen, so the search and the bottom chips step aside.
+  const phoneSheetOpen = phone && !!selectedBattle && !panelDismissed && !showPlayback && !historyMode;
 
   // Effective year window: during history playback this is a trailing range
   // from the very start of recorded history up to the current playhead, so
@@ -1004,6 +1024,8 @@ export default function App() {
         onResetView={handleResetView}
         onWarSelect={handleSearchWarSelect}
         onCommanderSelect={setCommanderQuery}
+        hideSearch={phoneSheetOpen || (phone && showPlayback)}
+        showDonate={!showPlayback && !historyMode}
       />}
 
       <PersistentGlobe
@@ -1022,19 +1044,22 @@ export default function App() {
         warCountryColors={warCountryColors ?? undefined}
         warFactionAnchors={factionAnchors}
         warSnapshotYear={snapshotYear ?? undefined}
-        landingMode={landingMode}
+        landingMode={globeLanding}
+        currentWars={currentWars}
+        onVisibleCount={setVisibleCount}
         paused={!!replayBattle}
       />
 
       {/* Landing-mode toggle. Sits at the top-center while the dramatic
           mode globe is showing so the user can flip between "current
-          conflicts" (ripples on bare Earth) and "all history" (default)
-          (every battle as a pillar) in one click. Hidden as soon as the
-          user dives into a battle, war, or history sweep so it does not
-          compete with active chrome. */}
+          conflicts" (the default, ripples on bare Earth) and "all history"
+          (every battle as a pillar) in one click. On a phone it sits in the
+          third header row, right of the mode rail, so it never overlaps the
+          masthead. Hidden as soon as the user dives into a battle, war, or
+          history sweep so it does not compete with active chrome. */}
       {showPillars && !historyMode && !showPlayback && (
         <div
-          className="fixed top-5 left-1/2 z-30 -translate-x-1/2 flex items-center gap-1 p-1 rounded-full backdrop-blur-md"
+          className={`fixed z-30 flex items-center gap-1 p-1 rounded-full backdrop-blur-md ${phone ? 'top-[118px] right-4' : 'top-5 left-1/2 -translate-x-1/2'}`}
           style={{
             background: 'rgba(10,12,18,0.7)',
             border: '1px solid rgba(148,163,184,0.25)',
@@ -1045,14 +1070,17 @@ export default function App() {
             <button
               key={m}
               onClick={() => setLandingMode(m)}
-              className="px-3.5 h-7 rounded-full text-[10.5px] font-semibold uppercase tracking-[0.16em] transition-colors"
+              className={`${phone ? 'px-2.5 tracking-[0.1em]' : 'px-3.5 tracking-[0.16em]'} h-8 rounded-full text-[10.5px] font-semibold uppercase transition-colors`}
               style={{
                 color: landingMode === m ? '#fff' : 'rgba(203,213,225,0.6)',
                 background: landingMode === m ? 'rgba(239,68,68,0.22)' : 'transparent',
                 border: landingMode === m ? '1px solid rgba(239,68,68,0.55)' : '1px solid transparent',
               }}
             >
-              {m === 'current' ? 'Current conflicts' : 'All history'}
+              {m === 'current' ? (phone ? 'Current' : 'Current conflicts') : (phone ? 'All' : 'All history')}
+              {m === 'current' && showingCurrent && (
+                <span className="ml-1.5 tabular-nums" data-testid="current-count">{visibleCount}</span>
+              )}
             </button>
           ))}
         </div>
@@ -1061,7 +1089,7 @@ export default function App() {
       {/* Era legend chip. Visible while the user is browsing the globe.
           Hidden during history mode (the playhead and beat cards own the
           top edge) and during replay (full-screen overlay covers it). */}
-      {!historyMode && !replayBattle && (
+      {!historyMode && !replayBattle && !phoneSheetOpen && (
         <EraLegend
           selectedEra={filters.era}
           onSelect={(era) => {
@@ -1085,8 +1113,8 @@ export default function App() {
           positioning context, so either card opens at the same left edge.
           Hidden during replay, where the full-screen overlay owns the
           frame. */}
-      {!replayBattle && (
-        <div className="fixed bottom-24 left-4 z-30 flex items-center gap-2 select-none">
+      {!replayBattle && !phoneSheetOpen && (
+        <div className="fixed bottom-24 max-sm:bottom-[112px] left-4 z-30 flex items-center gap-2 select-none">
           <DataQualityNote />
           <AboutNote />
         </div>
@@ -1112,7 +1140,7 @@ export default function App() {
           max={MAX_YEAR}
           value={effectiveYearRange}
           onChange={setYearRange}
-          battleCount={globeBattles.length}
+          battleCount={showingCurrent ? visibleCount : globeBattles.length}
           battles={battles}
         />
       )}
@@ -1289,16 +1317,21 @@ export default function App() {
           above everything. One click tears down whatever the viewer is
           inside and returns to the bare globe. On the bare globe itself
           the CommandBar wordmark already serves as home. */}
+      {/* The Support Ukraine button rides next to it, so it stays visible
+          over every overlay. */}
       {!introVisible && (replayBattle || showPlayback || historyMode) && (
+        <div className="fixed top-3 left-3 z-[70] flex items-center gap-2">
         <button
           onClick={handleResetView}
-          className="fixed top-3 left-3 z-[70] inline-flex items-center gap-2 h-9 px-3.5 rounded-full border border-slate-600/50 bg-[#0a0d18]/85 hover:border-slate-300/60 hover:bg-[#131829]/95 transition-colors"
+          className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full border border-slate-600/50 bg-[#0a0d18]/85 hover:border-slate-300/60 hover:bg-[#131829]/95 transition-colors"
           style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
           title="Back to the globe"
         >
           <span className="inline-block w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
           <span className="text-[12px] font-semibold tracking-[0.22em] uppercase text-slate-100">BattleSight</span>
         </button>
+        <SupportUkraineButton />
+        </div>
       )}
 
       {introVisible && featured && (

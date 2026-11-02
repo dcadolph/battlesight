@@ -6495,5 +6495,38 @@
       "Yemeni Revolution",
       "2011 Yemeni revolution"
     ]
+  },
+  "Israeli invasion of the Gaza Strip": {
+    "parent": "Gaza war"
+  },
+  "October 7 attacks": {
+    "parent": "Gaza war"
+  },
+  "Stand-off in Be'eri and Ofakim": {
+    "parent": "Gaza war"
+  },
+  "Darfur campaign": {
+    "parent": "Sudanese Civil War (2023–present)"
+  },
+  "Kordofan campaign": {
+    "parent": "Sudanese Civil War (2023–present)"
+  },
+  "Sennar offensive": {
+    "parent": "Sudanese Civil War (2023–present)"
+  },
+  "Operation 1027": {
+    "parent": "Myanmar civil war (2021–present)"
+  },
+  "Karenni theater": {
+    "parent": "Myanmar civil war (2021–present)"
+  },
+  "Chin theater": {
+    "parent": "Myanmar civil war (2021–present)"
+  },
+  "Chin theater in the Myanmar civil war": {
+    "parent": "Myanmar civil war (2021–present)"
+  },
+  "Rohingya conflict during the Myanmar civil war (2021–present)": {
+    "parent": "Myanmar civil war (2021–present)"
   }
 }

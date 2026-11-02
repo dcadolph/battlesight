@@ -45,6 +45,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/battles/{id}", h.getBattle)
 	mux.HandleFunc("GET /api/battles", h.listBattles)
 	mux.HandleFunc("GET /api/wars/summary", h.warSummary)
+	mux.HandleFunc("GET /api/wars/current", h.currentWars)
 	mux.HandleFunc("GET /api/people/battles", h.battlesByCommander)
 }
 

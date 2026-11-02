@@ -705,18 +705,28 @@ func underscored(titles []string) []string {
 
 // infoboxField returns one raw parameter of the article's conflict infobox with
 // references and comments removed, or "" when there is none. Templates stay,
-// since {{Start date|1444|11|10}} carries the year as digits.
+// since {{Start date|1444|11|10}} carries the year as digits. The infobox is
+// read by balanced braces and its parameters split at the top level, so a
+// nested template's own date parameter, a one-line infobox, or a nested
+// template that closes on its own line never stands in for the field.
 func infoboxField(wikitext, name string) string {
-	box := infoboxRe.FindString(wikitext)
-	if box == "" {
+	text := htmlCommentRe.ReplaceAllString(wikitext, "")
+	loc := conflictInfoboxRe.FindStringIndex(text)
+	if loc == nil {
 		return ""
 	}
-	for _, m := range fieldRe.FindAllStringSubmatch(box, -1) {
-		if !strings.EqualFold(m[1], name) {
-			continue
-		}
-		s := htmlCommentRe.ReplaceAllString(refTag.ReplaceAllString(m[2], ""), "")
-		return strings.Join(strings.Fields(s), " ")
+	box, ok := templateSpan(text[loc[0]:])
+	if !ok {
+		return ""
 	}
-	return ""
+	raw, _ := infoboxParam(box, name)
+	return strings.Join(strings.Fields(refTag.ReplaceAllString(raw, "")), " ")
 }
+
+// conflictInfoboxRe matches the opening of an infobox that dates a conflict:
+// the military conflict infobox under any of its names, including the bare
+// {{Battle}} redirect, and the war, campaign, operation and civil conflict
+// infoboxes, which carry the same date parameter.
+var conflictInfoboxRe = regexp.MustCompile(`(?i)\{\{\s*(?:infobox[ _]+(?:military[ _]+conflict|battle\b|` +
+	`military[ _]+engagement|war\b|military[ _]+campaign|military[ _]+operation|civil[ _]+conflict)|` +
+	`battle\s*(?:\||\n))`)

@@ -93,7 +93,8 @@ func openWarDB(t *testing.T, seeds []warSeed) *sql.DB {
 }
 
 // TestFillAndAliasWars verifies the fill touches only war-less unverified
-// wikidata rows and the alias pass moves every row to the canonical name.
+// wikidata rows, refuses a war whose span excludes the row's year, and the
+// alias pass moves every unprotected row to the canonical name.
 func TestFillAndAliasWars(t *testing.T) {
 	t.Parallel()
 	conn := openWarDB(t, []warSeed{
@@ -105,13 +106,19 @@ func TestFillAndAliasWars(t *testing.T) {
 		{ID: "no-source", Source: "wikidata"},
 		{ID: "out-of-region", Source: "wikidata", Conflict: "Russo-Ukrainian War", Lat: 47, Lng: 6},
 		{ID: "capitalized", Source: "wikidata", War: "Eastern front of the invasion"},
+		{ID: "out-of-span", Source: "wikidata", Conflict: "Angolan Wars"},
+		{ID: "in-span", Source: "wikidata", Conflict: "Second Boer War"},
+		{ID: "verified-alias", Source: "wikidata", Verified: 1, War: "Russia-Ukraine War"},
+		{ID: "curated-alias", Source: "curated", War: "Israel–Hamas war"},
 	})
 	ctx := context.Background()
-	filled, err := fillWarFromWikidata(ctx, conn)
+	wars := WarNames{Spans: map[string]WarSpan{"angolan wars": {Start: 1961, End: 2002},
+		"second boer war": {Start: 1899, End: 1902}}}
+	filled, err := fillWarFromWikidata(ctx, conn, wars)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(2, filled); diff != "" {
+	if diff := cmp.Diff(3, filled); diff != "" {
 		t.Errorf("filled mismatch (-want +got):\n%s", diff)
 	}
 	aliases := map[string]string{"Israel–Hamas war": "Gaza war", "Russia-Ukraine War": "Russo-Ukrainian War",
@@ -123,13 +130,14 @@ func TestFillAndAliasWars(t *testing.T) {
 	if diff := cmp.Diff(3, moved); diff != "" {
 		t.Errorf("moved mismatch (-want +got):\n%s", diff)
 	}
-	want := []string{"capitalized:Russian invasion of Ukraine", "curated:", "filled:Gaza war", "from-partof:Gaza war", "has-war:Russo-Ukrainian War",
-		"no-source:", "out-of-region:", "verified:"}
+	want := []string{"capitalized:Russian invasion of Ukraine", "curated:", "curated-alias:Israel–Hamas war",
+		"filled:Gaza war", "from-partof:Gaza war", "has-war:Russo-Ukrainian War", "in-span:Second Boer War",
+		"no-source:", "out-of-region:", "out-of-span:", "verified:", "verified-alias:Russia-Ukraine War"}
 	got := queryStrings(t, conn, `SELECT id || ':' || war FROM battles ORDER BY id`)
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("rows mismatch (-want +got):\n%s", diff)
 	}
-	again, err := fillWarFromWikidata(ctx, conn)
+	again, err := fillWarFromWikidata(ctx, conn, wars)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +205,7 @@ func TestClearNonConflictWars(t *testing.T) {
 	if diff := cmp.Diff(3, cleared); diff != "" {
 		t.Errorf("cleared mismatch (-want +got):\n%s", diff)
 	}
-	if _, err := fillWarFromWikidata(ctx, conn); err != nil {
+	if _, err := fillWarFromWikidata(ctx, conn, wars); err != nil {
 		t.Fatal(err)
 	}
 	want := []string{"alias:Old name", "curated:The", "junk:", "key:Bakumatsu", "label-case:The Ten Thousand",

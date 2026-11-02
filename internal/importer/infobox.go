@@ -46,6 +46,8 @@ var (
 
 // wikiRevisionsResponse is the Action API shape for prop=revisions with content.
 type wikiRevisionsResponse struct {
+	// Error carries an API-level error, which arrives with a 200 status.
+	Error *geocodeAPIError `json:"error"`
 	// Query holds the pages keyed by page id.
 	Query struct {
 		// Pages maps a page id to its title and latest revision.
@@ -486,6 +488,11 @@ func fetchWikitext(ctx context.Context, titles []string) (map[string]string, err
 	var result wikiRevisionsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
+	}
+	// An API error returns no pages. Reporting it keeps a caller from
+	// recording every title as read with nothing in it.
+	if result.Error != nil {
+		return nil, fmt.Errorf("wikipedia api error %s: %s", result.Error.Code, result.Error.Info)
 	}
 
 	for _, page := range result.Query.Pages {

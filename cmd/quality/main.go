@@ -34,10 +34,13 @@ func main() {
 	enrichDir := flag.String("year-enrich", "data/.wikicache/year-enrich", "retired year-enrich cache directory")
 	phasesPath := flag.String("phases", "data/phases.json", "replay file checked for orphan keys by -mismatch")
 	refsPath := flag.String("references", "data/references.json", "references file checked for orphan keys by -mismatch")
+	warsPath := flag.String("wars", "data/wars.json",
+		"war registry whose spans the war-outside-span class checks")
 	flag.Parse()
 
 	if *mismatch || *mismatchIDs != "" {
-		if err := runMismatch(*dbPath, *land, *enrichDir, *phasesPath, *refsPath, *mismatchIDs); err != nil {
+		err := runMismatch(*dbPath, *land, *enrichDir, *phasesPath, *refsPath, *warsPath, *mismatchIDs)
+		if err != nil {
 			log.Fatalf("mismatch report: %v", err)
 		}
 		return
@@ -81,7 +84,7 @@ func main() {
 }
 
 // runMismatch prints the mismatch report, or the ids of one class when class is set.
-func runMismatch(dbPath, landPath, enrichDir, phasesPath, refsPath, class string) error {
+func runMismatch(dbPath, landPath, enrichDir, phasesPath, refsPath, warsPath, class string) error {
 	database, err := db.OpenReadOnly(dbPath)
 	if err != nil {
 		return err
@@ -98,6 +101,13 @@ func runMismatch(dbPath, landPath, enrichDir, phasesPath, refsPath, class string
 			return err
 		}
 		in.Land = mask
+	}
+	if warsPath != "" {
+		wars := battles.NewWars()
+		if _, err := wars.Load(warsPath); err != nil {
+			return err
+		}
+		in.WarSpans = importer.WarSpans(wars.All())
 	}
 	if in.ReplayIDs, err = importer.LoadJSONKeys(phasesPath); err != nil {
 		return err

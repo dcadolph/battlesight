@@ -106,6 +106,9 @@ type AuditInput struct {
 	CanonicalTitles map[string]string
 	// Duplicates holds the reviewed twin allowlist from data/duplicates.json.
 	Duplicates []DuplicatePair
+	// WarSpans holds the wars.json span of each war, folded by canonWarKey.
+	// Nil skips the war-outside-span class.
+	WarSpans map[string]WarSpan
 }
 
 // MismatchClass is one kind of data defect with the rows that show it.
@@ -326,6 +329,19 @@ func Mismatches(in AuditInput) []MismatchClass {
 	}
 	add("war-outside-region", "modern war attribution outside that war's region", func(r *AuditRow) bool {
 		return warOutsideRegion(r)
+	})
+	if in.WarSpans != nil {
+		spans := WarNames{Spans: in.WarSpans}
+		add("war-outside-span", "year falls more than a year outside the wars.json span of its war",
+			func(r *AuditRow) bool { return spans.outsideSpan(r.War, r.Year) })
+	} else {
+		na("war-outside-span", "year outside the span of its war", "no wars.json loaded")
+	}
+	add("year-unsourced", "undated wikidata row whose year no Wikidata date, infobox date or "+
+		"title states", func(r *AuditRow) bool {
+		undated := r.Date == "" || r.Date == "0"
+		return r.Source == "wikidata" && !r.Verified && r.Year != 0 && undated &&
+			!yearSourced(r.Year, r.WikidataDate, r.InfoboxDate, r.Name, r.WikipediaTitle)
 	})
 	add("war-empty", "war is empty", func(r *AuditRow) bool { return r.War == "" })
 	add("war-family-variant", "war is a non-canonical spelling of a known war", func(r *AuditRow) bool {

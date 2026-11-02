@@ -282,7 +282,55 @@ var (
 	openTemplateRe = regexp.MustCompile(`\{\{.*$`)
 	// startEndDatesTplRe matches {{Start and end dates|Y|M|D|Y|M|D}}.
 	startEndDatesTplRe = regexp.MustCompile(`(?i)\{\{\s*start[ _]and[ _]end[ _]dates\s*\|([^{}]*)\}\}`)
+	// isoDateTplRe matches {{date|1965-8-6}}, an ISO date with optional day.
+	isoDateTplRe = regexp.MustCompile(`(?i)\{\{\s*date\s*\|\s*(-?\d{3,4})-(\d{1,2})(?:-(\d{1,2}))?[^{}]*\}\}`)
+	// namedRangeTplRe matches a template whose dates are named parameters,
+	// {{Date range and age...|year1=1949|month1=1|day1=30|year2=...}}.
+	namedRangeTplRe = regexp.MustCompile(`(?i)\{\{[^{}|]*\|[^{}]*\byear1\s*=[^{}]*\}\}`)
 )
+
+// isoDateTemplate renders an {{date|Y-M-D}} match as prose.
+func isoDateTemplate(m string) string {
+	parts := isoDateTplRe.FindStringSubmatch(m)
+	var nums []int
+	for _, p := range parts[1:] {
+		if n, err := strconv.Atoi(p); err == nil {
+			nums = append(nums, n)
+		}
+	}
+	return dateFromParts(nums)
+}
+
+// namedRangeTemplate renders a template's year1, month1, day1 and year2,
+// month2, day2 parameters as a prose date or range.
+func namedRangeTemplate(m string) string {
+	named := map[string]int{}
+	for _, p := range strings.Split(strings.Trim(m, "{}"), "|") {
+		k, v, ok := strings.Cut(p, "=")
+		if !ok {
+			continue
+		}
+		if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil {
+			named[strings.ToLower(strings.TrimSpace(k))] = n
+		}
+	}
+	part := func(i string) string {
+		var nums []int
+		for _, k := range []string{"year", "month", "day"} {
+			n, ok := named[k+i]
+			if !ok {
+				break
+			}
+			nums = append(nums, n)
+		}
+		return dateFromParts(nums)
+	}
+	start, end := part("1"), part("2")
+	if end == "" || end == start {
+		return start
+	}
+	return start + " – " + end
+}
 
 // infoboxDateProse renders a raw infobox date parameter as display prose and
 // returns it with its ISO range and the first year it names. It reports false
@@ -303,6 +351,8 @@ func infoboxDateProse(raw string) (string, DateRange, int, bool) {
 	s = startDateTplRe.ReplaceAllStringFunc(s, func(m string) string {
 		return dateFromParts(templateNumbers(startDateTplRe.FindStringSubmatch(m)[1]))
 	})
+	s = isoDateTplRe.ReplaceAllStringFunc(s, isoDateTemplate)
+	s = namedRangeTplRe.ReplaceAllStringFunc(s, namedRangeTemplate)
 	s = cleanWikitext(s)
 	s = strings.TrimRight(strings.ReplaceAll(openTemplateRe.ReplaceAllString(s, ""), "}}", ""), " ,;)(")
 	if strings.Count(s, "(") < strings.Count(s, ")") {

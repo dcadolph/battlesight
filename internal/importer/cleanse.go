@@ -34,7 +34,7 @@ func Cleanse(ctx context.Context, db *sql.DB, wars WarNames) (CleanseReport, err
 	} else {
 		rep.WarsCleared = n
 	}
-	if n, err := fillWarFromWikidata(ctx, db); err != nil {
+	if n, err := fillWarFromWikidata(ctx, db, wars); err != nil {
 		return rep, err
 	} else {
 		rep.WarsFilled = n
@@ -63,6 +63,18 @@ func Cleanse(ctx context.Context, db *sql.DB, wars WarNames) (CleanseReport, err
 		return rep, err
 	} else {
 		rep.SourceDatesReconciled = n
+	}
+	// Years now stand on their sources, so a war whose span excludes the
+	// year can be told apart from a year the war's span exposes as wrong.
+	if n, err := reconcileWarSpans(ctx, db, wars); err != nil {
+		return rep, err
+	} else {
+		rep.WarSpansReconciled = n
+	}
+	if n, err := zeroUnsourcedYears(ctx, db); err != nil {
+		return rep, err
+	} else {
+		rep.UnsourcedYearsZeroed = n
 	}
 	if n, err := alignYearToDate(ctx, db); err != nil {
 		return rep, err
@@ -301,6 +313,11 @@ type CleanseReport struct {
 	WarsCleared int
 	// WarsFilled counts war-less rows given a war from Wikidata or the infobox.
 	WarsFilled int
+	// WarSpansReconciled counts rows outside their war's span that took the
+	// Wikidata year or lost the war.
+	WarSpansReconciled int
+	// UnsourcedYearsZeroed counts undated rows whose year no source states.
+	UnsourcedYearsZeroed int
 	// WarAliasesApplied counts rows moved from a war alias to its canonical name.
 	WarAliasesApplied int
 	NonBattlesDropped int
@@ -317,6 +334,7 @@ func (r CleanseReport) Total() int {
 	return r.BattleTextFixed + r.SideTextFixed + r.MissingDatesBackfilled +
 		r.DateStringsNormalised + r.SourceDatesReconciled + r.YearsAligned + r.YearsDerived +
 		r.ErasRecomputed + r.BlankSidesDropped + r.WarNamesCanonicalised + r.WarsCleared + r.WarsFilled +
+		r.WarSpansReconciled + r.UnsourcedYearsZeroed +
 		r.WarAliasesApplied + r.NonBattlesDropped + r.TwinsMerged + r.DuplicatesRemoved + r.CoordsOverridden +
 		r.RichSearchRowsIndexed
 }
@@ -721,13 +739,15 @@ var paramCaptureRe = regexp.MustCompile(`^\s*\|?\s*\w+\s*=`)
 // have none. The Wikidata date renders first, since it is the source of
 // truth for wikidata rows. Without one the fall-back is the plain "1850" or
 // "490 BC" string, matching what users see elsewhere when no finer date is
-// available. The legacy "0" placeholder and a captured infobox parameter
-// count as missing, and an undated row's date becomes the empty string, so
-// the catalog has one placeholder. Curated and verified rows are never touched.
+// available, and only for a year a source states (see yearSourced): a bare
+// year label would hide an unsourced year as if it were a date. The legacy
+// "0" placeholder and a captured infobox parameter count as missing, and an
+// undated row's date becomes the empty string, so the catalog has one
+// placeholder. Curated and verified rows are never touched.
 func backfillMissingDate(ctx context.Context, db *sql.DB) (int, error) {
 	rows, err := db.QueryContext(ctx, `SELECT id, year, date, wikidata_date, wikidata_precision, wikidata_end,
-		wikidata_end_precision FROM battles WHERE source != 'curated' AND verified = 0
-		AND (date = '' OR date = '0' OR date LIKE '%=%')`)
+		wikidata_end_precision, infobox_date, name, wikipedia_title FROM battles
+		WHERE source != 'curated' AND verified = 0 AND (date = '' OR date = '0' OR date LIKE '%=%')`)
 	if err != nil {
 		return 0, fmt.Errorf("scan missing-date battles: %w", err)
 	}
@@ -737,9 +757,10 @@ func backfillMissingDate(ctx context.Context, db *sql.DB) (int, error) {
 	}
 	var batch []fill
 	for rows.Next() {
-		var id, date, wdDate, wdEnd string
+		var id, date, wdDate, wdEnd, ibDate, name, title string
 		var year, prec, endPrec int
-		if err := rows.Scan(&id, &year, &date, &wdDate, &prec, &wdEnd, &endPrec); err != nil {
+		err := rows.Scan(&id, &year, &date, &wdDate, &prec, &wdEnd, &endPrec, &ibDate, &name, &title)
+		if err != nil {
 			rows.Close()
 			return 0, fmt.Errorf("scan missing-date row: %w", err)
 		}
@@ -749,7 +770,7 @@ func backfillMissingDate(ctx context.Context, db *sql.DB) (int, error) {
 		f := fill{id: id}
 		if display, dr, ok := renderWikidataDate(wdDate, prec, wdEnd, endPrec); ok {
 			f.date, f.dr = display, dr
-		} else if year != 0 {
+		} else if yearSourced(year, wdDate, ibDate, name, title) {
 			f.date, f.dr = formatYearLabel(year), yearFallback(year)
 		}
 		if f.date == date {
@@ -834,9 +855,11 @@ func candidateYears(date string) []int {
 // the prose lists a single canonical year ("AD 316" vs year=314). Ambiguous
 // prose ("574, 580, or 590") leaves year alone — that case keeps the curated
 // year and lets the audit recognise the ambiguity instead of flagging it.
+// Curated and verified rows are never touched: prose poisoned by a retired
+// pass once moved a verified year this way.
 func alignYearToDate(ctx context.Context, db *sql.DB) (int, error) {
 	rows, err := db.QueryContext(ctx,
-		`SELECT id, year, date FROM battles WHERE date != ''`)
+		`SELECT id, year, date FROM battles WHERE date != '' AND source != 'curated' AND verified = 0`)
 	if err != nil {
 		return 0, fmt.Errorf("scan align-year rows: %w", err)
 	}
@@ -1147,6 +1170,8 @@ type warCount struct {
 //     under its parent (American Civil War, World War I, etc.).
 //  2. Collapse spelling variants of the same war (dash style, leading
 //     "the") onto the variant with the most battles.
+//
+// Curated and verified rows are never rewritten.
 func canonicaliseWarNames(ctx context.Context, db *sql.DB, keys map[string]bool) (int, error) {
 	loadCounts := func() ([]warCount, error) {
 		rows, err := db.QueryContext(ctx,
@@ -1176,7 +1201,8 @@ func canonicaliseWarNames(ctx context.Context, db *sql.DB, keys map[string]bool)
 		return 0, fmt.Errorf("begin war tx: %w", err)
 	}
 	defer tx.Rollback()
-	stmt, err := tx.PrepareContext(ctx, `UPDATE battles SET war = ? WHERE war = ?`)
+	stmt, err := tx.PrepareContext(ctx, `UPDATE battles SET war = ? WHERE war = ?
+		AND source != 'curated' AND verified = 0`)
 	if err != nil {
 		return 0, fmt.Errorf("prepare war update: %w", err)
 	}

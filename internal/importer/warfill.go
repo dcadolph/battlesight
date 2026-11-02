@@ -34,6 +34,8 @@ type WarNames struct {
 	Keys map[string]bool
 	// Aliases maps each alias to its canonical war name.
 	Aliases map[string]string
+	// Spans maps each key and alias, folded by canonWarKey, to its year span.
+	Spans map[string]WarSpan
 }
 
 // warFromSources returns the war a source states for a row: the first labeled
@@ -125,9 +127,10 @@ func sourcedWar(war, conflict string, wars WarNames) bool {
 // from its Wikidata conflict facts or its infobox partof link. Curated and
 // verified rows are never touched. A modern war whose region excludes the
 // row's point is not filled, the same rule reconcileSourceDates clears by,
-// so the two passes never undo each other.
-func fillWarFromWikidata(ctx context.Context, db *sql.DB) (int, error) {
-	rows, err := db.QueryContext(ctx, `SELECT id, wikidata_conflict, infobox_partof, lat, lng FROM battles
+// and neither is a war whose span excludes the row's year, the rule
+// reconcileWarSpans clears by, so the passes never undo each other.
+func fillWarFromWikidata(ctx context.Context, db *sql.DB, wars WarNames) (int, error) {
+	rows, err := db.QueryContext(ctx, `SELECT id, year, wikidata_conflict, infobox_partof, lat, lng FROM battles
 		WHERE war = '' AND source = 'wikidata' AND verified = 0
 		AND (wikidata_conflict != '' OR infobox_partof != '')`)
 	if err != nil {
@@ -136,13 +139,14 @@ func fillWarFromWikidata(ctx context.Context, db *sql.DB) (int, error) {
 	fills := map[string]string{}
 	for rows.Next() {
 		var id, conflict, partof string
+		var year int
 		var lat, lng float64
-		if err := rows.Scan(&id, &conflict, &partof, &lat, &lng); err != nil {
+		if err := rows.Scan(&id, &year, &conflict, &partof, &lat, &lng); err != nil {
 			rows.Close()
 			return 0, fmt.Errorf("scan war-less row: %w", err)
 		}
 		w := warFromSources(conflict, partof)
-		if w == "" || warOutsideRegion(&AuditRow{War: w, Lat: lat, Lng: lng}) {
+		if w == "" || warOutsideRegion(&AuditRow{War: w, Lat: lat, Lng: lng}) || wars.outsideSpan(w, year) {
 			continue
 		}
 		fills[id] = w
@@ -180,9 +184,10 @@ func fillWarFromWikidata(ctx context.Context, db *sql.DB) (int, error) {
 	return len(fills), nil
 }
 
-// applyWarAliases rewrites every row filed under a war alias, in any case, to
-// the canonical war name from wars.json. Text cleanse capitalizes a Wikidata
-// label that starts lower case, so an exact match would miss filled rows.
+// applyWarAliases rewrites every unverified wikidata row filed under a war
+// alias, in any case, to the canonical war name from wars.json. Text cleanse
+// capitalizes a Wikidata label that starts lower case, so an exact match would
+// miss filled rows. Curated and verified rows are never touched.
 func applyWarAliases(ctx context.Context, db *sql.DB, aliases map[string]string) (int, error) {
 	if len(aliases) == 0 {
 		return 0, nil
@@ -192,7 +197,8 @@ func applyWarAliases(ctx context.Context, db *sql.DB, aliases map[string]string)
 		return 0, fmt.Errorf("begin war alias tx: %w", err)
 	}
 	defer tx.Rollback()
-	stmt, err := tx.PrepareContext(ctx, `UPDATE battles SET war = ? WHERE war = ? COLLATE NOCASE AND war != ?`)
+	stmt, err := tx.PrepareContext(ctx, `UPDATE battles SET war = ? WHERE war = ? COLLATE NOCASE AND war != ?
+		AND source != 'curated' AND verified = 0`)
 	if err != nil {
 		return 0, fmt.Errorf("prepare war alias: %w", err)
 	}

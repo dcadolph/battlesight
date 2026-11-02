@@ -86,18 +86,21 @@ func Run(cfg Config) error {
 	// variants and aliases, drop rows Wikidata says are not battles, and merge
 	// duplicate Wikipedia rows. Idempotent. Drives the audit error count
 	// toward zero on every start.
-	if rep, err := importer.Cleanse(context.Background(), database,
-		importer.WarNames{Keys: wars.Names(), Aliases: wars.Aliases()}); err != nil {
+	warNames := importer.WarNames{Keys: wars.Names(), Aliases: wars.Aliases(),
+		Spans: importer.WarSpans(wars.All())}
+	if rep, err := importer.Cleanse(context.Background(), database, warNames); err != nil {
 		return fmt.Errorf("cleanse data: %w", err)
 	} else if rep.Total() > 0 {
 		log.Printf("cleansed data: %d battle text, %d sides, %d missing-date backfilled, %d dates normalized, "+
 			"%d reconciled with Wikidata, %d years aligned, %d years derived, %d eras recomputed, "+
-			"%d blank sides dropped, %d unsourced wars cleared, %d wars filled, %d war-name variants merged, "+
+			"%d blank sides dropped, %d unsourced wars cleared, %d wars filled, %d war spans reconciled, "+
+			"%d unsourced years zeroed, %d war-name variants merged, "+
 			"%d war aliases applied, "+
 			"%d non-battles dropped, %d twins merged, %d duplicates removed",
 			rep.BattleTextFixed, rep.SideTextFixed, rep.MissingDatesBackfilled, rep.DateStringsNormalised,
 			rep.SourceDatesReconciled, rep.YearsAligned, rep.YearsDerived, rep.ErasRecomputed,
-			rep.BlankSidesDropped, rep.WarsCleared, rep.WarsFilled, rep.WarNamesCanonicalised, rep.WarAliasesApplied,
+			rep.BlankSidesDropped, rep.WarsCleared, rep.WarsFilled, rep.WarSpansReconciled,
+			rep.UnsourcedYearsZeroed, rep.WarNamesCanonicalised, rep.WarAliasesApplied,
 			rep.NonBattlesDropped, rep.TwinsMerged, rep.DuplicatesRemoved)
 	}
 

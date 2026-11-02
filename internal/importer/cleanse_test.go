@@ -293,6 +293,9 @@ func TestYearToEra(t *testing.T) {
 	}
 }
 
+// TestBackfillMissingDate verifies the date backfill renders the Wikidata date
+// first, labels only a year a source states, and never touches curated or
+// verified rows.
 func TestBackfillMissingDate(t *testing.T) {
 	t.Parallel()
 	conn, err := db.Open(filepath.Join(t.TempDir(), "dates.db"))
@@ -302,15 +305,19 @@ func TestBackfillMissingDate(t *testing.T) {
 	t.Cleanup(func() { conn.Close() })
 	seeds := []struct {
 		ID       string
+		Name     string
 		Date     string
 		Source   string
 		WDDate   string
+		Infobox  string
 		Year     int
 		Prec     int
 		Verified int
 	}{
-		{ID: "empty-dated", Date: "", Source: "wikidata", Year: 1850},
-		{ID: "zero-dated", Date: "0", Source: "wikidata", Year: -490},
+		{ID: "empty-dated", Name: "Battle of Pucarani (1850)", Date: "", Source: "wikidata", Year: 1850},
+		{ID: "zero-dated", Date: "0", Source: "wikidata", Year: -490, Infobox: "490 BC"},
+		{ID: "unsourced-year", Name: "Battle of Jam", Date: "0", Source: "wikidata", Year: 2026,
+			Infobox: "September 24, 1528"},
 		{ID: "zero-undated", Date: "0", Source: "wikidata"},
 		{ID: "empty-undated", Date: "", Source: "wikidata"},
 		{ID: "verified-zero", Date: "0", Source: "wikidata", Verified: 1},
@@ -321,11 +328,14 @@ func TestBackfillMissingDate(t *testing.T) {
 		{ID: "equals-kept", Date: "1066 (Julian = 1066)", Source: "wikidata", Year: 1066},
 	}
 	for _, s := range seeds {
+		if s.Name == "" {
+			s.Name = s.ID
+		}
 		if _, err := conn.ExecContext(context.Background(), `INSERT INTO battles (id, name, year, date, date_start,
 			date_end, lat, lng, era, war, battle_type, victor, summary, significance, source, source_id, verified,
-			wikipedia_title, wikidata_date, wikidata_precision)
-			VALUES (?, ?, ?, ?, '', '', 0, 0, '', '', 'land', '', '', '', ?, '', ?, '', ?, ?)`,
-			s.ID, s.ID, s.Year, s.Date, s.Source, s.Verified, s.WDDate, s.Prec); err != nil {
+			wikipedia_title, wikidata_date, wikidata_precision, infobox_date)
+			VALUES (?, ?, ?, ?, '', '', 0, 0, '', '', 'land', '', '', '', ?, '', ?, '', ?, ?, ?)`,
+			s.ID, s.Name, s.Year, s.Date, s.Source, s.Verified, s.WDDate, s.Prec, s.Infobox); err != nil {
 			t.Fatalf("insert %s: %v", s.ID, err)
 		}
 	}
@@ -333,12 +343,12 @@ func TestBackfillMissingDate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(5, n); diff != "" {
+	if diff := cmp.Diff(6, n); diff != "" {
 		t.Errorf("updated mismatch (-want +got):\n%s", diff)
 	}
 	want := []string{"captured:4 July 1773|1773-07-04|1773-07-04", "curated-empty:||",
 		"empty-dated:1850|1850-12-31|1850-12-31", "empty-undated:||", "equals-kept:1066 (Julian = 1066)||",
-		"has-date:4 October 1923||", "verified-zero:0||", "wikidata-day:14 March 2014|2014-03-14|2014-03-14",
+		"has-date:4 October 1923||", "unsourced-year:||", "verified-zero:0||", "wikidata-day:14 March 2014|2014-03-14|2014-03-14",
 		"zero-dated:490 BC|-0490-12-31|-0490-12-31", "zero-undated:||"}
 	got := queryStrings(t, conn, `SELECT id || ':' || date || '|' || date_start || '|' || date_end FROM battles ORDER BY id`)
 	if diff := cmp.Diff(want, got); diff != "" {

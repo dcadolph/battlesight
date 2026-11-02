@@ -309,6 +309,17 @@ func (w *Wars) Names() map[string]bool {
 	return out
 }
 
+// All returns a copy of every loaded war narrative keyed by canonical name.
+func (w *Wars) All() map[string]WarNarrative {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	out := make(map[string]WarNarrative, len(w.byName))
+	for n, v := range w.byName {
+		out[n] = v
+	}
+	return out
+}
+
 // Aliases returns a copy of the alias to canonical war name map.
 func (w *Wars) Aliases() map[string]string {
 	w.mu.RLock()

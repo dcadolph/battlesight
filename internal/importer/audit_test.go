@@ -45,7 +45,7 @@ func TestMismatchesClean(t *testing.T) {
 			t.Errorf("class %s flagged a clean row: %v", c.Key, c.IDs)
 		}
 	}
-	if diff := cmp.Diff([]string{"year-vs-wikidata", "non-battle"}, gotNA); diff != "" {
+	if diff := cmp.Diff([]string{"year-vs-wikidata", "war-outside-span", "non-battle"}, gotNA); diff != "" {
 		t.Errorf("n/a mismatch (-want +got):\n%s", diff)
 	}
 }
@@ -438,6 +438,29 @@ func TestMismatches(t *testing.T) { //nolint:funlen // Test function.
 		Mutate: func(r *AuditRow) {
 			r.Significance = "The 1863–1864 \"Overland\" campaign followed, one man hurt in the thumb, carts upright."
 		},
+		WantIDs: nil,
+	}, { // Test 87: Year far outside the war's span.
+		Name: "war outside span", Key: "war-outside-span",
+		Mutate:  func(r *AuditRow) { r.War, r.Year = "Russo-Ukrainian War", 1476 },
+		In:      func(in *AuditInput) { in.WarSpans = map[string]WarSpan{"russo-ukrainian war": {Start: 2014}} },
+		WantIDs: []string{"x"},
+	}, { // Test 88: Year inside the war's span.
+		Name: "war inside span", Key: "war-outside-span",
+		In: func(in *AuditInput) {
+			in.WarSpans = map[string]WarSpan{"american civil war": {Start: 1861, End: 1865}}
+		},
+		WantIDs: nil,
+	}, { // Test 89: No wars.json loaded.
+		Name: "war span na", Key: "war-outside-span", WantNA: true,
+	}, { // Test 90: Undated row whose year nothing states.
+		Name: "year unsourced", Key: "year-unsourced",
+		Mutate: func(r *AuditRow) {
+			r.Name, r.WikipediaTitle, r.Year, r.Date = "Battle of Jam", "Battle of Jam", 2026, "0"
+		},
+		WantIDs: []string{"x"},
+	}, { // Test 91: Undated row whose title states the year.
+		Name: "year from title", Key: "year-unsourced",
+		Mutate:  func(r *AuditRow) { r.Name, r.Year, r.Date = "Battle of Tagab (2012)", 2012, "" },
 		WantIDs: nil,
 	}}
 	for testNum, test := range tests {

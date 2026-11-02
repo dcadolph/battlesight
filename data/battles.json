@@ -934,35 +934,6 @@
     "significance": "Worst tank disaster in Russian history. Triggers the Khasavyurt Accord and Chechen de facto independence, a settlement that lasts until the Second Chechen War in 1999."
   },
   {
-    "id": "fall-of-baghdad-2003",
-    "name": "Fall of Baghdad (2003)",
-    "year": 2003,
-    "date": "3–9 April 2003",
-    "lat": 33.3152,
-    "lng": 44.3661,
-    "era": "contemporary",
-    "war": "Iraq War",
-    "battleType": "land",
-    "wikipediaTitle": "Battle of Baghdad (2003)",
-    "sides": [
-      {
-        "name": "United States",
-        "commander": "David Petraeus, David Perkins, James Mattis",
-        "strength": "3rd Infantry Division + 1st Marine Division (~25,000)",
-        "casualties": "34 killed, 248 wounded"
-      },
-      {
-        "name": "Iraq",
-        "commander": "Saddam Hussein, Qusay Hussein",
-        "strength": "~36,000 Republican Guard + Special Republican Guard",
-        "casualties": "~2,300+ killed (estimate)"
-      }
-    ],
-    "victor": "United States",
-    "summary": "The \"Thunder Run\", two armored thrusts into Baghdad on 5 and 7 April, finds Iraqi defenses brittle. By 9 April US troops are in Firdos Square and the statue of Saddam Hussein is pulled down.",
-    "significance": "Effective end of the Saddam Hussein regime. Beginning, not end, of US involvement in Iraq, the insurgency lasts another decade."
-  },
-  {
     "id": "lexington-concord-1775",
     "name": "Battles of Lexington and Concord",
     "year": 1775,

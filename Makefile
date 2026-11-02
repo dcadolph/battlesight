@@ -6,8 +6,8 @@ help:
 	@echo "  web       - start the Vite dev server on :5173 (proxies /api)"
 	@echo "  test      - run all Go unit tests"
 	@echo "  check     - test + audit + audit-db + Go build + TypeScript check"
-	@echo "  audit     - data integrity audit on data/*.json"
-	@echo "  audit-db  - wider audit on the live SQLite database"
+	@echo "  audit     - validate data/battles.json, curated files and replays"
+	@echo "  audit-db  - correctness mismatch report on the SQLite database"
 	@echo "  import    - fetch/refresh Wikidata + Wikipedia data into the DB"
 	@echo "  build-web - production frontend build"
 
@@ -15,11 +15,11 @@ test:
 	go test ./...
 
 audit:
-	python3 scripts/audit_data.py
+	go run ./cmd/import -validate
 
 # audit-db requires data/battlesight.db. The server seeds it on first start.
 audit-db:
-	python3 scripts/audit_db.py
+	go run ./cmd/quality -mismatch
 
 check: test audit audit-db
 	go build ./...

@@ -3,6 +3,9 @@ package importer
 import (
 	"fmt"
 	"regexp"
+	"slices"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/dcadolph/battlesight/internal/battles"
@@ -421,7 +424,255 @@ func ValidateBattles(bs []battles.Battle) ValidationReport {
 				Message: "both empty; dossier will render only the side cards",
 			})
 		}
+		validateBattleConsistency(b, &rep)
 	}
+	validateBatch(bs, &rep)
 
 	return rep
 }
+
+// victorGenericTerms mark victor text that names an outcome rather than a side.
+var victorGenericTerms = []string{"inconclusive", "indecisive", "both", "tactical", "strategic", "allied",
+	"allies", "mixed", "stalemate", "draw", "ceasefire", "ongoing"}
+
+// nonPersonnelTerms mark strength text counted in equipment rather than people.
+var nonPersonnelTerms = []string{"ship", "tank", "aircraft", "plane", "vessel", "cannon", "gun",
+	"piece of artillery", "artillery piece"}
+
+// reForceNumber matches a figure with an optional magnitude suffix that is its
+// own token, so "31,000 killed (mostly disease)" does not read "m" as million.
+var reForceNumber = regexp.MustCompile(`(?i)([\d,]+)\s*(m\b|million\b|k\b|thousand\b)?`)
+
+// casualtyOverStrength is how far casualties may exceed strength before the
+// validator warns. Surrenders and reinforcements push some real sieges past 1.
+const casualtyOverStrength = 1.2
+
+// validateBattleConsistency checks that fields of one battle agree with each
+// other: the year with the prose date, the victor with the sides, and each
+// side's casualties with its strength.
+func validateBattleConsistency(b battles.Battle, rep *ValidationReport) {
+	if yearDisagreesWithProse(b.Year, b.Date) {
+		rep.Errors = append(rep.Errors, ValidationError{
+			ID: b.ID, Field: "year,date",
+			Message: fmt.Sprintf("year %d is not among the years date %q names", b.Year, b.Date),
+		})
+	}
+	if v := strings.TrimSpace(b.Victor); v != "" && len(b.Sides) > 0 && !victorMatchesSide(v, b.Sides) {
+		rep.Warnings = append(rep.Warnings, ValidationError{
+			ID: b.ID, Field: "victor",
+			Message: fmt.Sprintf("%q matches no side name and names no generic outcome", v),
+		})
+	}
+	for i, side := range b.Sides {
+		strength, casualties, ok := comparableForce(side)
+		if ok && float64(casualties) > float64(strength)*casualtyOverStrength {
+			rep.Warnings = append(rep.Warnings, ValidationError{
+				ID: b.ID, Field: fmt.Sprintf("sides[%d].casualties", i),
+				Message: fmt.Sprintf("casualties %d exceed strength %d", casualties, strength),
+			})
+		}
+	}
+}
+
+// victorGenericTokens are words too common in side names to show that a
+// victor names a particular side.
+var victorGenericTokens = map[string]bool{"forces": true, "force": true, "armed": true, "army": true,
+	"republic": true, "support": true, "coalition": true, "government": true, "units": true, "state": true,
+	"states": true, "national": true, "allied": true, "people": true}
+
+// victorMatchesSide reports whether the victor text names a side, by substring
+// or by a shared significant word, or names a generic outcome.
+func victorMatchesSide(victor string, sides []battles.Side) bool {
+	words := victorWords(victor)
+	for _, s := range sides {
+		if s.Name == "" {
+			continue
+		}
+		if strings.Contains(victor, s.Name) || strings.Contains(s.Name, victor) {
+			return true
+		}
+		for w := range victorWords(s.Name) {
+			if words[w] {
+				return true
+			}
+		}
+	}
+	l := strings.ToLower(victor)
+	for _, t := range victorGenericTerms {
+		if strings.Contains(l, t) {
+			return true
+		}
+	}
+	return false
+}
+
+// victorWords returns the lower-cased words of at least five letters in s that
+// are not generic side vocabulary.
+func victorWords(s string) map[string]bool {
+	out := map[string]bool{}
+	for _, w := range reNameToken.FindAllString(strings.ToLower(s), -1) {
+		if len([]rune(w)) >= 5 && !victorGenericTokens[w] {
+			out[w] = true
+		}
+	}
+	return out
+}
+
+// comparableForce returns the largest strength and casualty figures of a side
+// when both are personnel counts that can be compared. Civilian tallies after
+// the first semicolon, or after the word civilian, are left out.
+func comparableForce(s battles.Side) (int, int, bool) {
+	if s.Strength == "" || s.Casualties == "" {
+		return 0, 0, false
+	}
+	ls := strings.ToLower(s.Strength)
+	for _, t := range nonPersonnelTerms {
+		if strings.Contains(ls, t) {
+			return 0, 0, false
+		}
+	}
+	cas := s.Casualties
+	if lc := strings.ToLower(cas); strings.Contains(lc, "civilian") {
+		cut := strings.Index(cas, ";")
+		if cut < 0 {
+			cut = strings.Index(lc, "civilian")
+		}
+		if military := forceNumbers(cas[:cut]); len(military) > 0 {
+			cas = cas[:cut]
+		}
+	}
+	strengths, casualties := forceNumbers(s.Strength), forceNumbers(cas)
+	if len(strengths) == 0 || len(casualties) == 0 {
+		return 0, 0, false
+	}
+	strength, casualty := slices.Max(strengths), slices.Max(casualties)
+	if strength <= 50 {
+		return 0, 0, false
+	}
+	return strength, casualty, true
+}
+
+// forceNumbers returns every figure in s, scaled by any magnitude suffix.
+func forceNumbers(s string) []int {
+	var out []int
+	for _, m := range reForceNumber.FindAllStringSubmatch(s, -1) {
+		digits := strings.ReplaceAll(m[1], ",", "")
+		n, err := strconv.Atoi(digits)
+		if err != nil {
+			continue
+		}
+		switch strings.ToLower(m[2]) {
+		case "m", "million":
+			n *= 1_000_000
+		case "k", "thousand":
+			n *= 1_000
+		}
+		out = append(out, n)
+	}
+	return out
+}
+
+// validateBatch runs the checks that compare battles with each other: a shared
+// Wikipedia title is a duplicate import, a shared name is likely one, and two
+// spellings of one war split that war's battle list.
+func validateBatch(bs []battles.Battle, rep *ValidationReport) {
+	titles := map[string][]string{}
+	names := map[string][]string{}
+	wars := map[string]map[string]bool{}
+	for _, b := range bs {
+		if t := strings.TrimSpace(b.WikipediaTitle); t != "" {
+			titles[t] = append(titles[t], b.ID)
+		}
+		if n := strings.TrimSpace(b.Name); n != "" {
+			names[n] = append(names[n], b.ID)
+		}
+		if b.War != "" {
+			k := canonWarKey(b.War)
+			if wars[k] == nil {
+				wars[k] = map[string]bool{}
+			}
+			wars[k][b.War] = true
+		}
+	}
+	for _, t := range sortedKeys(titles) {
+		if ids := titles[t]; len(ids) > 1 {
+			rep.Errors = append(rep.Errors, ValidationError{
+				ID: ids[0], Field: "wikipediaTitle",
+				Message: fmt.Sprintf("%q is shared by %s", t, strings.Join(ids, ", ")),
+			})
+		}
+	}
+	for _, n := range sortedKeys(names) {
+		if ids := names[n]; len(ids) > 1 {
+			rep.Warnings = append(rep.Warnings, ValidationError{
+				ID: ids[0], Field: "name",
+				Message: fmt.Sprintf("%q is shared by %s", n, strings.Join(ids, ", ")),
+			})
+		}
+	}
+	for _, k := range sortedKeys(wars) {
+		if variants := wars[k]; len(variants) > 1 {
+			rep.Warnings = append(rep.Warnings, ValidationError{
+				Field:   "war",
+				Message: fmt.Sprintf("one war spelled %d ways: %s", len(variants), strings.Join(sortedKeys(variants), " | ")),
+			})
+		}
+	}
+}
+
+// sortedKeys returns the keys of m in order.
+func sortedKeys[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// ValidateReplays checks the structure of every served replay: faction labels,
+// at least replayMinPhases phases, a title and narration per phase, palette
+// factions, and normalized coordinates inside 0..100. It is looser than
+// battles.ValidateReplay, which gates new drafts at merge time.
+func ValidateReplays(replays map[string]battles.Replay) ValidationReport {
+	var rep ValidationReport
+	add := func(id, field, format string, args ...any) {
+		rep.Errors = append(rep.Errors, ValidationError{ID: id, Field: field, Message: fmt.Sprintf(format, args...)})
+	}
+	inRange := func(v float64) bool { return v >= 0 && v <= 100 }
+	for _, id := range sortedKeys(replays) {
+		r := replays[id]
+		if strings.TrimSpace(r.FactionA) == "" || strings.TrimSpace(r.FactionB) == "" {
+			add(id, "factionA,factionB", "both are required")
+		}
+		if len(r.Phases) < replayMinPhases {
+			add(id, "phases", "need at least %d phases, got %d", replayMinPhases, len(r.Phases))
+		}
+		for i, p := range r.Phases {
+			field := fmt.Sprintf("phases[%d]", i)
+			if strings.TrimSpace(p.Title) == "" {
+				add(id, field+".title", "required")
+			}
+			if strings.TrimSpace(p.Narration) == "" {
+				add(id, field+".narration", "required")
+			}
+			for j, u := range p.Units {
+				if u.Faction != "a" && u.Faction != "b" && u.Faction != "c" {
+					add(id, fmt.Sprintf("%s.units[%d].faction", field, j), "%q is not a, b or c", u.Faction)
+				}
+				if !inRange(u.X) || !inRange(u.Y) {
+					add(id, fmt.Sprintf("%s.units[%d]", field, j), "x,y %.1f,%.1f outside 0..100", u.X, u.Y)
+				}
+			}
+			for j, m := range p.Movements {
+				if !inRange(m.FromX) || !inRange(m.FromY) || !inRange(m.ToX) || !inRange(m.ToY) {
+					add(id, fmt.Sprintf("%s.movements[%d]", field, j), "coordinates outside 0..100")
+				}
+			}
+		}
+	}
+	return rep
+}
+
+// replayMinPhases is the fewest phases a served replay may have.
+const replayMinPhases = 3

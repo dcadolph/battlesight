@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -224,10 +225,38 @@ func runValidate(jsonPath string) error {
 	}
 	fmt.Fprintf(os.Stdout, "validated %d battle(s): %d error(s), %d warning(s)\n",
 		len(raw), len(rep.Errors), len(rep.Warnings))
-	if rep.HasErrors() {
-		return fmt.Errorf("%d blocking issue(s) found", len(rep.Errors))
+
+	phasesPath := filepath.Join(filepath.Dir(jsonPath), "phases.json")
+	replays, err := loadValidationReplays(phasesPath)
+	if err != nil {
+		return err
+	}
+	replayRep := importer.ValidateReplays(replays)
+	if formatted := replayRep.FormatReport(); formatted != "" {
+		fmt.Fprint(os.Stderr, formatted)
+	}
+	fmt.Fprintf(os.Stdout, "validated %d replay(s): %d error(s)\n", len(replays), len(replayRep.Errors))
+
+	if n := len(rep.Errors) + len(replayRep.Errors); n > 0 {
+		return fmt.Errorf("%d blocking issue(s) found", n)
 	}
 	return nil
+}
+
+// loadValidationReplays reads the served replay file. A missing file is not an error.
+func loadValidationReplays(path string) (map[string]battles.Replay, error) {
+	data, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read %s: %w", path, err)
+	}
+	var out map[string]battles.Replay
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil, fmt.Errorf("parse %s: %w", path, err)
+	}
+	return out, nil
 }
 
 // loadValidationCuratedDir duplicates the small directory walk used by

@@ -716,7 +716,7 @@ var reYearToken = regexp.MustCompile(`\b(\d{3,4})\b`)
 var reBCToken = regexp.MustCompile(`(\d+)\s*BC`)
 
 // candidateYears returns the list of years a prose date string mentions.
-// Mirrors scripts/audit_db.py's year_candidates so the two stay in lockstep.
+// The mismatch audit shares it so cleanse and audit agree on what a date names.
 func candidateYears(date string) []int {
 	if date == "" {
 		return nil

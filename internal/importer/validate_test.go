@@ -1,8 +1,13 @@
 package importer
 
 import (
+	"fmt"
+	"slices"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/dcadolph/battlesight/internal/battles"
 )
@@ -206,5 +211,148 @@ func TestLargestCasualtyNumber(t *testing.T) {
 		if got != test.Want {
 			t.Errorf("largestCasualtyNumber(%q): want %d got %d", test.In, test.Want, got)
 		}
+	}
+}
+
+// reportFields lists the id.field of every error and warning in a report.
+func reportFields(rep ValidationReport) (errs, warns []string) {
+	for _, e := range rep.Errors {
+		errs = append(errs, e.ID+"."+e.Field)
+	}
+	for _, w := range rep.Warnings {
+		warns = append(warns, w.ID+"."+w.Field)
+	}
+	return errs, warns
+}
+
+// TestValidateConsistency pins the cross-field checks ported from the retired
+// Python audit: year against prose date, victor against sides, and casualties
+// against strength.
+func TestValidateConsistency(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		Name      string
+		Mutate    func(b *battles.Battle)
+		WantError string
+		WantWarn  string
+	}{{ // Test 0: Year missing from the prose date errors.
+		Name: "year date", Mutate: func(b *battles.Battle) { b.Date = "18 June 1816" },
+		WantError: "battle-of-test.year,date",
+	}, { // Test 1: Victor naming a side by substring passes.
+		Name: "victor substring", Mutate: func(b *battles.Battle) { b.Victor = "Side A" },
+	}, { // Test 2: Victor sharing a significant word with a side passes.
+		Name: "victor word", Mutate: func(b *battles.Battle) {
+			b.Sides[0].Name = "Republic of the Philippines (with coalition support)"
+			b.Victor = "Republic of the Philippines (and the coalition)"
+		},
+	}, { // Test 3: Victor sharing only generic words warns.
+		Name: "victor generic only", Mutate: func(b *battles.Battle) {
+			b.Sides[0].Name, b.Victor = "Sudanese Armed Forces", "Rapid Support Forces"
+		}, WantWarn: "battle-of-test.victor",
+	}, { // Test 4: A generic outcome passes.
+		Name: "victor outcome", Mutate: func(b *battles.Battle) { b.Victor = "Inconclusive" },
+	}, { // Test 5: Casualties far above strength warn.
+		Name: "casualties over strength", Mutate: func(b *battles.Battle) {
+			b.Sides[1].Strength, b.Sides[1].Casualties = "12,000", "25,000 killed"
+		}, WantWarn: "battle-of-test.sides[1].casualties",
+	}, { // Test 6: A million suffix scales strength.
+		Name: "million suffix", Mutate: func(b *battles.Battle) {
+			b.Sides[1].Strength, b.Sides[1].Casualties = "1.2 M", "250,000"
+		},
+	}, { // Test 7: Equipment strength is not compared.
+		Name: "ships", Mutate: func(b *battles.Battle) {
+			b.Sides[1].Strength, b.Sides[1].Casualties = "30 ships", "4,000 killed"
+		},
+	}, { // Test 8: A civilian tally after a semicolon is left out.
+		Name: "civilian tally", Mutate: func(b *battles.Battle) {
+			b.Sides[1].Strength, b.Sides[1].Casualties = "10,000", "8,000 killed; 50,000 civilian dead"
+		},
+	}, { // Test 9: Small units are not compared.
+		Name: "small unit", Mutate: func(b *battles.Battle) {
+			b.Sides[1].Strength, b.Sides[1].Casualties = "40", "60"
+		},
+	}}
+	for testNum, test := range tests {
+		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {
+			t.Parallel()
+			b := validBase()
+			b.Sides = slices.Clone(b.Sides)
+			test.Mutate(&b)
+			errs, warns := reportFields(ValidateBattles([]battles.Battle{b}))
+			var wantErrs, wantWarns []string
+			if test.WantError != "" {
+				wantErrs = []string{test.WantError}
+			}
+			if test.WantWarn != "" {
+				wantWarns = []string{test.WantWarn}
+			}
+			if diff := cmp.Diff(wantErrs, errs, cmpopts.EquateEmpty()); diff != "" {
+				t.Errorf("errors mismatch (-want +got):\n%s", diff)
+			}
+			if diff := cmp.Diff(wantWarns, warns, cmpopts.EquateEmpty()); diff != "" {
+				t.Errorf("warnings mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+// TestValidateBatch pins the checks that compare battles with each other.
+func TestValidateBatch(t *testing.T) {
+	t.Parallel()
+	b1, b2 := validBase(), validBase()
+	b2.ID, b2.Lat = "battle-of-test-two", 51
+	b1.WikipediaTitle, b2.WikipediaTitle = "Battle of Test", "Battle of Test"
+	b2.War = "The Napoleonic wars"
+	errs, warns := reportFields(ValidateBattles([]battles.Battle{b1, b2}))
+	if diff := cmp.Diff([]string{"battle-of-test.wikipediaTitle"}, errs); diff != "" {
+		t.Errorf("errors mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff([]string{"battle-of-test.name", ".war"}, warns); diff != "" {
+		t.Errorf("warnings mismatch (-want +got):\n%s", diff)
+	}
+}
+
+// TestValidateReplays pins the structural checks on served replays.
+func TestValidateReplays(t *testing.T) {
+	t.Parallel()
+	phase := func(i int) battles.Phase {
+		return battles.Phase{Index: i, Title: "T", Narration: "N",
+			Units:     []battles.Unit{{Faction: "a", X: 10, Y: 10}},
+			Movements: []battles.Movement{{Faction: "b", FromX: 1, FromY: 1, ToX: 2, ToY: 2}}}
+	}
+	good := func() battles.Replay {
+		return battles.Replay{FactionA: "A", FactionB: "B", Phases: []battles.Phase{phase(0), phase(1), phase(2)}}
+	}
+	tests := []struct {
+		Name       string
+		Mutate     func(r *battles.Replay)
+		WantFields []string
+	}{{ // Test 0: A clean replay passes.
+		Name: "clean", Mutate: func(*battles.Replay) {},
+	}, { // Test 1: No phases errors.
+		Name: "no phases", Mutate: func(r *battles.Replay) { r.Phases = nil }, WantFields: []string{"r.phases"},
+	}, { // Test 2: Missing faction label errors.
+		Name: "faction label", Mutate: func(r *battles.Replay) { r.FactionB = " " },
+		WantFields: []string{"r.factionA,factionB"},
+	}, { // Test 3: Missing phase title and narration error.
+		Name: "phase text", Mutate: func(r *battles.Replay) { r.Phases[1].Title, r.Phases[1].Narration = "", "" },
+		WantFields: []string{"r.phases[1].title", "r.phases[1].narration"},
+	}, { // Test 4: Bad faction and out-of-range unit error.
+		Name: "unit", Mutate: func(r *battles.Replay) { r.Phases[0].Units = []battles.Unit{{Faction: "d", X: 101}} },
+		WantFields: []string{"r.phases[0].units[0].faction", "r.phases[0].units[0]"},
+	}, { // Test 5: Out-of-range movement errors.
+		Name: "movement", Mutate: func(r *battles.Replay) { r.Phases[2].Movements[0].ToY = -1 },
+		WantFields: []string{"r.phases[2].movements[0]"},
+	}}
+	for testNum, test := range tests {
+		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {
+			t.Parallel()
+			r := good()
+			test.Mutate(&r)
+			errs, _ := reportFields(ValidateReplays(map[string]battles.Replay{"r": r}))
+			if diff := cmp.Diff(test.WantFields, errs, cmpopts.EquateEmpty()); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
 	}
 }

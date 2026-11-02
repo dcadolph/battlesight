@@ -89,6 +89,8 @@ licensed work. Each row inherits the license of the source it came from.
 - **License:** [ISC License](https://opensource.org/licenses/ISC)
 - **What we use:** 110-meter TopoJSON country polygons (`countries-110m.json`)
   for the country overlay layer on the globe.
+  The 50-meter land polygons (`data/land-50m.json`, world-atlas 2.0.2) back the
+  land-in-ocean check in the data audit.
 
 ### NASA Blue Marble
 

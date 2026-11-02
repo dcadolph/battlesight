@@ -36,6 +36,20 @@ func Open(path string) (*sql.DB, error) {
 	return db, nil
 }
 
+// OpenReadOnly opens an existing SQLite database without running migrations or
+// changing the journal mode, so audits never write to it.
+func OpenReadOnly(path string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite", "file:"+path+"?mode=ro&_pragma=busy_timeout(5000)")
+	if err != nil {
+		return nil, fmt.Errorf("open database read-only: %w", err)
+	}
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("ping database read-only: %w", err)
+	}
+	return db, nil
+}
+
 // pragmas sets performance and correctness pragmas.
 func pragmas(db *sql.DB) error {
 	stmts := []string{

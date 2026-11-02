@@ -68,19 +68,37 @@ Parses the year from the date, writes it back, and derives the era.
 go run ./cmd/fixdates
 ```
 
-## `quality` — the completeness report
+## `quality` — completeness and mismatch reports
 
-Scores every battle on which fields are populated and writes a per-era,
-per-region, per-war markdown report. The score measures completeness,
-not factual accuracy: a true entry missing coordinates still ranks low.
-Use it to direct curation, not as a measure of truth.
+Opens the database read-only and never writes to it.
+
+Without `-mismatch` it scores every battle on which fields are populated and
+writes a per-era, per-region, per-war markdown report. The score measures
+completeness, not factual accuracy: a true entry missing coordinates still
+ranks low. Use it to direct curation, not as a measure of truth.
+
+With `-mismatch` it prints one line per correctness class (a date the parser
+cannot read, a year that disagrees with its own date or with Wikidata, a point
+at 0,0 or in the ocean, a modern war outside its region, an empty or variant
+war key, sides with bad names, near-duplicate rows, replay and reference keys
+with no battle) with the count of rows in it. `-mismatch-ids <class>` prints
+the ids in one class, one per line, for repair work. Classes that need a
+column or file that is absent print `n/a` with the reason.
 
 ```bash
 go run ./cmd/quality                    # writes to ~/Downloads
 go run ./cmd/quality -out report.md
+go run ./cmd/quality -mismatch
+go run ./cmd/quality -mismatch-ids land-in-ocean
 ```
 
 | Flag | Default | Purpose |
 | --- | --- | --- |
 | `-db` | `data/battlesight.db` | SQLite database path. |
 | `-out` | `~/Downloads/battlesight-quality-<date>.md` | Report output path. |
+| `-mismatch` | `false` | Print the correctness mismatch report and exit. |
+| `-mismatch-ids` | | Print the row ids of one mismatch class and exit. |
+| `-land` | `data/land-50m.json` | world-atlas land TopoJSON for the `land-in-ocean` class. |
+| `-year-enrich` | `data/.wikicache/year-enrich` | Cache directory of the retired year-enrich pass, for `year-enrich-unreconciled`. |
+| `-phases` | `data/phases.json` | Replay file checked for keys with no battle. |
+| `-references` | `data/references.json` | References file checked for keys with no battle. |

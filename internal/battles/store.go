@@ -47,6 +47,12 @@ const documentedSQL = `(verified = 1 OR (` +
 	`AND EXISTS (SELECT 1 FROM battle_sides s WHERE s.battle_id = battles.id)` +
 	`))`
 
+// DocumentedCondition returns the SQL condition that defines the documented tier,
+// for tools that report on tiers without going through a Store.
+func DocumentedCondition() string {
+	return documentedSQL
+}
+
 // All returns every battle sorted by year.
 func (s *Store) All(ctx context.Context) ([]Battle, int, error) {
 	return s.List(ctx, Filter{Limit: 0})

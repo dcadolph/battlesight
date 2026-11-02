@@ -555,94 +555,103 @@ function buildMotionLayers(trips: ResolvedTrip[], t: number, phaseIdx: number): 
   return result;
 }
 
-// Cartographic MapLibre style. No keys, no signups, CORS-open.
-// A muted, label-free dark canvas over a warm matte, with a hillshade
-// laid over it so ridges and river valleys read as terrain rather than
-// flat paper. No streaming satellite imagery and no 3D terrain mesh: the
-// old satellite stack streamed slowly and read as a tech demo. This is
+// Cartographic MapLibre style. No keys, no signups, CORS-open, and every
+// source is under open terms that allow public use with attribution.
+// A label-free dark plate over a warm matte, with hillshade computed from
+// open elevation data so ridges and river valleys read as terrain rather
+// than flat paper. No streaming satellite imagery and no 3D terrain mesh:
+// the old satellite stack streamed slowly and read as a tech demo. This is
 // the documentary-atlas plate, a map rather than Google Earth.
 //
-// The base was Carto dark_all until CARTO began requiring an API key and
-// started serving unauthenticated tiles with "API KEY REQUIRED" burned
-// into the image. Those tiles still return 200, so nothing errored and
-// the watermark simply appeared across every replay. Any keyless tile
-// source can do this to us, so if the plate ever looks wrong, fetch a
-// single tile and look at it before trusting the network tab.
+// The plate draws only water, rivers, and woodland from OpenStreetMap.
+// Modern roads, towns, and borders are left out on purpose, since they
+// would sit anachronistically under a battle fought centuries earlier.
+//
+// Earlier bases were Carto dark_all, until CARTO began burning "API KEY
+// REQUIRED" into unauthenticated tiles, and then Esri's keyless canvas,
+// whose terms for keyless public use were unclear. Any keyless tile source
+// can change under us, so if the plate ever looks wrong, fetch a single
+// tile and look at it before trusting the network tab.
+const PLATE_LAND = '#1a1814';
+const PLATE_WATER = '#0d1113';
+const PLATE_WOOD = '#1e1d17';
+
 const OPEN_STYLE: StyleSpecification = {
   version: 8,
   sources: {
-    // Esri World Dark Gray Canvas: keyless, CORS-open, label-free, and
-    // already the muted grade this plate wants.
-    'dark-canvas': {
-      type: 'raster',
-      tiles: [
-        'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-      ],
-      tileSize: 256,
-      minzoom: 0,
-      maxzoom: 16,
-      attribution: 'Esri, HERE, Garmin, (c) OpenStreetMap contributors',
+    // OpenFreeMap vector tiles in the OpenMapTiles schema: keyless, free,
+    // and without usage limits.
+    openmaptiles: {
+      type: 'vector',
+      url: 'https://tiles.openfreemap.org/planet',
+      attribution: 'OpenFreeMap, OpenMapTiles, OpenStreetMap contributors',
     },
-    // Hillshade over the canvas. This is what makes a battlefield look
+    // Mapzen terrain tiles on the AWS Open Data registry, terrarium encoded.
+    // MapLibre shades them itself, which is what makes a battlefield look
     // like ground: the ridge a flank anchors on and the valley a cavalry
     // charge runs down are otherwise invisible.
-    hillshade: {
-      type: 'raster',
-      tiles: [
-        'https://services.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
-      ],
+    terrain: {
+      type: 'raster-dem',
+      tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+      encoding: 'terrarium',
       tileSize: 256,
       minzoom: 0,
-      maxzoom: 16,
-      attribution: 'Esri, USGS, NOAA',
+      maxzoom: 15,
+      attribution: 'Mapzen terrain tiles: USGS, NASA SRTM, NOAA ETOPO1, GMTED2010, and others',
     },
   },
   layers: [
-    // Warm matte under everything. Reads as film base, not blue slate, and
-    // seals any gap while tiles arrive.
+    // Warm matte land under everything. Reads as film base, not blue
+    // slate, and seals any gap while tiles arrive.
     {
       id: 'matte',
       type: 'background',
-      paint: { 'background-color': '#12100d' },
+      paint: { 'background-color': PLATE_LAND },
     },
-    // The cartographic base. Desaturated toward the app's warm neutral and
-    // held low-contrast so the faction palette stays the loudest thing.
+    // Woodland and wetland, barely lifted off the land so cover a battle
+    // turned on is visible without competing with the faction palette.
     {
-      id: 'dark-canvas',
-      type: 'raster',
-      source: 'dark-canvas',
-      minzoom: 0,
-      maxzoom: 19,
+      id: 'woodland',
+      type: 'fill',
+      source: 'openmaptiles',
+      'source-layer': 'landcover',
+      filter: ['in', ['get', 'class'], ['literal', ['wood', 'wetland']]],
+      paint: { 'fill-color': PLATE_WOOD, 'fill-opacity': 0.9 },
+    },
+    {
+      id: 'water',
+      type: 'fill',
+      source: 'openmaptiles',
+      'source-layer': 'water',
+      paint: { 'fill-color': PLATE_WATER },
+    },
+    {
+      id: 'rivers',
+      type: 'line',
+      source: 'openmaptiles',
+      'source-layer': 'waterway',
+      filter: ['in', ['get', 'class'], ['literal', ['river', 'canal']]],
       paint: {
-        'raster-saturation': -0.35,
-        'raster-brightness-min': 0.04,
-        'raster-brightness-max': 0.62,
-        'raster-contrast': -0.05,
-        'raster-fade-duration': 300,
+        'line-color': PLATE_WATER,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.6, 10, 1.6, 14, 4],
       },
     },
-    // Relief. The hillshade is near-white, so it is held to a low opacity
-    // and darkened: enough to model the ground, not enough to grey out the
-    // plate or steal contrast from the units.
+    // Relief. Held subtle: enough to model the ground, not enough to grey
+    // out the plate or steal contrast from the units.
     {
       id: 'hillshade',
-      type: 'raster',
-      source: 'hillshade',
-      minzoom: 0,
-      maxzoom: 19,
+      type: 'hillshade',
+      source: 'terrain',
       paint: {
-        // Held low. The hillshade is a near-white image, so anything higher
-        // lifts the whole plate to flat grey and the faction colors stop
-        // reading against it.
-        'raster-opacity': 0.1,
-        'raster-saturation': -1,
-        'raster-brightness-max': 0.34,
-        'raster-contrast': 0.2,
-        'raster-fade-duration': 300,
+        'hillshade-exaggeration': 0.45,
+        'hillshade-illumination-direction': 315,
+        'hillshade-shadow-color': 'rgba(0, 0, 0, 0.75)',
+        'hillshade-highlight-color': 'rgba(255, 236, 210, 0.07)',
+        'hillshade-accent-color': 'rgba(0, 0, 0, 0.35)',
       },
     },
   ],
-  glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+  glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
 };
 
 export default function TacticalSurface({
@@ -823,7 +832,7 @@ export default function TacticalSurface({
       console.warn('[TacticalSurface] map error', e.error?.message || e);
     });
     // Fade the slate the moment the STYLE is parsed and ready — do not
-    // wait for raster tiles to download. Esri's dark-canvas tiles can
+    // wait for basemap tiles to download. Cold tiles can
     // take 1.5–3s from cold CDN; gating the slate on tile arrival was
     // the "insanely slow" cold-start complaint. Once the style is
     // ready, action layers (units, arrows, country shading) can paint
@@ -1837,7 +1846,7 @@ export default function TacticalSurface({
       )}
 
       <div className="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded text-[9px] uppercase tracking-wider text-slate-300/60 pointer-events-none">
-        Esri . USGS . OpenStreetMap . MapLibre
+        &copy; OpenStreetMap contributors . OpenFreeMap . Mapzen terrain . MapLibre
       </div>
     </div>
   );

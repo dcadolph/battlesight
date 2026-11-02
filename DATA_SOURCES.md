@@ -98,6 +98,26 @@ licensed work. Each row inherits the license of the source it came from.
 - **What we use:** Earth surface texture rendered on the globe sphere
   (`earth-blue-marble.jpg`).
 
+### Replay basemap: OpenStreetMap via OpenFreeMap
+
+- **Source:** https://openfreemap.org, vector tiles in the OpenMapTiles schema
+- **Underlying data:** OpenStreetMap contributors,
+  https://www.openstreetmap.org/copyright
+- **License:** [ODbL 1.0](https://opendatacommons.org/licenses/odbl/) for the
+  OpenStreetMap data. OpenFreeMap is free to use with no keys and no limits.
+- **What we use:** Water, rivers, and woodland for the tactical replay map.
+  Modern roads, towns, and borders are left out on purpose.
+- **Attribution:** Shown on the replay map and in the in-app credits card.
+
+### Replay relief: Mapzen terrain tiles
+
+- **Source:** https://registry.opendata.aws/terrain-tiles/, terrarium encoding
+- **License and attribution:** Per source dataset (USGS, NASA SRTM, NOAA
+  ETOPO1, GMTED2010, and others), listed at
+  https://github.com/tilezen/joerd/blob/master/docs/attribution.md
+- **What we use:** Elevation that MapLibre shades into hillshade on the
+  replay map.
+
 ### three-globe night sky
 
 - **Source:** https://github.com/vasturiano/three-globe (`example/img/night-sky.png`)
@@ -117,6 +137,8 @@ licensed work. Each row inherits the license of the source it came from.
 - **three-globe**. https://github.com/vasturiano/three-globe. MIT
 - **Tailwind CSS**. https://tailwindcss.com. MIT
 - **Vite**. https://vitejs.dev. MIT
+- **MapLibre GL JS**. https://maplibre.org. BSD-3-Clause
+- **deck.gl**. https://deck.gl. MIT
 
 ### Back end
 

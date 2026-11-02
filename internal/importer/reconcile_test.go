@@ -472,6 +472,23 @@ func TestInfoboxField(t *testing.T) {
 		In: "{{Infobox military conflict\n| place = X\n}}", WantDate: "",
 	}, { // Test 4: An empty date never reads the next parameter as its value.
 		In: "{{Infobox military conflict\n| date =\n| place = Kidodi\n}}", WantDate: "",
+	}, { // Test 5: A one-line infobox.
+		In: "{{Infobox military conflict | conflict = Battle of X | date = 3 May 1802 | place = Y }}", WantDate: "3 May 1802",
+	}, { // Test 6: A nested template closing on its own line before the date, Battle of Katasin.
+		In: "{{Infobox military conflict\n| conflict = Battle of Katasin\n| image = {{Location map|India West Bengal\n" +
+			"|width = 280\n|label = \n}}\n| date = 1243 AD\n| place = [[Contai]]\n}}",
+		WantDate: "1243 AD",
+	}, { // Test 7: The bare Battle template, Battle of Livny.
+		In:       "{{Battle\n| conflict = Battle of Livny\n| place = [[Livny]]\n| date = [[7 July]] [[1618]]\n}}",
+		WantDate: "[[7 July]] [[1618]]",
+	}, { // Test 8: A cite template's own date never stands in for the field, Battle of Korea Strait.
+		In: "{{Infobox military conflict\n| conflict = Battle of Korea Strait\n| strength1 = 1 steamer<ref name=\"a\">" +
+			"{{cite web \n|date = 7 September 2019\n|publisher= X}}</ref>\n| date = 25–26 June 1950\n}}",
+		WantDate: "25–26 June 1950",
+	}, { // Test 9: A cite template's date with no infobox date stays empty.
+		In: "{{Infobox military conflict\n| strength1 = 1 steamer<ref>{{cite web\n" +
+			"|date = 7 September 2019}}</ref>\n}}",
+		WantDate: "",
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {
@@ -512,6 +529,32 @@ func TestInfoboxDateProse(t *testing.T) {
 	}, { // Test 8: Year to day range starts in the first year.
 		In: "1591 – 3 January 1594", WantDisplay: "1591 – 3 January 1594", WantStart: "1591-01-01", WantYear: 1591,
 		Want: true,
+	}, { // Test 9: ISO date template, Dongshan.
+		In: "{{date|1965-8-6}}", WantDisplay: "6 August 1965", WantStart: "1965-08-06", WantYear: 1965, Want: true,
+	}, { // Test 10: Date range with named parameters, Insein.
+		In: "{{Date range and age in years, months, weeks and days|month1=1|day1=30|year1=1949|" +
+			"month2=5|day2=21|year2=1949|df=yes}}",
+		WantDisplay: "30 January 1949 – 21 May 1949", WantStart: "1949-01-30", WantYear: 1949, Want: true,
+	}, { // Test 11: Date range with positional parameters.
+		In:          "{{Date range and age in years, months, weeks and days|df=y|1941|5|7|1941|5|27}}",
+		WantDisplay: "7 – 27 May 1941", WantStart: "1941-05-07", WantYear: 1941, Want: true,
+	}, { // Test 12: An age template after the prose is not repeated.
+		In: "24 December 1941 – 15 January 1942 <br> ({{Age in years, months, weeks and days|month1=12|day1=24|" +
+			"year1=1941|month2=01|day2=15|year2=1942}})",
+		WantDisplay: "24 December 1941 – 15 January 1942", WantStart: "1941-12-24", WantYear: 1941, Want: true,
+	}, { // Test 13: Old style date keeps the new style day and the year, Battle of the Zolota Lypa.
+		In:          "{{OldStyleDate|26–28 August|1914|13–15 August}}",
+		WantDisplay: "26 – 28 August 1914", WantStart: "1914-08-26", WantYear: 1914, Want: true,
+	}, { // Test 14: A list of dates with labels, Battles of Tilton.
+		In:          "{{ublist|\n{{Start date|1864|5|13}} (first)|{{End date|1864|10|13}} (second)}}",
+		WantDisplay: "13 May 1864 – 13 October 1864", WantStart: "1864-05-13", WantYear: 1864, Want: true,
+	}, { // Test 15: A bulleted plain list.
+		In:          "{{plainlist|\n* 4 June 1937\n* 5 June 1937}}",
+		WantDisplay: "4 June 1937 – 5 June 1937", WantStart: "1937-06-04", WantYear: 1937, Want: true,
+	}, { // Test 16: A formatting wrapper keeps its text.
+		In: "{{nowrap|4 June 1937}}", WantDisplay: "4 June 1937", WantStart: "1937-06-04", WantYear: 1937, Want: true,
+	}, { // Test 17: A citation template still drops.
+		In: "1 May 1802{{sfn|Smith|2001|p=4}}", WantDisplay: "1 May 1802", WantStart: "1802-05-01", WantYear: 1802, Want: true,
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {

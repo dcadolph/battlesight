@@ -280,13 +280,16 @@ var (
 		`en[ _]dash)\s*\}\}`)
 	// openTemplateRe matches a template left open by a field cut at its line end.
 	openTemplateRe = regexp.MustCompile(`\{\{.*$`)
-	// startEndDatesTplRe matches {{Start and end dates|Y|M|D|Y|M|D}}.
-	startEndDatesTplRe = regexp.MustCompile(`(?i)\{\{\s*start[ _]and[ _]end[ _]dates\s*\|([^{}]*)\}\}`)
+	// startEndDatesTplRe matches {{Start and end dates|Y|M|D|Y|M|D}} and the
+	// positional {{Date range and age...|Y|M|D|Y|M|D}} forms.
+	startEndDatesTplRe = regexp.MustCompile(`(?i)\{\{\s*(?:start[ _]and[ _]end[ _]dates|date[ _]range[^{}|]*)\s*\|` +
+		`([^{}]*)\}\}`)
 	// isoDateTplRe matches {{date|1965-8-6}}, an ISO date with optional day.
 	isoDateTplRe = regexp.MustCompile(`(?i)\{\{\s*date\s*\|\s*(-?\d{3,4})-(\d{1,2})(?:-(\d{1,2}))?[^{}]*\}\}`)
-	// namedRangeTplRe matches a template whose dates are named parameters,
-	// {{Date range and age...|year1=1949|month1=1|day1=30|year2=...}}.
-	namedRangeTplRe = regexp.MustCompile(`(?i)\{\{[^{}|]*\|[^{}]*\byear1\s*=[^{}]*\}\}`)
+	// namedRangeTplRe matches a date range template whose dates are named
+	// parameters, {{Date range and age...|year1=1949|month1=1|day1=30|year2=...}}.
+	// {{Age in...}} templates are left out: they repeat dates already in prose.
+	namedRangeTplRe = regexp.MustCompile(`(?i)\{\{\s*date[ _]range[^{}|]*\|[^{}]*\byear1\s*=[^{}]*\}\}`)
 )
 
 // isoDateTemplate renders an {{date|Y-M-D}} match as prose.
@@ -339,6 +342,9 @@ func infoboxDateProse(raw string) (string, DateRange, int, bool) {
 	s := dashTplRe.ReplaceAllString(raw, " – ")
 	s = startEndDatesTplRe.ReplaceAllStringFunc(s, func(m string) string {
 		nums := templateNumbers(startEndDatesTplRe.FindStringSubmatch(m)[1])
+		if len(nums) == 0 {
+			return m
+		}
 		if len(nums) < 6 {
 			return dateFromParts(nums)
 		}
@@ -353,6 +359,7 @@ func infoboxDateProse(raw string) (string, DateRange, int, bool) {
 	})
 	s = isoDateTplRe.ReplaceAllStringFunc(s, isoDateTemplate)
 	s = namedRangeTplRe.ReplaceAllStringFunc(s, namedRangeTemplate)
+	s = unwrapDateTemplates(s)
 	s = cleanWikitext(s)
 	s = strings.TrimRight(strings.ReplaceAll(openTemplateRe.ReplaceAllString(s, ""), "}}", ""), " ,;)(")
 	if strings.Count(s, "(") < strings.Count(s, ")") {
@@ -371,6 +378,46 @@ func infoboxDateProse(raw string) (string, DateRange, int, bool) {
 		dr.Start = fmt.Sprintf("%04d-01-01", years[0])
 	}
 	return s, dr, years[0], true
+}
+
+// dateListTemplates lists the list templates an infobox date wraps its items in.
+var dateListTemplates = map[string]bool{
+	"ubl": true, "ublist": true, "unbulleted list": true, "plainlist": true, "plain list": true,
+	"hlist": true, "flatlist": true, "flat list": true,
+}
+
+// listNoteRe matches a parenthetical with no digit in a date list item, such as
+// "(first)", which labels the item rather than dating it.
+var listNoteRe = regexp.MustCompile(`\s*\([^()0-9]*\)`)
+
+// unwrapDateTemplates replaces the templates that wrap an infobox date's text
+// with that text. {{OldStyleDate|26–28 August|1914|13–15 August}} becomes "26–28
+// August 1914", list templates join their items with a dash, and formatting
+// wrappers keep their text. Other templates stay for cleanWikitext to drop.
+func unwrapDateTemplates(s string) string {
+	return dropTemplatesWith(s, func(span string) string {
+		parts := splitTemplateParams(span[2 : len(span)-2])
+		name := strings.ToLower(strings.TrimSpace(parts[0]))
+		pos := positionalParams(parts[1:])
+		switch {
+		case name == "oldstyledate" && len(pos) >= 2:
+			return unwrapDateTemplates(pos[0]) + " " + pos[1]
+		case dateListTemplates[name]:
+			var items []string
+			for _, p := range pos {
+				for _, line := range strings.Split(p, "\n") {
+					line = listNoteRe.ReplaceAllString(strings.TrimLeft(strings.TrimSpace(line), "*#"), "")
+					if line = strings.TrimSpace(line); line != "" {
+						items = append(items, unwrapDateTemplates(line))
+					}
+				}
+			}
+			return strings.Join(items, " – ")
+		case bfUnwrapTemplates[name] && len(pos) > 0:
+			return unwrapDateTemplates(pos[len(pos)-1])
+		}
+		return span
+	})
 }
 
 // infoboxProse returns the display prose of a raw infobox date, or "".

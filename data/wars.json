@@ -259,10 +259,17 @@
     "aftermath": "In 1768, several of the Thirteen Colonies purchased the \"Iroquois claim\" to the Ohio and Illinois Country and created the Indiana Land Company to hold the claim to all of the Northwest. It maintained a claim to the region using the Iroquois right of conquest until the company was dissolved in 1798 by the United States Supreme Court.",
     "keyTerms": "Great Peace of Montreal (August 4, 1701)",
     "humanDeaths": 20000,
-    "startYear": 1640,
+    "startYear": 1609,
     "endYear": 1701,
     "parent": "",
-    "outcome": "Iroquois Confederacy victory; Confederacy dominates the Great Lakes fur trade by 1701."
+    "outcome": "Iroquois Confederacy victory; Confederacy dominates the Great Lakes fur trade by 1701.",
+    "sources": [
+      {
+        "title": "Beaver Wars",
+        "revision": 1382412899,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Berber Revolt": {
     "outcome": "See Aftermath",
@@ -357,11 +364,18 @@
   "Byzantine–Bulgarian wars": {
     "keyTerms": "Battle of Kleidion (July 29, 1014); Conquest of Bulgaria (1018)",
     "humanDeaths": 200000,
-    "startYear": 680,
-    "endYear": 1018,
+    "startYear": 499,
+    "endYear": 1355,
     "parent": "",
-    "outcome": "Centuries of intermittent war ended with Basil II's conquest of Bulgaria (1018).",
-    "aftermath": "Three and a half centuries of war that ended with Bulgaria absorbed into the Byzantine Empire for 168 years before reasserting independence in 1186. Basil II's sobriquet Bulgaroktonos (Bulgar-Slayer) commemorates his 1014 victory at Kleidion and its bloody aftermath."
+    "outcome": "Intermittent wars from 499 to 1355. Basil II conquered the First Bulgarian Empire in 1018, and the Second Bulgarian Empire, founded in the revolt of 1185, fought Byzantium until 1355.",
+    "aftermath": "Bulgaria was absorbed into the Byzantine Empire from 1018 until the revolt of 1185 founded the Second Bulgarian Empire, which fought Byzantium until 1355.",
+    "sources": [
+      {
+        "title": "Byzantine–Bulgarian wars",
+        "revision": 1378572827,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Byzantine–Ottoman wars": {
     "outcome": "Ottoman victory",
@@ -5989,13 +6003,19 @@
     "keyTerms": "Peace of Cateau-Cambrésis (April 3, 1559)"
   },
   "Third Anglo-Maratha War": {
-    "humanDeaths": 30000,
-    "startYear": 1775,
-    "endYear": 1782,
+    "startYear": 1817,
+    "endYear": 1819,
     "parent": "",
-    "outcome": "Inconclusive; Treaty of Salbai (1782) restores status quo ante bellum.",
-    "aftermath": "Seven years of war that confirmed Maratha sovereignty against East India Company encroachment but exhausted both sides. The treaty held until the Second Anglo-Maratha War a generation later.",
-    "keyTerms": "Treaty of Salbai (May 17, 1782)"
+    "outcome": "British victory; the East India Company took control of all Maratha territories.",
+    "aftermath": "The final conflict between the East India Company and the Maratha Empire broke up the Maratha Empire, ended Maratha power and left the Company in control of most of India.",
+    "keyTerms": "Peshwa Baji Rao II; Pindaris; Treaty of Bassein",
+    "sources": [
+      {
+        "title": "Third Anglo-Maratha War",
+        "revision": 1370750299,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Byzantine–Serbian wars": {
     "humanDeaths": 500000,
@@ -6078,12 +6098,18 @@
     "humanDeaths": 100000
   },
   "Barcid conquest of Hispania": {
-    "outcome": "Roman victory; Hispania fully pacified under Augustus by 19 BC.",
-    "aftermath": "Two centuries of conquest from the Second Punic War to the Cantabrian Wars (19 BC). Hispania became a wealthy core province providing emperors (Trajan, Hadrian, Theodosius), grain, gold, and the philosopher Seneca.",
-    "keyTerms": "Numantine War (143-133 BC); Cantabrian Wars (29-19 BC)",
-    "startYear": -218,
-    "endYear": -19,
-    "humanDeaths": 300000
+    "outcome": "Carthaginian victory; expansion of Carthaginian Iberia.",
+    "aftermath": "Under the Barcid family, Carthage expanded its possessions on the Iberian Peninsula after the First Punic War and the Mercenary War, building the economic and military base it needed to confront Rome.",
+    "keyTerms": "Hamilcar Barca; Carthaginian Iberia; Treaty of Lutatius",
+    "startYear": -237,
+    "endYear": -219,
+    "sources": [
+      {
+        "title": "Barcid conquest of Hispania",
+        "revision": 1383367502,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "First Anglo-Maratha War": {
     "outcome": "Inconclusive; Treaty of Salbai (1782) restores status quo ante bellum.",
@@ -6421,12 +6447,18 @@
     "humanDeaths": 5000
   },
   "War of the Straits": {
-    "outcome": "Venetian victory; Treaty of Turin (1381).",
-    "aftermath": "A four-year war between Venice and Genoa for control of the Adriatic-Aegean trade routes. The Treaty of Turin confirmed Venice's long-term naval ascendancy in the eastern Mediterranean.",
-    "keyTerms": "Treaty of Turin (August 8, 1381)",
-    "startYear": 1378,
-    "endYear": 1381,
-    "humanDeaths": 10000
+    "outcome": "Inconclusive; peace signed on 1 June 1355 through the mediation of the Visconti.",
+    "aftermath": "The third Genoese-Venetian war, fought over access to the Aegean and Black Seas, the Bosporus and the Genoese seizure of Chios and Phocaea, ended with prisoners released and all claims since 1299 sent to arbitration.",
+    "keyTerms": "Third Genoese-Venetian War; Caffa; Bosporus; Chios",
+    "startYear": 1350,
+    "endYear": 1355,
+    "sources": [
+      {
+        "title": "War of the Straits",
+        "revision": 1370750213,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Tunisian–Algerian War (1705)": {
     "outcome": "Hussein I (Husainid dynasty) victory; consolidation of independent Beylik of Tunis.",

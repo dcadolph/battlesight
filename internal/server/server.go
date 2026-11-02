@@ -69,19 +69,18 @@ func Run(cfg Config) error {
 
 	// Cleanse: strip wiki/HTML markup leftovers, back-fill missing date
 	// strings, align off-by-one BC years to the prose date, recompute era,
-	// canonicalise war-name spelling variants, and drop duplicate Wikipedia
-	// rows. Idempotent. Drives the audit error count toward zero on every
-	// start.
+	// canonicalise war-name spelling variants, drop rows Wikidata says are
+	// not battles, and merge duplicate Wikipedia rows. Idempotent. Drives the
+	// audit error count toward zero on every start.
 	if rep, err := importer.Cleanse(context.Background(), database); err != nil {
 		return fmt.Errorf("cleanse data: %w", err)
 	} else if rep.Total() > 0 {
 		log.Printf("cleansed data: %d battle text, %d sides, %d missing-date backfilled, %d dates normalized, "+
 			"%d reconciled with Wikidata, %d years aligned, %d years derived, %d eras recomputed, "+
-			"%d blank sides dropped, %d war-name variants merged, %d duplicates removed",
+			"%d blank sides dropped, %d war-name variants merged, %d non-battles dropped, %d duplicates removed",
 			rep.BattleTextFixed, rep.SideTextFixed, rep.MissingDatesBackfilled, rep.DateStringsNormalised,
 			rep.SourceDatesReconciled, rep.YearsAligned, rep.YearsDerived, rep.ErasRecomputed,
-			rep.BlankSidesDropped, rep.WarNamesCanonicalised,
-			rep.DuplicatesRemoved)
+			rep.BlankSidesDropped, rep.WarNamesCanonicalised, rep.NonBattlesDropped, rep.DuplicatesRemoved)
 	}
 
 	replays := battles.NewReplays()

@@ -32,6 +32,28 @@ pointers for completeness.
 - **Dates.** ISO placeholders like `YYYY-01-01` or `YYYY-12-31` are
   treated as year-only. The UI shows just the year in that case.
 
+## What gets removed
+
+A Wikidata record is dropped at server start when Wikidata's own class
+for the item says it is not a military event. That covers any class
+naming myth, legend, folklore, fiction, a deity, a literary work, a film,
+a novel, a video game, a Bible story, a counterfactual event, a concept,
+a religious belief or a disambiguation page, and any item whose classes
+name no military event at all (battle, siege, raid, campaign, operation,
+massacre, armed conflict and their kin). Camlann, Clavijo and the Battle
+of Salvore are examples. Curated and hand-checked records are never
+dropped. An item with no class on Wikidata is kept.
+
+Two records are merged when they carry the same Wikipedia title. A
+hand-checked record wins, then the one with more sides, then the longer
+summary, and the other record's name becomes a search alias. Titles that
+only redirect to one article are not merged, because the target is often
+a parent article that covers several distinct battles (Siversk, Kreminna
+and Lyman all redirect to the Battle of Donbas). Records with similar
+names in the same place and year are not merged when Wikidata or
+Wikipedia treats them as separate events, so the First and Second Battles
+of Gaza stay apart.
+
 ## Spotting an indexed record
 
 If the battle panel says "indexed" in the tier badge, the only fields

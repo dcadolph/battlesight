@@ -49,6 +49,8 @@ type AuditRow struct {
 	Verified bool
 	// WikipediaTitle is the English Wikipedia article title.
 	WikipediaTitle string
+	// SourceID is the Wikidata Q-id, empty for curated rows.
+	SourceID string
 	// WikidataDate is the Wikidata P585 or P580 date, empty when unknown.
 	WikidataDate string
 	// WikidataPrecision is the Wikidata precision of WikidataDate, 0 when unknown.
@@ -95,6 +97,9 @@ type AuditInput struct {
 	ReplayIDs []string
 	// ReferenceIDs holds the references.json keys. Nil skips the reference-orphan class.
 	ReferenceIDs []string
+	// CanonicalTitles maps a stored Wikipedia title to the article it resolves
+	// to, "" for a missing page. Titles absent from the map are taken as canonical.
+	CanonicalTitles map[string]string
 }
 
 // MismatchClass is one kind of data defect with the rows that show it.
@@ -192,7 +197,7 @@ var validEras = map[string]bool{
 // nameStopWords are tokens too common to signal that two names are the same event.
 var nameStopWords = map[string]bool{
 	"battle": true, "of": true, "the": true, "siege": true, "and": true, "at": true, "in": true,
-	"first": true, "second": true, "third": true, "on": true, "de": true, "la": true, "le": true,
+	"on": true, "de": true, "la": true, "le": true,
 	"capture": true, "attack": true, "action": true, "raid": true, "clashes": true, "offensive": true,
 }
 
@@ -354,14 +359,23 @@ func Mismatches(in AuditInput) []MismatchClass {
 		"no references file loaded", in.ReferenceIDs, ids))
 
 	dupTitle := duplicateTitleRows(in.Rows)
-	add("dup-wikipedia-title", "two rows share one Wikipedia article", func(r *AuditRow) bool {
+	add("dup-wikipedia-title", "two rows share one Wikipedia title", func(r *AuditRow) bool {
 		return dupTitle[r.ID]
 	})
-	near := nearDuplicateRows(in.Rows)
-	add("near-duplicate", "same year, within 2 km, overlapping name", func(r *AuditRow) bool { return near[r.ID] })
+	add("title-redirect", "the stored Wikipedia title redirects to another article", func(r *AuditRow) bool {
+		c, ok := in.CanonicalTitles[r.WikipediaTitle]
+		return r.WikipediaTitle != "" && ok && c != "" && c != strings.TrimSpace(r.WikipediaTitle)
+	})
+	add("title-missing", "the stored Wikipedia title names no article", func(r *AuditRow) bool {
+		c, ok := in.CanonicalTitles[r.WikipediaTitle]
+		return r.WikipediaTitle != "" && ok && c == ""
+	})
+	near := nearDuplicateRows(in.Rows, in.CanonicalTitles)
+	add("near-duplicate", "same year, within 2 km, same name, no source keeps them apart",
+		func(r *AuditRow) bool { return near[r.ID] })
 	if in.HasInstanceOf {
 		add("non-battle", "Wikidata says the item is not a military event", func(r *AuditRow) bool {
-			return r.Source == "wikidata" && isNonBattleClass(r.InstanceOf)
+			return r.Source == "wikidata" && !r.Verified && IsNonBattle(r.InstanceOf)
 		})
 	} else {
 		na("non-battle", "Wikidata says the item is not a military event", "no wikidata_instance_of column yet")
@@ -433,21 +447,6 @@ func LoadJSONKeys(path string) ([]string, error) {
 	}
 	sort.Strings(keys)
 	return keys, nil
-}
-
-// nonBattleClasses are P31 label fragments that mark an item as not a battle.
-var nonBattleClasses = []string{"mytholog", "fiction", "legend", "deity", "theomachy", "literary", "film",
-	"video game", "novel", "folklore", "concept", "religious belief"}
-
-// isNonBattleClass reports whether a pipe-joined P31 label list names a non-military class.
-func isNonBattleClass(instanceOf string) bool {
-	s := strings.ToLower(instanceOf)
-	for _, c := range nonBattleClasses {
-		if strings.Contains(s, c) {
-			return true
-		}
-	}
-	return false
 }
 
 // yearDisagreesWithWikidata reports whether a wikidata row's year contradicts its
@@ -556,12 +555,22 @@ func warVariantRows(rows []AuditRow) map[string]bool {
 	return out
 }
 
-// duplicateTitleRows marks rows that share a Wikipedia title with another row.
+// canonicalTitle returns the article a stored title resolves to, "" for none.
+func canonicalTitle(title string, canon map[string]string) string {
+	t := strings.TrimSpace(title)
+	if c, ok := canon[t]; ok {
+		return c
+	}
+	return t
+}
+
+// duplicateTitleRows marks rows that share a stored Wikipedia title. Titles that
+// redirect to one article are not compared, since a redirect target is often a
+// parent article covering several distinct battles.
 func duplicateTitleRows(rows []AuditRow) map[string]bool {
 	by := map[string][]string{}
 	for _, r := range rows {
-		t := strings.TrimSpace(r.WikipediaTitle)
-		if t != "" {
+		if t := strings.TrimSpace(r.WikipediaTitle); t != "" {
 			by[t] = append(by[t], r.ID)
 		}
 	}
@@ -577,8 +586,11 @@ func duplicateTitleRows(rows []AuditRow) map[string]bool {
 }
 
 // nearDuplicateRows marks pairs in the same year within 2 km whose names share
-// at least half their significant tokens.
-func nearDuplicateRows(rows []AuditRow) map[string]bool {
+// more than 80 percent of their significant tokens, ordinals and numbers
+// included, and that no source keeps apart. Two Wikidata items are two events
+// by Wikidata's own account, and two rows on two different articles are two
+// events by Wikipedia's. Rows on the same stored title belong to dup-wikipedia-title.
+func nearDuplicateRows(rows []AuditRow, canon map[string]string) map[string]bool {
 	byYear := map[int][]int{}
 	for i, r := range rows {
 		if r.Year == 0 || (r.Lat == 0 && r.Lng == 0) {
@@ -595,14 +607,26 @@ func nearDuplicateRows(rows []AuditRow) map[string]bool {
 				if haversineKM(ra.Lat, ra.Lng, rb.Lat, rb.Lng) > 2 {
 					continue
 				}
-				if nameOverlap(ra.Name, rb.Name) >= 0.5 {
-					out[ra.ID] = true
-					out[rb.ID] = true
+				if keptApart(ra, rb, canon) || nameOverlap(ra.Name, rb.Name) <= 0.8 {
+					continue
 				}
+				out[ra.ID] = true
+				out[rb.ID] = true
 			}
 		}
 	}
 	return out
+}
+
+// keptApart reports whether a source separates two rows: distinct Wikidata
+// items, or a Wikipedia title that names an article on both. Two different
+// titles are two events, and one shared title is the dup-wikipedia-title class.
+func keptApart(a, b *AuditRow, canon map[string]string) bool {
+	if a.SourceID != "" && b.SourceID != "" && a.SourceID != b.SourceID {
+		return true
+	}
+	ta, tb := canonicalTitle(a.WikipediaTitle, canon), canonicalTitle(b.WikipediaTitle, canon)
+	return ta != "" && tb != ""
 }
 
 // nameOverlap returns the Jaccard overlap of the significant tokens of two names.
@@ -621,26 +645,16 @@ func nameOverlap(a, b string) float64 {
 	return float64(inter) / float64(union)
 }
 
-// nameTokens lower-cases a name and drops stop words and bare numbers.
+// nameTokens lower-cases a name and drops stop words.
 func nameTokens(s string) map[string]bool {
 	out := map[string]bool{}
 	for _, t := range reNameToken.FindAllString(strings.ToLower(s), -1) {
-		if nameStopWords[t] || isDigits(t) {
+		if nameStopWords[t] {
 			continue
 		}
 		out[t] = true
 	}
 	return out
-}
-
-// isDigits reports whether s is all ASCII digits.
-func isDigits(s string) bool {
-	for _, c := range s {
-		if c < '0' || c > '9' {
-			return false
-		}
-	}
-	return s != ""
 }
 
 // haversineKM returns the great-circle distance between two points.
@@ -713,7 +727,7 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 		inst = "wikidata_instance_of"
 	}
 	q := `SELECT id, name, year, date, date_start, date_end, lat, lng, era, war, battle_type, victor,
-		summary, source, verified, wikipedia_title, ` + wdDate + `, ` + wdPrec + `, ` + inst + `, ` + ibDate +
+		summary, source, verified, wikipedia_title, source_id, ` + wdDate + `, ` + wdPrec + `, ` + inst + `, ` + ibDate +
 		`, ` + ibChecked + `,
 		CASE WHEN ` + documentedSQL + ` THEN 1 ELSE 0 END FROM battles`
 	rows, err := db.QueryContext(ctx, q)
@@ -727,7 +741,7 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 		var ibCheckedAt string
 		if err := rows.Scan(&r.ID, &r.Name, &r.Year, &r.Date, &r.DateStart, &r.DateEnd, &r.Lat, &r.Lng,
 			&r.Era, &r.War, &r.BattleType, &r.Victor, &r.Summary, &r.Source, &verified, &r.WikipediaTitle,
-			&r.WikidataDate, &r.WikidataPrecision, &r.InstanceOf, &r.InfoboxDate, &ibCheckedAt,
+			&r.SourceID, &r.WikidataDate, &r.WikidataPrecision, &r.InstanceOf, &r.InfoboxDate, &ibCheckedAt,
 			&documented); err != nil {
 			return in, fmt.Errorf("scan audit row: %w", err)
 		}
@@ -756,8 +770,27 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 		return in, fmt.Errorf("iterate audit sides: %w", err)
 	}
 
+	in.CanonicalTitles = cachedCanonicalTitles(in.Rows)
 	in.YearEnrichTitles, err = yearEnrichTitles(yearEnrichDir)
 	return in, err
+}
+
+// cachedCanonicalTitles reads the -resolve-titles cache for every stored title.
+// Titles never resolved are left out and count as canonical.
+func cachedCanonicalTitles(rows []AuditRow) map[string]string {
+	out := map[string]string{}
+	for _, r := range rows {
+		if r.WikipediaTitle == "" {
+			continue
+		}
+		if _, done := out[r.WikipediaTitle]; done {
+			continue
+		}
+		if c, ok := wikiCacheGet(titleCanonicalNamespace, r.WikipediaTitle); ok {
+			out[r.WikipediaTitle] = c
+		}
+	}
+	return out
 }
 
 // yearEnrichTitles lists the article titles cached by the retired year-enrich

@@ -24,6 +24,8 @@ func main() {
 		"fill the wikidata_* and infobox_* columns from Wikidata and the article for rows not yet checked")
 	rawDumpPath := flag.String("wikidata-dump", "data/wikidata_battles_raw.json",
 		"SPARQL dump that -wikidata-dates compares live years against")
+	resolveTitles := flag.Bool("resolve-titles", false,
+		"resolve every Wikipedia title through redirects and report missing and redirected titles")
 	enrich := flag.Bool("enrich", false, "fetch Wikipedia summaries for battles missing them")
 	infobox := flag.Bool("infobox", false, "fetch Wikipedia infobox data (sides, commanders, casualties)")
 	significance := flag.Bool("significance", false, "fetch Wikipedia aftermath/legacy sections for battles missing significance")
@@ -66,6 +68,7 @@ func main() {
 	if *all {
 		*wikidata = true
 		*wikidataDates = true
+		*resolveTitles = true
 		*enrich = true
 		*infobox = true
 		*significance = true
@@ -76,10 +79,10 @@ func main() {
 		}
 	}
 
-	if *jsonPath == "" && !*wikidata && !*wikidataDates && !*enrich && !*infobox && !*significance && !*references &&
+	if *jsonPath == "" && !*wikidata && !*wikidataDates && !*resolveTitles && !*enrich && !*infobox && !*significance && !*references &&
 		!*warsEnrich && !*geocodeMissing && !*geocodeDryRun && !*infoboxBackfill && !*infoboxDryRun &&
 		*mergeReplays == "" {
-		log.Fatal("at least one action required: -json, -wikidata, -wikidata-dates, -enrich, -infobox, -significance, " +
+		log.Fatal("at least one action required: -json, -wikidata, -wikidata-dates, -resolve-titles, -enrich, -infobox, -significance, " +
 			"-references, -wars, -geocode-missing, -geocode-dry-run, -infobox-backfill, " +
 			"-infobox-dry-run, -merge-replays, -validate, or -all")
 	}
@@ -132,6 +135,22 @@ func main() {
 			log.Fatalf("infobox dates failed: %v", err)
 		}
 		log.Printf("infobox dates: read %d rows whose year disagrees with Wikidata", n)
+	}
+
+	if *resolveTitles {
+		log.Println("resolving Wikipedia titles through redirects...")
+		rep, err := importer.ResolveWikipediaTitles(ctx, database)
+		if err != nil {
+			log.Fatalf("resolve titles failed: %v", err)
+		}
+		for _, m := range rep.Missing {
+			log.Printf("resolve-titles: no article: %s", m)
+		}
+		for _, r := range rep.Redirects {
+			log.Printf("resolve-titles: redirects: %s", r)
+		}
+		log.Printf("resolve titles: %d titles, %d fetched, %d missing, %d redirect", rep.Titles, rep.Fetched,
+			len(rep.Missing), len(rep.Redirects))
 	}
 
 	if *enrich {

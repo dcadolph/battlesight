@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"regexp"
 	"slices"
 	"sort"
@@ -73,6 +74,11 @@ func Cleanse(ctx context.Context, db *sql.DB) (CleanseReport, error) {
 		return rep, err
 	} else {
 		rep.WarNamesCanonicalised = n
+	}
+	if n, err := dropNonBattles(ctx, db); err != nil {
+		return rep, err
+	} else {
+		rep.NonBattlesDropped = n
 	}
 	if n, err := deduplicateWikipedia(ctx, db); err != nil {
 		return rep, err
@@ -267,6 +273,7 @@ type CleanseReport struct {
 	ErasRecomputed         int
 	BlankSidesDropped      int
 	WarNamesCanonicalised  int
+	NonBattlesDropped      int
 	DuplicatesRemoved      int
 	CoordsOverridden       int
 	RichSearchRowsIndexed  int
@@ -278,7 +285,7 @@ func (r CleanseReport) Total() int {
 	return r.BattleTextFixed + r.SideTextFixed + r.MissingDatesBackfilled +
 		r.DateStringsNormalised + r.SourceDatesReconciled + r.YearsAligned + r.YearsDerived +
 		r.ErasRecomputed + r.BlankSidesDropped + r.WarNamesCanonicalised +
-		r.DuplicatesRemoved + r.CoordsOverridden + r.RichSearchRowsIndexed
+		r.NonBattlesDropped + r.DuplicatesRemoved + r.CoordsOverridden + r.RichSearchRowsIndexed
 }
 
 // --- Text normalisation -----------------------------------------------------
@@ -1322,22 +1329,22 @@ func canonWarKey(w string) string {
 // foreign-key cascade.
 func deduplicateWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 	rows, err := db.QueryContext(ctx, `
-		SELECT id, wikipedia_title, verified, COALESCE(LENGTH(summary), 0),
+		SELECT id, name, wikipedia_title, verified, COALESCE(LENGTH(summary), 0),
 		       (SELECT COUNT(*) FROM battle_sides s WHERE s.battle_id = battles.id)
 		FROM battles WHERE wikipedia_title != ''`)
 	if err != nil {
 		return 0, fmt.Errorf("scan duplicates: %w", err)
 	}
 	type row struct {
-		id, title string
-		verified  int
-		summary   int
-		sides     int
+		id, name, title string
+		verified        int
+		summary         int
+		sides           int
 	}
 	groups := make(map[string][]row)
 	for rows.Next() {
 		var r row
-		if err := rows.Scan(&r.id, &r.title, &r.verified, &r.summary, &r.sides); err != nil {
+		if err := rows.Scan(&r.id, &r.name, &r.title, &r.verified, &r.summary, &r.sides); err != nil {
 			rows.Close()
 			return 0, fmt.Errorf("scan duplicate row: %w", err)
 		}
@@ -1375,7 +1382,12 @@ func deduplicateWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 			}
 			return a.id < b.id
 		})
+		keep := dupes[0]
 		for _, d := range dupes[1:] {
+			if err := carryAlias(ctx, tx, keep.id, keep.name, d.name); err != nil {
+				return removed, err
+			}
+			log.Printf("dedupe: merged %s (%s) into %s (%s): %s", d.id, d.name, keep.id, keep.name, d.title)
 			if _, err := tx.ExecContext(ctx, `DELETE FROM battle_sides WHERE battle_id = ?`, d.id); err != nil {
 				return removed, fmt.Errorf("delete sides for %s: %w", d.id, err)
 			}
@@ -1392,4 +1404,26 @@ func deduplicateWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 		return 0, fmt.Errorf("commit dedupe: %w", err)
 	}
 	return removed, nil
+}
+
+// carryAlias records a merged row's name as an alias of the kept row, unless it
+// matches the kept name or an alias the kept row already has.
+func carryAlias(ctx context.Context, tx *sql.Tx, keepID, keepName, name string) error {
+	if name == "" || strings.EqualFold(name, keepName) {
+		return nil
+	}
+	var have int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM battle_aliases WHERE battle_id = ? AND name = ? COLLATE NOCASE`,
+		keepID, name).Scan(&have); err != nil {
+		return fmt.Errorf("check alias for %s: %w", keepID, err)
+	}
+	if have > 0 {
+		return nil
+	}
+	if _, err := tx.ExecContext(ctx, `INSERT INTO battle_aliases (battle_id, alias_index, name, by_text)
+		VALUES (?, (SELECT COALESCE(MAX(alias_index) + 1, 0) FROM battle_aliases WHERE battle_id = ?), ?, '')`,
+		keepID, keepID, name); err != nil {
+		return fmt.Errorf("carry alias to %s: %w", keepID, err)
+	}
+	return nil
 }

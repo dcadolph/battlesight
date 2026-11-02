@@ -190,11 +190,11 @@ func TestMismatches(t *testing.T) { //nolint:funlen // Test function.
 			r.WikipediaTitle, r.Lat, r.Lng = "Battle of x", 10, 10
 			in.Rows = append(in.Rows, r)
 		}, WantIDs: []string{"x", "y"},
-	}, { // Test 39: Same year, 1 km apart, same significant name.
+	}, { // Test 39: Same year, 1 km apart, same significant name, one row with no article.
 		Name: "near duplicate", Key: "near-duplicate",
 		In: func(in *AuditInput) {
 			r := testAuditRow("y")
-			r.Name, r.Lat = "Siege of x", r.Lat+0.009
+			r.Name, r.Lat, r.WikipediaTitle = "Siege of x", r.Lat+0.009, ""
 			in.Rows = append(in.Rows, r)
 		}, WantIDs: []string{"x", "y"},
 	}, { // Test 40: Same place and name in another year is not a duplicate.
@@ -297,6 +297,75 @@ func TestMismatches(t *testing.T) { //nolint:funlen // Test function.
 		Name: "year enrich infobox", Key: "year-enrich-unreconciled",
 		Mutate: func(r *AuditRow) { r.InfoboxChecked, r.InfoboxDate = true, "{{Start date|1863|7|1}}" },
 		In:     func(in *AuditInput) { in.YearEnrichTitles = []string{"battle of x"} }, WantIDs: nil,
+	}, { // Test 64: Two titles that redirect to one article are not duplicates.
+		Name: "redirect not dup", Key: "dup-wikipedia-title",
+		In: func(in *AuditInput) {
+			r := testAuditRow("y")
+			r.Lat, r.Lng = 10, 10
+			in.Rows = append(in.Rows, r)
+			in.CanonicalTitles = map[string]string{"Battle of y": "Battle of x"}
+		}, WantIDs: nil,
+	}, { // Test 65: A title with no article.
+		Name: "title missing", Key: "title-missing",
+		In:      func(in *AuditInput) { in.CanonicalTitles = map[string]string{"Battle of x": ""} },
+		WantIDs: []string{"x"},
+	}, { // Test 66: A title never resolved is not missing.
+		Name: "title unresolved", Key: "title-missing", WantIDs: nil,
+	}, { // Test 67: Two missing titles are not one article.
+		Name: "missing not dup", Key: "dup-wikipedia-title",
+		In: func(in *AuditInput) {
+			r := testAuditRow("y")
+			in.Rows = append(in.Rows, r)
+			in.CanonicalTitles = map[string]string{"Battle of x": "", "Battle of y": ""}
+		}, WantIDs: nil,
+	}, { // Test 68: First and Second of one place are not duplicates.
+		Name: "ordinals differ", Key: "near-duplicate",
+		Mutate: func(r *AuditRow) { r.Name, r.WikipediaTitle = "First Battle of Gaza", "" },
+		In: func(in *AuditInput) {
+			r := testAuditRow("y")
+			r.Name, r.WikipediaTitle = "Second Battle of Gaza", ""
+			in.Rows = append(in.Rows, r)
+		}, WantIDs: nil,
+	}, { // Test 69: Two Wikidata items are two events.
+		Name: "distinct items", Key: "near-duplicate",
+		Mutate: func(r *AuditRow) { r.WikipediaTitle, r.SourceID = "", "Q1" },
+		In: func(in *AuditInput) {
+			r := testAuditRow("y")
+			r.Name, r.WikipediaTitle, r.SourceID = "Siege of x", "", "Q2"
+			in.Rows = append(in.Rows, r)
+		}, WantIDs: nil,
+	}, { // Test 70: Two articles are two events.
+		Name: "distinct articles", Key: "near-duplicate",
+		In: func(in *AuditInput) {
+			r := testAuditRow("y")
+			r.Name = "Siege of x"
+			in.Rows = append(in.Rows, r)
+		}, WantIDs: nil,
+	}, { // Test 71: A curated row and a wikidata row whose curated title is missing.
+		Name: "curated twin", Key: "near-duplicate",
+		Mutate: func(r *AuditRow) { r.Source, r.Verified, r.SourceID = "curated", true, "" },
+		In: func(in *AuditInput) {
+			r := testAuditRow("y")
+			r.Name, r.SourceID = "Siege of x", "Q2"
+			in.Rows = append(in.Rows, r)
+			in.CanonicalTitles = map[string]string{"Battle of x": ""}
+		}, WantIDs: []string{"x", "y"},
+	}, { // Test 72: A verified row is never a non-battle.
+		Name: "verified legend", Key: "non-battle",
+		Mutate: func(r *AuditRow) { r.InstanceOf, r.Verified = "legendary battle", true },
+		In:     func(in *AuditInput) { in.HasInstanceOf = true }, WantIDs: nil,
+	}, { // Test 73: A title that redirects to another article.
+		Name: "title redirect", Key: "title-redirect",
+		In:      func(in *AuditInput) { in.CanonicalTitles = map[string]string{"Battle of x": "Battle of z"} },
+		WantIDs: []string{"x"},
+	}, { // Test 74: A title that resolves to itself is not a redirect.
+		Name: "title canonical", Key: "title-redirect",
+		In:      func(in *AuditInput) { in.CanonicalTitles = map[string]string{"Battle of x": "Battle of x"} },
+		WantIDs: nil,
+	}, { // Test 75: A missing title is not a redirect.
+		Name: "missing not redirect", Key: "title-redirect",
+		In:      func(in *AuditInput) { in.CanonicalTitles = map[string]string{"Battle of x": ""} },
+		WantIDs: nil,
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {

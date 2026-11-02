@@ -37,6 +37,7 @@ updates the rows it owns. You can run a single stage or chain them with
 | --- | --- | --- |
 | Wikidata pull&nbsp;&nbsp; | `-wikidata` | SPARQL query for all entities of type `military operation` with coordinates. Inserts/updates `battles` rows. |
 | Wikidata facts&nbsp;&nbsp; | `-wikidata-dates` | Reads each unchecked wikidata row's item with `wbgetentities` (50 per call, cached per Q-id under `wikidata-dates` and `wikidata-labels`) and stores the P585 or P580 date with its precision, the P582 end, the P607 conflict labels and the P31 class labels in the `wikidata_*` columns. Cleanse then reconciles year, date and war against them. Runs after `-wikidata` on its own. Resumable. |
+| Title redirects | `-resolve-titles` | Resolves every stored Wikipedia title through normalization and redirects (50 per call, cached under `title-canonical`) and lists the titles that redirect or name no article. It writes nothing to the database. `cmd/quality -mismatch` reads the cache for its `title-redirect` and `title-missing` classes. |
 | Wikipedia enrichment&nbsp;&nbsp; | `-enrich` | Fetches REST API summary for each battle. Populates `wikipedia_title`, `wikipedia_extract`. |
 | Infobox parse&nbsp;&nbsp; | `-infobox` | Pulls the Wikipedia article wikitext, parses the `{{Infobox military conflict}}` template, populates `sides`, `commanders`, `casualties`, `strength`. |
 | Significance&nbsp;&nbsp; | `-significance` | Mines the "Aftermath" / "Legacy" sections for prose. Stores in `significance` column. |
@@ -45,7 +46,7 @@ updates the rows it owns. You can run a single stage or chain them with
 | Curated JSON seed&nbsp;&nbsp; | `-json <path>` | Insert/update from a hand-curated JSON file. Used for editorial overrides. |
 | Validate only&nbsp;&nbsp; | `-validate` | Parses every curated file (phases.json, wars.json, territory snapshots) and exits non-zero on any error. CI uses this. |
 
-The `-all` flag chains: `-wikidata -wikidata-dates -enrich -infobox -significance -references -wars`.
+The `-all` flag chains: `-wikidata -wikidata-dates -resolve-titles -enrich -infobox -significance -references -wars`.
 
 ## Global Flags
 
@@ -64,6 +65,7 @@ The `-all` flag chains: `-wikidata -wikidata-dates -enrich -infobox -significanc
 | --- | --- | --- |
 | `-wikidata`&nbsp;&nbsp;&nbsp; | bool | Run the Wikidata SPARQL pull stage. |
 | `-wikidata-dates` | bool | Fill the `wikidata_*` columns for rows not yet checked. |
+| `-resolve-titles` | bool | Report Wikipedia titles that redirect or name no article. |
 | `-wikidata-dump` | string | SPARQL dump the stage compares live years against (default `data/wikidata_battles_raw.json`). |
 | `-enrich`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | bool | Run the Wikipedia summary enrichment stage. |
 | `-infobox`&nbsp;&nbsp;&nbsp;&nbsp; | bool | Run the Wikipedia infobox parse stage. |

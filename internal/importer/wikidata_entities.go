@@ -265,12 +265,17 @@ func wikidataFactsFor(ctx context.Context, api string, qids []string) (map[strin
 		if !f.Missing {
 			f = factsFromClaims(e.Claims)
 		}
-		if b, err := json.Marshal(f); err == nil {
-			wikiCacheSet(wikidataFactsNamespace, q, string(b))
-		}
+		cacheWikidataFacts(q, f)
 		out[q] = f
 	}
 	return out, nil
+}
+
+// cacheWikidataFacts stores one Q-id's facts under the wikidata-dates namespace.
+func cacheWikidataFacts(q string, f wikidataFacts) {
+	if b, err := json.Marshal(f); err == nil {
+		wikiCacheSet(wikidataFactsNamespace, q, string(b))
+	}
 }
 
 // wikidataLabelsFor returns the English label for each Q-id, cached per id.

@@ -55,8 +55,8 @@ func IsNonBattle(instanceOf string) bool {
 }
 
 // dropNonBattles deletes unverified wikidata rows whose Wikidata classes say
-// they are not battles, with their sides and references, in one transaction.
-// Every deleted row is logged by id and name.
+// they are not battles, with their sides and references, in one transaction,
+// and records each item as removed. Every deleted row is logged by id and name.
 func dropNonBattles(ctx context.Context, db *sql.DB) (int, error) {
 	rows, err := db.QueryContext(ctx, `SELECT id, name, wikidata_instance_of FROM battles
 		WHERE source = 'wikidata' AND verified = 0 AND wikidata_instance_of != ''`)
@@ -89,6 +89,9 @@ func dropNonBattles(ctx context.Context, db *sql.DB) (int, error) {
 	}
 	defer tx.Rollback()
 	for _, h := range hits {
+		if err := recordRemoved(ctx, tx, h.id, "non-battle: "+h.classes, ""); err != nil {
+			return 0, err
+		}
 		for _, q := range []string{`DELETE FROM battle_sides WHERE battle_id = ?`,
 			`DELETE FROM battle_references WHERE battle_id = ?`, `DELETE FROM battle_aliases WHERE battle_id = ?`,
 			`DELETE FROM battles WHERE id = ?`} {

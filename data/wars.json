@@ -1714,11 +1714,18 @@
   "Moro conflict": {
     "keyTerms": "Bangsamoro Organic Law (July 26, 2018)",
     "humanDeaths": 120000,
-    "startYear": 1969,
-    "endYear": 0,
+    "startYear": 1968,
+    "endYear": 2019,
     "parent": "",
-    "outcome": "Ongoing as of late 2025; 2014 Bangsamoro Framework Agreement and 2018 BOL produced the Bangsamoro Autonomous Region.",
-    "aftermath": "A half-century of insurgency in the southern Philippines by Moro National Liberation Front and Moro Islamic Liberation Front, complicated by Abu Sayyaf and ISIS-affiliated factions. 120,000 dead; the 2014 framework agreement produced the Bangsamoro autonomous region in 2019."
+    "outcome": "Peace agreements with the MNLF and the MILF. The Bangsamoro Autonomous Region in Muslim Mindanao was ratified on 22 February 2019, ending the conflict. An ISIL-aligned insurgency and sporadic clashes with remnant militias continue.",
+    "aftermath": "A half-century of insurgency in the southern Philippines by Moro National Liberation Front and Moro Islamic Liberation Front, complicated by Abu Sayyaf and ISIS-affiliated factions. 120,000 dead; the 2014 framework agreement produced the Bangsamoro autonomous region in 2019.",
+    "sources": [
+      {
+        "title": "Moro conflict",
+        "revision": 1383403893,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Moroccan–Portuguese conflicts": {
     "outcome": "| Combatant1 = border|16pxPortugal Portuguese Empire",
@@ -3923,10 +3930,10 @@
   "Syrian civil war": {
     "humanDeaths": 600000,
     "startYear": 2011,
-    "endYear": 0,
+    "endYear": 2024,
     "parent": "",
-    "outcome": "Ongoing as of late 2025; Assad regime fell in December 2024 to HTS-led opposition.",
-    "aftermath": "Fourteen years of war that began with anti-Assad protests in 2011 and ended with the lightning HTS offensive of late 2024. 600,000+ dead, half the population displaced, ISIS rise and fall, Russian/Iranian intervention, and the transformation of regional politics.",
+    "outcome": "Syrian opposition and allied victory. The Assad government fell when opposition forces entered Damascus on 8 December 2024.",
+    "aftermath": "Fourteen years of war that began with anti-Assad protests in 2011 and ended with the HTS-led offensive of November and December 2024. 600,000+ dead, half the population displaced, ISIS rise and fall, Russian/Iranian intervention, and the transformation of regional politics.",
     "keyTerms": "Fall of Damascus (December 8, 2024)",
     "notable": [
       "Russian intervention reverses the war (September 2015)",
@@ -3934,6 +3941,13 @@
       "Chemical weapons attacks on Khan Shaykhun (2017) and Douma (2018)",
       "Turkish operations against the SDF in northern Syria (Olive Branch 2018, Peace Spring 2019)",
       "Lightning opposition offensive captures Aleppo, Hama, Homs, Damascus (Nov-Dec 2024)"
+    ],
+    "sources": [
+      {
+        "title": "Syrian civil war",
+        "revision": 1382725076,
+        "fetched": "2026-11-02"
+      }
     ]
   },
   "Iraqi insurgency": {
@@ -3957,13 +3971,25 @@
   "Ukrainian Kursk Oblast Incursion": {
     "humanDeaths": 30000,
     "startYear": 2024,
-    "endYear": 0,
+    "endYear": 2025,
     "parent": "Russo-Ukrainian War",
-    "outcome": "Ongoing; Ukrainian forces hold a salient in Kursk Oblast through 2024-2025.",
-    "aftermath": "Ukraine's August 2024 cross-border offensive into Kursk Oblast — the first foreign army incursion into Russian sovereign territory since WWII. The operation diverted Russian forces from eastern Ukraine and put pressure on the Putin government domestically.",
+    "outcome": "Russian forces regained most of the territory Ukraine had taken in Kursk Oblast by March 2025 and followed with an offensive into neighboring Sumy Oblast.",
+    "aftermath": "Ukraine's cross-border offensive into Kursk Oblast began on 6 August 2024, the first foreign incursion into Russian territory since World War II. It drew Russian reserves, including North Korean troops deployed from December 2024, before a Russian counteroffensive pushed Ukrainian forces back across the border by March 2025.",
     "keyTerms": "Cross-border offensive (August 6, 2024)",
     "aliases": [
       "Kursk campaign"
+    ],
+    "sources": [
+      {
+        "title": "Kursk campaign",
+        "revision": 1382583935,
+        "fetched": "2026-11-02"
+      },
+      {
+        "title": "Casualties of the Russo-Ukrainian war",
+        "revision": 1383272485,
+        "fetched": "2026-11-02"
+      }
     ]
   },
   "Sudanese Civil War (2023–present)": {
@@ -4261,11 +4287,18 @@
   "Libyan Civil War": {
     "humanDeaths": 30000,
     "startYear": 2011,
-    "endYear": 0,
+    "endYear": 2011,
     "parent": "",
     "outcome": "Anti-Gaddafi victory under NATO air cover; Gaddafi killed October 20, 2011.",
-    "aftermath": "Seven months of war that ended Gaddafi's 42-year rule. UN Security Council Resolution 1973 authorised the no-fly zone. Post-war Libya descended into the Second Libyan Civil War by 2014.",
-    "keyTerms": "Death of Muammar Gaddafi (October 20, 2011)"
+    "aftermath": "Seven months of war that ended Gaddafi's 42-year rule. UN Security Council Resolution 1973 authorized the no-fly zone. Post-war Libya descended into the Second Libyan Civil War by 2014.",
+    "keyTerms": "Death of Muammar Gaddafi (October 20, 2011)",
+    "sources": [
+      {
+        "title": "Libyan civil war (2011)",
+        "revision": 1382711633,
+        "fetched": "2026-11-02"
+      }
+    ]
   },
   "Italian campaign of 1796–1797 in the War of the First Coalition": {
     "humanDeaths": 80000,

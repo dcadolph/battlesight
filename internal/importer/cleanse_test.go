@@ -120,7 +120,7 @@ func TestCleanseProse(t *testing.T) {
 	}, { // Test 10: A comment opener on an unprotected row blanks.
 		In: "<!--- Links", WantResult: "",
 	}, { // Test 11: Dotted abbreviations, initials and street names keep the next word lowercase.
-		In: "At 9 p.m. he left by Washington Blvd. and Bluff Rd. in town, as W. T. said. then it rained.",
+		In:         "At 9 p.m. he left by Washington Blvd. and Bluff Rd. in town, as W. T. said. then it rained.",
 		WantResult: "At 9 p.m. he left by Washington Blvd. and Bluff Rd. in town, as W. T. said. Then it rained.",
 	}, { // Test 12: A protected row is never blanked for leftover markup.
 		In: "<!--- Links", Protected: true, WantResult: "<!--- Links",

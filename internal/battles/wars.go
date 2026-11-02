@@ -159,6 +159,19 @@ type WarNarrative struct {
 	// Aliases lists the other spellings of this war's name. A battle or a
 	// territory snapshot keyed by an alias resolves to this entry.
 	Aliases []string `json:"aliases,omitempty"`
+	// Sources names the article revisions the narrative was written from.
+	// Required for a war that is still open or began in 2022 or later.
+	Sources []WarSource `json:"sources,omitempty"`
+}
+
+// WarSource is one Wikipedia article revision a war narrative was written from.
+type WarSource struct {
+	// Title is the English Wikipedia article title.
+	Title string `json:"title"`
+	// Revision is the article revision id read.
+	Revision int64 `json:"revision"`
+	// Fetched is the day the revision was read, as YYYY-MM-DD.
+	Fetched string `json:"fetched"`
 }
 
 // Wars is a thread-safe registry of curated war narratives loaded from a

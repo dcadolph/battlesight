@@ -1456,7 +1456,8 @@ func deduplicateWikipedia(ctx context.Context, db *sql.DB) (int, error) {
 				continue
 			}
 			log.Printf("dedupe: merged %s (%s) into %s (%s): %s", d.id, d.name, keep.id, keep.name, d.title)
-			if err := mergeRow(ctx, tx, keep.id, keep.name, d.id, d.name); err != nil {
+			err := mergeRow(ctx, tx, keep.id, keep.name, d.id, d.name, "same Wikipedia title")
+			if err != nil {
 				return removed, err
 			}
 			removed++

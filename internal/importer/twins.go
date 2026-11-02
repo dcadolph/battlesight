@@ -377,7 +377,8 @@ func mergeTwins(ctx context.Context, db *sql.DB, pairs []DuplicatePair,
 		}
 		log.Printf("twins: merged %s (%s) into %s (%s): %s, similarity %.2f",
 			p.Twin.ID, p.Twin.Name, p.Anchor.ID, p.Anchor.Name, p.Canonical, p.Similarity)
-		if err := mergeRow(ctx, tx, p.Anchor.ID, p.Anchor.Name, p.Twin.ID, p.Twin.Name); err != nil {
+		err := mergeRow(ctx, tx, p.Anchor.ID, p.Anchor.Name, p.Twin.ID, p.Twin.Name, "redirect twin")
+		if err != nil {
 			return 0, err
 		}
 		gone[p.Twin.ID] = true
@@ -425,7 +426,7 @@ func mergeAllowlisted(ctx context.Context, tx *sql.Tx, p DuplicatePair, gone map
 		return false, nil
 	}
 	log.Printf("twins: merged %s (%s) into %s (%s): allowlist", p.Merge, drop.name, p.Keep, keep.name)
-	if err := mergeRow(ctx, tx, p.Keep, keep.name, p.Merge, drop.name); err != nil {
+	if err := mergeRow(ctx, tx, p.Keep, keep.name, p.Merge, drop.name, "allowlist twin"); err != nil {
 		return false, err
 	}
 	gone[p.Merge] = true
@@ -434,8 +435,12 @@ func mergeAllowlisted(ctx context.Context, tx *sql.Tx, p DuplicatePair, gone map
 
 // mergeRow folds the row dropID into keepID: the dropped name and every alias
 // it carries become aliases of the kept row, its sides move over only when
-// the kept row has none, its references go, and the row is deleted.
-func mergeRow(ctx context.Context, tx *sql.Tx, keepID, keepName, dropID, dropName string) error {
+// the kept row has none, its references go, its Wikidata item is recorded as
+// removed for the reason given, and the row is deleted.
+func mergeRow(ctx context.Context, tx *sql.Tx, keepID, keepName, dropID, dropName, reason string) error {
+	if err := recordRemoved(ctx, tx, dropID, reason, keepID); err != nil {
+		return err
+	}
 	if err := carryAlias(ctx, tx, keepID, keepName, dropName, ""); err != nil {
 		return err
 	}

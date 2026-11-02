@@ -124,6 +124,11 @@ func TestDropNonBattles(t *testing.T) {
 			t.Errorf("%s kept %d rows of a dropped battle", table, left)
 		}
 	}
+	removed := queryStrings(t, conn, `SELECT qid || '|' || reason || '|' || kept_id FROM removed_items ORDER BY qid`)
+	wantRemoved := []string{"Q1|non-battle: legendary battle|", "Q2|non-battle: deity|"}
+	if diff := cmp.Diff(wantRemoved, removed); diff != "" {
+		t.Errorf("removed items mismatch (-want +got):\n%s", diff)
+	}
 	if n, err := dropNonBattles(ctx, conn); err != nil || n != 0 {
 		t.Errorf("second pass dropped %d rows, err %v, want 0 and nil", n, err)
 	}

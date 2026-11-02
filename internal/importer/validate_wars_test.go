@@ -68,6 +68,23 @@ func TestValidateWars(t *testing.T) {
 			"B war": {},
 		},
 		WantErrors: []string{"aliases"},
+	}, { // Test 8: An open war with no sources.
+		Wars:       map[string]battles.WarNarrative{"Open war": {StartYear: 2014}},
+		WantErrors: []string{"Open war.sources"},
+	}, { // Test 9: A war begun in 2025 with a source missing its revision.
+		Wars: map[string]battles.WarNarrative{"New war": {StartYear: 2025, EndYear: 2025,
+			Sources: []battles.WarSource{{Title: "New war", Fetched: "2026-11-02"}}}},
+		WantErrors: []string{"New war.sources"},
+	}, { // Test 10: A season in place of a month.
+		Wars: map[string]battles.WarNarrative{"Open war": {StartYear: 2014, Outcome: "Ongoing as of late 2025.",
+			Sources: []battles.WarSource{{Title: "Open war", Revision: 1, Fetched: "2026-11-02"}}}},
+		WantErrors: []string{"Open war.outcome"},
+	}, { // Test 11: A cited open war and a closed old war pass.
+		Wars: map[string]battles.WarNarrative{
+			"Open war": {StartYear: 2014, Outcome: "Ongoing as of November 2026.",
+				Sources: []battles.WarSource{{Title: "Open war", Revision: 1, Fetched: "2026-11-02"}}},
+			"Old war": {StartYear: 1939, EndYear: 1945, Outcome: "Ended in late 1945."},
+		},
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {

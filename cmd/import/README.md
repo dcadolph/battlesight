@@ -35,7 +35,8 @@ updates the rows it owns. You can run a single stage or chain them with
 
 | Stage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Flag | What it does |
 | --- | --- | --- |
-| Wikidata pull&nbsp;&nbsp; | `-wikidata` | SPARQL query for all entities of type `military operation` with coordinates. Inserts/updates `battles` rows. |
+| Wikidata pull&nbsp;&nbsp; | `-wikidata` | SPARQL query for all entities of type `military operation` with coordinates. Inserts/updates `battles` rows. Skips items in `removed_items`. |
+| Wikidata refresh | `-wikidata-refresh` | The repeatable catch-up. Runs the same four catalog queries as `-wikidata` and inserts every item no row carries yet, matched by Q-id and never by name: an item a cleanse pass removed on purpose (recorded in `removed_items` as a non-battle or the merged side of a duplicate) is skipped, an item whose English article is already some row's title is skipped, so is one named like a curated row or like a row within a year of it, and a taken slug gets the year (`409-bc` for a BC year) or the Q-id appended. Then re-reads the live Wikidata facts (50 per call, a cached entry younger than 12 hours counts as live) of every unverified wikidata row dated `-refresh-since` or later, or not dated at all. For those rows it stores the facts, renders the date columns again only when the Wikidata date or end moved, takes the item's article when the row has none or its title redirects there, and takes the item's point when the row sits at 0,0. A war-class P361 conflict is kept when P607 is empty. It never writes curated or verified rows, a victor, a summary, sides or a war: Cleanse files new and moved rows from the stored facts on the next start. All reads come before one write transaction, so a failed run writes nothing and exits 3. Refuses to change more than 2000 existing rows. `-refresh-dry-run` logs every planned change and writes nothing. Follow it with `-resolve-titles`, one server start, then `-coords-from-source`, `-enrich`, `-infobox`, `-significance` and `-references`. |
 | Wikidata facts&nbsp;&nbsp; | `-wikidata-dates` | Reads each unchecked wikidata row's item with `wbgetentities` (50 per call, cached per Q-id under `wikidata-dates` and `wikidata-labels`) and stores the P585 or P580 date with its precision, the P582 end, the P607 conflict labels and the P31 class labels in the `wikidata_*` columns. Cleanse then reconciles year, date and war against them. Runs after `-wikidata` on its own. Resumable. |
 | Wikidata wars | `-wikidata-wars` | For each war-less, unverified wikidata row, asks the query service for the item's P607 conflicts and P361 part-of targets (200 per query, cached per Q-id under `wikidata-wars` and `wikidata-war-targets`) and stores the war in `wikidata_conflict`: every P607 conflict, else each P361 target whose P31 class reads as a war, campaign, revolt or similar and never a battle, siege, list or region. Cleanse then files the row under that war, else under the first link of the infobox `partof`, and rewrites wars.json aliases to their canonical war. Runs after `-wikidata` on its own. Resumable. |
 | Coordinates&nbsp;&nbsp; | `-coords-from-source` | Checks every unverified wikidata row's point against Wikidata P625, then the English article's coordinate, then the other language articles' coordinates (P625 and sitelinks 50 Q-ids per call cached under `wikidata-coords`, article coordinates 50 titles per call cached under `geodata-<lang>`, one request per second). A point within 50 km of a source is kept and the source is recorded in `coord_source`. Otherwise the point moves to the source another source agrees with, or to the only source there is. Sources that disagree, or a lone source that is the stored point with a lost sign or swapped axes, leave the row alone and list it. Rows in the cleanse coordinate overrides are never read. Land rows whose Wikidata class is naval battle are retyped naval. Every move is logged with its old and new point. |
@@ -48,7 +49,7 @@ updates the rows it owns. You can run a single stage or chain them with
 | Curated JSON seed&nbsp;&nbsp; | `-json <path>` | Insert/update from a hand-curated JSON file. Used for editorial overrides. |
 | Validate only&nbsp;&nbsp; | `-validate` | Parses every curated file (phases.json, wars.json, territory snapshots) and exits non-zero on any error. CI uses this. |
 
-The `-all` flag chains: `-wikidata -wikidata-dates -wikidata-wars -coords-from-source -resolve-titles -enrich -infobox -significance -references -wars`.
+The `-all` flag chains: `-wikidata -wikidata-refresh -wikidata-dates -wikidata-wars -coords-from-source -resolve-titles -enrich -infobox -significance -references -wars`.
 
 ## Global Flags
 
@@ -66,6 +67,9 @@ The `-all` flag chains: `-wikidata -wikidata-dates -wikidata-wars -coords-from-s
 | Flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Type | Meaning |
 | --- | --- | --- |
 | `-wikidata`&nbsp;&nbsp;&nbsp; | bool | Run the Wikidata SPARQL pull stage. |
+| `-wikidata-refresh` | bool | Insert new Wikidata battles and re-read the facts of recent and undated rows. |
+| `-refresh-since` | int | First year whose rows `-wikidata-refresh` re-reads (default 2022). |
+| `-refresh-dry-run` | bool | With `-wikidata-refresh`, log every planned change and write nothing. |
 | `-wikidata-dates` | bool | Fill the `wikidata_*` columns for rows not yet checked. |
 | `-wikidata-wars` | bool | Name the war of war-less wikidata rows from Wikidata P607 or a war-class P361 target. |
 | `-coords-from-source` | bool | Check coordinates against Wikidata P625 and the Wikipedia articles. |

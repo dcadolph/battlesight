@@ -211,8 +211,9 @@ func openTwinDB(t *testing.T, seeds []twinSeed) *sql.DB {
 	for _, s := range seeds {
 		if _, err := conn.ExecContext(ctx, `INSERT INTO battles (id, name, year, date, date_start, date_end, lat, lng,
 			era, war, battle_type, victor, summary, significance, source, source_id, verified, wikipedia_title)
-			VALUES (?, ?, 1893, '1893', '1893-01-01', '1893-12-31', ?, 28, 'modern', '', 'land', '', '', '', ?, '', ?, ?)`,
-			s.ID, s.Name, s.Lat, s.Source, s.Verified, s.Title); err != nil {
+			VALUES (?, ?, 1893, '1893', '1893-01-01', '1893-12-31', ?, 28, 'modern', '', 'land', '', '', '', ?,
+			CASE ? WHEN 'wikidata' THEN 'Q' || ? ELSE '' END, ?, ?)`,
+			s.ID, s.Name, s.Lat, s.Source, s.Source, s.ID, s.Verified, s.Title); err != nil {
 			t.Fatalf("insert %s: %v", s.ID, err)
 		}
 		for i, n := range s.Sides {
@@ -274,6 +275,7 @@ func TestMergeTwins(t *testing.T) { //nolint:funlen // Test function.
 		WantIDs     []string
 		WantAliases []string
 		WantSides   []string
+		WantRemoved []string
 	}{{ // Test 0: A spelling twin merges, carrying its name and aliases with attribution.
 		Name: "bembezi",
 		Seeds: []twinSeed{
@@ -285,6 +287,7 @@ func TestMergeTwins(t *testing.T) { //nolint:funlen // Test function.
 		WantCount: 1, WantIDs: []string{"battle-of-bembezi"},
 		WantAliases: []string{"Battle of Bembesi|", "Bembesi River|Smith"},
 		WantSides:   []string{"British", "Ndebele"},
+		WantRemoved: []string{"Qbattle-of-bembesi|redirect twin|battle-of-bembezi"},
 	}, { // Test 1: Twins merge however far apart their stored points sit.
 		Name: "wad kaltabu",
 		Seeds: []twinSeed{
@@ -294,6 +297,7 @@ func TestMergeTwins(t *testing.T) { //nolint:funlen // Test function.
 				Source: "wikidata", Lat: -21},
 		},
 		WantCount: 1, WantIDs: []string{"battle-of-wad-kaltabu"}, WantAliases: []string{"Battle of Wadkaltabu|"},
+		WantRemoved: []string{"Qbattle-of-wadkaltabu|redirect twin|battle-of-wad-kaltabu"},
 	}, { // Test 2: An anchor with no sides receives the twin's sides.
 		Name: "sides move",
 		Seeds: []twinSeed{
@@ -302,7 +306,8 @@ func TestMergeTwins(t *testing.T) { //nolint:funlen // Test function.
 				Sides: []string{"Zulu", "Boers"}},
 		},
 		WantCount: 1, WantIDs: []string{"battle-of-maqongqo"}, WantAliases: []string{"Battle of Magango|"},
-		WantSides: []string{"Boers", "Zulu"},
+		WantSides:   []string{"Boers", "Zulu"},
+		WantRemoved: []string{"Qbattle-of-magango|redirect twin|battle-of-maqongqo"},
 	}, { // Test 3: An allowlist pair merges two alternate names the rule refuses.
 		Name: "allowlist",
 		Seeds: []twinSeed{
@@ -311,6 +316,7 @@ func TestMergeTwins(t *testing.T) { //nolint:funlen // Test function.
 		},
 		Pairs:     []DuplicatePair{{Keep: "battle-of-klushino", Merge: "battle-of-kruszyn"}},
 		WantCount: 1, WantIDs: []string{"battle-of-klushino"}, WantAliases: []string{"Battle of Kruszyn|"},
+		WantRemoved: []string{"Qbattle-of-kruszyn|allowlist twin|battle-of-klushino"},
 	}, { // Test 4: A verified row in an allowlist pair is never merged.
 		Name: "allowlist verified",
 		Seeds: []twinSeed{
@@ -359,6 +365,11 @@ func TestMergeTwins(t *testing.T) { //nolint:funlen // Test function.
 			if len(orphans) != 0 {
 				t.Errorf("merged rows left children behind: %v", orphans)
 			}
+			removed := queryStrings(t, conn, `SELECT qid || '|' || reason || '|' || kept_id FROM removed_items
+				ORDER BY qid`)
+			if diff := cmp.Diff(test.WantRemoved, removed, cmpopts.EquateEmpty()); diff != "" {
+				t.Errorf("removed items mismatch (-want +got):\n%s", diff)
+			}
 			if again, err := mergeTwins(ctx, conn, test.Pairs, staticCanon(canon)); err != nil || again != 0 {
 				t.Errorf("second pass merged %d, err %v, want 0 and nil", again, err)
 			}
@@ -389,6 +400,11 @@ func TestDeduplicateWikipediaKeepsCurated(t *testing.T) {
 	got := queryStrings(t, conn, `SELECT name FROM battle_aliases WHERE battle_id = 'gaza-city-2023-2024' ORDER BY name`)
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("aliases mismatch (-want +got):\n%s", diff)
+	}
+	removed := queryStrings(t, conn, `SELECT qid || '|' || reason || '|' || kept_id FROM removed_items`)
+	wantRemoved := []string{"Qsiege-of-gaza-city|same Wikipedia title|gaza-city-2023-2024"}
+	if diff := cmp.Diff(wantRemoved, removed); diff != "" {
+		t.Errorf("removed items mismatch (-want +got):\n%s", diff)
 	}
 }
 

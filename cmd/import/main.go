@@ -20,6 +20,10 @@ func main() {
 	dbPath := flag.String("db", "data/battlesight.db", "path to SQLite database")
 	jsonPath := flag.String("json", "", "path to curated battles JSON file")
 	wikidata := flag.Bool("wikidata", false, "import battles from Wikidata SPARQL")
+	wikidataRefresh := flag.Bool("wikidata-refresh", false,
+		"insert battles Wikidata has that no row carries and re-read the live facts of recent and undated rows")
+	refreshSince := flag.Int("refresh-since", 2022, "first year whose wikidata rows -wikidata-refresh re-reads")
+	refreshDryRun := flag.Bool("refresh-dry-run", false, "with -wikidata-refresh, log every planned change and write nothing")
 	wikidataDates := flag.Bool("wikidata-dates", false,
 		"fill the wikidata_* and infobox_* columns from Wikidata and the article for rows not yet checked")
 	rawDumpPath := flag.String("wikidata-dump", "data/wikidata_battles_raw.json",
@@ -73,6 +77,7 @@ func main() {
 
 	if *all {
 		*wikidata = true
+		*wikidataRefresh = true
 		*wikidataDates = true
 		*wikidataWars = true
 		*coordsFromSource = true
@@ -87,10 +92,10 @@ func main() {
 		}
 	}
 
-	if *jsonPath == "" && !*wikidata && !*wikidataDates && !*wikidataWars && !*coordsFromSource && !*resolveTitles && !*enrich && !*infobox && !*significance && !*references &&
+	if *jsonPath == "" && !*wikidata && !*wikidataRefresh && !*wikidataDates && !*wikidataWars && !*coordsFromSource && !*resolveTitles && !*enrich && !*infobox && !*significance && !*references &&
 		!*warsEnrich && !*geocodeMissing && !*geocodeDryRun && !*infoboxBackfill && !*infoboxDryRun &&
 		*mergeReplays == "" {
-		log.Fatal("at least one action required: -json, -wikidata, -wikidata-dates, -wikidata-wars, -coords-from-source, -resolve-titles, -enrich, -infobox, -significance, " +
+		log.Fatal("at least one action required: -json, -wikidata, -wikidata-refresh, -wikidata-dates, -wikidata-wars, -coords-from-source, -resolve-titles, -enrich, -infobox, -significance, " +
 			"-references, -wars, -geocode-missing, -geocode-dry-run, -infobox-backfill, " +
 			"-infobox-dry-run, -merge-replays, -validate, or -all")
 	}
@@ -128,6 +133,25 @@ func main() {
 		log.Printf("imported %d battles from wikidata", count)
 		*wikidataDates = true
 		*wikidataWars = true
+	}
+
+	if *wikidataRefresh {
+		log.Printf("refreshing wikidata rows dated %d or later and adding new battles...", *refreshSince)
+		rep, err := importer.RefreshWikidata(ctx, database, *refreshSince, *refreshDryRun)
+		if err != nil {
+			// Exit 3 means the refresh wrote nothing: every read precedes its one transaction.
+			log.Printf("wikidata refresh failed, nothing written: %v", err)
+			database.Close()
+			os.Exit(3)
+		}
+		log.Printf("wikidata refresh: %d catalog items, %d new; inserted %d, skipped %d removed on purpose, "+
+			"%d already titled, %d named like an existing row, %d unlabeled; %d rows in scope, %d items gone, "+
+			"%d facts moved, %d dates rendered again, %d titles set, %d coordinates filled", rep.Fetched, rep.New,
+			rep.Inserted, rep.SkippedRemoved, rep.SkippedTitle, rep.SkippedName, rep.SkippedLabel, rep.InScope,
+			rep.Missing, rep.FactsChanged, rep.DatesRewritten, rep.TitlesSet, rep.CoordsFilled)
+		if !*refreshDryRun {
+			*wikidataWars = true
+		}
 	}
 
 	if *wikidataDates {

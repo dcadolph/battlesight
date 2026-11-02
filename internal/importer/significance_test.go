@@ -203,7 +203,8 @@ func TestEnrichSignificance(t *testing.T) {
 	got := queryStrings(t, conn, `SELECT id || '|' || CASE significance WHEN '' THEN '-'
 		WHEN ? THEN 'prose' ELSE 'other' END FROM battles ORDER BY id`, testProse)
 	want := []string{
-		"cached-parent|-", "curated|-", "fill|prose", "long|other", "missing|-", "no-prose|-", "parent|prose", "renamed|prose",
+		"cached-parent|-", "curated|-", "fill|prose", "long|other", "missing|-", "no-prose|-", "parent|prose",
+		"renamed|prose",
 		"sub-battle|-", "verified|-",
 	}
 	if diff := cmp.Diff(want, got); diff != "" {

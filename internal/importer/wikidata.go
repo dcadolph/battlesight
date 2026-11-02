@@ -95,7 +95,8 @@ type sparqlValue struct {
 }
 
 // ImportWikidata fetches battles from Wikidata SPARQL and inserts them into the database.
-// Runs three queries: point-in-time dates, start dates, and no-date battles.
+// Runs three queries: point-in-time dates, start dates, and no-date battles. Items a cleanse
+// pass removed on purpose are skipped.
 func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
 	log.Println("query 1/3: battles with point-in-time dates")
 	bindings1, err := fetchSPARQLQuery(ctx, wikidataQuery)
@@ -159,7 +160,10 @@ func ImportWikidata(ctx context.Context, db *sql.DB) (int, error) {
 		nameRows.Close()
 	}
 
-	seen := make(map[string]bool)
+	seen, err := removedQIDs(ctx, tx)
+	if err != nil {
+		return 0, err
+	}
 	var count int
 
 	for _, b := range bindings {

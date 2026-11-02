@@ -10,3 +10,6 @@ var ErrWikipediaBusy = errors.New("wikipedia api busy after one retry")
 
 // ErrSPARQLBusy reports that the Wikidata query service answered 429 or a gateway error.
 var ErrSPARQLBusy = errors.New("wikidata query service busy")
+
+// ErrRefreshScope reports that a Wikidata refresh would change more existing rows than its cap.
+var ErrRefreshScope = errors.New("wikidata refresh scope")

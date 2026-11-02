@@ -391,7 +391,10 @@ var sentenceAbbrev = map[string]bool{
 	"e.g": true, "i.e": true, "etc": true, "vs": true, "al": true, "no": true,
 	"mr": true, "mrs": true, "dr": true, "st": true, "inc": true, "ltd": true,
 	"u.s": true, "u.k": true, "ca": true, "cf": true, "fig": true, "vol": true,
-	"esp": true, "approx": true, "cap": true,
+	"esp": true, "approx": true, "cap": true, "blvd": true, "rd": true, "ave": true,
+	"mt": true, "ft": true, "gen": true, "col": true, "lt": true, "capt": true, "maj": true,
+	"sgt": true, "adm": true, "jr": true, "sr": true, "co": true, "corp": true, "pp": true,
+	"viz": true, "op": true, "ed": true, "eds": true, "rev": true, "hon": true,
 }
 
 // reCaptionLead detects a field whose content is a leaked image caption
@@ -437,7 +440,9 @@ func capitalizeSentences(s string) string {
 		}
 		if punct == "." {
 			lw := strings.ToLower(strings.TrimRight(word, ".!?"))
-			if sentenceAbbrev[lw] {
+			// An initial ("W.") or a dotted abbreviation ("p.m.") never ends a
+			// sentence that the next word starts in lowercase.
+			if sentenceAbbrev[lw] || utf8.RuneCountInString(lw) == 1 || strings.Contains(lw, ".") {
 				return m
 			}
 			wr := []rune(word)
@@ -449,19 +454,31 @@ func capitalizeSentences(s string) string {
 	})
 }
 
+// reProseIconSize matches an icon size left behind by a flag template ("25px").
+var reProseIconSize = regexp.MustCompile(`(?i)\b\d+\s*px\b\s*`)
+
 // cleanseProse cleans a summary or significance field. A field that is a
-// leaked image caption blanks out for re-curation. Otherwise markup is
-// stripped, any reference or caption pipe-tail is truncated, and sentence
-// starts are capitalized.
-func cleanseProse(s string) string {
+// leaked image caption blanks out for re-curation. Otherwise external links
+// keep only their label, icon sizes drop, markup is stripped, any reference or
+// caption pipe-tail is truncated, and sentence starts are capitalized. On a row
+// that is neither curated nor verified, a field that still carries markup
+// blanks out too, so the enrichment stages refill it from the article.
+func cleanseProse(s string, protected bool) string {
 	if reCaptionLead.MatchString(s) {
 		return ""
 	}
+	s = proseExtLinkRe.ReplaceAllString(s, "$1")
+	s = proseBareLinkRe.ReplaceAllString(s, "")
+	s = reProseIconSize.ReplaceAllString(s, "")
 	s = NormaliseText(s)
 	if i := strings.IndexByte(s, '|'); i >= 0 {
 		s = strings.TrimSpace(s[:i])
 	}
-	return capitalizeSentences(s)
+	s = capitalizeSentences(s)
+	if !protected && proseLeftoverRe.MatchString(s) {
+		return ""
+	}
+	return s
 }
 
 // cleanseSideName cleans a belligerent name: shared markup strip, align-word
@@ -574,17 +591,20 @@ func NormaliseText(s string) string {
 
 func cleanseBattleText(ctx context.Context, db *sql.DB) (int, error) {
 	rows, err := db.QueryContext(ctx,
-		`SELECT id, name, war, victor, summary, significance FROM battles`)
+		`SELECT id, name, war, victor, summary, significance, source = 'curated' OR verified = 1
+		FROM battles`)
 	if err != nil {
 		return 0, fmt.Errorf("scan battle text: %w", err)
 	}
 	type row struct {
 		id, name, war, victor, summary, significance string
+		protected                                    bool
 	}
 	var batch []row
 	for rows.Next() {
 		var r row
-		if err := rows.Scan(&r.id, &r.name, &r.war, &r.victor, &r.summary, &r.significance); err != nil {
+		if err := rows.Scan(&r.id, &r.name, &r.war, &r.victor, &r.summary, &r.significance,
+			&r.protected); err != nil {
 			rows.Close()
 			return 0, fmt.Errorf("scan battle text row: %w", err)
 		}
@@ -612,8 +632,8 @@ func cleanseBattleText(ctx context.Context, db *sql.DB) (int, error) {
 		name := NormaliseText(r.name)
 		war := NormaliseText(r.war)
 		victor := NormaliseText(r.victor)
-		summary := cleanseProse(r.summary)
-		significance := cleanseProse(r.significance)
+		summary := cleanseProse(r.summary, r.protected)
+		significance := cleanseProse(r.significance, r.protected)
 		if name == r.name && war == r.war && victor == r.victor &&
 			summary == r.summary && significance == r.significance {
 			continue

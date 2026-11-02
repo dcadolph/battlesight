@@ -43,6 +43,8 @@ type AuditRow struct {
 	Victor string
 	// Summary is the dossier summary.
 	Summary string
+	// Significance is the dossier's why-it-mattered text.
+	Significance string
 	// Source is curated or wikidata.
 	Source string
 	// Verified is true for hand-checked rows.
@@ -335,6 +337,10 @@ func Mismatches(in AuditInput) []MismatchClass {
 	add("garbage-text", "name, war or victor carries raw wiki markup", func(r *AuditRow) bool {
 		return hasGarbage(r.Name) || hasGarbage(r.War) || hasGarbage(r.Victor)
 	})
+	add("prose-markup", "summary or significance carries raw wiki markup or an image caption",
+		func(r *AuditRow) bool {
+			return proseLeftoverRe.MatchString(r.Summary) || proseLeftoverRe.MatchString(r.Significance)
+		})
 	add("bad-unicode", "a visible field holds the U+FFFD replacement glyph", func(r *AuditRow) bool {
 		return strings.ContainsRune(r.Name+r.War+r.Victor+r.Summary, '\uFFFD')
 	})
@@ -785,7 +791,7 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 		inst = "wikidata_instance_of"
 	}
 	q := `SELECT id, name, year, date, date_start, date_end, lat, lng, era, war, battle_type, victor,
-		summary, source, verified, wikipedia_title, source_id, ` + wdDate + `, ` + wdPrec + `, ` + inst + `, ` + ibDate +
+		summary, significance, source, verified, wikipedia_title, source_id, ` + wdDate + `, ` + wdPrec + `, ` + inst + `, ` + ibDate +
 		`, ` + ibChecked + `,
 		CASE WHEN ` + documentedSQL + ` THEN 1 ELSE 0 END, ` + coordSrc + ` FROM battles`
 	rows, err := db.QueryContext(ctx, q)
@@ -798,7 +804,7 @@ func LoadAuditInput(ctx context.Context, db *sql.DB, documentedSQL, yearEnrichDi
 		var verified, documented int
 		var ibCheckedAt string
 		if err := rows.Scan(&r.ID, &r.Name, &r.Year, &r.Date, &r.DateStart, &r.DateEnd, &r.Lat, &r.Lng,
-			&r.Era, &r.War, &r.BattleType, &r.Victor, &r.Summary, &r.Source, &verified, &r.WikipediaTitle,
+			&r.Era, &r.War, &r.BattleType, &r.Victor, &r.Summary, &r.Significance, &r.Source, &verified, &r.WikipediaTitle,
 			&r.SourceID, &r.WikidataDate, &r.WikidataPrecision, &r.InstanceOf, &r.InfoboxDate, &ibCheckedAt,
 			&documented, &r.CoordSource); err != nil {
 			return in, fmt.Errorf("scan audit row: %w", err)

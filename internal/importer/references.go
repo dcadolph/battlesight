@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"sort"
 	"strings"
-	"time"
 )
 
 // refOpenRe matches an opening <ref ...> tag, capturing the inner attributes
@@ -26,17 +25,40 @@ var (
 	bareURLRe   = regexp.MustCompile(`(?i)https?://[^\s\]<|]+`)
 )
 
-// EnrichReferences walks every battle's Wikipedia article and lifts the
-// citations out of its <ref>...</ref> blocks into the battle_references
-// table. Three sources, in priority order: {{cite web|url=...|title=...}}
-// style templates, bare URLs inside refs, and {{cite book|...|title=...}}
-// style templates with no URL (book references). Idempotent — skips any
-// (battle_id, url, title) triple already present.
-func EnrichReferences(ctx context.Context, db *sql.DB) (int, error) {
-	rows, err := db.QueryContext(ctx,
-		`SELECT id, wikipedia_title FROM battles WHERE wikipedia_title != ''`)
+// ReferenceReport counts what the references stage did.
+type ReferenceReport struct {
+	// Candidates is the number of rows selected.
+	Candidates int
+	// NoArticle counts titles with no page.
+	NoArticle int
+	// RedirectFollowed counts titles read through a rename redirect.
+	RedirectFollowed int
+	// RedirectSkipped counts titles whose redirect is not a rename.
+	RedirectSkipped int
+	// Added counts reference rows inserted.
+	Added int
+}
+
+// EnrichReferences lifts the citations out of each unverified wikidata row's
+// Wikipedia article into battle_references. Three sources, in priority order:
+// {{cite web|url=...|title=...}} style templates, bare URLs inside refs, and
+// {{cite book|...|title=...}} style templates with no URL. Curated rows are
+// skipped because the curated seed owns their reference list and rewrites it
+// on every boot; verified rows are skipped because they are hand-checked.
+// Idempotent: a (battle_id, url, title) triple already present is skipped.
+func EnrichReferences(ctx context.Context, db *sql.DB) (ReferenceReport, error) {
+	return enrichReferences(ctx, db, fetchArticleTexts, cachedCanonicalTitle)
+}
+
+// enrichReferences is EnrichReferences with the wikitext source and the
+// redirect cache supplied by the caller.
+func enrichReferences(ctx context.Context, db *sql.DB, fetch wikitextFetchFunc,
+	canon canonicalTitleFunc) (ReferenceReport, error) {
+	var rep ReferenceReport
+	rows, err := db.QueryContext(ctx, `SELECT id, wikipedia_title FROM battles
+		WHERE source = 'wikidata' AND verified = 0 AND wikipedia_title != '' ORDER BY id`)
 	if err != nil {
-		return 0, fmt.Errorf("query battles: %w", err)
+		return rep, fmt.Errorf("query reference candidates: %w", err)
 	}
 	type ref struct {
 		id    string
@@ -47,98 +69,88 @@ func EnrichReferences(ctx context.Context, db *sql.DB) (int, error) {
 		var r ref
 		if err := rows.Scan(&r.id, &r.title); err != nil {
 			rows.Close()
-			return 0, fmt.Errorf("scan: %w", err)
+			return rep, fmt.Errorf("scan reference candidate: %w", err)
 		}
 		pending = append(pending, r)
 	}
 	rows.Close()
+	if err := rows.Err(); err != nil {
+		return rep, fmt.Errorf("iterate reference candidates: %w", err)
+	}
+	rep.Candidates = len(pending)
 	if len(pending) == 0 {
-		return 0, nil
+		return rep, nil
 	}
 
-	// Existing references — used as the dedup key so re-runs are idempotent.
-	// A composite of (battle_id, url, title) catches both URL-bearing and
-	// book references where url='' but title is the discriminator.
 	existing := make(map[string]bool)
 	exRows, err := db.QueryContext(ctx,
 		`SELECT battle_id, COALESCE(url, ''), COALESCE(title, '') FROM battle_references`)
-	if err == nil {
-		for exRows.Next() {
-			var bid, url, title string
-			exRows.Scan(&bid, &url, &title)
-			existing[bid+"|"+url+"|"+title] = true
-		}
-		exRows.Close()
+	if err != nil {
+		return rep, fmt.Errorf("query existing references: %w", err)
 	}
+	for exRows.Next() {
+		var bid, url, title string
+		if err := exRows.Scan(&bid, &url, &title); err != nil {
+			exRows.Close()
+			return rep, fmt.Errorf("scan existing reference: %w", err)
+		}
+		existing[bid+"|"+url+"|"+title] = true
+	}
+	exRows.Close()
 
-	insertStmt, err := db.PrepareContext(ctx,
+	owned, shared, err := redirectOwnership(ctx, db, canon)
+	if err != nil {
+		return rep, err
+	}
+	titles := make([]string, 0, len(pending))
+	for _, r := range pending {
+		titles = append(titles, r.title)
+	}
+	log.Printf("references: %d candidate rows", len(pending))
+	art, fetchErr := readArticles(ctx, "references", titles, fetch, canon, owned, shared)
+
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return rep, fmt.Errorf("begin references tx: %w", err)
+	}
+	defer tx.Rollback()
+	insert, err := tx.PrepareContext(ctx,
 		`INSERT INTO battle_references (battle_id, ref_type, title, author, year, url, note)
 		 VALUES (?, ?, ?, ?, ?, ?, '')`)
 	if err != nil {
-		return 0, fmt.Errorf("prepare insert: %w", err)
+		return rep, fmt.Errorf("prepare reference insert: %w", err)
 	}
-	defer insertStmt.Close()
+	defer insert.Close()
 
-	log.Printf("extracting references for %d battles", len(pending))
-
-	var added int
-	batchSize := 15
-
-	for i := 0; i < len(pending); i += batchSize {
-		end := min(i+batchSize, len(pending))
-		batch := pending[i:end]
-
-		titles := make([]string, len(batch))
-		titleMap := make(map[string]ref, len(batch))
-		for j, r := range batch {
-			wt := strings.ReplaceAll(r.title, " ", "_")
-			titles[j] = wt
-			titleMap[r.title] = r
-		}
-
-		pages, err := fetchWikitext(ctx, titles)
-		if err != nil {
-			log.Printf("references batch %d-%d failed: %v", i, end, err)
-			time.Sleep(2 * time.Second)
+	for _, r := range pending {
+		text, ok := art.texts[r.title]
+		switch {
+		case art.skipped[r.title]:
+			rep.RedirectSkipped++
+			continue
+		case !ok:
+			rep.NoArticle++
 			continue
 		}
-
-		for pageTitle, wikitext := range pages {
-			normalTitle := strings.ReplaceAll(pageTitle, "_", " ")
-			r, ok := titleMap[normalTitle]
-			if !ok {
-				for t, rr := range titleMap {
-					if strings.EqualFold(t, normalTitle) {
-						r = rr
-						ok = true
-						break
-					}
-				}
-			}
-			if !ok {
+		if art.followed[r.title] {
+			rep.RedirectFollowed++
+		}
+		for _, c := range extractCitations(text) {
+			key := r.id + "|" + c.URL + "|" + c.Title
+			if existing[key] {
 				continue
 			}
-
-			cites := extractCitations(wikitext)
-			for _, c := range cites {
-				key := r.id + "|" + c.URL + "|" + c.Title
-				if existing[key] {
-					continue
-				}
-				existing[key] = true
-				if _, err := insertStmt.ExecContext(ctx, r.id, c.Type, c.Title, c.Author, c.Year, c.URL); err == nil {
-					added++
-				}
+			existing[key] = true
+			if _, err := insert.ExecContext(ctx, r.id, c.Type, c.Title, c.Author, c.Year, c.URL); err != nil {
+				return rep, fmt.Errorf("insert reference for %s: %w", r.id, err)
 			}
+			rep.Added++
 		}
-
-		if (i/batchSize)%20 == 0 {
-			log.Printf("references added: %d (after %d battles)", added, end)
-		}
-		time.Sleep(300 * time.Millisecond)
 	}
-
-	return added, nil
+	if err := tx.Commit(); err != nil {
+		return rep, fmt.Errorf("commit references: %w", err)
+	}
+	return rep, fetchErr
 }
 
 // citation is the structured form of one entry pulled out of a <ref> block.
@@ -243,15 +255,9 @@ func parseCitationBlock(inner string) citation {
 
 	// Cap title and author lengths so the references table stays sane;
 	// the UI does not render essay-length citation titles.
-	if len(c.Title) > 240 {
-		c.Title = c.Title[:240]
-	}
-	if len(c.Author) > 120 {
-		c.Author = c.Author[:120]
-	}
-	if len(c.URL) > 480 {
-		c.URL = c.URL[:480]
-	}
+	c.Title = truncateRunes(c.Title, 240)
+	c.Author = truncateRunes(c.Author, 120)
+	c.URL = truncateRunes(c.URL, 480)
 	// If no title but URL is present, synthesise a placeholder from the
 	// host so the UI has something to render.
 	if c.Title == "" && c.URL != "" {

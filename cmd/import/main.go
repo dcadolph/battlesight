@@ -211,21 +211,24 @@ func main() {
 
 	if *significance {
 		log.Println("enriching significance from Wikipedia aftermath/legacy sections...")
-		count, err := importer.EnrichSignificance(ctx, database)
+		rep, err := importer.EnrichSignificance(ctx, database)
+		log.Printf("significance: %d candidates, %d no article, %d through a rename redirect, "+
+			"%d redirect to a parent or shared article, %d no clean prose, %d not longer; wrote %d",
+			rep.Candidates, rep.NoArticle, rep.RedirectFollowed, rep.RedirectSkipped, rep.NoProse,
+			rep.NotLonger, rep.Written)
 		if err != nil {
-			log.Printf("significance enrichment failed: %v (continuing)", err)
-		} else {
-			log.Printf("enriched %d battles with significance", count)
+			log.Fatalf("significance enrichment failed after writing the rows above: %v", err)
 		}
 	}
 
 	if *references {
 		log.Println("extracting citation URLs into battle_references...")
-		count, err := importer.EnrichReferences(ctx, database)
+		rep, err := importer.EnrichReferences(ctx, database)
+		log.Printf("references: %d candidates, %d no article, %d through a rename redirect, "+
+			"%d redirect to a parent or shared article; added %d",
+			rep.Candidates, rep.NoArticle, rep.RedirectFollowed, rep.RedirectSkipped, rep.Added)
 		if err != nil {
-			log.Printf("reference enrichment failed: %v (continuing)", err)
-		} else {
-			log.Printf("added %d references across battles", count)
+			log.Fatalf("reference enrichment failed after writing the rows above: %v", err)
 		}
 	}
 

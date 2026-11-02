@@ -142,7 +142,7 @@ type InfoboxReport struct {
 // rename of the same event (see renameRedirect), so a sub-battle never takes
 // its parent campaign's figures.
 func EnrichInfoboxes(ctx context.Context, db *sql.DB) (InfoboxReport, error) {
-	return enrichInfoboxes(ctx, db, fetchInfoboxTexts, cachedCanonicalTitle)
+	return enrichInfoboxes(ctx, db, fetchArticleTexts, cachedCanonicalTitle)
 }
 
 // wikitextFetchFunc returns wikitext keyed by requested title, with what it
@@ -176,47 +176,12 @@ func enrichInfoboxes(ctx context.Context, db *sql.DB, fetch wikitextFetchFunc,
 	if err != nil {
 		return rep, err
 	}
-
 	titles := make([]string, 0, len(cands))
-	seen := map[string]bool{}
 	for _, c := range cands {
-		if !seen[c.title] {
-			seen[c.title] = true
-			titles = append(titles, c.title)
-		}
+		titles = append(titles, c.title)
 	}
-	texts, fetchErr := fetch(ctx, titles)
-
-	hops := map[string]string{}
-	skipped := map[string]bool{}
-	for _, t := range titles {
-		m := redirectFullRe.FindStringSubmatch(texts[t])
-		if m == nil {
-			continue
-		}
-		target := strings.TrimSpace(strings.ReplaceAll(m[1], "_", " "))
-		delete(texts, t)
-		if !renameRedirect(t, target, owned, shared) {
-			skipped[t] = true
-			log.Printf("infobox: %q redirects to %q, not a rename: skipped", t, target)
-			continue
-		}
-		hops[t] = target
-	}
-	if len(hops) > 0 && fetchErr == nil {
-		targets := make([]string, 0, len(hops))
-		for _, to := range hops {
-			targets = append(targets, to)
-		}
-		got, err := fetch(ctx, targets)
-		fetchErr = err
-		for from, to := range hops {
-			if text := got[to]; text != "" && redirectFullRe.FindString(text) == "" {
-				texts[from] = text
-				log.Printf("infobox: %q read through redirect to %q", from, to)
-			}
-		}
-	}
+	art, fetchErr := readArticles(ctx, "infobox", titles, fetch, canon, owned, shared)
+	texts, skipped := art.texts, art.skipped
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -251,7 +216,7 @@ func enrichInfoboxes(ctx context.Context, db *sql.DB, fetch wikitextFetchFunc,
 			rep.NoArticle++
 			continue
 		}
-		if hops[c.title] != "" {
+		if art.followed[c.title] {
 			rep.RedirectFollowed++
 		}
 		info, found := parseInfobox(text)
@@ -295,6 +260,80 @@ func enrichInfoboxes(ctx context.Context, db *sql.DB, fetch wikitextFetchFunc,
 		return rep, fmt.Errorf("commit infobox: %w", err)
 	}
 	return rep, fetchErr
+}
+
+// articleSet holds article wikitext keyed by stored title.
+type articleSet struct {
+	// texts maps a stored title to its article wikitext, read through a rename redirect when
+	// the stored title redirects.
+	texts map[string]string
+	// followed marks stored titles read through a rename redirect.
+	followed map[string]bool
+	// skipped marks stored titles whose redirect is not a rename of the same event.
+	skipped map[string]bool
+}
+
+// readArticles fetches the article behind each stored title. A title that
+// redirects, by its page text or by the -resolve-titles cache, is read through
+// the redirect only when the target is a rename of the same event (see
+// renameRedirect); otherwise it is marked skipped, so a sub-battle never takes
+// its parent campaign's text. The cache check matters because older runs cached
+// some redirecting titles under the target article's text. On a fetch error it
+// returns what it read so far with the error.
+func readArticles(ctx context.Context, stage string, titles []string, fetch wikitextFetchFunc,
+	canon canonicalTitleFunc, owned map[string]bool, shared map[string]int) (articleSet, error) {
+	art := articleSet{followed: map[string]bool{}, skipped: map[string]bool{}}
+	uniq := make([]string, 0, len(titles))
+	seen := make(map[string]bool, len(titles))
+	for _, t := range titles {
+		if seen[t] {
+			continue
+		}
+		seen[t] = true
+		if c, ok := canon(t); ok && c != "" && c != t && !renameRedirect(t, c, owned, shared) {
+			art.skipped[t] = true
+			log.Printf("%s: %q redirects to %q, not a rename: skipped", stage, t, c)
+			continue
+		}
+		uniq = append(uniq, t)
+	}
+	texts, fetchErr := fetch(ctx, uniq)
+	if texts == nil {
+		texts = map[string]string{}
+	}
+	art.texts = texts
+
+	hops := map[string]string{}
+	for _, t := range uniq {
+		m := redirectFullRe.FindStringSubmatch(texts[t])
+		if m == nil {
+			continue
+		}
+		target := strings.TrimSpace(strings.ReplaceAll(m[1], "_", " "))
+		delete(texts, t)
+		if !renameRedirect(t, target, owned, shared) {
+			art.skipped[t] = true
+			log.Printf("%s: %q redirects to %q, not a rename: skipped", stage, t, target)
+			continue
+		}
+		hops[t] = target
+	}
+	if len(hops) == 0 || fetchErr != nil {
+		return art, fetchErr
+	}
+	targets := make([]string, 0, len(hops))
+	for _, to := range hops {
+		targets = append(targets, to)
+	}
+	got, err := fetch(ctx, targets)
+	for from, to := range hops {
+		if text := got[to]; text != "" && redirectFullRe.FindString(text) == "" {
+			texts[from] = text
+			art.followed[from] = true
+			log.Printf("%s: %q read through redirect to %q", stage, from, to)
+		}
+	}
+	return art, err
 }
 
 // redirectParentPrefixes mark a redirect target that covers several events.
@@ -371,10 +410,10 @@ func redirectOwnership(ctx context.Context, db *sql.DB, canon canonicalTitleFunc
 	return owned, shared, nil
 }
 
-// fetchInfoboxTexts returns wikitext keyed by the requested title (spaces, not
+// fetchArticleTexts returns wikitext keyed by the requested title (spaces, not
 // underscores), fetching in batches. On a fetch error it returns what it read
 // so far with the error, so the caller can write partial progress.
-func fetchInfoboxTexts(ctx context.Context, titles []string) (map[string]string, error) {
+func fetchArticleTexts(ctx context.Context, titles []string) (map[string]string, error) {
 	out := make(map[string]string, len(titles))
 	for start := 0; start < len(titles); start += wikitextBatch {
 		batch := titles[start:min(start+wikitextBatch, len(titles))]
@@ -395,7 +434,7 @@ func fetchInfoboxTexts(ctx context.Context, titles []string) (map[string]string,
 			}
 		}
 		if start/wikitextBatch%5 == 0 {
-			log.Printf("infobox: fetched %d/%d titles", min(start+wikitextBatch, len(titles)), len(titles))
+			log.Printf("wikitext: fetched %d/%d titles", min(start+wikitextBatch, len(titles)), len(titles))
 		}
 	}
 	return out, nil

@@ -426,6 +426,19 @@ func TestMismatches(t *testing.T) { //nolint:funlen // Test function.
 			in.CanonicalTitles = map[string]string{"Battle of El Geneina": "Battle of Geneina",
 				"Battle of Geneina": "Battle of Geneina"}
 		}, WantIDs: nil,
+	}, { // Test 84: An image caption leaked into the significance.
+		Name: "prose markup caption", Key: "prose-markup",
+		Mutate:  func(r *AuditRow) { r.Significance = "thumb|upright|alt=A painting|The surrender." },
+		WantIDs: []string{"x"},
+	}, { // Test 85: A section heading leaked into the summary.
+		Name: "prose markup heading", Key: "prose-markup",
+		Mutate: func(r *AuditRow) { r.Summary = "===Reconcentration=== The army fell back." }, WantIDs: []string{"x"},
+	}, { // Test 86: Clean prose with an en dash and a quote is fine.
+		Name: "prose markup clean", Key: "prose-markup",
+		Mutate: func(r *AuditRow) {
+			r.Significance = "The 1863–1864 \"Overland\" campaign followed, one man hurt in the thumb, carts upright."
+		},
+		WantIDs: nil,
 	}}
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {

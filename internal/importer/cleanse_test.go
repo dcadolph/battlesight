@@ -82,26 +82,53 @@ func TestCapitalizeSentences(t *testing.T) {
 	}
 }
 
-// TestCleanseProse pins caption blanking, pipe-tail truncation, and
-// capitalization for summary and significance fields.
+// TestCleanseProse pins caption blanking, link and icon stripping, pipe-tail
+// truncation, capitalization, and markup blanking on unprotected rows for
+// summary and significance fields.
 func TestCleanseProse(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		Name string
-		In   string
-		Want string
-	}{
-		{Name: "leaked caption blanks", In: "thumbnail|Markers at the Monument show the dead.", Want: ""},
-		{Name: "thumb space caption blanks", In: "thumb | Memorial at the church.", Want: ""},
-		{Name: "File caption blanks", In: "File:Foo.jpg|The victory tapestry.", Want: ""},
-		{Name: "ref group tail truncated", In: "Adherbal was reinforced by Carthalo with 70 ships.|group=note", Want: "Adherbal was reinforced by Carthalo with 70 ships."},
-		{Name: "lowercase sentence fixed", In: "the city fell. the enemy fled.", Want: "The city fell. The enemy fled."},
-		{Name: "clean prose untouched", In: "Rome mustered its largest army. Hannibal destroyed it.", Want: "Rome mustered its largest army. Hannibal destroyed it."},
-	}
-	for i, test := range tests {
-		t.Run(fmt.Sprintf("test %d %s", i, test.Name), func(t *testing.T) {
+		WantResult string
+		In         string
+		Protected  bool
+	}{{ // Test 0: A leaked caption blanks.
+		In: "thumbnail|Markers at the Monument show the dead.", WantResult: "",
+	}, { // Test 1: A spaced thumb caption blanks.
+		In: "thumb | Memorial at the church.", WantResult: "",
+	}, { // Test 2: A file caption blanks.
+		In: "File:Foo.jpg|The victory tapestry.", WantResult: "",
+	}, { // Test 3: A ref group tail is truncated.
+		In:         "Adherbal was reinforced by Carthalo with 70 ships.|group=note",
+		WantResult: "Adherbal was reinforced by Carthalo with 70 ships.",
+	}, { // Test 4: Lowercase sentence starts are fixed.
+		In: "the city fell. the enemy fled.", WantResult: "The city fell. The enemy fled.",
+	}, { // Test 5: Clean prose is untouched.
+		In:         "Rome mustered its largest army. Hannibal destroyed it.",
+		WantResult: "Rome mustered its largest army. Hannibal destroyed it.",
+	}, { // Test 6: A labeled external link keeps its label.
+		In:         "Only the [http://www.kirche.example.de church] survived.",
+		WantResult: "Only the church survived.",
+	}, { // Test 7: A bare external link drops, a nested archive URL included.
+		In:         "She hid the dispatches.[https://archive.today/2025/https://www.example.com/x] She rode on.",
+		WantResult: "She hid the dispatches. She rode on.",
+	}, { // Test 8: A flag icon size drops.
+		In: "It took place in 1682. 25px Mughal Empire was victorious.", WantResult: "It took place in 1682. " +
+			"Mughal Empire was victorious.",
+	}, { // Test 9: An unclosed template drops with its tail.
+		In:         "Wellington wrote after the encounter: {{blockquote Richosa, 2d Oct. 1811",
+		WantResult: "Wellington wrote after the encounter",
+	}, { // Test 10: A comment opener on an unprotected row blanks.
+		In: "<!--- Links", WantResult: "",
+	}, { // Test 11: Dotted abbreviations, initials and street names keep the next word lowercase.
+		In: "At 9 p.m. he left by Washington Blvd. and Bluff Rd. in town, as W. T. said. then it rained.",
+		WantResult: "At 9 p.m. he left by Washington Blvd. and Bluff Rd. in town, as W. T. said. Then it rained.",
+	}, { // Test 12: A protected row is never blanked for leftover markup.
+		In: "<!--- Links", Protected: true, WantResult: "<!--- Links",
+	}}
+	for testNum, test := range tests {
+		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {
 			t.Parallel()
-			if diff := cmp.Diff(test.Want, cleanseProse(test.In)); diff != "" {
+			if diff := cmp.Diff(test.WantResult, cleanseProse(test.In, test.Protected)); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
 		})

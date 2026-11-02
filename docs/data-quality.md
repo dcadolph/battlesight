@@ -26,7 +26,7 @@ pointers for completeness.
   Wikipedia template tree. Some Wikipedia articles use ambiguous
   templates. The Documented filter excludes records whose war metadata
   failed validation.
-- **Coordinates.** Pulled from Wikipedia GeoData or Wikidata P625.
+- **Coordinates.** Checked against Wikidata P625 and every Wikipedia language's article coordinate. A point moves only when a source places the battle elsewhere, a land battle the sources put at sea becomes naval, and two sources that disagree leave the row unwritten. 316 rows have no coordinate in any source and stay off the globe.
   Accuracy varies. Battles in the ocean with no clear shore point are
   filtered out by the importer.
 - **Dates.** ISO placeholders like `YYYY-01-01` or `YYYY-12-31` are

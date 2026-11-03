@@ -20,6 +20,7 @@ import { cleanCasualtyText, cleanProseText, formatBattleDate } from '../../lib/f
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { COMPACT_LANDSCAPE_QUERY, COMPACT_QUERY, useMediaQuery } from '../../hooks/useIsPhone';
 import CloseButton from '../CloseButton';
+import { OVERLAY_BAND, OVERLAY_DONATE_CLEARANCE, OVERLAY_HOME_CLEARANCE } from '../../lib/overlayChrome';
 import { findSnapshot, buildCountryColorMap } from '../../data/territory-snapshots';
 import { cachedReplay, loadReplay } from '../../data/replay-cache';
 
@@ -386,10 +387,15 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   // Sideways the bars float over a full-screen stage and fade together.
   const barFade = `transition-opacity duration-300 ${chromeShown ? 'opacity-100' : 'opacity-0 pointer-events-none'}`;
   const headerClass = sideways
-    ? `absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-2 px-4 py-2 pl-[340px] bg-gradient-to-b from-[#070912]/90 to-transparent ${barFade}`
+    ? `absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-2 py-2 bg-gradient-to-b from-[#070912]/90 to-transparent ${barFade}`
     : compact
-      ? 'flex items-center justify-between gap-2 px-4 pb-2 pt-[62px] border-b border-slate-800/80 bg-[#0a0d18]/90'
-      : 'flex items-center justify-between px-6 py-3 pl-[340px] border-b border-slate-800/80 bg-[#0a0d18]/90';
+      ? 'flex items-center justify-between gap-2 px-4 pb-2 border-b border-slate-800/80 bg-[#0a0d18]/90'
+      : 'flex items-center justify-between gap-3 py-3 border-b border-slate-800/80 bg-[#0a0d18]/90';
+  // The header keeps clear of the app's corner pills: beside them when the
+  // header is one wide row, below them on an upright phone.
+  const headerStyle = compact && !sideways
+    ? { paddingTop: OVERLAY_BAND - 2 }
+    : { paddingLeft: OVERLAY_HOME_CLEARANCE, paddingRight: OVERLAY_DONATE_CLEARANCE };
   const footerClass = sideways
     ? `absolute inset-x-0 bottom-0 z-20 flex items-center gap-2 px-4 py-2 bg-gradient-to-t from-[#070912]/90 to-transparent ${barFade}`
     : compact
@@ -657,10 +663,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
       `}</style>
 
       {/* Top bar */}
-      {/* The left padding clears the app's fixed home row (home pill and
-          Support Ukraine button). On a phone in portrait the row sits above
-          the header content instead. */}
-      <header className={headerClass}>
+      <header className={headerClass} style={headerStyle}>
         <div className={compact ? 'flex flex-col min-w-0 flex-1' : 'flex items-center gap-3 min-w-0'}>
           <span
             className={`${compact ? 'hidden' : ''} text-[10px] font-semibold uppercase tracking-[0.18em] ${
@@ -674,7 +677,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           >
             {replay.schematic ? 'Schematic replay' : 'Tactical reconstruction'}
           </span>
-          <h2 className="text-base font-semibold text-white truncate">{replay.title}</h2>
+          {/* On a wide header the title keeps its width up to 40ch and the
+              war and terrain notes give way first. */}
+          <h2 className={`text-base font-semibold text-white truncate ${compact ? '' : 'shrink-0 max-w-[40ch]'}`}>{replay.title}</h2>
           {/* Date chip: always visible. Lets the viewer answer "when?" at a
               glance instead of hunting for the year inside the phase
               narration. Pulls from the battle's date_start / year combo via

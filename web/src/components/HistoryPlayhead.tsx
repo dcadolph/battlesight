@@ -3,6 +3,7 @@ import type { EraTheme } from '../theme/era';
 import { ERA_RANGES, themeForEra } from '../theme/era';
 import type { HistoryBeat } from '../data/history-beats';
 import { formatYear } from '../lib/format';
+import { OVERLAY_BAND } from '../lib/overlayChrome';
 import CloseButton from './CloseButton';
 
 interface HistoryPlayheadProps {
@@ -153,7 +154,8 @@ export default function HistoryPlayhead({
     : null;
 
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+    // The playhead starts below the app's corner pills.
+    <div className="fixed left-1/2 -translate-x-1/2 z-30 pointer-events-none" style={{ top: OVERLAY_BAND }}>
       <div
         className="px-9 pt-6 pb-5 rounded-3xl bg-black/70 backdrop-blur-2xl border shadow-[0_36px_80px_-16px_rgba(0,0,0,0.85)] text-center pointer-events-auto"
         style={{

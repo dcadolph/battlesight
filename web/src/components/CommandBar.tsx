@@ -72,9 +72,9 @@ interface CommandBarProps {
   // hideSearch hides the search box and the mode rail while a phone
   // bottom sheet is open, so nothing floats over the dossier text.
   hideSearch?: boolean;
-  // showDonate shows the Support Ukraine button in the masthead. Off while
-  // an overlay's home row carries it instead.
-  showDonate?: boolean;
+  // hideMasthead hides the wordmark row and its Support Ukraine button while
+  // an overlay's corner pills carry both instead.
+  hideMasthead?: boolean;
 }
 
 export default function CommandBar({
@@ -91,7 +91,7 @@ export default function CommandBar({
   onWarSelect,
   onCommanderSelect,
   hideSearch = false,
-  showDonate = true,
+  hideMasthead = false,
 }: CommandBarProps) {
   const phone = useIsPhone();
   const [query, setQuery] = useState('');
@@ -222,7 +222,7 @@ export default function CommandBar({
           accent. The vertical rhythm is the same 8px grid throughout. */}
       {/* On a phone the masthead is its own row: wordmark left, the
           Support Ukraine button right, nothing positioned over either. */}
-      <div
+      {!hideMasthead && <div
         className={phone
           ? 'fixed top-3 left-4 right-4 z-[45] flex items-center justify-between gap-3 select-none'
           : 'fixed top-5 left-6 z-[45] flex items-center gap-4 select-none'}
@@ -265,8 +265,8 @@ export default function CommandBar({
           )}
         </span>
       </button>
-      {showDonate && <SupportUkraineButton />}
-      </div>
+      <SupportUkraineButton />
+      </div>}
 
       {/* Search. z-[100] so its dropdown floats above the mode rail (z-30).
           Full width under the masthead on a phone. */}

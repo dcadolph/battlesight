@@ -13,6 +13,7 @@ import CloseButton from './CloseButton';
 import { usePauseOnHidden } from '../hooks/usePauseOnHidden';
 import { COMPACT_LANDSCAPE_QUERY, COMPACT_QUERY, useMediaQuery } from '../hooks/useIsPhone';
 import { formatYear, formatBattleDate, formatDeathTollCompact } from '../lib/format';
+import { OVERLAY_BAND } from '../lib/overlayChrome';
 
 interface WarPlaybackProps {
   onBattleFocus: (battle: Battle) => void;
@@ -1150,9 +1151,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     return (
       <div
         className={`fixed inset-0 z-30 flex items-center justify-center bg-black/55 backdrop-blur-sm ${compact ? 'p-2' : 'p-6'}`}
+        style={{ paddingTop: OVERLAY_BAND }}
         onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
-        <div className={`w-[620px] bg-[#0a0c14]/97 border border-slate-800/80 rounded-2xl shadow-2xl flex flex-col ${compact ? 'max-w-full max-h-[calc(100dvh-16px)]' : 'max-w-[94vw] max-h-[82vh]'}`}>
+        {/* The modal starts below the app's corner pills. */}
+        <div className={`w-[620px] bg-[#0a0c14]/97 border border-slate-800/80 rounded-2xl shadow-2xl flex flex-col ${compact ? 'max-w-full max-h-[calc(100dvh-72px)]' : 'max-w-[94vw] max-h-[82vh]'}`}>
           <div className={`flex items-center justify-between border-b border-slate-800/70 flex-shrink-0 ${compact ? 'px-4 py-2' : 'px-6 py-4'}`}>
             <div>
               {!landscape && (
@@ -1367,11 +1370,15 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     : landscape
       ? 'fixed top-0 right-0 h-full w-[300px] max-w-[40vw] bg-[#0f1019]/95 border-l border-slate-800'
       : 'fixed left-0 right-0 bottom-0 h-[60vh] bg-[#0f1019]/97 border-t border-slate-700 rounded-t-2xl';
+  // A pane in the top-right corner starts below the app's Support Ukraine
+  // button so its header and close keep their own space.
+  const paneStyle = !compact || landscape ? { paddingTop: OVERLAY_BAND } : undefined;
 
   return (
     <>
     <div
       className={`${paneShell} z-30 backdrop-blur-xl flex flex-col ${paneHidden ? 'invisible' : ''}`}
+      style={paneStyle}
       inert={paneHidden}
       aria-hidden={paneHidden || undefined}
     >

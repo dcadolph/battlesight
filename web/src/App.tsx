@@ -21,9 +21,10 @@ import type { Battle } from './types/battle';
 import { themeForEra, themeForYear } from './theme/era';
 import { disableSound, soundEnabled, setSoundEra } from './audio/sound';
 import { usePauseOnHidden } from './hooks/usePauseOnHidden';
-import { useIsPhone } from './hooks/useIsPhone';
+import { COMPACT_QUERY, useIsPhone, useMediaQuery } from './hooks/useIsPhone';
 import { useCurrentWars } from './lib/current-wars';
 import { PHONE_CHIP_ROW_BOTTOM, PHONE_ROW3_TOP } from './lib/phoneLayout';
+import { OVERLAY_ROW_TOP } from './lib/overlayChrome';
 import type { ImageryStage } from './lib/globe/imagery';
 import SupportUkraineButton from './components/SupportUkraineButton';
 import ImageryAttribution, { ImageryCreditChip } from './components/globe/ImageryAttribution';
@@ -258,6 +259,8 @@ export default function App() {
   }, [landingMode]);
   const currentWars = useCurrentWars();
   const phone = useIsPhone();
+  // compact covers a phone held either way, where tap targets are 44 px.
+  const compact = useMediaQuery(COMPACT_QUERY);
   // imageryStage is the globe imagery source, reported by the globe so the
   // credit on screen names the imagery actually drawn.
   const [imageryStage, setImageryStage] = useState<ImageryStage>('tiles');
@@ -837,6 +840,9 @@ export default function App() {
   // phoneSheetOpen is true while the dossier bottom sheet owns a phone
   // screen, so the search and the bottom chips step aside.
   const phoneSheetOpen = phone && !!selectedBattle && !panelDismissed && !showPlayback && !historyMode;
+  // overlayRow is true while an overlay owns the screen and the home pill and
+  // the Support Ukraine button hold the top corners in place of the masthead.
+  const overlayRow = !introVisible && (!!replayBattle || showPlayback || historyMode);
 
   // Effective year window: during history playback this is a trailing range
   // from the very start of recorded history up to the current playhead, so
@@ -1046,8 +1052,8 @@ export default function App() {
         onResetView={handleResetView}
         onWarSelect={handleSearchWarSelect}
         onCommanderSelect={setCommanderQuery}
-        hideSearch={phoneSheetOpen || (phone && showPlayback)}
-        showDonate={!showPlayback && !historyMode}
+        hideSearch={phoneSheetOpen || (phone && (showPlayback || historyMode))}
+        hideMasthead={overlayRow}
       />}
 
       <PersistentGlobe
@@ -1116,9 +1122,10 @@ export default function App() {
       )}
 
       {/* Era legend chip. Visible while the user is browsing the globe.
-          Hidden during history mode (the playhead and beat cards own the
-          top edge) and during replay (full-screen overlay covers it). */}
-      {!phone && !historyMode && !replayBattle && !phoneSheetOpen && (
+          Hidden while an overlay owns the screen (history, replay, the war
+          picker, pane and cinematic), where the Support Ukraine button
+          holds the top-right corner. */}
+      {!phone && !overlayRow && !historyMode && !replayBattle && !phoneSheetOpen && (
         <EraLegend selectedEra={filters.era} onSelect={handleEraSelect} />
       )}
 
@@ -1349,22 +1356,25 @@ export default function App() {
           screen (replay, war cinematic, history sweep), always top-left,
           above everything. One click tears down whatever the viewer is
           inside and returns to the bare globe. On the bare globe itself
-          the CommandBar wordmark already serves as home. */}
-      {/* The Support Ukraine button rides next to it, so it stays visible
-          over every overlay. */}
-      {!introVisible && (replayBattle || showPlayback || historyMode) && (
-        <div className="fixed top-3 left-3 z-[70] flex items-center gap-2">
-        <button
-          onClick={handleResetView}
-          className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full border border-slate-600/50 bg-[#0a0d18]/85 hover:border-slate-300/60 hover:bg-[#131829]/95 transition-colors"
-          style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
-          title="Back to the globe"
-        >
-          <span className="inline-block w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-          <span className="text-[12px] font-semibold tracking-[0.22em] uppercase text-slate-100">BattleSight</span>
-        </button>
-        <SupportUkraineButton />
-        </div>
+          the CommandBar wordmark already serves as home. The Support
+          Ukraine button takes the top-right corner in its own space, so it
+          stays visible over every overlay without crowding the name.
+          Overlays keep clear of both corners (lib/overlayChrome). */}
+      {overlayRow && (
+        <>
+          <button
+            onClick={handleResetView}
+            className={`fixed left-3 z-[70] inline-flex items-center gap-2 ${compact ? 'h-11' : 'h-9'} px-3.5 rounded-full border border-slate-600/50 bg-[#0a0d18]/85 hover:border-slate-300/60 hover:bg-[#131829]/95 transition-colors`}
+            style={{ top: OVERLAY_ROW_TOP, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            title="Back to the globe"
+          >
+            <span className="inline-block w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+            <span className="text-[12px] font-semibold tracking-[0.22em] uppercase text-slate-100">BattleSight</span>
+          </button>
+          <div className="fixed right-3 z-[70]" style={{ top: OVERLAY_ROW_TOP }}>
+            <SupportUkraineButton />
+          </div>
+        </>
       )}
 
       {introVisible && featured && (

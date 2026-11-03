@@ -11,6 +11,8 @@ import {
   type DeathToll,
 } from '../lib/format';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { COMPACT_QUERY, useMediaQuery } from '../hooks/useIsPhone';
+import { OVERLAY_BAND } from '../lib/overlayChrome';
 import CloseButton from './CloseButton';
 
 interface WarSummaryShape {
@@ -158,6 +160,7 @@ export default function WarCinematicOverlay({
   const midYear = summary ? (displayStart + displayEnd) / 2 : 1500;
   const theme = themeForYear(midYear);
   const reducedMotion = usePrefersReducedMotion();
+  const compact = useMediaQuery(COMPACT_QUERY);
 
   // Esc dismisses at any stage. Enter advances the overture; on the
   // aftermath it also dismisses, so the user can chain through with
@@ -215,9 +218,10 @@ export default function WarCinematicOverlay({
 
       {/* Top-right close mark. Matches the global exit affordance used by
           BattlePanel and WarPlayback so the user has the same out from
-          every modal mode, not a different gesture per surface. */}
-      <div className="absolute top-4 right-4 z-10">
-        <CloseButton onClick={onDismiss} label="Close cinematic (Esc)" tone="elevated" />
+          every modal mode, not a different gesture per surface. It sits
+          below the app's Support Ukraine button in the corner. */}
+      <div className="absolute right-4 z-10" style={{ top: OVERLAY_BAND }}>
+        <CloseButton onClick={onDismiss} label="Close cinematic (Esc)" tone="elevated" large={compact} />
       </div>
 
       {/* Soft era-themed bloom. */}

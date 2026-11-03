@@ -4,7 +4,6 @@ import type { GlobeMethods } from 'react-globe.gl';
 import type { Battle } from '../../types/battle';
 import { ERA_COLORS } from '../../types/battle';
 import type { Feature, Geometry } from 'geojson';
-import { HI_RES_EARTH, TOPOLOGY_BUMP } from '../../data/cities';
 import { OWNER_LABELS } from '../../data/territory-owners';
 import { flagForFaction } from '../../data/faction-flags';
 import { loadWorldCountries, worldCountriesCache } from '../../data/world-countries';
@@ -15,6 +14,8 @@ import { findCountry, arcDistance } from '../../lib/globe/geometry';
 import { hexToRgba, darkenHex } from '../../lib/globe/colors';
 import { buildFactionLabelElement } from '../../lib/globe/faction-label';
 import { enhanceGlobe } from '../../lib/globe/cinematic';
+import { tuneGlobe, useGlobeImagery } from '../../lib/globe/imagery';
+import ImageryAttribution from './ImageryAttribution';
 import { isCurrentConflict } from '../../lib/current-wars';
 
 // PersistentGlobe is the single Three.js scene mounted at app root. In
@@ -154,6 +155,7 @@ function battleMagnitude(b: Battle): number {
 
 export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, warFactionAnchors, warSnapshotYear, landingMode = 'current', currentWars = EMPTY_WARS, onVisibleCount, paused = false }: PersistentGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
+  const imagery = useGlobeImagery(globeRef);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
 
@@ -675,11 +677,17 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
   // Keep a ref to the latest selectedBattle so listener closures don't go stale
   // without re-binding (which would also reset the camera).
   const selectedBattleRef = useRef(selectedBattle);
+  // introRunningRef is true while the cold-open camera move plays, so the
+  // frame-the-war move cannot fight it for the camera.
+  const introRunningRef = useRef(true);
   useEffect(() => { selectedBattleRef.current = selectedBattle; }, [selectedBattle]);
 
   useEffect(() => {
     const globe = globeRef.current;
-    if (!globe) return;
+    if (!globe) {
+      introRunningRef.current = false;
+      return;
+    }
 
     // Runtime texture tuning (setPixelRatio, anisotropy, needsUpdate flags)
     // was removed here. On some GPU/driver combinations it forced a WebGL
@@ -725,11 +733,15 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
     const resumeRotateTimer = setTimeout(() => {
       if (!selectedBattleRef.current) controls.autoRotate = true;
     }, 4200);
+    const introDoneTimer = setTimeout(() => {
+      introRunningRef.current = false;
+    }, 220 + 2800);
 
     return () => {
       clearTimeout(idleTimer);
       clearTimeout(introTimer);
       clearTimeout(resumeRotateTimer);
+      clearTimeout(introDoneTimer);
       el.removeEventListener('mousedown', stopRotation);
       el.removeEventListener('wheel', stopRotation);
       el.removeEventListener('touchstart', stopRotation);
@@ -772,10 +784,13 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
   // single war (a few up to a few hundred entries) and nothing specific is
   // selected, fly the camera to a vantage that frames every battle of that
   // war. The full unfiltered set (~12k battles) is skipped via the length
-  // threshold so the initial load stays at its default vantage.
+  // threshold so the initial load stays at its default vantage, and the
+  // move is skipped while the cold open plays: the two tweens fought for the
+  // camera, and each two-frame jump fetched a full level of imagery tiles.
   useEffect(() => {
     if (selectedBattle) return;
     if (!globeRef.current) return;
+    if (introRunningRef.current) return;
     if (visibleBattles.length === 0 || visibleBattles.length > 400) return;
 
     let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
@@ -964,14 +979,17 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
   // Nudge the globe up by ~36px (roughly half the timeline strip) so the
   // sphere lands where the eye expects "centre" to be.
   return (
+    <>
     <div style={{ transform: 'translateY(-36px)' }}>
     <Globe
       ref={globeRef as React.MutableRefObject<GlobeMethods | undefined>}
       width={dimensions.width}
       height={dimensions.height}
-      onGlobeReady={() => enhanceGlobe(globeRef.current)}
-      globeImageUrl={HI_RES_EARTH}
-      bumpImageUrl={TOPOLOGY_BUMP}
+      onGlobeReady={() => {
+        tuneGlobe(globeRef.current);
+        enhanceGlobe(globeRef.current);
+      }}
+      {...imagery.props}
       backgroundColor="#0d0c0b"
       atmosphereColor={atmosphereColor || '#8fa6bf'}
       atmosphereAltitude={0.15}
@@ -1067,5 +1085,7 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       htmlElement={(d: object) => buildFactionLabelElement(d as { text: string; faction: string; flag: string | null })}
     />
     </div>
+    <ImageryAttribution stage={imagery.stage} position="fixed" />
+    </>
   );
 }

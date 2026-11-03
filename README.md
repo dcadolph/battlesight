@@ -132,6 +132,10 @@ the cinematic from that API.
 The data sources, importers, and trust filters are documented in
 [DATA_SOURCES.md](DATA_SOURCES.md) and [docs/data-quality.md](docs/data-quality.md).
 
+The globe streams Sentinel-2 cloudless imagery from EOX IT Services GmbH
+(the 2017 layer, CC BY 4.0, contains modified Copernicus Sentinel data
+2017), with the attribution shown on the globe and in the in-app credits.
+
 ## Authoring a phase replay
 
 A phase replay is a JSON entry in `data/phases.json` keyed by battle

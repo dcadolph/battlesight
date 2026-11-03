@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from 'react';
 
+import { IMAGERY_LINKS } from '../lib/globe/imagery';
+
 // CreditLink is one outbound link in the about card. Every link opens in a
 // new tab without handing the destination a reference back to this page.
 function CreditLink({ href, children }: { href: string; children: ReactNode }) {
@@ -65,7 +67,16 @@ export default function AboutNote() {
               </CreditLink>
               .
             </li>
-            <li>Globe imagery from NASA Blue Marble. Country outlines from Natural Earth via world-atlas.</li>
+            <li>
+              Globe imagery: EOxCloudless{' '}
+              <CreditLink href={IMAGERY_LINKS.eox}>https://cloudless.eox.at</CreditLink> by EOX IT Services
+              GmbH (Contains modified Copernicus Sentinel data 2017) released under{' '}
+              <CreditLink href={IMAGERY_LINKS.license}>
+                Creative Commons Attribution 4.0 International License
+              </CreditLink>
+              . NASA Blue Marble when the imagery service is unavailable. Country outlines from Natural Earth
+              via world-atlas.
+            </li>
           </ul>
           <p className="text-[11.5px] leading-[1.6] text-slate-400 mb-3">
             <CreditLink href="https://github.com/dcadolph/battlesight">Source on GitHub</CreditLink>

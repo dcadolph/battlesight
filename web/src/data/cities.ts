@@ -87,15 +87,15 @@ export const CITIES: CityLabel[] = [
   { name: 'Waterloo', lat: 50.6803, lng: 4.4124, tier: 2 },
 ];
 
-// HI_RES_EARTH is the Earth day-color texture at 8192x4096 (Solar
-// System Scope, CC BY 4.0), self-hosted from /public/textures so it's
-// same-origin (no CORS surprises) and we control caching. ~4.6MB;
-// cached after first load. The resolution boost is what makes
-// close-zoom framings not look like a pixel smear.
+// HI_RES_EARTH is the 4096x2048 Earth day-color texture, self-hosted from
+// /public/textures. The globe streams Sentinel-2 cloudless tiles instead
+// (lib/globe/imagery.ts), and three-globe hides the textured sphere while
+// tiles are on, so this texture is only requested when the tile host fails
+// and the globe falls back to the stock sphere.
 export const HI_RES_EARTH = '/textures/earth-blue-marble-4k.jpg';
 
-// TOPOLOGY_BUMP gives the globe a relief feel. Bumpy mountains and ocean
-// floor. Used as bump map on top of HI_RES_EARTH.
+// TOPOLOGY_BUMP is the relief bump map for the stock sphere. Like
+// HI_RES_EARTH it is only requested on the tile fallback.
 export const TOPOLOGY_BUMP =
   'https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-topology.png';
 

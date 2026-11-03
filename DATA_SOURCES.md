@@ -92,13 +92,28 @@ licensed work. Each row inherits the license of the source it came from.
   The 50-meter land polygons (`data/land-50m.json`, world-atlas 2.0.2) back the
   land-in-ocean check in the data audit.
 
-### NASA Blue Marble
+### Globe imagery: Sentinel-2 cloudless by EOX
+
+- **Source:** https://cloudless.eox.at, WMTS layer `s2cloudless-2017_3857`
+  at https://tiles.maps.eox.at (Web Mercator tile matrix set `g`)
+- **License:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+  The 2017 layer is the newest one EOX publishes under CC BY. Later years
+  are CC BY-NC-SA and are not used.
+- **Attribution (verbatim from the WMTS capabilities):** EOxCloudless
+  https://cloudless.eox.at by EOX IT Services GmbH (Contains modified
+  Copernicus Sentinel data 2017) released under Creative Commons Attribution
+  4.0 International License.
+- **What we use:** Imagery tiles streamed onto both globes, up to zoom
+  level 12. The attribution is shown on the globe and in the in-app credits
+  card.
+
+### NASA Blue Marble (fallback only)
 
 - **Source:** https://visibleearth.nasa.gov (via the three-globe sample assets)
 - **License:** Public domain. NASA imagery is not subject to copyright
   protection.
-- **What we use:** Earth surface texture rendered on the globe sphere
-  (`earth-blue-marble.jpg`).
+- **What we use:** A 4096x2048 Earth texture (`earth-blue-marble-4k.jpg`),
+  requested only when the imagery tiles fail to load.
 
 ### Replay basemap: OpenStreetMap via OpenFreeMap
 

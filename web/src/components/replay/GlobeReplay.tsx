@@ -6,7 +6,7 @@ import type { Feature, Geometry } from 'geojson';
 import type { Battle } from '../../types/battle';
 import type { Phase, Replay, Faction, ControlRegion, PaletteContext } from '../../types/replay';
 import { factionColorFor } from '../../types/replay';
-import { HI_RES_EARTH, TOPOLOGY_BUMP, NIGHT_SKY } from '../../data/cities';
+import { NIGHT_SKY } from '../../data/cities';
 import { loadWorldCountries, worldCountriesCache } from '../../data/world-countries';
 import { OWNER_LABELS } from '../../data/territory-snapshots';
 import { flagForFaction } from '../../data/faction-flags';
@@ -15,6 +15,8 @@ import { playImpact } from '../../audio/sound';
 import { COUNTRY_NAME_ALIASES } from '../../lib/globe/aliases';
 import { largestPolygonCentroid } from '../../lib/globe/centroid';
 import { enhanceGlobe } from '../../lib/globe/cinematic';
+import { tuneGlobe, useGlobeImagery } from '../../lib/globe/imagery';
+import ImageryAttribution from '../globe/ImageryAttribution';
 import { findCountry } from '../../lib/globe/geometry';
 import { hexWithAlpha } from '../../lib/globe/colors';
 import { buildFactionLabelElement } from '../../lib/globe/faction-label';
@@ -266,6 +268,7 @@ function unitsMoved(prev: ProjectedUnit[] | null, next: ProjectedUnit[]): boolea
 
 export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountryColors, warFactionAnchors, warSnapshotYear, onSceneReady }: GlobeReplayProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
+  const imagery = useGlobeImagery(globeRef);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
@@ -905,9 +908,11 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
         ref={globeRef as React.MutableRefObject<GlobeMethods | undefined>}
         width={dims.width}
         height={dims.height}
-        onGlobeReady={() => enhanceGlobe(globeRef.current)}
-        globeImageUrl={HI_RES_EARTH}
-        bumpImageUrl={TOPOLOGY_BUMP}
+        onGlobeReady={() => {
+          tuneGlobe(globeRef.current);
+          enhanceGlobe(globeRef.current);
+        }}
+        {...imagery.props}
         backgroundImageUrl={NIGHT_SKY}
         atmosphereColor={themeForEra(battle.era).atmosphere}
         atmosphereAltitude={0.16}
@@ -1093,6 +1098,7 @@ export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountr
           );
         })()}
       </svg>
+      <ImageryAttribution stage={imagery.stage} position="absolute" />
     </div>
   );
 }

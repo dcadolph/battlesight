@@ -11,6 +11,7 @@ import type { MediaEntry } from '../data/media';
 import WarCinematicOverlay from './WarCinematicOverlay';
 import CloseButton from './CloseButton';
 import { usePauseOnHidden } from '../hooks/usePauseOnHidden';
+import { COMPACT_LANDSCAPE_QUERY, COMPACT_QUERY, useMediaQuery } from '../hooks/useIsPhone';
 import { formatYear, formatBattleDate, formatDeathTollCompact } from '../lib/format';
 
 interface WarPlaybackProps {
@@ -347,6 +348,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   const [summaryFetch, setSummaryFetch] = useState<{ war: string; summary: WarSummaryData | null } | null>(null);
   const warSummary = summaryFetch && summaryFetch.war === selectedWar ? summaryFetch.summary : null;
   const warSummaryLoading = !!selectedWar && (!summaryFetch || summaryFetch.war !== selectedWar);
+  // compact is a phone in either orientation; landscape is a phone held
+  // sideways. Portrait turns the pane into a bottom sheet, landscape narrows
+  // it so the globe keeps most of the width.
+  const compact = useMediaQuery(COMPACT_QUERY);
+  const landscape = useMediaQuery(COMPACT_LANDSCAPE_QUERY);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   // openReplayBattleIdRef remembers which battle the cinematic has already
   // opened a replay overlay for. Without this, every pause/resume cycle
@@ -1143,30 +1149,34 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   if (!selectedWar) {
     return (
       <div
-        className="fixed inset-0 z-30 flex items-center justify-center bg-black/55 backdrop-blur-sm p-6"
+        className={`fixed inset-0 z-30 flex items-center justify-center bg-black/55 backdrop-blur-sm ${compact ? 'p-2' : 'p-6'}`}
         onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
-        <div className="w-[620px] max-w-[94vw] bg-[#0a0c14]/97 border border-slate-800/80 rounded-2xl shadow-2xl flex flex-col max-h-[82vh]">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/70 flex-shrink-0">
+        <div className={`w-[620px] bg-[#0a0c14]/97 border border-slate-800/80 rounded-2xl shadow-2xl flex flex-col ${compact ? 'max-w-full max-h-[calc(100dvh-16px)]' : 'max-w-[94vw] max-h-[82vh]'}`}>
+          <div className={`flex items-center justify-between border-b border-slate-800/70 flex-shrink-0 ${compact ? 'px-4 py-2' : 'px-6 py-4'}`}>
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.32em] text-amber-200/90 mb-1">
-                The Atlas of War
-              </div>
-              <h3 className="text-[20px] font-semibold text-white tracking-tight" style={{ fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif" }}>
+              {!landscape && (
+                <div className="text-[10px] font-semibold uppercase tracking-[0.32em] text-amber-200/90 mb-1">
+                  The Atlas of War
+                </div>
+              )}
+              <h3 className={`${landscape ? 'text-[17px]' : 'text-[20px]'} font-semibold text-white tracking-tight`} style={{ fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif" }}>
                 Choose a conflict
               </h3>
             </div>
-            <CloseButton onClick={onClose} label="Back to the globe (Esc)" />
+            <CloseButton onClick={onClose} label="Back to the globe (Esc)" large={compact} />
           </div>
-          <div className="px-6 pt-4 pb-2 flex-shrink-0 border-b border-slate-800/40">
+          <div className={`flex-shrink-0 border-b border-slate-800/40 ${compact ? 'px-4 pt-2 pb-1' : 'px-6 pt-4 pb-2'}`}>
             <input
               type="text"
               value={warSearch}
               onChange={(e) => setWarSearch(e.target.value)}
               placeholder="Search wars..."
-              className="w-full h-10 px-3 bg-transparent border border-slate-700/50 rounded-lg text-[13px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-300/40 transition-colors"
+              className={`w-full ${compact ? 'h-11 text-[16px]' : 'h-10 text-[13px]'} px-3 bg-transparent border border-slate-700/50 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-amber-300/40 transition-colors`}
             />
-            <div className="flex items-baseline gap-4 mt-3 flex-wrap">
+            {/* On a phone the sort pills are one row of 44 px targets that
+                scrolls sideways instead of wrapping into small text links. */}
+            <div className={compact ? 'flex items-center gap-1 mt-1 -mx-1 overflow-x-auto overscroll-x-contain' : 'flex items-baseline gap-4 mt-3 flex-wrap'}>
               {([
                 ['casualties', 'Bloodiest'],
                 ['battles', 'Most battles'],
@@ -1177,7 +1187,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                 <button
                   key={key}
                   onClick={() => setWarSort(key)}
-                  className="text-[10px] font-semibold uppercase tracking-[0.28em] transition-colors focus:outline-none"
+                  className={`text-[10px] font-semibold uppercase tracking-[0.28em] transition-colors focus:outline-none ${compact ? 'h-11 min-w-11 px-2 flex-shrink-0 whitespace-nowrap' : ''}`}
                   style={{
                     color: warSort === key ? '#fbbf24' : '#94a3b8',
                   }}
@@ -1185,7 +1195,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
               ))}
             </div>
           </div>
-          <div className="p-4 overflow-y-auto flex-1">
+          <div className={`${compact ? 'p-2' : 'p-4'} overflow-y-auto overscroll-contain flex-1`}>
             <div className="space-y-0.5 pr-1">
               {filteredWars.map((row) => {
                 if (row.kind === 'country') {
@@ -1222,7 +1232,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                   <button
                     key={`war:${w.name}:${w.depth}`}
                     onClick={() => setSelectedWar(w.name)}
-                    className={`relative w-full text-left rounded-lg text-[13px] hover:bg-slate-800/50 hover:text-white transition-colors overflow-hidden ${
+                    className={`relative w-full text-left rounded-lg text-[13px] hover:bg-slate-800/50 hover:text-white transition-colors overflow-hidden ${compact ? 'min-h-11' : ''} ${
                       warSort === 'country'
                         ? 'pl-3 pr-3 py-1.5 text-slate-300'
                         : w.depth === 0
@@ -1296,8 +1306,75 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
     );
   }
 
+  // aboutCard is the current battle's dossier. On a phone it renders below
+  // Play the war so the play control is on the first screen.
+  const aboutCard = currentBattle && initialPaneLoaded && (
+    <div className="mb-3 rounded-xl border border-slate-800/60 bg-slate-900/30 px-4 py-3.5">
+      <div className="text-[9px] font-semibold uppercase tracking-[0.32em] text-amber-300/80 mb-1.5">
+        About this battle
+      </div>
+      <div className="flex items-center gap-2 mb-1">
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ERA_COLORS[currentBattle.era] || '#fff' }} />
+        <span className="text-[15px] font-semibold text-white">{currentBattle.name}</span>
+      </div>
+      <p className="text-[12px] text-slate-400 mb-2">{formatBattleDate(currentBattle.date, currentBattle.year)}</p>
+
+      {currentGroup?.concurrent && (
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/25">
+            {currentGroup.battles.length} simultaneous
+          </span>
+          <div className={`flex ${compact ? 'flex-wrap' : 'gap-1'}`}>
+            {currentGroup.battles.map((b, i) => (
+              <button key={b.id} onClick={() => { setSubIndex(i); focusBattle(b); }}
+                aria-label={b.name}
+                className={compact ? 'w-11 h-11 flex items-center justify-center' : `w-2 h-2 rounded-full transition-all ${i === subIndex ? 'bg-amber-400 scale-125' : 'bg-slate-600'}`}>
+                {compact && (
+                  <span className={`w-2 h-2 rounded-full transition-all ${i === subIndex ? 'bg-amber-400 scale-125' : 'bg-slate-600'}`} />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {detail?.victor && (
+        <div className="mt-2 mb-2.5 flex items-baseline gap-2 text-[11.5px]">
+          <span className="text-[9px] uppercase tracking-[0.28em] text-slate-500">Victor</span>
+          <span className="text-slate-100 font-medium">{detail.victor}</span>
+        </div>
+      )}
+      {detail?.summary && (
+        <div className="mt-3">
+          <div className="text-[9px] uppercase tracking-[0.28em] text-slate-500 mb-1">What happened</div>
+          <p className="text-[12.5px] text-slate-200/95 leading-relaxed">{detail.summary}</p>
+        </div>
+      )}
+      {detail?.significance && (
+        <div className="mt-3">
+          <div className="text-[9px] uppercase tracking-[0.28em] text-slate-500 mb-1">Why this battle mattered</div>
+          <p className="text-[12.5px] text-slate-300 leading-relaxed italic">{detail.significance}</p>
+        </div>
+      )}
+    </div>
+  );
+
+  // paneHidden clears the phone pane while a war cinematic runs so the globe
+  // and the replay own the small screen. Stop brings it back.
+  const paneHidden = compact && cinematicStage !== 'none';
+  const paneShell = !compact
+    ? 'fixed top-0 right-0 h-full w-[420px] max-w-[92vw] bg-[#0f1019]/95 border-l border-slate-800'
+    : landscape
+      ? 'fixed top-0 right-0 h-full w-[300px] max-w-[40vw] bg-[#0f1019]/95 border-l border-slate-800'
+      : 'fixed left-0 right-0 bottom-0 h-[60vh] bg-[#0f1019]/97 border-t border-slate-700 rounded-t-2xl';
+
   return (
-    <div className="fixed top-0 right-0 h-full w-[420px] max-w-[92vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 flex flex-col">
+    <>
+    <div
+      className={`${paneShell} z-30 backdrop-blur-xl flex flex-col ${paneHidden ? 'invisible' : ''}`}
+      inert={paneHidden}
+      aria-hidden={paneHidden || undefined}
+    >
       {/* Header carries a single, unambiguous exit (top-right X) that
           drops the user straight back to the globe. The previous version
           also had a back arrow that returned to the war picker, but the
@@ -1314,11 +1391,11 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           {!battlesLoading && battles.length > 0 && (
             <span className="text-[10px] text-slate-500 tabular-nums">{battles.length}</span>
           )}
-          <CloseButton onClick={onClose} label="Back to the globe (Esc)" />
+          <CloseButton onClick={onClose} label="Back to the globe (Esc)" large={compact} />
         </div>
       </div>
 
-      <div className="p-4 overflow-y-auto flex-1">
+      <div className={`${compact ? 'p-3 overscroll-contain' : 'p-4'} overflow-y-auto flex-1`}>
         {/* Single unified loading overlay. Stays mounted until ALL three
             async paths (battles list + current-battle detail + war summary)
             have settled for the FIRST time after a war selection. After
@@ -1356,51 +1433,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           </div>
         )}
 
-        {currentBattle && initialPaneLoaded && (
-          <div className="mb-3 rounded-xl border border-slate-800/60 bg-slate-900/30 px-4 py-3.5">
-            <div className="text-[9px] font-semibold uppercase tracking-[0.32em] text-amber-300/80 mb-1.5">
-              About this battle
-            </div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ERA_COLORS[currentBattle.era] || '#fff' }} />
-              <span className="text-[15px] font-semibold text-white">{currentBattle.name}</span>
-            </div>
-            <p className="text-[12px] text-slate-400 mb-2">{formatBattleDate(currentBattle.date, currentBattle.year)}</p>
-
-            {currentGroup?.concurrent && (
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/25">
-                  {currentGroup.battles.length} simultaneous
-                </span>
-                <div className="flex gap-1">
-                  {currentGroup.battles.map((b, i) => (
-                    <button key={b.id} onClick={() => { setSubIndex(i); focusBattle(b); }}
-                      className={`w-2 h-2 rounded-full transition-all ${i === subIndex ? 'bg-amber-400 scale-125' : 'bg-slate-600'}`} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {detail?.victor && (
-              <div className="mt-2 mb-2.5 flex items-baseline gap-2 text-[11.5px]">
-                <span className="text-[9px] uppercase tracking-[0.28em] text-slate-500">Victor</span>
-                <span className="text-slate-100 font-medium">{detail.victor}</span>
-              </div>
-            )}
-            {detail?.summary && (
-              <div className="mt-3">
-                <div className="text-[9px] uppercase tracking-[0.28em] text-slate-500 mb-1">What happened</div>
-                <p className="text-[12.5px] text-slate-200/95 leading-relaxed">{detail.summary}</p>
-              </div>
-            )}
-            {detail?.significance && (
-              <div className="mt-3">
-                <div className="text-[9px] uppercase tracking-[0.28em] text-slate-500 mb-1">Why this battle mattered</div>
-                <p className="text-[12.5px] text-slate-300 leading-relaxed italic">{detail.significance}</p>
-              </div>
-            )}
-          </div>
-        )}
+        {!compact && aboutCard}
 
         {/* Hero: "Play the war" — the ONE big play button. Owns the full
             cinematic flow. Separated visually from the secondary "browse
@@ -1463,21 +1496,24 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
                   {totalIdx + 1} of {totalBattles}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className={`flex items-center ${compact ? 'gap-1' : 'gap-2'}`}>
                 <button onClick={() => goTo(groupIndex - 1)} disabled={groupIndex === 0}
-                  className="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700/60 hover:text-white disabled:opacity-25 disabled:hover:bg-transparent transition-colors flex-shrink-0"
+                  className={`${compact ? 'h-11 w-11' : 'h-7 w-7'} flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700/60 hover:text-white disabled:opacity-25 disabled:hover:bg-transparent transition-colors flex-shrink-0`}
                   title="Previous battle"
                   aria-label="Previous battle">
                   <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
                     <path d="M7.5 1.5L3 5.5l4.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
+                {/* On a phone the scrubber is a 44 px tall hit area that
+                    still draws the same 4 px track through its middle. */}
                 <input type="range" min={0} max={Math.max(0, groups.length - 1)} value={groupIndex}
                   onChange={(e) => { setPlaying(false); goTo(parseInt(e.target.value)); }}
-                  className="flex-1 accent-slate-400 h-1 bg-slate-800/60 rounded-full appearance-none cursor-pointer"
+                  className={`flex-1 min-w-0 accent-slate-400 appearance-none cursor-pointer ${compact ? 'h-11 bg-transparent' : 'h-1 bg-slate-800/60 rounded-full'}`}
+                  style={compact ? { background: 'linear-gradient(rgba(30,41,59,0.6), rgba(30,41,59,0.6)) center / 100% 4px no-repeat' } : undefined}
                   aria-label="Scrub through battles" />
                 <button onClick={() => goTo(groupIndex + 1)} disabled={groupIndex >= groups.length - 1}
-                  className="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700/60 hover:text-white disabled:opacity-25 disabled:hover:bg-transparent transition-colors flex-shrink-0"
+                  className={`${compact ? 'h-11 w-11' : 'h-7 w-7'} flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700/60 hover:text-white disabled:opacity-25 disabled:hover:bg-transparent transition-colors flex-shrink-0`}
                   title="Next battle"
                   aria-label="Next battle">
                   <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
@@ -1488,6 +1524,8 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
             </div>
           );
         })()}
+
+        {compact && aboutCard}
 
         {/* How-it-ended card + Watch & Read shelf. Both gated on the same
             initialPaneLoaded flag as the rest of the right pane so nothing
@@ -1512,9 +1550,10 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           </>
         )}
       </div>
-      {/* Cinematic full-screen overlay. Mounted via portal-style fixed
-          positioning rather than inside the side panel so the title
-          card owns the whole viewport, not just a 420px column. */}
+    </div>
+      {/* Cinematic full-screen overlay. A sibling of the pane rather than a
+          child, so the title card owns the whole viewport and stays visible
+          while the phone pane is hidden. */}
       <WarCinematicOverlay
         stage={cinematicStage === 'overture' ? 'overture' : cinematicStage === 'aftermath' ? 'aftermath' : 'none'}
         warName={selectedWar}
@@ -1552,7 +1591,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           style={{ animation: 'cinhud-rise 280ms ease-out both' }}
         >
           <div
-            className="flex items-center gap-3 px-3 py-2 rounded-full backdrop-blur-md border shadow-2xl"
+            className="flex items-center gap-3 px-3 py-2 rounded-full backdrop-blur-md border shadow-2xl whitespace-nowrap"
             style={{
               background: 'rgba(8,10,18,0.78)',
               borderColor: 'rgba(96,165,250,0.45)',
@@ -1573,7 +1612,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
               <span className="text-[10px] uppercase tracking-[0.32em] font-semibold text-slate-200">
                 {playing ? 'Cinematic playing' : 'Cinematic paused'}
               </span>
-              {currentBattle && (
+              {currentBattle && !compact && (
                 <span className="text-[10px] text-slate-500 ml-1 hidden sm:inline">
                   · {currentBattle.name}
                 </span>
@@ -1583,7 +1622,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
               onClick={() => setPlaying(!playing)}
               aria-label={playing ? 'Pause cinematic' : 'Resume cinematic'}
               title={playing ? 'Pause cinematic' : 'Resume cinematic'}
-              className="w-9 h-9 inline-flex items-center justify-center rounded-full bg-white text-slate-900 hover:scale-[1.05] transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+              className={`${compact ? 'w-11 h-11' : 'w-9 h-9'} shrink-0 inline-flex items-center justify-center rounded-full bg-white text-slate-900 hover:scale-[1.05] transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80`}
             >
               {playing ? (
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="3" y="2" width="3" height="10" rx="1" /><rect x="8" y="2" width="3" height="10" rx="1" /></svg>
@@ -1608,7 +1647,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
               }}
               aria-label="Stop cinematic"
               title="Stop the cinematic and return to the war detail pane"
-              className="w-8 h-8 inline-flex items-center justify-center rounded-full bg-slate-800/80 text-slate-200 hover:bg-slate-700 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300/70"
+              className={`${compact ? 'w-11 h-11' : 'w-8 h-8'} shrink-0 inline-flex items-center justify-center rounded-full bg-slate-800/80 text-slate-200 hover:bg-slate-700 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300/70`}
             >
               <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="1.5" y="1.5" width="7" height="7" rx="1" /></svg>
             </button>
@@ -1625,6 +1664,6 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
           `}</style>
         </div>
       )}
-    </div>
+    </>
   );
 }

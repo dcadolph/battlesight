@@ -170,6 +170,10 @@ function portraitAltitude(altitude: number): number {
   return (1 + altitude) * (PORTRAIT_FIT_ASPECT / aspect) - 1;
 }
 
+// AUTO_ROTATE_MIN_ALTITUDE is the camera altitude, in globe radii, below
+// which the idle spin stays off.
+const AUTO_ROTATE_MIN_ALTITUDE = 1.0;
+
 export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, warFactionAnchors, warSnapshotYear, landingMode = 'current', currentWars = EMPTY_WARS, onVisibleCount, onImageryStage, paused = false }: PersistentGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const imagery = useGlobeImagery(globeRef);
@@ -728,12 +732,22 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
 
     let idleTimer: ReturnType<typeof setTimeout>;
 
+    // resumeRotation turns the idle spin back on only when nothing is
+    // selected and the camera is out at the whole-globe view. Close in, the
+    // same angular speed drags the ground out from under the viewer and
+    // leaves tiles half loaded.
+    const resumeRotation = () => {
+      if (selectedBattleRef.current) return;
+      if (globe.pointOfView().altitude < AUTO_ROTATE_MIN_ALTITUDE) return;
+      controls.autoRotate = true;
+    };
+
+    // stopRotation halts the spin on any user gesture and arms the idle
+    // resume.
     const stopRotation = () => {
       controls.autoRotate = false;
       clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => {
-        if (!selectedBattleRef.current) controls.autoRotate = true;
-      }, 10000);
+      idleTimer = setTimeout(resumeRotation, 10000);
     };
 
     const el = globe.renderer().domElement;
@@ -754,9 +768,7 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
     const introTimer = setTimeout(() => {
       globe.pointOfView({ lat: 42, lng: 22, altitude: portraitAltitude(2.05) }, 2800);
     }, 220);
-    const resumeRotateTimer = setTimeout(() => {
-      if (!selectedBattleRef.current) controls.autoRotate = true;
-    }, 4200);
+    const resumeRotateTimer = setTimeout(resumeRotation, 4200);
     const introDoneTimer = setTimeout(() => {
       introRunningRef.current = false;
     }, 220 + 2800);

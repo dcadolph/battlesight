@@ -3,6 +3,7 @@ import type { Battle } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 import { formatYear } from '../lib/format';
 import { useIsPhone } from '../hooks/useIsPhone';
+import { PHONE_ROW3_HEIGHT, PHONE_ROW3_TOP } from '../lib/phoneLayout';
 import SupportUkraineButton from './SupportUkraineButton';
 
 // SEARCH_ALIASES rewrites well-known nicknames to a canonical query the
@@ -226,40 +227,44 @@ export default function CommandBar({
           ? 'fixed top-3 left-4 right-4 z-[45] flex items-center justify-between gap-3 select-none'
           : 'fixed top-5 left-6 z-[45] flex items-center gap-4 select-none'}
       >
-      <div>
-        <div className="flex items-baseline gap-3">
-          <button
-            type="button"
-            onClick={onResetView}
-            className="leading-none hover:opacity-95 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 rounded-sm"
-            title="Back to the main globe"
-            aria-label="Reset view: back to the main globe"
-            style={{
-              fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif",
-              fontWeight: 600,
-              fontSize: 24,
-              letterSpacing: '-0.025em',
-              color: '#ffffff',
-            }}
-          >
-            <span>Battle<span style={{ color: '#60a5fa' }}>Sight</span></span>
-          </button>
-        </div>
-        <div
+      {/* The wordmark and the stat strip under it form one home button, so
+          the target is 44 px tall on a phone. */}
+      <button
+        type="button"
+        onClick={onResetView}
+        className="flex flex-col justify-center min-h-11 text-left hover:opacity-95 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40 rounded-sm"
+        title="Back to the main globe"
+        aria-label="Reset view: back to the main globe"
+      >
+        <span
+          className="block leading-none"
+          style={{
+            fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif",
+            fontWeight: 600,
+            fontSize: 24,
+            letterSpacing: '-0.025em',
+            color: '#ffffff',
+          }}
+        >
+          Battle<span style={{ color: '#60a5fa' }}>Sight</span>
+        </span>
+        <span
           className="mt-1.5 text-[9.5px] tabular-nums leading-none flex items-baseline gap-2"
           style={{ letterSpacing: '0.14em', textTransform: 'uppercase' }}
         >
           <span className="text-slate-400">{battleCount.toLocaleString()}</span>
           <span className="text-slate-500">battles</span>
+          {/* The replay count drops below 380 px so the masthead row keeps
+              room for the Support Ukraine button. */}
           {stats && stats.replayCount > 0 && (
-            <>
+            <span className="flex items-baseline gap-2 max-[379px]:hidden">
               <span className="text-slate-700">·</span>
               <span style={{ color: '#60a5fa' }}>{stats.replayCount}</span>
               <span className="text-slate-500">replays</span>
-            </>
+            </span>
           )}
-        </div>
-      </div>
+        </span>
+      </button>
       {showDonate && <SupportUkraineButton />}
       </div>
 
@@ -398,11 +403,11 @@ export default function CommandBar({
             natural workflow position (refine the search) instead of as a
             sibling of Wars/History which open separate menus. */}
         {!playbackActive && (searchFocused || hasFilters) && (
-          <div className="mt-2 flex items-baseline gap-3 pl-1">
+          <div className={`flex gap-3 pl-1 ${phone ? 'items-center' : 'mt-2 items-baseline'}`}>
             <button
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => setPanel(panel === 'filters' ? 'none' : 'filters')}
-              className="text-[10px] font-semibold uppercase tracking-[0.28em] transition-colors focus:outline-none inline-flex items-baseline gap-1"
+              className={`text-[10px] font-semibold uppercase tracking-[0.28em] transition-colors focus:outline-none inline-flex gap-1 ${phone ? 'h-11 items-center' : 'items-baseline'}`}
               style={{ color: panel === 'filters' || hasFilters ? '#fbbf24' : '#94a3b8' }}
             >
               <span>Filters</span>
@@ -416,7 +421,7 @@ export default function CommandBar({
               <button
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => onFiltersChange({ era: '', war: '', battleType: '', quality: '' })}
-                className="text-[9.5px] font-semibold uppercase tracking-[0.28em] text-slate-500 hover:text-rose-300 transition-colors focus:outline-none"
+                className={`text-[9.5px] font-semibold uppercase tracking-[0.28em] text-slate-500 hover:text-rose-300 transition-colors focus:outline-none${phone ? ' h-11' : ''}`}
               >
                 Clear
               </button>
@@ -431,17 +436,25 @@ export default function CommandBar({
           mode like Wars/History which open separate UIs). Filters now lives
           inline under the search input — appears on focus or when active —
           which is the natural reading order: type a query, refine with
-          filters, see results. */}
+          filters, see results. On a phone the rail is the left half of the
+          third header row, its tabs centered on the landing toggle at the
+          right. It steps below the 44 px filters chip while that chip
+          shows. */}
       {!hideSearch && (
       <div
         className={`fixed ${phone ? 'left-4' : 'left-6'} z-30 transition-[top] duration-200 ease-out`}
-        style={{ top: phone ? (filtersChipVisible ? 158 : 128) : (filtersChipVisible ? 152 : 126) }}
+        style={{
+          top: phone
+            ? (filtersChipVisible ? PHONE_ROW3_TOP + PHONE_ROW3_HEIGHT : PHONE_ROW3_TOP + (PHONE_ROW3_HEIGHT - 44) / 2)
+            : (filtersChipVisible ? 152 : 126),
+        }}
       >
-        <div className="inline-flex items-baseline gap-3.5">
+        <div className={`inline-flex ${phone ? 'items-center gap-1' : 'items-baseline gap-3.5'}`}>
           <ModeTab
             label="Wars"
             active={playbackActive}
             onClick={onPlaybackOpen}
+            phone={phone}
           />
           <span className="text-slate-700 text-[9px] select-none" aria-hidden="true">·</span>
           <ModeTab
@@ -449,6 +462,7 @@ export default function CommandBar({
             active={historyActive}
             onClick={onHistoryPlay}
             title="Play 3,500 years of history in 90 seconds"
+            phone={phone}
           />
         </div>
       </div>
@@ -456,7 +470,7 @@ export default function CommandBar({
 
       {/* Filter panel */}
       {!playbackActive && !hideSearch && panel === 'filters' && stats && (
-        <div className={`fixed ${phone ? 'top-[184px] left-4 right-4' : 'top-[156px] left-6 w-64'} z-30 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3`}>
+        <div className={`fixed ${phone ? 'top-[176px] left-4 right-4' : 'top-[156px] left-6 w-64'} z-30 bg-[#16171f] border border-slate-700/60 rounded-lg shadow-xl p-3 space-y-3`}>
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-[10px] text-slate-600 uppercase tracking-wider">Tier</label>
@@ -533,21 +547,23 @@ function ModeTab({
   active,
   onClick,
   title,
+  phone = false,
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
   title?: string;
+  phone?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       title={title}
       aria-pressed={active}
-      className="relative inline-flex items-baseline text-[10.5px] font-semibold uppercase tracking-[0.32em] transition-colors focus:outline-none"
+      className={`relative inline-flex text-[10.5px] font-semibold uppercase transition-colors focus:outline-none ${phone ? 'h-11 items-center justify-center px-2 min-w-11 tracking-[0.2em]' : 'items-baseline tracking-[0.32em]'}`}
       style={{
         color: active ? '#ffffff' : '#94a3b8',
-        paddingBottom: 4,
+        paddingBottom: phone ? undefined : 4,
       }}
     >
       {label}

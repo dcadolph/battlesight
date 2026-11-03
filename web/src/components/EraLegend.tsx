@@ -30,15 +30,15 @@ const ERA_ORDER = [
 // a one-click filter. Clicking the active era clears the filter. Hidden
 // behind any open right-side panel so it never competes with the dossier
 // or war card; visible whenever the user is browsing the bare globe. On a
-// phone it starts as a collapsed chip at the bottom right, clear of the
-// header, and opens upward on a tap.
+// phone it is a collapsed chip at the end of the bottom chip row, placed by
+// its parent, and opens upward on a tap.
 export default function EraLegend({ selectedEra, onSelect }: EraLegendProps) {
   const phone = useIsPhone();
   const [open, setOpen] = useState(false);
   const expanded = !phone || open;
   return (
     <div
-      className={phone ? 'fixed bottom-[164px] right-4 z-30 select-none' : 'fixed top-4 right-5 z-20 select-none'}
+      className={phone ? 'relative select-none' : 'fixed top-4 right-5 z-20 select-none'}
       role="group"
       aria-label="Era legend; click to filter the globe by era"
     >
@@ -47,7 +47,7 @@ export default function EraLegend({ selectedEra, onSelect }: EraLegendProps) {
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full text-[10px] uppercase tracking-[0.2em] font-semibold backdrop-blur-md"
+          className="inline-flex items-center gap-1.5 h-11 px-3 rounded-full text-[10px] uppercase tracking-[0.12em] font-semibold whitespace-nowrap backdrop-blur-md"
           style={{
             background: 'rgba(8, 10, 18, 0.7)',
             border: '1px solid rgba(148, 163, 184, 0.25)',
@@ -89,7 +89,7 @@ export default function EraLegend({ selectedEra, onSelect }: EraLegendProps) {
                     onSelect(isActive ? '' : era);
                     if (phone) setOpen(false);
                   }}
-                  className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+                  className="w-full flex items-center gap-2.5 px-2.5 py-1.5 max-sm:min-h-11 max-sm:py-0 rounded-lg transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
                   style={{
                     background: isActive ? `${color}26` : 'transparent',
                     border: isActive ? `1px solid ${color}55` : '1px solid transparent',

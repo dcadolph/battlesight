@@ -91,7 +91,7 @@ export default function AboutNote() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] uppercase tracking-[0.2em] font-semibold backdrop-blur-md transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 max-sm:h-11 max-sm:py-0 rounded-full text-[10px] uppercase tracking-[0.2em] max-sm:tracking-[0.08em] font-semibold whitespace-nowrap backdrop-blur-md transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
         style={{
           background: 'rgba(8, 10, 18, 0.55)',
           border: '1px solid rgba(148, 163, 184, 0.25)',

@@ -23,7 +23,10 @@ import { disableSound, soundEnabled, setSoundEra } from './audio/sound';
 import { usePauseOnHidden } from './hooks/usePauseOnHidden';
 import { useIsPhone } from './hooks/useIsPhone';
 import { useCurrentWars } from './lib/current-wars';
+import { PHONE_CHIP_ROW_BOTTOM, PHONE_ROW3_TOP } from './lib/phoneLayout';
+import type { ImageryStage } from './lib/globe/imagery';
 import SupportUkraineButton from './components/SupportUkraineButton';
+import ImageryAttribution, { ImageryCreditChip } from './components/globe/ImageryAttribution';
 
 // The war panel and the battle replay stack (maplibre-gl, deck.gl, the
 // tactical surface) are only needed once the user opens one of them, so
@@ -255,6 +258,9 @@ export default function App() {
   }, [landingMode]);
   const currentWars = useCurrentWars();
   const phone = useIsPhone();
+  // imageryStage is the globe imagery source, reported by the globe so the
+  // credit on screen names the imagery actually drawn.
+  const [imageryStage, setImageryStage] = useState<ImageryStage>('tiles');
   // visibleCount is how many battles the globe draws, reported by it.
   const [visibleCount, setVisibleCount] = useState(0);
   // historyMode is true whenever the user is in the play-history overlay,
@@ -865,7 +871,7 @@ export default function App() {
         />
 
         <div
-          className="relative text-center px-8 mx-auto w-full max-w-[1200px]"
+          className="relative text-center px-8 max-sm:px-5 mx-auto w-full max-w-[1200px]"
           style={{ textAlign: 'center' }}
         >
           <div
@@ -883,19 +889,22 @@ export default function App() {
               line. Previously a single string with <br/> let the renderer
               break the first line on its own ("Two thousand five" / "hundred")
               at large viewports because the headline outgrew the container.
-              Forcing each line into its own block locks the layout. */}
+              Forcing each line into its own block locks the layout. On a
+              phone the first line may wrap, balanced, so it never runs off
+              the right edge. */}
           <h1
             className="leading-[0.95] tracking-tight"
             style={{
               fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif",
               fontWeight: 600,
-              fontSize: 'clamp(40px, 6.4vw, 82px)',
+              fontSize: 'clamp(36px, 6.4vw, 82px)',
+              textWrap: 'balance',
               letterSpacing: '-0.018em',
               color: '#ffffff',
               textShadow: '0 10px 40px rgba(0,0,0,0.85), 0 0 28px rgba(255,255,255,0.08)',
             }}
           >
-            <span className="block whitespace-nowrap">Three thousand five hundred</span>
+            <span className="block sm:whitespace-nowrap">Three thousand five hundred</span>
             <span className="block whitespace-nowrap">years of war</span>
           </h1>
           <div
@@ -928,7 +937,7 @@ export default function App() {
           <div
             className="mt-10 mx-auto rounded-full overflow-hidden"
             style={{
-              width: 320,
+              width: 'min(320px, 100%)',
               height: 2,
               background: 'rgba(148,163,184,0.16)',
             }}
@@ -991,6 +1000,19 @@ export default function App() {
     );
   }
 
+  // handleEraSelect applies an era pick from the legend. Same as the
+  // search/filters change: an era pick must clear any selectedBattle
+  // dimming, otherwise the 547-Ancient-battle filter shows as a black globe
+  // with no pillars because dramatic mode is off.
+  const handleEraSelect = (era: string) => {
+    setFilters((f) => ({ ...f, era }));
+    setSelectedBattle(null);
+    setIsolatedBattle(null);
+    setPanelDismissed(false);
+    setReplayBattle(null);
+    setReplayPhase(0);
+  };
+
   return (
     <div className="w-full h-full relative">
       {/* Command bar — wordmark, search, mode rail. Hidden while a war
@@ -1047,8 +1069,14 @@ export default function App() {
         landingMode={globeLanding}
         currentWars={currentWars}
         onVisibleCount={setVisibleCount}
+        onImageryStage={setImageryStage}
         paused={!!replayBattle}
       />
+
+      {/* Imagery credit strip for the landing globe. On a phone the credit
+          is a chip in the bottom row instead, so the strip never sits on
+          the timeline. */}
+      {!phone && <ImageryAttribution stage={imageryStage} position="fixed" />}
 
       {/* Landing-mode toggle. Sits at the top-center while the dramatic
           mode globe is showing so the user can flip between "current
@@ -1059,8 +1087,9 @@ export default function App() {
           history sweep so it does not compete with active chrome. */}
       {showPillars && !historyMode && !showPlayback && (
         <div
-          className={`fixed z-30 flex items-center gap-1 p-1 rounded-full backdrop-blur-md ${phone ? 'top-[118px] right-4' : 'top-5 left-1/2 -translate-x-1/2'}`}
+          className={`fixed z-30 flex items-center gap-1 rounded-full backdrop-blur-md ${phone ? 'right-4 p-0.5' : 'top-5 left-1/2 -translate-x-1/2 p-1'}`}
           style={{
+            top: phone ? PHONE_ROW3_TOP : undefined,
             background: 'rgba(10,12,18,0.7)',
             border: '1px solid rgba(148,163,184,0.25)',
             boxShadow: '0 8px 30px -10px rgba(0,0,0,0.7)',
@@ -1070,7 +1099,7 @@ export default function App() {
             <button
               key={m}
               onClick={() => setLandingMode(m)}
-              className={`${phone ? 'px-2.5 tracking-[0.1em]' : 'px-3.5 tracking-[0.16em]'} h-8 rounded-full text-[10.5px] font-semibold uppercase transition-colors`}
+              className={`${phone ? 'h-11 px-3 tracking-[0.1em]' : 'h-8 px-3.5 tracking-[0.16em]'} rounded-full text-[10.5px] font-semibold uppercase transition-colors`}
               style={{
                 color: landingMode === m ? '#fff' : 'rgba(203,213,225,0.6)',
                 background: landingMode === m ? 'rgba(239,68,68,0.22)' : 'transparent',
@@ -1089,22 +1118,8 @@ export default function App() {
       {/* Era legend chip. Visible while the user is browsing the globe.
           Hidden during history mode (the playhead and beat cards own the
           top edge) and during replay (full-screen overlay covers it). */}
-      {!historyMode && !replayBattle && !phoneSheetOpen && (
-        <EraLegend
-          selectedEra={filters.era}
-          onSelect={(era) => {
-            // Same as the search/filters change above: applying an era
-            // pick must clear any selectedBattle dimming, otherwise the
-            // 547-Ancient-battle filter shows as a black globe with no
-            // pillars because dramatic mode is off.
-            setFilters((f) => ({ ...f, era }));
-            setSelectedBattle(null);
-            setIsolatedBattle(null);
-            setPanelDismissed(false);
-            setReplayBattle(null);
-            setReplayPhase(0);
-          }}
-        />
+      {!phone && !historyMode && !replayBattle && !phoneSheetOpen && (
+        <EraLegend selectedEra={filters.era} onSelect={handleEraSelect} />
       )}
 
       {/* Standing data-quality and pre-release notes. They stay on screen
@@ -1112,11 +1127,25 @@ export default function App() {
           policy, and the credits are one click away. The row is the
           positioning context, so either card opens at the same left edge.
           Hidden during replay, where the full-screen overlay owns the
-          frame. */}
+          frame. On a phone the row spans the width above the timeline and
+          also carries the imagery credit and the era chip, so nothing floats
+          over the globe. */}
       {!replayBattle && !phoneSheetOpen && (
-        <div className="fixed bottom-24 max-sm:bottom-[112px] left-4 z-30 flex items-center gap-2 select-none">
+        <div
+          className={`fixed z-30 flex items-center gap-1.5 select-none ${phone ? 'left-4 right-4' : 'bottom-24 left-4 gap-2'}`}
+          style={phone ? { bottom: PHONE_CHIP_ROW_BOTTOM } : undefined}
+        >
           <DataQualityNote />
           <AboutNote />
+          {phone && (
+            <>
+              <div className="flex-1" />
+              <ImageryCreditChip stage={imageryStage} />
+              {!historyMode && (
+                <EraLegend selectedEra={filters.era} onSelect={handleEraSelect} />
+              )}
+            </>
+          )}
         </div>
       )}
 

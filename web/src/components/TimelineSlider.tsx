@@ -102,12 +102,12 @@ export default function TimelineSlider({ min, max, value, onChange, battleCount,
   const isAllEras = value[0] === min && value[1] === max;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-[#070912f5] via-[#070912cc] to-transparent pt-5 pb-4 pointer-events-none">
+    <div className="fixed bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-[#070912f5] via-[#070912cc] to-transparent pt-5 max-sm:pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none">
       <div className="px-10 max-sm:px-4 pointer-events-auto">
         {/* Refined readout. Year endpoints set in a display serif so they
             read like the chapter mark on a print spread, not a form value.
             "TO" set tracked small-caps in between, terse and quiet. */}
-        <div className="mb-3 flex items-baseline justify-center gap-4 max-sm:gap-2 whitespace-nowrap tabular-nums">
+        <div className="mb-3 max-sm:mb-2 flex items-baseline justify-center gap-4 max-sm:gap-2 whitespace-nowrap tabular-nums">
           <span
             className="text-slate-100 text-[22px] max-sm:text-[17px] font-light tracking-tight"
             style={{ fontFamily: SERIF_DISPLAY }}
@@ -131,7 +131,7 @@ export default function TimelineSlider({ min, max, value, onChange, battleCount,
           {!isAllEras && (
             <button
               onClick={() => onChange([min, max])}
-              className="ml-3 text-[10px] uppercase tracking-[0.18em] text-slate-500 hover:text-slate-200 transition-colors"
+              className="ml-3 max-sm:ml-1 max-sm:h-11 max-sm:-my-3 text-[10px] uppercase tracking-[0.18em] text-slate-500 hover:text-slate-200 transition-colors"
             >
               Reset
             </button>
@@ -143,7 +143,7 @@ export default function TimelineSlider({ min, max, value, onChange, battleCount,
             collide. */}
         <div
           ref={trackRef}
-          className="relative h-[34px] rounded-lg overflow-hidden cursor-pointer bg-slate-950/70 border border-slate-800/70"
+          className="relative h-[34px] max-sm:h-[46px] rounded-lg overflow-hidden cursor-pointer bg-slate-950/70 border border-slate-800/70"
           onClick={onTrackClick}
         >
           {/* Era color slivers as the track background. Very low opacity so

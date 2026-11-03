@@ -136,6 +136,28 @@ html, body, #root {
   cursor: grabbing;
 }
 
+/* On a phone the thumb is a 28 px wide touch target that still draws the
+ * same 8 px pin: the padding is transparent and the pin is the content box. */
+@media (max-width: 639px) {
+  .timeline-range::-webkit-slider-thumb {
+    width: 28px;
+    height: 44px;
+    margin-top: 0;
+    padding: 0 10px;
+    border: 0;
+    box-shadow: none;
+    background-clip: content-box;
+  }
+  .timeline-range::-moz-range-thumb {
+    width: 8px;
+    height: 44px;
+    padding: 0 10px;
+    border: 0;
+    box-shadow: none;
+    background-clip: content-box;
+  }
+}
+
 /* Battle title card animations. The veil keyframe is the backdrop fade and
  * the block keyframe drives the title content's appear / hold / clear arc.
  * Two separate keyframes so the inner block can scale subtly while the outer

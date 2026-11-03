@@ -15,7 +15,7 @@ import { hexToRgba, darkenHex } from '../../lib/globe/colors';
 import { buildFactionLabelElement } from '../../lib/globe/faction-label';
 import { enhanceGlobe } from '../../lib/globe/cinematic';
 import { tuneGlobe, useGlobeImagery } from '../../lib/globe/imagery';
-import ImageryAttribution from './ImageryAttribution';
+import type { ImageryStage } from '../../lib/globe/imagery';
 import { isCurrentConflict } from '../../lib/current-wars';
 
 // PersistentGlobe is the single Three.js scene mounted at app root. In
@@ -71,6 +71,9 @@ interface PersistentGlobeProps {
   // onVisibleCount receives the number of battles the globe draws, so the
   // chrome can say how many current-conflict battles are on screen.
   onVisibleCount?: (n: number) => void;
+  // onImageryStage receives the imagery stage whenever it changes, so the
+  // chrome can credit the imagery on screen.
+  onImageryStage?: (stage: ImageryStage) => void;
   // paused halts the globe's render loop entirely. Set while a battle
   // replay covers the screen so the hidden globe stops burning GPU
   // frames behind the opaque overlay.
@@ -153,13 +156,30 @@ function battleMagnitude(b: Battle): number {
   return Math.max(0, Math.min(1, (v - 2) / 4));
 }
 
-export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, warFactionAnchors, warSnapshotYear, landingMode = 'current', currentWars = EMPTY_WARS, onVisibleCount, paused = false }: PersistentGlobeProps) {
+// PORTRAIT_FIT_ASPECT is the width-to-height ratio below which the viewport
+// width, not its height, limits what a landing or war frame can show.
+const PORTRAIT_FIT_ASPECT = 0.8;
+
+// portraitAltitude widens a camera altitude chosen for a landscape frame so
+// the same span fits a portrait viewport. The camera's 50 degree field of
+// view is vertical, so on a phone held upright the frame is cut by the
+// width; the camera distance from the globe center grows by the shortfall.
+function portraitAltitude(altitude: number): number {
+  const aspect = window.innerWidth / Math.max(1, window.innerHeight);
+  if (aspect >= PORTRAIT_FIT_ASPECT) return altitude;
+  return (1 + altitude) * (PORTRAIT_FIT_ASPECT / aspect) - 1;
+}
+
+export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, warFactionAnchors, warSnapshotYear, landingMode = 'current', currentWars = EMPTY_WARS, onVisibleCount, onImageryStage, paused = false }: PersistentGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const imagery = useGlobeImagery(globeRef);
   // The stock look takes over once the imagery fallback shows the textured sphere.
   useEffect(() => {
     if (imagery.stage === 'stock') enhanceGlobe(globeRef.current, 'stock');
   }, [imagery.stage]);
+  useEffect(() => {
+    onImageryStage?.(imagery.stage);
+  }, [imagery.stage, onImageryStage]);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
 
@@ -730,9 +750,9 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
     // 16E is roughly Vienna/Central Europe, where the densest historical
     // battle clusters live — with a gentle settle to the resting frame.
     controls.autoRotate = false;
-    globe.pointOfView({ lat: 48, lng: 16, altitude: 2.6 });
+    globe.pointOfView({ lat: 48, lng: 16, altitude: portraitAltitude(2.6) });
     const introTimer = setTimeout(() => {
-      globe.pointOfView({ lat: 42, lng: 22, altitude: 2.05 }, 2800);
+      globe.pointOfView({ lat: 42, lng: 22, altitude: portraitAltitude(2.05) }, 2800);
     }, 220);
     const resumeRotateTimer = setTimeout(() => {
       if (!selectedBattleRef.current) controls.autoRotate = true;
@@ -812,7 +832,7 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
     // Altitude scales with angular span. A 5° war frames at ~0.45 (close);
     // a 100° war frames at ~1.9 (continental); clamped so we never zoom
     // ridiculously close or float past the moon.
-    const altitude = Math.max(0.35, Math.min(2.6, 0.18 + span * 0.018));
+    const altitude = portraitAltitude(Math.max(0.35, Math.min(2.6, 0.18 + span * 0.018)));
 
     globeRef.current.controls().autoRotate = false;
     globeRef.current.pointOfView(
@@ -1089,7 +1109,6 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       htmlElement={(d: object) => buildFactionLabelElement(d as { text: string; faction: string; flag: string | null })}
     />
     </div>
-    <ImageryAttribution stage={imagery.stage} position="fixed" />
     </>
   );
 }

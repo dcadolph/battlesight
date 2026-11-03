@@ -18,9 +18,16 @@ import {
 } from '../../lib/replay-recorder';
 import { cleanCasualtyText, cleanProseText, formatBattleDate } from '../../lib/format';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { COMPACT_LANDSCAPE_QUERY, COMPACT_QUERY, useMediaQuery } from '../../hooks/useIsPhone';
 import CloseButton from '../CloseButton';
 import { findSnapshot, buildCountryColorMap } from '../../data/territory-snapshots';
 import { cachedReplay, loadReplay } from '../../data/replay-cache';
+
+// SPEEDS are the playback rates the transport offers.
+const SPEEDS = [0.5, 1, 1.5, 2] as const;
+
+// Speed is one of the offered playback rates.
+type Speed = (typeof SPEEDS)[number];
 
 interface BattleReplayProps {
   battle: Battle;
@@ -76,7 +83,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   // Auto-play on open. Opening "Watch the battle" implies "play it". Making
   // the user hunt for a play button to see anything happen is a poor default.
   const [playing, setPlaying] = useState(true);
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState<Speed>(1);
   const [error, setError] = useState<string | null>(null);
   // Default view is the globe. Auto-switching to the tactical schematic
   // was reverted: curated phases for lat/lng-only battles (Normandy and
@@ -104,6 +111,25 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     const card = rail?.children[phaseIdx] as HTMLElement | undefined;
     card?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }, [phaseIdx, cinema]);
+
+  // compact is a phone in either orientation; sideways is a phone held in
+  // landscape, where the stage fills the screen and the bars float over it.
+  const compact = useMediaQuery(COMPACT_QUERY);
+  const sideways = useMediaQuery(COMPACT_LANDSCAPE_QUERY);
+  // chromeAwake keeps the floating bars up for a few seconds after the last
+  // touch while a sideways replay plays, then lets them fade out.
+  const [chromeAwake, setChromeAwake] = useState(true);
+  const [wakeTick, setWakeTick] = useState(0);
+  const wakeChrome = useCallback(() => {
+    setChromeAwake(true);
+    setWakeTick((t) => t + 1);
+  }, []);
+  useEffect(() => {
+    if (!sideways || !cinema) return;
+    const t = setTimeout(() => setChromeAwake(false), 3000);
+    return () => clearTimeout(t);
+  }, [sideways, cinema, wakeTick]);
+  const chromeShown = !sideways || !cinema || chromeAwake;
   // Honour the OS-level "Reduce motion" preference: phase timer collapses
   // to the next phase with no dwell so the user steps through frames
   // rather than waiting on animated transitions. Decorative pulse keyframes
@@ -310,6 +336,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      wakeChrome();
       if (e.key === 'Escape') onClose();
       else if (e.key === 'ArrowRight') {
         if (cinematicMode && onAdvanceNext) onAdvanceNext();
@@ -331,7 +358,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose, goto, phaseIdx, cinematicMode, onAdvanceNext, onAdvancePrev]);
+  }, [onClose, goto, phaseIdx, cinematicMode, onAdvanceNext, onAdvancePrev, wakeChrome]);
 
   if (error) {
     return (
@@ -356,10 +383,30 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
 
   const phase = replay.phases[phaseIdx];
   const aspectRatio = replay.aspectRatio ?? 1.6;
+  // Sideways the bars float over a full-screen stage and fade together.
+  const barFade = `transition-opacity duration-300 ${chromeShown ? 'opacity-100' : 'opacity-0 pointer-events-none'}`;
+  const headerClass = sideways
+    ? `absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-2 px-4 py-2 pl-[340px] bg-gradient-to-b from-[#070912]/90 to-transparent ${barFade}`
+    : compact
+      ? 'flex items-center justify-between gap-2 px-4 pb-2 pt-[62px] border-b border-slate-800/80 bg-[#0a0d18]/90'
+      : 'flex items-center justify-between px-6 py-3 pl-[340px] border-b border-slate-800/80 bg-[#0a0d18]/90';
+  const footerClass = sideways
+    ? `absolute inset-x-0 bottom-0 z-20 flex items-center gap-2 px-4 py-2 bg-gradient-to-t from-[#070912]/90 to-transparent ${barFade}`
+    : compact
+      ? 'flex items-center gap-2 px-3 py-2 border-t border-slate-800/80 bg-[#0a0d18]/90'
+      : 'flex items-center gap-3 px-6 py-3 border-t border-slate-800/80 bg-[#0a0d18]/90';
+  // Previous and next are 36 px on a desktop and 44 px on a phone.
+  const stepClass = `${compact ? 'w-11 h-11' : 'w-9 h-9'} shrink-0 flex items-center justify-center rounded-full bg-slate-800/80 border border-slate-700/40 text-slate-200 hover:bg-slate-700 hover:text-white disabled:opacity-25 disabled:hover:bg-slate-800/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60`;
+  const viewButtonClass = compact ? 'px-3 h-11' : 'px-3 py-1';
   const theme = themeForEra(battle.era);
 
   return (
-    <div className="fixed inset-0 bg-[#070912] z-50 flex flex-col" style={{ animation: 'replay-fade-in 280ms ease-out forwards' }}>
+    <div
+      className="fixed inset-0 bg-[#070912] z-50 flex flex-col"
+      style={{ animation: 'replay-fade-in 280ms ease-out forwards' }}
+      onPointerDown={wakeChrome}
+      onPointerMove={sideways && !chromeAwake ? wakeChrome : undefined}
+    >
       <style>{`
         @keyframes replay-fade-in {
           from { opacity: 0; }
@@ -611,14 +658,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
 
       {/* Top bar */}
       {/* The left padding clears the app's fixed home row (home pill and
-          Support Ukraine button). On a phone the row sits above the header
-          content instead. */}
-      <header
-        className="flex items-center justify-between px-6 py-3 pl-[340px] max-sm:pl-4 max-sm:pt-[62px] max-sm:flex-wrap max-sm:gap-2 border-b border-slate-800/80 bg-[#0a0d18]/90"
-      >
-        <div className="flex items-center gap-3 min-w-0">
+          Support Ukraine button). On a phone in portrait the row sits above
+          the header content instead. */}
+      <header className={headerClass}>
+        <div className={compact ? 'flex flex-col min-w-0 flex-1' : 'flex items-center gap-3 min-w-0'}>
           <span
-            className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
+            className={`${compact ? 'hidden' : ''} text-[10px] font-semibold uppercase tracking-[0.18em] ${
               replay.schematic ? 'text-amber-400/90' : 'text-blue-400/90'
             }`}
             title={
@@ -635,25 +680,27 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
               narration. Pulls from the battle's date_start / year combo via
               the shared formatter. */}
           <span
-            className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-slate-800/70 border border-slate-700/60 text-[11px] font-semibold tracking-[0.04em] text-slate-200 whitespace-nowrap"
+            className={compact
+              ? 'text-[12px] text-slate-300 truncate'
+              : 'inline-flex items-center gap-1 h-6 px-2 rounded-full bg-slate-800/70 border border-slate-700/60 text-[11px] font-semibold tracking-[0.04em] text-slate-200 whitespace-nowrap'}
             title="When this battle was fought"
           >
             {formatBattleDate(battle.date, battle.year) || (battle.year ? String(battle.year) : '')}
           </span>
-          {battle.war && (
+          {battle.war && !compact && (
             <span className="hidden md:inline text-[11px] text-slate-500 truncate max-w-[20ch]" title={battle.war}>
               · {battle.war}
             </span>
           )}
-          {replay.battlefieldDesc && (
+          {replay.battlefieldDesc && !compact && (
             <span className="hidden lg:block text-xs text-slate-500 truncate max-w-[34ch]">· {replay.battlefieldDesc}</span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Export the replay as a video. Restarts from phase one so the
               take is complete, records the composited stage, and saves on
-              the outro (or on click while recording). */}
-          {view === 'surface' && recordingSupported() && (
+              the outro (or on click while recording). Desktop only. */}
+          {view === 'surface' && !compact && recordingSupported() && (
             <button
               onClick={recording ? () => void finishRecording() : startRecording}
               className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-full border transition-colors ${
@@ -676,25 +723,26 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             href={`https://earth.google.com/web/@${battle.lat},${battle.lng},0a,8000d,35y,0h,55t,0r`}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-1 inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25 hover:border-emerald-400 transition-colors"
+            className={`ml-1 inline-flex items-center justify-center gap-1.5 ${compact ? 'w-11 h-11' : 'h-8 px-3'} rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25 hover:border-emerald-400 transition-colors`}
             title="Open this battlefield in Google Earth (new tab)"
+            aria-label="Open in Google Earth"
           >
             <span className="text-[13px] leading-none">🌍</span>
-            <span className="text-xs font-semibold tracking-wide">Earth</span>
+            {!compact && <span className="text-xs font-semibold tracking-wide">Earth</span>}
           </a>
           <div className="ml-1">
-            <CloseButton onClick={onClose} label="Exit replay (Esc)" tone="elevated" />
+            <CloseButton onClick={onClose} label="Exit replay (Esc)" tone="elevated" large={compact} />
           </div>
         </div>
       </header>
 
       {/* Main */}
-      <div className="flex-1 flex min-h-0">
+      <div className={`flex-1 flex min-h-0 ${sideways ? 'relative' : compact ? 'flex-col' : ''}`}>
         {/* Battle stage: globe-based view by default, with the tactical SVG
             available as a fallback toggle. The globe puts the action in real
             geography so the viewer sees Belgium, the Ardennes, the Channel,
             etc. when watching Battle of France, not an abstract grid. */}
-        <div className="flex-1 flex items-center justify-center p-2 relative">
+        <div className={`flex-1 min-h-0 flex items-center justify-center relative ${sideways ? '' : 'p-2'}`}>
           <div ref={stageRef} className="w-full h-full relative">
             {view === 'surface' ? (
               <TacticalSurface
@@ -796,26 +844,28 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 cinematicMode={cinematicMode}
                 onAdvanceNext={onAdvanceNext}
                 onAdvancePrev={onAdvancePrev}
+                clearBars={sideways}
               />
             )}
 
-            {/* View toggle (pinned bottom-left over the stage). */}
-            <div className="absolute bottom-3 left-3 flex bg-black/60 border border-white/10 rounded-full overflow-hidden text-[10px] uppercase tracking-wider">
+            {/* View toggle (pinned bottom-left over the stage). Sideways it
+                rides above the floating footer and fades with it. */}
+            <div className={`absolute left-3 ${sideways ? `bottom-[68px] ${ended ? 'hidden' : barFade}` : 'bottom-3'} flex bg-black/60 border border-white/10 rounded-full overflow-hidden text-[10px] uppercase tracking-wider`}>
               <button
                 onClick={() => setView('surface')}
-                className={`px-3 py-1 transition-colors ${
+                className={`${viewButtonClass} transition-colors ${
                   view === 'surface' ? 'bg-emerald-500/40 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >Surface</button>
               <button
                 onClick={() => setView('globe')}
-                className={`px-3 py-1 transition-colors ${
+                className={`${viewButtonClass} transition-colors ${
                   view === 'globe' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >Globe</button>
               <button
                 onClick={() => setView('tactical')}
-                className={`px-3 py-1 transition-colors ${
+                className={`${viewButtonClass} transition-colors ${
                   view === 'tactical' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >Schematic</button>
@@ -863,10 +913,17 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
 
         {/* Narration sidebar. Hidden while the replay plays so the stage
             fills the viewport; the stage carries the phase title slate and
-            the narration is spoken. Pause or the outro brings it back. */}
-        {!cinema && (
-        <aside className="w-[360px] max-w-[40vw] border-l border-slate-800 bg-[#0c101c] flex flex-col">
-          <div className="p-6 overflow-y-auto flex-1">
+            the narration is spoken. Pause or the outro brings it back,
+            except on a sideways phone, where the outro card owns the stage. */}
+        {!cinema && !(sideways && ended) && (
+        <aside
+          className={sideways
+            ? 'absolute right-0 top-[60px] bottom-[60px] z-10 w-[300px] max-w-[40vw] border-l border-slate-800 bg-[#0c101c]/95 flex flex-col'
+            : compact
+              ? 'w-full h-[45%] border-t border-slate-800 bg-[#0c101c] flex flex-col'
+              : 'w-[360px] max-w-[40vw] border-l border-slate-800 bg-[#0c101c] flex flex-col'}
+        >
+          <div className={`${compact ? 'p-4' : 'p-6'} overflow-y-auto flex-1 min-h-0`}>
             {/* Sides legend. Always at the top of the sidebar so the user
                 can map arrow color to faction at a glance while watching
                 the action. The header bar shows the same info but it can
@@ -917,7 +974,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
               shows its index, the phase title (truncated), and the time
               marker when available. The active chapter has a flag in the
               era accent so the eye locks onto it without effort. */}
-          <div className="border-t border-slate-800 p-4 space-y-3">
+          <div className={`border-t border-slate-800 ${compact ? 'p-3 space-y-2' : 'p-4 space-y-3'}`}>
             <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 flex items-center justify-between">
               <span>Chapters</span>
               <span className="tabular-nums text-slate-600">{phaseIdx + 1} / {replay.phases.length}</span>
@@ -985,7 +1042,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             </div>
             <button
               onClick={onClose}
-              className="w-full h-10 rounded-full text-[13px] font-semibold tracking-wide transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
+              className={`w-full ${compact ? 'h-11' : 'h-10'} rounded-full text-[13px] font-semibold tracking-wide transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40`}
               style={{
                 background: phaseIdx === replay.phases.length - 1 ? `${theme.accent}26` : `${theme.accent}14`,
                 color: phaseIdx === replay.phases.length - 1 ? '#fff' : '#e2e8f0',
@@ -1004,11 +1061,11 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           glyphs the previous version used so the controls read as crafted
           chrome rather than shareware. The active state hugs the era accent
           so the bar coheres with everything else inside the replay. */}
-      <footer className="flex items-center gap-3 px-6 py-3 border-t border-slate-800/80 bg-[#0a0d18]/90">
+      <footer className={footerClass}>
         <button
           onClick={() => goto(phaseIdx - 1)}
           disabled={phaseIdx === 0}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800/80 border border-slate-700/40 text-slate-200 hover:bg-slate-700 hover:text-white disabled:opacity-25 disabled:hover:bg-slate-800/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
+          className={stepClass}
           title="Previous (←)"
           aria-label="Previous chapter"
         >
@@ -1018,7 +1075,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         </button>
         <button
           onClick={() => setPlaying((p) => !p)}
-          className="w-11 h-11 flex items-center justify-center rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0d18]"
+          className="w-11 h-11 shrink-0 flex items-center justify-center rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0d18]"
           style={{
             background: `${theme.accent}33`,
             border: `1px solid ${theme.accent}77`,
@@ -1037,7 +1094,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         <button
           onClick={() => goto(phaseIdx + 1)}
           disabled={phaseIdx >= replay.phases.length - 1}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800/80 border border-slate-700/40 text-slate-200 hover:bg-slate-700 hover:text-white disabled:opacity-25 disabled:hover:bg-slate-800/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
+          className={stepClass}
           title="Next (→)"
           aria-label="Next chapter"
         >
@@ -1046,7 +1103,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           </svg>
         </button>
 
-        <div className="flex-1 px-3">
+        <div className={`flex-1 min-w-0 ${compact ? 'px-1' : 'px-3'}`}>
           <TransportScrubber
             phases={replay.phases}
             phaseIdx={phaseIdx}
@@ -1058,8 +1115,18 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           />
         </div>
 
+        {compact ? (
+          <button
+            onClick={() => setSpeed((s) => SPEEDS[(SPEEDS.indexOf(s) + 1) % SPEEDS.length])}
+            className="w-11 h-11 shrink-0 rounded-full bg-slate-800/70 border border-slate-700/40 text-[12px] font-semibold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/50"
+            title="Playback speed, tap to change"
+            aria-label={`Playback speed ${speed}×`}
+          >
+            {speed}×
+          </button>
+        ) : (
         <div className="flex items-center gap-1.5 bg-slate-800/70 border border-slate-700/40 rounded-full p-0.5">
-          {([0.5, 1, 1.5, 2] as const).map((s) => (
+          {SPEEDS.map((s) => (
             <button
               key={s}
               onClick={() => setSpeed(s)}
@@ -1075,6 +1142,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             </button>
           ))}
         </div>
+        )}
       </footer>
     </div>
   );
@@ -1319,9 +1387,12 @@ interface BattleOutroProps {
   // cinematic actually moves rather than just dismissing this card.
   onAdvanceNext?: () => void;
   onAdvancePrev?: () => void;
+  // clearBars keeps the card between the floating header and footer of a
+  // sideways phone replay.
+  clearBars?: boolean;
 }
 
-function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinematicMode = false, onAdvanceNext, onAdvancePrev }: BattleOutroProps) {
+function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinematicMode = false, onAdvanceNext, onAdvancePrev, clearBars = false }: BattleOutroProps) {
   void replay;
   const victor = (battle.victor || '').trim();
   const sides = battle.sides || [];
@@ -1358,7 +1429,7 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinemati
 
   return (
     <div
-      className="pointer-events-auto absolute inset-0 flex items-center justify-center px-6"
+      className={`pointer-events-auto absolute inset-0 flex items-center justify-center px-6 ${clearBars ? 'pt-[60px] pb-[60px]' : ''}`}
       style={{ animation: 'outro-veil-in 600ms ease-out both' }}
     >
       {/* Dual-layer backdrop. First layer is a near-black wash that drops the
@@ -1381,7 +1452,7 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinemati
         }}
       />
 
-      <div className="relative w-full max-w-[820px] max-h-[92vh] overflow-y-auto px-1 py-6">
+      <div className={`relative w-full max-w-[820px] ${clearBars ? 'max-h-full' : 'max-h-[92vh]'} overflow-y-auto px-1 py-6`}>
         {/* Top accent: a thin era-colored hairline with a soft glow, like the
             opening of a film frame. */}
         <div

@@ -23,10 +23,11 @@ import { disableSound, soundEnabled, setSoundEra } from './audio/sound';
 import { usePauseOnHidden } from './hooks/usePauseOnHidden';
 import { COMPACT_QUERY, useIsPhone, useMediaQuery } from './hooks/useIsPhone';
 import { useCurrentWars } from './lib/current-wars';
-import { PHONE_CHIP_ROW_BOTTOM, PHONE_ROW3_TOP } from './lib/phoneLayout';
+import { PHONE_CHIP_ROW_BOTTOM, PHONE_ROW3_HEIGHT, PHONE_ROW3_TOP } from './lib/phoneLayout';
 import { OVERLAY_ROW_TOP } from './lib/overlayChrome';
-import type { ImageryStage } from './lib/globe/imagery';
+import { useImageryReady, type ImageryStage } from './lib/globe/imagery';
 import SupportUkraineButton from './components/SupportUkraineButton';
+import LoadingSliver from './components/LoadingSliver';
 import ImageryAttribution, { ImageryCreditChip } from './components/globe/ImageryAttribution';
 
 // The war panel and the battle replay stack (maplibre-gl, deck.gl, the
@@ -261,9 +262,14 @@ export default function App() {
   const phone = useIsPhone();
   // compact covers a phone held either way, where tap targets are 44 px.
   const compact = useMediaQuery(COMPACT_QUERY);
+  // sideways is a phone held in landscape: compact by height, not by width.
+  const sideways = compact && !phone;
   // imageryStage is the globe imagery source, reported by the globe so the
   // credit on screen names the imagery actually drawn.
   const [imageryStage, setImageryStage] = useState<ImageryStage>('tiles');
+  // imageryReady flips once the first globe imagery has painted, which clears
+  // the first-load globe cue.
+  const imageryReady = useImageryReady();
   // visibleCount is how many battles the globe draws, reported by it.
   const [visibleCount, setVisibleCount] = useState(0);
   // historyMode is true whenever the user is in the play-history overlay,
@@ -938,25 +944,14 @@ export default function App() {
             From Megiddo to Mariupol
           </p>
 
-          {/* Indeterminate progress sliver. Stays subtle so the headline
-              owns the frame; reads as "machinery turning over." */}
-          <div
-            className="mt-10 mx-auto rounded-full overflow-hidden"
-            style={{
-              width: 'min(320px, 100%)',
-              height: 2,
-              background: 'rgba(148,163,184,0.16)',
-            }}
-          >
+          <div className="mt-10" data-loading>
+            <LoadingSliver width="min(320px, 100%)" />
             <div
-              className="h-full rounded-full"
-              style={{
-                width: '32%',
-                background: 'linear-gradient(90deg, transparent 0%, #93c5fd 50%, transparent 100%)',
-                animation: 'splash-progress 2400ms ease-in-out infinite',
-                boxShadow: '0 0 18px rgba(147,197,253,0.5)',
-              }}
-            />
+              className="mt-3 uppercase"
+              style={{ fontSize: 11, letterSpacing: '0.3em', color: 'rgba(203,213,225,0.85)' }}
+            >
+              Loading battles
+            </div>
           </div>
         </div>
 
@@ -964,10 +959,6 @@ export default function App() {
           @keyframes splash-bloom {
             0%, 100% { opacity: 0.6; transform: scale(1); }
             50%      { opacity: 0.95; transform: scale(1.05); }
-          }
-          @keyframes splash-progress {
-            0%   { transform: translateX(-110%); }
-            100% { transform: translateX(310%); }
           }
         `}</style>
       </div>
@@ -1083,6 +1074,35 @@ export default function App() {
           is a chip in the bottom row instead, so the strip never sits on
           the timeline. */}
       {!phone && <ImageryAttribution stage={imageryStage} position="fixed" />}
+
+      {/* First-load globe cue. The globe draws before its imagery arrives,
+          so this pill says it is still loading until the first tiles paint.
+          It sits below the landing toggle on desktop and below the third
+          header row on a phone, above the intro veil (z 40) so first visits
+          see it too. On a phone held sideways the intro fills the screen, so
+          the pill waits for the intro to close and then sits in the left
+          column under the mode rail. It never takes a pointer. */}
+      {!imageryReady && !overlayRow && !(sideways && introVisible) && (
+        <div
+          data-loading
+          role="status"
+          aria-live="polite"
+          className={`fixed z-[45] pointer-events-none rounded-full backdrop-blur-md px-4 pt-2 pb-2.5 ${sideways ? 'left-6' : 'left-1/2 -translate-x-1/2'}`}
+          style={{
+            top: phone ? PHONE_ROW3_TOP + PHONE_ROW3_HEIGHT + 12 : sideways ? 172 : 84,
+            background: 'rgba(10,12,18,0.7)',
+            border: '1px solid rgba(148,163,184,0.25)',
+          }}
+        >
+          <div
+            className="mb-1.5 uppercase whitespace-nowrap text-center"
+            style={{ fontSize: 10, letterSpacing: '0.28em', color: 'rgba(203,213,225,0.85)' }}
+          >
+            Loading the globe
+          </div>
+          <LoadingSliver width={128} />
+        </div>
+      )}
 
       {/* Landing-mode toggle. Sits at the top-center while the dramatic
           mode globe is showing so the user can flip between "current

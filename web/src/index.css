@@ -193,3 +193,11 @@ html, body, #root {
     scroll-behavior: auto !important;
   }
 }
+
+/* loading-sliver sweeps the indeterminate bar across its track. The boot
+ * loader in index.html carries its own copy, since in dev this sheet is
+ * injected by script after the boot loader paints. */
+@keyframes loading-sliver {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(310%); }
+}

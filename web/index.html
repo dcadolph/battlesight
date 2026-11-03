@@ -8,9 +8,48 @@
     <link rel="preload" as="image" href="https://flagcdn.com/h60/us.png" crossorigin />
     <link rel="preload" as="image" href="https://flagcdn.com/h60/fr.png" crossorigin />
     <title>BattleSight</title>
+    <!-- The boot loader paints with the HTML, before the app bundle runs.
+         React replaces it when the app mounts and its own splash takes over. -->
+    <style>
+      html, body { margin: 0; height: 100%; background: #06070d; }
+      #boot-loader {
+        position: fixed; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; background: #06070d;
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+      #boot-loader .kicker {
+        font-size: 11px; font-weight: 600; letter-spacing: 0.55em; text-transform: uppercase;
+        color: #93c5fd; text-shadow: 0 0 24px rgba(147, 197, 253, 0.35);
+      }
+      #boot-loader .track {
+        margin-top: 28px; width: min(320px, 80vw); height: 3px; border-radius: 9999px;
+        overflow: hidden; background: rgba(148, 163, 184, 0.24);
+      }
+      #boot-loader .bar {
+        width: 32%; height: 100%; border-radius: 9999px;
+        background: linear-gradient(90deg, transparent 0%, #93c5fd 50%, transparent 100%);
+        box-shadow: 0 0 18px rgba(147, 197, 253, 0.5);
+        animation: boot-sliver 2400ms ease-in-out infinite;
+      }
+      #boot-loader .label {
+        margin-top: 12px; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+        color: rgba(203, 213, 225, 0.85);
+      }
+      @keyframes boot-sliver {
+        0% { transform: translateX(-110%); }
+        100% { transform: translateX(310%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot-loader .bar { animation: none; transform: translateX(100%); }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div id="boot-loader" role="status" aria-live="polite" data-loading>
+      <div class="kicker">Battle Sight</div>
+      <div class="track" aria-hidden="true"><div class="bar"></div></div>
+      <div class="label">Loading</div>
+    </div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

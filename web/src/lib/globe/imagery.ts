@@ -84,6 +84,64 @@ function subscribeTilesFailed(fn: () => void): () => void {
   return () => listeners.delete(fn);
 }
 
+// IMAGERY_READY_CAP_MS bounds how long the first-load imagery cue can stay up
+// when no tile ever finishes, so the cue can never stick.
+const IMAGERY_READY_CAP_MS = 30_000;
+
+// imageryReady records that the first globe imagery painted. It never resets
+// in a session, so the cue shows on first load only.
+let imageryReady = false;
+// readyWatcherInstalled guards the one-time loading manager hook.
+let readyWatcherInstalled = false;
+// readyListeners are notified once when imageryReady flips.
+const readyListeners = new Set<() => void>();
+
+// markImageryReady flips imageryReady once and notifies its subscribers.
+function markImageryReady(): void {
+  if (imageryReady) return;
+  imageryReady = true;
+  readyListeners.forEach((fn) => fn());
+}
+
+// installImageryReadyWatcher marks imagery ready the first time three.js's
+// default loading manager drains its queue after at least one imagery tile
+// loaded. A drained queue means every texture requested so far, tiles and
+// globe dressing alike, is on the sphere.
+function installImageryReadyWatcher(): void {
+  if (readyWatcherInstalled) return;
+  readyWatcherInstalled = true;
+  const manager = THREE.DefaultLoadingManager;
+  const failedTiles = new Set<string>();
+  let tileLoaded = false;
+  const previousError = manager.onError;
+  manager.onError = (url: string) => {
+    previousError?.call(manager, url);
+    if (url.startsWith(IMAGERY_TILE_PREFIX)) failedTiles.add(url);
+  };
+  const previousProgress = manager.onProgress;
+  manager.onProgress = (url: string, loaded: number, total: number) => {
+    previousProgress?.call(manager, url, loaded, total);
+    if (url.startsWith(IMAGERY_TILE_PREFIX) && !failedTiles.has(url)) tileLoaded = true;
+    if (tileLoaded && loaded === total) markImageryReady();
+  };
+  setTimeout(() => {
+    if (imageryReady) return;
+    console.warn(`globe imagery: not ready after ${IMAGERY_READY_CAP_MS / 1000} s: clearing the loading cue`);
+    markImageryReady();
+  }, IMAGERY_READY_CAP_MS);
+}
+
+// subscribeImageryReady registers fn for the imageryReady flip.
+function subscribeImageryReady(fn: () => void): () => void {
+  readyListeners.add(fn);
+  return () => readyListeners.delete(fn);
+}
+
+// useImageryReady reports whether the first globe imagery has painted.
+export function useImageryReady(): boolean {
+  return useSyncExternalStore(subscribeImageryReady, () => imageryReady);
+}
+
 // TileEngine is the slice of the three-slippy-map-globe instance this app
 // touches: the group that receives tile meshes, and its level controls.
 export type TileEngine = THREE.Object3D & { thresholds: number[]; maxLevel: number };
@@ -182,6 +240,7 @@ export function useGlobeImagery(globeRef: { current: GlobeMethods | undefined })
   stage: ImageryStage;
 } {
   installTileErrorWatcher();
+  installImageryReadyWatcher();
   const failed = useSyncExternalStore(subscribeTilesFailed, () => tilesFailed);
   const [stockReady, setStockReady] = useState(false);
 
@@ -204,6 +263,9 @@ export function useGlobeImagery(globeRef: { current: GlobeMethods | undefined })
   }, [failed, stockReady, globeRef]);
 
   const stage: ImageryStage = !failed ? 'tiles' : stockReady ? 'stock' : 'loading';
+  useEffect(() => {
+    if (stage === 'stock') markImageryReady();
+  }, [stage]);
   return {
     stage,
     props: {

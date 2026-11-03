@@ -84,14 +84,18 @@ function subscribeTilesFailed(fn: () => void): () => void {
   return () => listeners.delete(fn);
 }
 
+// TileEngine is the slice of the three-slippy-map-globe instance this app
+// touches: the group that receives tile meshes, and its level controls.
+export type TileEngine = THREE.Object3D & { thresholds: number[]; maxLevel: number };
+
 // tileEngineOf finds the three-slippy-map-globe instance in the scene. It is
 // the only object carrying both a thresholds array and a maxLevel.
-function tileEngineOf(scene: THREE.Scene): { thresholds: number[]; maxLevel: number } | undefined {
-  let found: { thresholds: number[]; maxLevel: number } | undefined;
+export function tileEngineOf(scene: THREE.Scene): TileEngine | undefined {
+  let found: TileEngine | undefined;
   scene.traverse((obj) => {
-    const o = obj as unknown as { thresholds?: unknown; maxLevel?: unknown };
+    const o = obj as Partial<TileEngine>;
     if (!found && Array.isArray(o.thresholds) && typeof o.maxLevel === 'number') {
-      found = o as { thresholds: number[]; maxLevel: number };
+      found = obj as TileEngine;
     }
   });
   return found;

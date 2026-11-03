@@ -156,6 +156,10 @@ function battleMagnitude(b: Battle): number {
 export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, warFactionAnchors, warSnapshotYear, landingMode = 'current', currentWars = EMPTY_WARS, onVisibleCount, paused = false }: PersistentGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const imagery = useGlobeImagery(globeRef);
+  // The stock look takes over once the imagery fallback shows the textured sphere.
+  useEffect(() => {
+    if (imagery.stage === 'stock') enhanceGlobe(globeRef.current, 'stock');
+  }, [imagery.stage]);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
 

@@ -269,6 +269,10 @@ function unitsMoved(prev: ProjectedUnit[] | null, next: ProjectedUnit[]): boolea
 export default function GlobeReplay({ battle, replay, phase, phaseIdx, warCountryColors, warFactionAnchors, warSnapshotYear, onSceneReady }: GlobeReplayProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const imagery = useGlobeImagery(globeRef);
+  // The stock look takes over once the imagery fallback shows the textured sphere.
+  useEffect(() => {
+    if (imagery.stage === 'stock') enhanceGlobe(globeRef.current, 'stock');
+  }, [imagery.stage]);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);

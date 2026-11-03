@@ -43,7 +43,14 @@ The Share button in the battle panel copies a deep link to the clipboard.
   hides the dossier while it plays. Closing the replay brings the
   dossier back where it was.
 
+![Battle of the Bulge replay filling the desktop browser window](assets/battlesight-desktop-replay.png)
+
 ## On a phone
+
+![Landing view on a phone held upright](assets/battlesight-phone-landing.png){ width="260" }
+![World War II war pane as a bottom sheet on a phone held upright](assets/battlesight-phone-war-pane.png){ width="260" }
+
+![Battle of the Bulge replay playing on a phone held sideways](assets/battlesight-phone-replay-sideways.png)
 
 - Replay controls, war pane controls, and the landing controls held
   upright are at least 44 px tall for touch.

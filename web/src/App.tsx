@@ -1188,17 +1188,21 @@ export default function App() {
           the globe directly, not while a war story or history sweep is on
           screen. Both of those have their own primary panels and rendering
           BattlePanel on top of them caused the right column to flicker as
-          focus changed. */}
+          focus changed. While a replay plays the dossier is hidden and inert
+          but stays mounted, so closing the replay restores it where the
+          viewer left it. */}
       {selectedBattle && !panelDismissed && !showPlayback && !historyMode && (
-        <Suspense fallback={null}>
-          <BattlePanel
-            battle={selectedBattle}
-            onClose={handleClosePanel}
-            onWatchReplay={handleWatchReplay}
-            onShare={handleShareSelected}
-            onCommanderClick={setCommanderQuery}
-          />
-        </Suspense>
+        <div className="contents" inert={!!replayBattle} style={replayBattle ? { visibility: 'hidden' } : undefined}>
+          <Suspense fallback={null}>
+            <BattlePanel
+              battle={selectedBattle}
+              onClose={handleClosePanel}
+              onWatchReplay={handleWatchReplay}
+              onShare={handleShareSelected}
+              onCommanderClick={setCommanderQuery}
+            />
+          </Suspense>
+        </div>
       )}
 
       {commanderQuery && (

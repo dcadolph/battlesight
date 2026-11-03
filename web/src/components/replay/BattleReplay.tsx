@@ -95,11 +95,15 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   // chapterRailRef scrolls the active chapter card into view on phase
   // change so the current chapter is never clipped off the rail's edge.
   const chapterRailRef = useRef<HTMLDivElement | null>(null);
+  // cinema is true while the replay runs. The stage then takes the full
+  // width of the viewport and the narration sidebar, rail included, steps
+  // aside, so the rail scroll re-runs when it mounts again.
+  const cinema = playing && !ended;
   useEffect(() => {
     const rail = chapterRailRef.current;
     const card = rail?.children[phaseIdx] as HTMLElement | undefined;
     card?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-  }, [phaseIdx]);
+  }, [phaseIdx, cinema]);
   // Honour the OS-level "Reduce motion" preference: phase timer collapses
   // to the next phase with no dwell so the user steps through frames
   // rather than waiting on animated transitions. Decorative pulse keyframes
@@ -857,7 +861,10 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           </div>
         </div>
 
-        {/* Narration sidebar */}
+        {/* Narration sidebar. Hidden while the replay plays so the stage
+            fills the viewport; the stage carries the phase title slate and
+            the narration is spoken. Pause or the outro brings it back. */}
+        {!cinema && (
         <aside className="w-[360px] max-w-[40vw] border-l border-slate-800 bg-[#0c101c] flex flex-col">
           <div className="p-6 overflow-y-auto flex-1">
             {/* Sides legend. Always at the top of the sidebar so the user
@@ -990,6 +997,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             </button>
           </div>
         </aside>
+        )}
       </div>
 
       {/* Transport bar. SVG icons replace the angle-bracket and unicode play

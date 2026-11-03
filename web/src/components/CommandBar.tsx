@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Battle } from '../types/battle';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 import { formatYear } from '../lib/format';
-import { useIsPhone } from '../hooks/useIsPhone';
+import { COMPACT_QUERY, useIsPhone, useMediaQuery } from '../hooks/useIsPhone';
 import { PHONE_ROW3_HEIGHT, PHONE_ROW3_TOP } from '../lib/phoneLayout';
 import SupportUkraineButton from './SupportUkraineButton';
 
@@ -94,6 +94,9 @@ export default function CommandBar({
   hideMasthead = false,
 }: CommandBarProps) {
   const phone = useIsPhone();
+  // compact covers a phone held either way. Only wider screens move the
+  // Support Ukraine button out of the masthead to the top-right corner.
+  const compact = useMediaQuery(COMPACT_QUERY);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Battle[]>([]);
   const [warResults, setWarResults] = useState<NameCount[]>([]);
@@ -221,7 +224,9 @@ export default function CommandBar({
           dashboard navbar. Tight tracking, hairline dividers, single
           accent. The vertical rhythm is the same 8px grid throughout. */}
       {/* On a phone the masthead is its own row: wordmark left, the
-          Support Ukraine button right, nothing positioned over either. */}
+          Support Ukraine button right, nothing positioned over either.
+          Screens wider and taller than a phone put the button in the
+          top-right corner, rendered by App. */}
       {!hideMasthead && <div
         className={phone
           ? 'fixed top-3 left-4 right-4 z-[45] flex items-center justify-between gap-3 select-none'
@@ -265,7 +270,7 @@ export default function CommandBar({
           )}
         </span>
       </button>
-      <SupportUkraineButton />
+      {compact && <SupportUkraineButton />}
       </div>}
 
       {/* Search. z-[100] so its dropdown floats above the mode rail (z-30).

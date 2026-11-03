@@ -849,6 +849,9 @@ export default function App() {
   // overlayRow is true while an overlay owns the screen and the home pill and
   // the Support Ukraine button hold the top corners in place of the masthead.
   const overlayRow = !introVisible && (!!replayBattle || showPlayback || historyMode);
+  // dossierOpen mirrors the BattlePanel mount below while it is visible, so
+  // the corner Support Ukraine button can step left of the right-edge panel.
+  const dossierOpen = !!selectedBattle && !panelDismissed && !showPlayback && !historyMode && !replayBattle;
 
   // Effective year window: during history playback this is a trailing range
   // from the very start of recorded history up to the current playhead, so
@@ -1395,6 +1398,19 @@ export default function App() {
             <SupportUkraineButton />
           </div>
         </>
+      )}
+
+      {/* The Support Ukraine button on the bare globe, in the same corner it
+          holds over overlays. On a phone held either way it lives in the
+          masthead row instead. While the desktop dossier is open on the right edge, the
+          button steps left of it so neither covers the other. */}
+      {!compact && !overlayRow && (
+        <div
+          className="fixed z-[45]"
+          style={{ top: OVERLAY_ROW_TOP, right: dossierOpen ? 'calc(min(420px, 90vw) + 12px)' : 12 }}
+        >
+          <SupportUkraineButton />
+        </div>
       )}
 
       {introVisible && featured && (

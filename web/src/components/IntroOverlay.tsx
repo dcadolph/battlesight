@@ -4,7 +4,8 @@ import { ERA_COLORS, ERA_LABELS } from '../types/battle';
 import { themeForEra } from '../theme/era';
 import { formatYear } from '../lib/format';
 import CloseButton from './CloseButton';
-import { useIsPhone } from '../hooks/useIsPhone';
+import { COMPACT_QUERY, useIsPhone, useMediaQuery } from '../hooks/useIsPhone';
+import { OVERLAY_BAND } from '../lib/overlayChrome';
 
 interface IntroOverlayProps {
   featured: Battle;
@@ -71,6 +72,9 @@ export default function IntroOverlay({ featured, onDismiss, onStart }: IntroOver
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const [stats, setStats] = useState<CatalogStats | null>(null);
   const phone = useIsPhone();
+  // compact keeps the exit in the corner on a phone held sideways, where the
+  // Support Ukraine button sits in the masthead instead of the corner.
+  const compact = useMediaQuery(COMPACT_QUERY);
 
   useEffect(() => {
     let cancelled = false;
@@ -192,8 +196,9 @@ export default function IntroOverlay({ featured, onDismiss, onStart }: IntroOver
         }}
       />
 
-      {/* Top-right exit. */}
-      <div className="absolute top-5 right-5 z-10">
+      {/* Top-right exit. On wide screens it sits below the band the
+          Support Ukraine pill owns. */}
+      <div className={`absolute z-10 ${compact ? 'top-5 right-5' : 'right-3'}`} style={compact ? undefined : { top: OVERLAY_BAND }}>
         <CloseButton onClick={onDismiss} label="Close intro (Esc)" tone="elevated" />
       </div>
 

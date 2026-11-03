@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ERA_COLORS, ERA_LABELS } from '../types/battle';
-import { useIsPhone } from '../hooks/useIsPhone';
+import { COMPACT_QUERY, useIsPhone, useMediaQuery } from '../hooks/useIsPhone';
+import { OVERLAY_BAND } from '../lib/overlayChrome';
 
 interface EraLegendProps {
   // selectedEra is the currently active era filter, "" when none.
@@ -26,7 +27,7 @@ const ERA_ORDER = [
 ];
 
 // EraLegend is the globe's chromatic key. Nine era chips stacked at the
-// top right of the viewport, each showing its color, label, and acting as
+// top right of the viewport (under the Support Ukraine pill on wide screens), each showing its color, label, and acting as
 // a one-click filter. Clicking the active era clears the filter. Hidden
 // behind any open right-side panel so it never competes with the dossier
 // or war card; visible whenever the user is browsing the bare globe. On a
@@ -34,11 +35,15 @@ const ERA_ORDER = [
 // its parent, and opens upward on a tap.
 export default function EraLegend({ selectedEra, onSelect }: EraLegendProps) {
   const phone = useIsPhone();
+  // compact keeps the legend at the very top on a phone held sideways, where
+  // the Support Ukraine button stays in the masthead and height is short.
+  const compact = useMediaQuery(COMPACT_QUERY);
   const [open, setOpen] = useState(false);
   const expanded = !phone || open;
   return (
     <div
-      className={phone ? 'relative select-none' : 'fixed top-4 right-5 z-20 select-none'}
+      className={phone ? 'relative select-none' : compact ? 'fixed top-4 right-5 z-20 select-none' : 'fixed right-3 z-20 select-none'}
+      style={phone || compact ? undefined : { top: OVERLAY_BAND }}
       role="group"
       aria-label="Era legend; click to filter the globe by era"
     >

@@ -5,9 +5,11 @@ import * as THREE from 'three';
 import { HI_RES_EARTH, TOPOLOGY_BUMP } from '../../data/cities';
 
 // IMAGERY_LAYER is the EOX Sentinel-2 cloudless WMTS layer the globe streams.
-// The 2017 layer is the newest one EOX publishes under CC BY 4.0. Later years
-// carry a non-commercial share-alike license and are not used.
-export const IMAGERY_LAYER = 's2cloudless-2017_3857';
+// EOX publishes the 2016 and 2017 layers under CC BY 4.0 and later years under
+// a non-commercial share-alike license, which is not used. The 2017 layer is
+// not a global mosaic: it serves blank white tiles over much of Africa and
+// Asia. The 2016 layer covers the whole planet.
+export const IMAGERY_LAYER = 's2cloudless_3857';
 
 // IMAGERY_TILE_PREFIX is the WMTS tile path up to the zoom level, in the Web
 // Mercator tile matrix set g.
@@ -23,7 +25,7 @@ export const earthTileUrl = (x: number, y: number, level: number): string =>
 // string names.
 export const IMAGERY_ATTRIBUTION =
   'EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus ' +
-  'Sentinel data 2017) released under Creative Commons Attribution 4.0 International License.';
+  'Sentinel data 2016) released under Creative Commons Attribution 4.0 International License.';
 export const IMAGERY_LINKS = {
   eox: 'https://cloudless.eox.at',
   license: 'https://creativecommons.org/licenses/by/4.0/',

@@ -29,7 +29,7 @@ export default function ImageryAttribution({ stage, position }: ImageryAttributi
           <a className={linkClass} href={IMAGERY_LINKS.eox} target="_blank" rel="noopener noreferrer">
             https://cloudless.eox.at
           </a>{' '}
-          by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2017) released under{' '}
+          by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) released under{' '}
           <a className={linkClass} href={IMAGERY_LINKS.license} target="_blank" rel="noopener noreferrer">
             Creative Commons Attribution 4.0 International License
           </a>

@@ -94,14 +94,15 @@ licensed work. Each row inherits the license of the source it came from.
 
 ### Globe imagery: Sentinel-2 cloudless by EOX
 
-- **Source:** https://cloudless.eox.at, WMTS layer `s2cloudless-2017_3857`
+- **Source:** https://cloudless.eox.at, WMTS layer `s2cloudless_3857` (2016)
   at https://tiles.maps.eox.at (Web Mercator tile matrix set `g`)
 - **License:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-  The 2017 layer is the newest one EOX publishes under CC BY. Later years
-  are CC BY-NC-SA and are not used.
+  EOX publishes the 2016 and 2017 layers under CC BY and later years under
+  CC BY-NC-SA, which is not used. The 2017 layer serves blank white tiles
+  over much of Africa and Asia, so the globe uses the global 2016 layer.
 - **Attribution (verbatim from the WMTS capabilities):** EOxCloudless
   https://cloudless.eox.at by EOX IT Services GmbH (Contains modified
-  Copernicus Sentinel data 2017) released under Creative Commons Attribution
+  Copernicus Sentinel data 2016) released under Creative Commons Attribution
   4.0 International License.
 - **What we use:** Imagery tiles streamed onto both globes, up to zoom
   level 12. The attribution is shown on the globe and in the in-app credits

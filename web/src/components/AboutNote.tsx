@@ -70,7 +70,7 @@ export default function AboutNote() {
             <li>
               Globe imagery: EOxCloudless{' '}
               <CreditLink href={IMAGERY_LINKS.eox}>https://cloudless.eox.at</CreditLink> by EOX IT Services
-              GmbH (Contains modified Copernicus Sentinel data 2017) released under{' '}
+              GmbH (Contains modified Copernicus Sentinel data 2016) released under{' '}
               <CreditLink href={IMAGERY_LINKS.license}>
                 Creative Commons Attribution 4.0 International License
               </CreditLink>

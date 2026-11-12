@@ -201,3 +201,10 @@ html, body, #root {
   0% { transform: translateX(-110%); }
   100% { transform: translateX(310%); }
 }
+
+/* cue-in fades a loading cue in after a short delay, so a fast load never
+ * flashes it. */
+@keyframes cue-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

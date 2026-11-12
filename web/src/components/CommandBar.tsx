@@ -5,6 +5,7 @@ import { formatYear } from '../lib/format';
 import { COMPACT_QUERY, useIsPhone, useMediaQuery } from '../hooks/useIsPhone';
 import { PHONE_ROW3_HEIGHT, PHONE_ROW3_TOP } from '../lib/phoneLayout';
 import SupportUkraineButton from './SupportUkraineButton';
+import { loadCatalogStats, type CatalogStats, type NameCount } from '../lib/catalog-stats';
 
 // SEARCH_ALIASES rewrites well-known nicknames to a canonical query the
 // FTS index can match. Without this, "d-day" hits the Six-Day War (the
@@ -30,15 +31,6 @@ const SEARCH_ALIASES: Record<string, string> = {
   'the blitz': 'Britain',
 };
 
-interface NameCount { name: string; count: number; }
-interface StatsData {
-  totalBattles: number;
-  verifiedBattles: number;
-  replayCount: number;
-  eras: NameCount[];
-  wars: NameCount[];
-  battleTypes: NameCount[];
-}
 interface Filters { era: string; war: string; battleType: string; quality: string }
 
 interface CommandBarProps {
@@ -105,12 +97,12 @@ export default function CommandBar({
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [panel, setPanel] = useState<'none' | 'filters'>('none');
-  const [stats, setStats] = useState<StatsData | null>(null);
+  const [stats, setStats] = useState<CatalogStats | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    fetch('/api/battles/stats').then((r) => r.json()).then(setStats).catch(() => {});
+    loadCatalogStats().then(setStats).catch(() => {});
   }, []);
 
   const search = useCallback((q: string) => {

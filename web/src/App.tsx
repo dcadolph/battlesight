@@ -3,8 +3,9 @@ import PersistentGlobe from './components/globe/PersistentGlobe';
 import TimelineSlider from './components/TimelineSlider';
 // BattlePanel pulls in the ~2,100-entry media library; it only ever mounts
 // after a battle is selected, so lazy-load it to keep that data out of the
-// initial bundle.
-const BattlePanel = lazy(() => import('./components/BattlePanel'));
+// initial bundle. DossierShell stands in for it until the chunk lands.
+const importBattlePanel = () => import('./components/BattlePanel');
+const BattlePanel = lazy(importBattlePanel);
 import CommanderPanel from './components/CommanderPanel';
 import { canonCountriesForBattle } from './lib/country';
 import CommandBar from './components/CommandBar';
@@ -28,6 +29,8 @@ import { OVERLAY_ROW_TOP } from './lib/overlayChrome';
 import { useImageryReady, type ImageryStage } from './lib/globe/imagery';
 import SupportUkraineButton from './components/SupportUkraineButton';
 import LoadingSliver from './components/LoadingSliver';
+import CloseButton from './components/CloseButton';
+import { formatYear } from './lib/format';
 import ImageryAttribution, { ImageryCreditChip } from './components/globe/ImageryAttribution';
 
 // The war panel and the battle replay stack (maplibre-gl, deck.gl, the
@@ -42,11 +45,12 @@ const importBattleReplay = () => import('./components/replay/BattleReplay');
 const WarPlayback = lazy(importWarPlayback);
 const BattleReplay = lazy(importBattleReplay);
 
-// prefetchReplayChunks warms the heavy overlay chunks during idle time so the
-// first "Watch replay" does not wait on a cold download. Falls back to a short
-// timeout where requestIdleCallback is unavailable (older Safari).
-function prefetchReplayChunks(): void {
-  const run = () => { void importBattleReplay(); void importWarPlayback(); };
+// prefetchOverlayChunks warms the dossier and the heavy overlay chunks during
+// idle time so the first pick and the first "Watch replay" do not wait on a
+// cold download. Falls back to a short timeout where requestIdleCallback is
+// unavailable (older Safari).
+function prefetchOverlayChunks(): void {
+  const run = () => { void importBattlePanel(); void importBattleReplay(); void importWarPlayback(); };
   const ric = (window as unknown as {
     requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
   }).requestIdleCallback;
@@ -96,6 +100,51 @@ function ChunkFallback({ label }: { label: string }) {
             animation: 'chunk-sweep 1400ms ease-in-out infinite',
           }}
         />
+      </div>
+    </div>
+  );
+}
+
+// DossierShell is drawn in the same frame as a pick while the BattlePanel
+// chunk loads. It matches the dossier's frame and hero so the panel lands in
+// place around it instead of popping in after a blank wait.
+function DossierShell({ battle, phone, onClose }: { battle: Battle; phone: boolean; onClose: () => void }) {
+  const theme = themeForEra(battle.era);
+  return (
+    <div
+      data-testid="battle-panel-shell"
+      role="status"
+      aria-live="polite"
+      className={phone
+        ? 'fixed left-0 right-0 bottom-0 h-[60vh] z-30 bg-[#0f1019]/97 backdrop-blur-xl border-t border-slate-700 rounded-t-2xl overflow-hidden'
+        : 'fixed top-0 right-0 h-full w-[420px] max-w-[90vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 overflow-hidden'}
+    >
+      <div className="sticky top-3 z-10 ml-auto mr-3 mt-3" style={{ float: 'right' }}>
+        <CloseButton onClick={onClose} label="Close panel (Esc)" tone={phone ? 'elevated' : 'ghost'} large={phone} />
+      </div>
+      <div className="p-6 pt-2 clear-both">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.32em] mb-4" style={{ color: theme.accent }}>
+          {theme.mood}
+          {battle.year !== 0 && <span className="opacity-75"> · {formatYear(battle.year)}</span>}
+        </div>
+        <h2
+          className="text-white mb-3 tracking-tight"
+          style={{
+            fontFamily: theme.titleFont,
+            fontWeight: 600,
+            fontSize: phone ? '30px' : '42px',
+            lineHeight: 1.02,
+            letterSpacing: '-0.01em',
+          }}
+        >
+          {battle.name}
+        </h2>
+        <div
+          className="mb-6 h-px"
+          style={{ width: 64, background: `linear-gradient(90deg, ${theme.accent} 0%, transparent 100%)`, opacity: 0.7 }}
+        />
+        <LoadingSliver width="100%" />
+        <div className="mt-3 text-[10px] uppercase tracking-[0.3em] text-slate-400">Opening the dossier</div>
       </div>
     </div>
   );
@@ -366,10 +415,10 @@ export default function App() {
       .catch(() => {});
   }, []);
 
-  // Warm the heavy replay chunk during idle so opening a replay is instant
-  // rather than flashing the loading state on a cold download.
+  // Warm the dossier and replay chunks during idle so the first pick and the
+  // first replay do not wait on a cold download.
   useEffect(() => {
-    prefetchReplayChunks();
+    prefetchOverlayChunks();
   }, []);
 
   // Honor URL hash on first load.
@@ -1223,7 +1272,7 @@ export default function App() {
           viewer left it. */}
       {selectedBattle && !panelDismissed && !showPlayback && !historyMode && (
         <div className="contents" inert={!!replayBattle} style={replayBattle ? { visibility: 'hidden' } : undefined}>
-          <Suspense fallback={null}>
+          <Suspense fallback={<DossierShell battle={selectedBattle} phone={phone} onClose={handleClosePanel} />}>
             <BattlePanel
               battle={selectedBattle}
               onClose={handleClosePanel}

@@ -14,6 +14,7 @@ import { usePauseOnHidden } from '../hooks/usePauseOnHidden';
 import { COMPACT_LANDSCAPE_QUERY, COMPACT_QUERY, useMediaQuery } from '../hooks/useIsPhone';
 import { formatYear, formatBattleDate, formatDeathTollCompact } from '../lib/format';
 import { OVERLAY_BAND } from '../lib/overlayChrome';
+import { loadCatalogStats, type WarCount } from '../lib/catalog-stats';
 
 interface WarPlaybackProps {
   onBattleFocus: (battle: Battle) => void;
@@ -66,38 +67,6 @@ interface WarPlaybackProps {
   // on the cinematic outro card. WarPlayback rewinds the group index by
   // one and re-focuses that battle.
   cinematicPrevTick?: number;
-}
-
-interface WarCount {
-  name: string;
-  count: number;
-  minYear: number;
-  casualties: number;
-  // humanDeaths is the curated point-estimate including civilians, famine,
-  // genocide, and disease. Zero when the war has no curated override.
-  // Preferred over casualties for display when present. An estimate,
-  // never a count.
-  humanDeaths?: number;
-  // deathsLow / deathsHigh bound the published range of death estimates;
-  // when present the list renders the range instead of one figure.
-  deathsLow?: number;
-  deathsHigh?: number;
-  // deathsNote states what the death figure includes.
-  deathsNote?: string;
-  // deathsSource attributes the death figure itself.
-  deathsSource?: string;
-  parent?: string;
-  rolledCount: number;
-  rolledCasualties: number;
-  // rolledHumanDeaths is the curated-first total summed across the war and
-  // every descendant theater / campaign, falling back to descendant battle
-  // sums where no curated number exists. Zero when nothing rolled up.
-  rolledHumanDeaths?: number;
-  // rolledDeathsBasis is the provenance class of rolledHumanDeaths:
-  // "curated", "battle-sum", or "mixed" when the roll-up added figures of
-  // differing provenance. Mixed totals are starred in the list.
-  rolledDeathsBasis?: string;
-  countries?: string[];
 }
 
 // preferredTotalForWar returns the war's best-available casualty figure.
@@ -391,8 +360,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
   }, [cinematicHaltTick]);
 
   useEffect(() => {
-    fetch('/api/battles/stats')
-      .then((r) => r.json())
+    loadCatalogStats()
       .then((d) => {
         // Filter out wars with too few battles. The Wikidata import sweeps in
         // a long tail of "theaters" and "campaigns" with one to three thin
@@ -400,7 +368,7 @@ export default function WarPlayback({ onBattleFocus, onBattlesLoaded, onClose, o
         // parse ("| combatant2 = ..."). Raising the threshold to 8 cuts
         // those without losing real wars: the wars list still has hundreds
         // of substantive entries.
-        setWars((d.wars || []).filter((w: WarCount) => w.count >= 8));
+        setWars((d.wars || []).filter((w) => w.count >= 8));
       })
       .catch(() => {});
   }, []);

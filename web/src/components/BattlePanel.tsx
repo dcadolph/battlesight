@@ -4,6 +4,7 @@ import { ERA_COLORS, ERA_LABELS, TIER_LABELS, TIER_DESCRIPTIONS, regionalEraCont
 import { themeForEra } from '../theme/era';
 import { formatYear, formatBattleDate, cleanCasualtyText, cleanProseText } from '../lib/format';
 import CloseButton from './CloseButton';
+import LoadingSliver from './LoadingSliver';
 import { useIsPhone } from '../hooks/useIsPhone';
 import { resolveMediaFor } from '../data/media';
 import type { MediaEntry } from '../data/media';
@@ -137,12 +138,17 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
   // to the lean prop until the fetch for this battle id lands, so switching
   // battles never shows the previous battle's detail.
   const [fetched, setFetched] = useState<Battle | null>(null);
+  // failedId is the battle whose record fetch failed, so its cue stops.
+  const [failedId, setFailedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/battles/${battle.id}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then(setFetched)
-      .catch(() => {});
+      .catch(() => setFailedId(battle.id));
     // Warm the replay cache as soon as the dossier opens. Clicking "Watch
     // the battle" then hits the browser cache and the overlay opens with no
     // loading spinner, no perceptible delay.
@@ -151,7 +157,9 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
     }
   }, [battle]);
 
-  const detail = fetched && fetched.id === battle.id ? fetched : battle;
+  const haveRecord = !!fetched && fetched.id === battle.id;
+  const detail = haveRecord ? fetched : battle;
+  const recordPending = !haveRecord && failedId !== battle.id;
 
   const refs = detail.references || [];
   const groupedRefs = groupRefs(refs);
@@ -170,6 +178,8 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
     // globe and the header stay visible above it.
     <div
       data-testid="battle-panel"
+      data-detail={haveRecord ? 'full' : 'lean'}
+      aria-busy={recordPending}
       className={phone
         ? 'fixed left-0 right-0 bottom-0 h-[60vh] z-30 bg-[#0f1019]/97 backdrop-blur-xl border-t border-slate-700 rounded-t-2xl overflow-y-auto overscroll-contain'
         : 'fixed top-0 right-0 h-full w-[420px] max-w-[90vw] z-30 bg-[#0f1019]/95 backdrop-blur-xl border-l border-slate-800 overflow-y-auto'}
@@ -221,6 +231,16 @@ export default function BattlePanel({ battle, onClose, onWatchReplay, onShare, o
             opacity: 0.7,
           }}
         />
+
+        {/* Record cue. The pick carries only the lean record, so the rest of
+            the dossier fills in when the full record lands. The cue fades in
+            after a short delay, so a fast fetch never flashes it. */}
+        {recordPending && (
+          <div className="mb-4" role="status" style={{ animation: 'cue-in 200ms ease-out 150ms both' }}>
+            <LoadingSliver width="100%" />
+            <div className="mt-2 text-[10px] uppercase tracking-[0.3em] text-slate-400">Loading the record</div>
+          </div>
+        )}
 
         {/* Aliases. Alternative names for the battle attributed to the
             belligerent or tradition that used them. Sharpsburg was the

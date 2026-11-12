@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -184,6 +185,9 @@ type Wars struct {
 	byName map[string]WarNarrative
 	// aliasOf maps each alias to its canonical war name.
 	aliasOf map[string]string
+	// gen counts successful loads, so cached responses built from an older
+	// load can tell they are stale.
+	gen atomic.Uint64
 }
 
 // NewWars returns an empty narrative registry.
@@ -244,8 +248,14 @@ func (w *Wars) Load(path string) (int, error) {
 	w.mu.Lock()
 	w.byName = raw
 	w.aliasOf = aliases
+	w.gen.Add(1)
 	w.mu.Unlock()
 	return len(raw), nil
+}
+
+// Generation returns a number that changes every time the registry reloads.
+func (w *Wars) Generation() uint64 {
+	return w.gen.Load()
 }
 
 // Watch hot-reloads the curated narratives file when it changes. Same poll

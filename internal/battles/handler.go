@@ -1,10 +1,12 @@
 package battles
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"math/rand/v2"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -17,6 +19,8 @@ type Handler struct {
 	replays *Replays
 	// wars is the in-memory curated war narrative registry. Optional.
 	wars *Wars
+	// cache holds the encoded stats and lean list responses.
+	cache responseCache
 }
 
 // NewHandler creates a handler backed by the given store and replay registry.
@@ -109,9 +113,28 @@ func (h *Handler) warSummary(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, sum)
 }
 
-// listBattles returns battles matching optional filter parameters.
+// listBattles returns battles matching optional filter parameters. The lean
+// projection is what every page load fetches, so it is served from the cache.
 func (h *Handler) listBattles(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
+	if q.Get("lean") == "1" || q.Get("lean") == "true" {
+		h.serveCached(w, r, "list?"+q.Encode(), "failed to list battles", func() (any, error) {
+			return h.listResponse(r.Context(), q, true)
+		})
+		return
+	}
+	resp, err := h.listResponse(r.Context(), q, false)
+	if err != nil {
+		log.Printf("failed to list battles: %v", err)
+		writeError(w, http.StatusInternalServerError, "failed to list battles")
+		return
+	}
+	writeJSON(w, http.StatusOK, resp)
+}
+
+// listResponse builds the list response for the filter in q, projected to
+// LeanBattle when lean is set.
+func (h *Handler) listResponse(ctx context.Context, q url.Values, lean bool) (any, error) {
 	f := Filter{
 		Era:            q.Get("era"),
 		War:            q.Get("war"),
@@ -129,15 +152,13 @@ func (h *Handler) listBattles(w http.ResponseWriter, r *http.Request) {
 	if f.Quality == "reconstructed" {
 		f.IDs = h.replays.IDs()
 		if len(f.IDs) == 0 {
-			writeJSON(w, http.StatusOK, ListResponse{Battles: []Battle{}, Total: 0, Limit: f.Limit, Offset: f.Offset})
-			return
+			return ListResponse{Battles: []Battle{}, Total: 0, Limit: f.Limit, Offset: f.Offset}, nil
 		}
 	}
 
-	results, total, err := h.store.List(r.Context(), f)
+	results, total, err := h.store.List(ctx, f)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to list battles")
-		return
+		return nil, err
 	}
 	if results == nil {
 		results = []Battle{}
@@ -149,31 +170,18 @@ func (h *Handler) listBattles(w http.ResponseWriter, r *http.Request) {
 		limit = 0
 	}
 
-	// When ?lean=1 is set, project to LeanBattle so the response carries
-	// only the fields the globe view actually reads. Cuts the full-dataset
-	// payload from ~17 MB to ~3 MB and dramatically shrinks JSON parse
-	// time on the client. The dossier still calls /api/battles/{id} for
-	// the full record on demand.
-	if q.Get("lean") == "1" || q.Get("lean") == "true" {
-		lean := make([]LeanBattle, len(results))
+	// The lean projection carries only the fields the globe view reads. It
+	// cuts the full-dataset payload from about 17 MB to about 3 MB and the
+	// client's parse time with it. The dossier still calls /api/battles/{id}
+	// for the full record on demand.
+	if lean {
+		out := make([]LeanBattle, len(results))
 		for i, b := range results {
-			lean[i] = LeanFromBattle(b)
+			out[i] = LeanFromBattle(b)
 		}
-		writeJSON(w, http.StatusOK, LeanListResponse{
-			Battles: lean,
-			Total:   total,
-			Limit:   limit,
-			Offset:  f.Offset,
-		})
-		return
+		return LeanListResponse{Battles: out, Total: total, Limit: limit, Offset: f.Offset}, nil
 	}
-
-	writeJSON(w, http.StatusOK, ListResponse{
-		Battles: results,
-		Total:   total,
-		Limit:   limit,
-		Offset:  f.Offset,
-	})
+	return ListResponse{Battles: results, Total: total, Limit: limit, Offset: f.Offset}, nil
 }
 
 // searchBattles performs full-text search.
@@ -209,15 +217,16 @@ func (h *Handler) searchBattles(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// stats returns aggregate counts for the filter UI.
+// stats returns aggregate counts for the filter UI, served from the cache.
 func (h *Handler) stats(w http.ResponseWriter, r *http.Request) {
-	s, err := h.store.Stats(r.Context(), h.wars)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to load stats")
-		return
-	}
-	s.ReplayCount = h.replays.Count()
-	writeJSON(w, http.StatusOK, s)
+	h.serveCached(w, r, "stats", "failed to load stats", func() (any, error) {
+		s, err := h.store.Stats(r.Context(), h.wars)
+		if err != nil {
+			return nil, err
+		}
+		s.ReplayCount = h.replays.Count()
+		return s, nil
+	})
 }
 
 // getBattle returns a single battle by ID.

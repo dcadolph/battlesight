@@ -6,23 +6,12 @@ import { formatYear } from '../lib/format';
 import CloseButton from './CloseButton';
 import { COMPACT_QUERY, useIsPhone, useMediaQuery } from '../hooks/useIsPhone';
 import { OVERLAY_BAND } from '../lib/overlayChrome';
+import { loadCatalogStats, type CatalogStats } from '../lib/catalog-stats';
 
 interface IntroOverlayProps {
   featured: Battle;
   onDismiss: () => void;
   onStart: () => void;
-}
-
-// CatalogStats is the slice of /api/battles/stats the intro needs to state
-// the catalog's real shape on the landing surface: how much is hand-built
-// and how much is imported. The curated layer and the imported catalog are
-// different products, and saying so up front beats implying uniform depth.
-interface CatalogStats {
-  totalBattles: number;
-  verifiedBattles: number;
-  documentedBattles: number;
-  indexedBattles: number;
-  replayCount: number;
 }
 
 // Era ticker beats. Each beat is one moment in the sweep with its own
@@ -78,10 +67,9 @@ export default function IntroOverlay({ featured, onDismiss, onStart }: IntroOver
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/battles/stats')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((s: CatalogStats | null) => {
-        if (!cancelled && s) setStats(s);
+    loadCatalogStats()
+      .then((s) => {
+        if (!cancelled) setStats(s);
       })
       .catch(() => {});
     return () => {

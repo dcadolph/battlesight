@@ -158,9 +158,15 @@ func Run(cfg Config) error {
 	return srv.ListenAndServe()
 }
 
+// immutableCache is the Cache-Control for build output under /assets/. Vite
+// puts a content hash in every file name there, so a file never changes.
+const immutableCache = "public, max-age=31536000, immutable"
+
 // staticHandler serves the built frontend from dir. Requests that resolve to an
 // existing file are served as-is; anything else falls back to index.html so the
-// single-page app can handle client-side routes and deep links.
+// single-page app can handle client-side routes and deep links. Hashed assets
+// are cached for a year, and index.html is revalidated on every load so a
+// deploy reaches the next visit.
 func staticHandler(dir string) http.Handler {
 	fs := http.FileServer(http.Dir(dir))
 	index := filepath.Join(dir, "index.html")
@@ -173,9 +179,13 @@ func staticHandler(dir string) http.Handler {
 		}
 		path := filepath.Join(dir, filepath.Clean(r.URL.Path))
 		if info, err := os.Stat(path); err == nil && !info.IsDir() {
+			if strings.HasPrefix(r.URL.Path, "/assets/") {
+				w.Header().Set("Cache-Control", immutableCache)
+			}
 			fs.ServeHTTP(w, r)
 			return
 		}
+		w.Header().Set("Cache-Control", "no-cache")
 		http.ServeFile(w, r, index)
 	})
 }
@@ -188,7 +198,7 @@ func withCORS(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		w.Header().Set("Vary", "Origin")
+		w.Header().Add("Vary", "Origin")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
@@ -202,19 +212,40 @@ func withCORS(next http.Handler) http.Handler {
 // the inner handler may have set, since the compressed length will differ.
 type gzipResponseWriter struct {
 	http.ResponseWriter
+	// gz compresses the body.
 	gz *gzip.Writer
+	// noBody is set when the status forbids a body, so no gzip stream is sent.
+	noBody bool
 }
 
 // Write delegates to the underlying gzip writer.
 func (g *gzipResponseWriter) Write(p []byte) (int, error) {
+	if g.noBody {
+		return g.ResponseWriter.Write(p)
+	}
 	return g.gz.Write(p)
 }
 
 // WriteHeader strips any Content-Length the inner handler set since the
-// compressed length will differ from the raw byte count.
+// compressed length will differ from the raw byte count. A status that
+// carries no body, such as 304, is sent without Content-Encoding.
 func (g *gzipResponseWriter) WriteHeader(status int) {
+	if status == http.StatusNotModified || status == http.StatusNoContent || status < http.StatusOK {
+		g.noBody = true
+		g.Header().Del("Content-Encoding")
+	}
 	g.Header().Del("Content-Length")
 	g.ResponseWriter.WriteHeader(status)
+}
+
+// close finishes the gzip stream unless the status forbade a body.
+func (g *gzipResponseWriter) close() {
+	if g.noBody {
+		return
+	}
+	if err := g.gz.Close(); err != nil {
+		log.Printf("gzip writer close: %v", err)
+	}
 }
 
 // withGzip compresses response bodies when the client advertises gzip in
@@ -234,13 +265,9 @@ func withGzip(next http.Handler) http.Handler {
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Add("Vary", "Accept-Encoding")
 
-		gz := gzip.NewWriter(w)
-		defer func() {
-			if err := gz.Close(); err != nil {
-				log.Printf("gzip writer close: %v", err)
-			}
-		}()
-		next.ServeHTTP(&gzipResponseWriter{ResponseWriter: w, gz: gz}, r)
+		gw := &gzipResponseWriter{ResponseWriter: w, gz: gzip.NewWriter(w)}
+		defer gw.close()
+		next.ServeHTTP(gw, r)
 	})
 }
 

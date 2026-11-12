@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -22,6 +23,9 @@ type Replays struct {
 	byID map[string]Replay
 	// ids is the sorted list of battle IDs that have replays.
 	ids []string
+	// gen counts successful loads, so cached responses built from an older
+	// load can tell they are stale.
+	gen atomic.Uint64
 }
 
 // NewReplays returns an empty replay registry.
@@ -61,8 +65,14 @@ func (r *Replays) Load(path string) (int, error) {
 	r.mu.Lock()
 	r.byID = byID
 	r.ids = ids
+	r.gen.Add(1)
 	r.mu.Unlock()
 	return len(ids), nil
+}
+
+// Generation returns a number that changes every time the registry reloads.
+func (r *Replays) Generation() uint64 {
+	return r.gen.Load()
 }
 
 // Watch polls the phases file every interval and reloads when its mtime

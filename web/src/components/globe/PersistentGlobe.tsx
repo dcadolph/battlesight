@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react';
 import Globe from 'react-globe.gl';
 import type { GlobeMethods } from 'react-globe.gl';
+import { MeshBasicMaterial } from 'three';
+import type { Material, Object3D } from 'three';
 import type { Battle } from '../../types/battle';
 import { ERA_COLORS } from '../../types/battle';
 import type { Feature, Geometry } from 'geojson';
@@ -11,6 +13,7 @@ import { formatNumberWithCommas } from '../../lib/format';
 import { COUNTRY_NAME_ALIASES } from '../../lib/globe/aliases';
 import { largestPolygonCentroid, polygonCentroid } from '../../lib/globe/centroid';
 import { findCountry, arcDistance } from '../../lib/globe/geometry';
+import { featureName, useCountryMount } from '../../lib/globe/country-mount';
 import { hexToRgba, darkenHex } from '../../lib/globe/colors';
 import { buildFactionLabelElement } from '../../lib/globe/faction-label';
 import { enhanceGlobe } from '../../lib/globe/cinematic';
@@ -174,7 +177,75 @@ function portraitAltitude(altitude: number): number {
 // which the idle spin stays off.
 const AUTO_ROTATE_MIN_ALTITUDE = 1.0;
 
-export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warAccent, warCountryColors, warFactionAnchors, warSnapshotYear, landingMode = 'current', currentWars = EMPTY_WARS, onVisibleCount, onImageryStage, paused = false }: PersistentGlobeProps) {
+// CountryShade is how one country is painted while a battle or a war is on
+// screen.
+type CountryShade = {
+  // cap is the fill color.
+  cap: string;
+  // stroke is the border color.
+  stroke: string;
+  // tooltip is the hover text, or an empty string for none.
+  tooltip: string;
+};
+
+// CLEAR_COLOR paints a country that is being drawn for the first time. The
+// frame uploads its geometry and nothing shows.
+const CLEAR_COLOR = 'rgba(0,0,0,0)';
+
+// HIDDEN_CAP is the fill material of every drawn country that shows nothing.
+// The renderer skips it, so an unshaded map costs no draw calls. The fill
+// color stays a string all the while, since three-globe rebuilds a country
+// whose fill goes from absent to present.
+const HIDDEN_CAP = new MeshBasicMaterial({ visible: false });
+
+// HOST_SHADE marks the country a selected battle was fought in when no war
+// shading is on.
+const HOST_CAP = 'rgba(59,130,246,0.14)';
+const HOST_STROKE = 'rgba(59,130,246,0.55)';
+
+// NEUTRAL_SHADE covers a country that takes no part in the war on screen.
+// The slate hides the imagery greens so the map reads as one surface, and
+// stays clearly apart from the colored belligerents.
+const NEUTRAL_SHADE: CountryShade = {
+  cap: 'rgba(48,56,72,0.78)',
+  stroke: 'rgba(110,124,148,0.65)',
+  tooltip: '',
+};
+
+// NO_FIRST_COUNTRIES is the stable empty set of countries to mount first.
+const NO_FIRST_COUNTRIES: ReadonlySet<string> = new Set();
+
+// noSideColor turns the side walls of every country off. It never changes,
+// since three-globe rebuilds a country whose walls come or go.
+function noSideColor(): string {
+  return '';
+}
+
+// polygonAltitude lifts every country fill just clear of the imagery.
+function polygonAltitude(): number {
+  return 0.002;
+}
+
+// countryTooltip renders the hover card of a shaded country.
+function countryTooltip(name: string, owner: string): string {
+  const ownerHint = owner
+    ? `<div style="color:#94a3b8;font-size:10px;margin-top:2px;">${escapeHTML(owner)} sphere</div>`
+    : '';
+  return `<div style="
+      background: rgba(10,10,15,0.92);
+      border: 1px solid rgba(59,130,246,0.6);
+      border-radius: 6px;
+      padding: 5px 11px;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #f1f5f9;
+      pointer-events: none;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    ">${escapeHTML(name)}${ownerHint}</div>`;
+}
+
+export default function PersistentGlobe({ battles, yearRange, onBattleClick, selectedBattle, dramatic, atmosphereColor, warCountries, warCountryColors, warFactionAnchors, warSnapshotYear, landingMode = 'current', currentWars = EMPTY_WARS, onVisibleCount, onImageryStage, paused = false }: PersistentGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const imagery = useGlobeImagery(globeRef);
   // The stock look takes over once the imagery fallback shows the textured sphere.
@@ -186,6 +257,9 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
   }, [imagery.stage, onImageryStage]);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [countries, setCountries] = useState<Feature<Geometry>[]>(() => worldCountriesCache() ?? []);
+  // globeReady flips once the globe renders frames, which the country mount
+  // needs before it can tell that a slice was drawn.
+  const [globeReady, setGlobeReady] = useState(false);
 
   // visibleBattles filters to the active year window and drops anything
   // without usable geography. An exact 0 on either axis is treated as the
@@ -532,38 +606,13 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
     return () => { cancelled = true; };
   }, []);
 
-  // featureColors maps each polygon feature shown on the globe to the
-  // colour it should render in. When the war cinematic is active we keep
-  // every country mounted in polygonsData so the polygon transition can
-  // tween colour smoothly across snapshot changes. Countries that aren't
-  // a belligerent at the current snapshot get a transparent fill (so they
-  // are still mounted, just invisible) — that stops the pop-in/pop-out
-  // flicker that happens when polygon features unmount.
-  const { highlightedCountry, featureColors } = useMemo(() => {
-    if (countries.length === 0) {
-      return { highlightedCountry: [] as Feature<Geometry>[], featureColors: new Map<string, string>() };
-    }
-    const out: Feature<Geometry>[] = [];
-    const colors = new Map<string, string>();
-    // Dedupe by NAME, not object reference. The previous reference-based
-    // Set let the same country slip in twice (once via selectedBattle's
-    // findCountry, again via the world-atlas iteration) because the two
-    // code paths produce different Feature object instances. Two polygons
-    // on the same country at the same altitude → GPU z-fighting and the
-    // checkerboard pattern the user reported on France during the cinematic.
-    const seenNames = new Set<string>();
-    if (selectedBattle) {
-      const match = findCountry(selectedBattle.lat, selectedBattle.lng, countries);
-      if (match) {
-        const name = (match.properties as Record<string, string>)?.name?.toLowerCase() || '';
-        if (name && !seenNames.has(name)) {
-          out.push(match);
-          seenNames.add(name);
-        }
-      }
-    }
+  // shadePlan resolves the selection and the war on screen to the countries
+  // that take a color. wanted maps a lowercased country name to its color,
+  // or to null for a country named without one. host is the country of the
+  // selected battle, used only when no war shading is on.
+  const shadePlan = useMemo(() => {
     const wanted = new Map<string, string | null>();
-    if (warCountries && warCountries.length > 0) {
+    if (warCountries) {
       for (const c of warCountries) {
         wanted.set(c.toLowerCase(), null);
         const aliases = COUNTRY_NAME_ALIASES[c];
@@ -577,42 +626,130 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
         if (aliases) for (const a of aliases) wanted.set(a.toLowerCase(), color);
       }
     }
-    if (wanted.size > 0) {
-      for (const f of countries) {
-        const name = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
-        if (!name) continue;
-        if (seenNames.has(name)) {
-          // Already mounted via the selectedBattle path; just record its
-          // color so colorFor resolves it correctly.
-          const c = wanted.get(name);
-          colors.set(name, c || '__neutral__');
-          continue;
-        }
-        out.push(f);
-        seenNames.add(name);
-        const c = wanted.get(name);
-        if (c) colors.set(name, c);
-        else colors.set(name, '__neutral__');
-      }
-    }
-    return { highlightedCountry: out, featureColors: colors };
+    const host = wanted.size === 0 && selectedBattle
+      ? findCountry(selectedBattle.lat, selectedBattle.lng, countries)
+      : null;
+    return { wanted, host };
   }, [selectedBattle, countries, warCountries, warCountryColors]);
 
-// hasWarShading determines whether the polygon overlay should render in the
-  // multi-country war palette (accented, brighter borders) or in the single-
-  // country battle-context palette (faint blue). We pick by checking whether
-  // a war is currently active.
-  const hasWarShading = !!(warCountries && warCountries.length > 0) || !!(warCountryColors && Object.keys(warCountryColors).length > 0);
-  const warShadeColor = warAccent || '#3b82f6';
+  // firstCountries names the countries that take a color of their own, so
+  // the mount builds them ahead of the rest when a selection is waiting.
+  const firstCountries = useMemo(() => {
+    const names = new Set<string>();
+    if (shadePlan.host) names.add(featureName(shadePlan.host));
+    for (const [name, color] of shadePlan.wanted) if (color) names.add(name);
+    return names.size > 0 ? names : NO_FIRST_COUNTRIES;
+  }, [shadePlan]);
 
-  // colorFor resolves a feature to its per-country colour from
-  // featureColors, or falls back to warShadeColor. Used by the polygon
-  // callbacks so each owner's territory paints in their accent.
-  const colorFor = useCallback((feat: object): string => {
+  // Every country stays on the globe from the first idle moments of the page
+  // and only its colors change after that. Building a country is the costly
+  // step, and it once ran for all of them on every battle pick.
+  const countryMount = useCountryMount(
+    countries, globeReady && !paused, !!selectedBattle || shadePlan.wanted.size > 0, firstCountries,
+  );
+
+  // countryShades maps each country that shows to its colors. A country
+  // with no entry is mounted and invisible. The neutral slate waits until
+  // every country is on the globe, so it lands as one surface and not as a
+  // patchwork.
+  const countryShades = useMemo(() => {
+    const shades = new Map<Feature<Geometry>, CountryShade>();
+    const { wanted, host } = shadePlan;
+    if (wanted.size === 0) {
+      const name = host ? (host.properties as Record<string, string>)?.name || '' : '';
+      if (host && name) {
+        shades.set(host, { cap: HOST_CAP, stroke: HOST_STROKE, tooltip: countryTooltip(name, '') });
+      }
+      return shades;
+    }
+    for (const f of countries) {
+      const name = (f.properties as Record<string, string>)?.name || '';
+      if (!name) continue;
+      const color = wanted.get(name.toLowerCase());
+      if (!color) {
+        if (countryMount.complete) shades.set(f, NEUTRAL_SHADE);
+        continue;
+      }
+      // The snapshot maps countries to their controller's color, so the
+      // first country carrying this color names the sphere it belongs to.
+      let owner = '';
+      if (warCountryColors) {
+        for (const [country, c] of Object.entries(warCountryColors)) {
+          if (c === color) {
+            owner = country;
+            break;
+          }
+        }
+      }
+      shades.set(f, {
+        cap: hexToRgba(color, 0.94),
+        stroke: hexToRgba(color, 1.0),
+        tooltip: countryTooltip(name, owner !== name ? owner : ''),
+      });
+    }
+    return shades;
+  }, [shadePlan, countries, warCountryColors, countryMount.complete]);
+
+  const polygonCapColor = useCallback(
+    (feat: object) => countryShades.get(feat as Feature<Geometry>)?.cap ?? CLEAR_COLOR,
+    [countryShades],
+  );
+
+  // polygonCapMaterial hides the fill of a country that shows nothing, once
+  // its first frame has been drawn.
+  const { drawn: drawnCountries } = countryMount;
+  const polygonCapMaterial = useCallback((feat: object): Material | undefined => {
     const f = feat as Feature<Geometry>;
-    const name = (f.properties as Record<string, string>)?.name?.toLowerCase() || '';
-    return featureColors.get(name) || warShadeColor;
-  }, [featureColors, warShadeColor]);
+    return countryShades.has(f) || !drawnCountries.has(f) ? undefined : HIDDEN_CAP;
+  }, [countryShades, drawnCountries]);
+
+  // polygonStrokeColor returns no color for a drawn country that shows
+  // nothing, which hides its border and keeps the built line.
+  const polygonStrokeColor = useCallback((feat: object) => {
+    const f = feat as Feature<Geometry>;
+    const shade = countryShades.get(f);
+    if (shade) return shade.stroke;
+    return drawnCountries.has(f) ? '' : CLEAR_COLOR;
+  }, [countryShades, drawnCountries]);
+
+  const polygonLabel = useCallback(
+    (feat: object) => countryShades.get(feat as Feature<Geometry>)?.tooltip ?? '',
+    [countryShades],
+  );
+
+  // pointerEventsFilter keeps a country that has no hover card out of
+  // hovering and clicking, so it cannot take the pointer from a battle
+  // marker at the same height.
+  const pointerEventsFilter = useCallback((obj: Object3D, data?: object) => {
+    if ((obj as { __globeObjType?: string }).__globeObjType !== 'polygon') return true;
+    return !!countryShades.get(data as Feature<Geometry>)?.tooltip;
+  }, [countryShades]);
+
+  // The country layer leaves the scene while no country shows, so frames do
+  // not walk its thousands of hidden objects. three.js keeps the geometry and
+  // its GPU buffers while it is out, so putting it back builds nothing. It
+  // stays in until the build is complete, since every slice must be drawn
+  // once to upload its buffers.
+  const countryLayerRef = useRef<{ group: Object3D; parent: Object3D } | null>(null);
+  const anyCountryShaded = countryShades.size > 0;
+  useLayoutEffect(() => {
+    if (!countryMount.complete) return;
+    let layer = countryLayerRef.current;
+    if (!layer) {
+      const scene = globeRef.current?.scene();
+      let group: Object3D | null = null;
+      scene?.traverse((obj) => {
+        if (!group && (obj as { __globeObjType?: string }).__globeObjType === 'polygon') group = obj.parent;
+      });
+      const found = group as Object3D | null;
+      if (!found?.parent) return;
+      layer = { group: found, parent: found.parent };
+      countryLayerRef.current = layer;
+    }
+    const attached = layer.group.parent === layer.parent;
+    if (anyCountryShaded && !attached) layer.parent.add(layer.group);
+    else if (!anyCountryShaded && attached) layer.parent.remove(layer.group);
+  }, [countryMount.complete, anyCountryShaded]);
 
   // factionLabels renders one editorial faction tag per controlling power
   // at the mainland centroid of its anchor country. The tag is a small
@@ -967,49 +1104,6 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
     </div>`;
   }, []);
 
-  const polygonLabel = useCallback((feat: object) => {
-    const f = feat as Feature<Geometry>;
-    const name = (f.properties as Record<string, string>)?.name || '';
-    if (!name) return '';
-    // Skip the tooltip for non-belligerent countries during war shading —
-    // we keep them mounted (transparent) to stop polygon flicker, but
-    // tooltipping every other country in the world is confusing.
-    const featColor = featureColors.get(name.toLowerCase());
-    if (featColor === '__neutral__') return '';
-    // Wartime tooltip: country name + owner label if we know it. Owner
-    // pulled by reverse-mapping featureColors → warCountryColors.
-    let ownerHint = '';
-    if (warCountryColors && featColor && featColor !== '__neutral__') {
-      // Find the owner whose color matches; surface a short label.
-      const ownerLabel = (() => {
-        for (const [country, color] of Object.entries(warCountryColors)) {
-          if (color === featColor) {
-            // Map country → owner via OWNER_LABELS would be cleaner; for
-            // now just show the country itself (the snapshot's structure
-            // is owner→countries, so the same color = same owner).
-            return country;
-          }
-        }
-        return '';
-      })();
-      if (ownerLabel && ownerLabel !== name) {
-        ownerHint = `<div style="color:#94a3b8;font-size:10px;margin-top:2px;">${escapeHTML(ownerLabel)} sphere</div>`;
-      }
-    }
-    return `<div style="
-      background: rgba(10,10,15,0.92);
-      border: 1px solid rgba(59,130,246,0.6);
-      border-radius: 6px;
-      padding: 5px 11px;
-      font-family: Inter, system-ui, sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      color: #f1f5f9;
-      pointer-events: none;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-    ">${escapeHTML(name)}${ownerHint}</div>`;
-  }, [featureColors, warCountryColors]);
-
   // The bottom-edge TimelineSlider visually weights the lower portion of
   // the viewport, so the geometric centre of the screen reads as too low.
   // Nudge the globe up by ~36px (roughly half the timeline strip) so the
@@ -1024,6 +1118,7 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       onGlobeReady={() => {
         tuneGlobe(globeRef.current);
         enhanceGlobe(globeRef.current);
+        setGlobeReady(true);
       }}
       {...imagery.props}
       backgroundColor="#0d0c0b"
@@ -1091,29 +1186,15 @@ export default function PersistentGlobe({ battles, yearRange, onBattleClick, sel
       arcDashGap={0.18}
       arcDashAnimateTime={1600}
       arcsTransitionDuration={0}
-      polygonsData={highlightedCountry}
-      polygonCapColor={(feat: object) => {
-        if (!hasWarShading) return 'rgba(59,130,246,0.14)';
-        const c = colorFor(feat);
-        // Non-belligerents get an opaque neutral slate so the satellite-
-        // photo greens don't bleed through. Earlier 36% alpha left the
-        // map looking patchy — green Earth visible between every shaded
-        // country. 78% alpha covers the green while staying clearly
-        // distinct from the colored belligerents. Belligerents punch
-        // through at 0.94 alpha for editorial weight.
-        if (c === '__neutral__') return 'rgba(48,56,72,0.78)';
-        return hexToRgba(c, 0.94);
-      }}
-      polygonSideColor={() => 'rgba(0,0,0,0)'}
-      polygonStrokeColor={(feat: object) => {
-        if (!hasWarShading) return 'rgba(59,130,246,0.55)';
-        const c = colorFor(feat);
-        if (c === '__neutral__') return 'rgba(110,124,148,0.65)';
-        return hexToRgba(c, 1.0);
-      }}
-      polygonAltitude={() => 0.002}
+      polygonsData={countryMount.mounted}
+      polygonCapColor={polygonCapColor}
+      polygonCapMaterial={polygonCapMaterial as (feat: object) => Material}
+      polygonSideColor={noSideColor}
+      polygonStrokeColor={polygonStrokeColor}
+      polygonAltitude={polygonAltitude}
       polygonsTransitionDuration={650}
       polygonLabel={polygonLabel}
+      pointerEventsFilter={pointerEventsFilter}
       htmlElementsData={visibleFactionLabels}
       htmlLat={(d: object) => (d as { lat: number }).lat}
       htmlLng={(d: object) => (d as { lng: number }).lng}

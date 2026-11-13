@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 // TestGenerateReplay confirms the schematic generator only fires when there
@@ -67,7 +69,7 @@ func TestGenerateReplay(t *testing.T) {
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {
 			t.Parallel()
-			got, ok := GenerateReplay(test.In)
+			got, ok := GenerateReplay(test.In, FlagNames{})
 			if ok != test.WantOK {
 				t.Fatalf("ok = %v, want %v", ok, test.WantOK)
 			}
@@ -98,6 +100,59 @@ func TestGenerateReplay(t *testing.T) {
 				if !strings.Contains(last.Narration, test.In.Victor) {
 					t.Errorf("outcome narration missing victor %q: %s", test.In.Victor, last.Narration)
 				}
+			}
+		})
+	}
+}
+
+func TestGeneratedNarration(t *testing.T) {
+	t.Parallel()
+	long := "Polish–Lithuanian Commonwealth"
+	tests := []struct {
+		In            Battle
+		WantNarration []string
+		WantLabel     string
+	}{{ // Test 0: Spoken lines name a long side in full and the unit label keeps its cut.
+		In: Battle{ID: "a", Name: "A", Victor: long, Sides: []Side{
+			{Name: long, Strength: "20,000", Casualties: "1,000,000"},
+			{Name: "Swedish Empire", Strength: "11,000"},
+		}},
+		WantNarration: []string{
+			"Polish–Lithuanian Commonwealth faces Swedish Empire. Polish–Lithuanian Commonwealth fields about " +
+				"20,000 men. Swedish Empire fields about 11,000 men.",
+			"Both sides close to engagement range. Lines meet near the center of the field.",
+			"Polish–Lithuanian Commonwealth holds the field. Polish–Lithuanian Commonwealth lost about 1 " +
+				"million men.",
+		},
+		WantLabel: "Polish–Lithuanian Commonw…",
+	}, { // Test 1: Unknown sides and commanders are not named, and a list takes the plural verb.
+		In: Battle{ID: "b", Name: "B", Victor: "Unknown", Sides: []Side{
+			{Name: "Unknown", Commander: "Unknown"},
+			{Name: "Kingdom of France", Commander: "Kingdom of France Ney, Kingdom of France Murat"},
+		}},
+		WantNarration: []string{
+			"Kingdom of France holds the field against an approaching enemy. Ney and Murat command the defense.",
+			"Ney and Murat hold the line. The opposing force closes to engagement range.",
+			"The action concludes.",
+		},
+		WantLabel: "Unknown",
+	}}
+	for testNum, test := range tests {
+		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {
+			t.Parallel()
+			got, ok := GenerateReplay(test.In, NewFlagNames([]string{"Kingdom of France"}))
+			if !ok {
+				t.Fatalf("no replay")
+			}
+			narration := make([]string, len(got.Phases))
+			for i, p := range got.Phases {
+				narration[i] = p.Narration
+			}
+			if diff := cmp.Diff(test.WantNarration, narration); diff != "" {
+				t.Errorf("narration mismatch (-want +got):\n%s", diff)
+			}
+			if diff := cmp.Diff(test.WantLabel, got.Phases[0].Units[0].Label); diff != "" {
+				t.Errorf("label mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

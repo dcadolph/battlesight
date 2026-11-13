@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 // Handler serves the battle API endpoints.
@@ -21,6 +22,10 @@ type Handler struct {
 	wars *Wars
 	// cache holds the encoded stats and lean list responses.
 	cache responseCache
+	// flagsOnce guards the one read of the catalog's flag names.
+	flagsOnce sync.Once
+	// flags holds the catalog's flag names, which generated narration drops.
+	flags FlagNames
 }
 
 // NewHandler creates a handler backed by the given store and replay registry.
@@ -267,7 +272,7 @@ func (h *Handler) getReplay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rep, ok := GenerateReplay(battle)
+	rep, ok := GenerateReplay(battle, h.flagNames())
 	if !ok {
 		// GenerateReplay returns false either because the battle has no
 		// sides data to schematize or because schematization itself failed.
@@ -278,6 +283,21 @@ func (h *Handler) getReplay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, rep)
+}
+
+// flagNames returns the catalog's flag names, read from the store on first
+// use. A failed read is logged and leaves the list empty, so generated
+// narration still drops the flag names of a battle's own sides.
+func (h *Handler) flagNames() FlagNames {
+	h.flagsOnce.Do(func() {
+		names, err := h.store.SideNames(context.Background())
+		if err != nil {
+			log.Printf("replay: read side names for flag list: %v", err)
+			return
+		}
+		h.flags = NewFlagNames(names)
+	})
+	return h.flags
 }
 
 // replayList returns the list of battle IDs that have a phased replay.

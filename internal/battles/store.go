@@ -53,6 +53,27 @@ func DocumentedCondition() string {
 	return documentedSQL
 }
 
+// SideNames returns every distinct side name in the catalog.
+func (s *Store) SideNames(ctx context.Context) ([]string, error) {
+	rows, err := s.db.QueryContext(ctx, "SELECT DISTINCT name FROM battle_sides")
+	if err != nil {
+		return nil, fmt.Errorf("list side names: %w", err)
+	}
+	defer rows.Close()
+	var names []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, fmt.Errorf("scan side name: %w", err)
+		}
+		names = append(names, name)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("list side names: %w", err)
+	}
+	return names, nil
+}
+
 // All returns every battle sorted by year.
 func (s *Store) All(ctx context.Context) ([]Battle, int, error) {
 	return s.List(ctx, Filter{Limit: 0})

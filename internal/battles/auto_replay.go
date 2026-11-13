@@ -113,7 +113,9 @@ func mathSin(r float64) float64 {
 // The output is intentionally generic: a deployment phase, an engagement
 // phase, and an outcome phase, with unit types and a single terrain hint
 // chosen from the battle type. Sides are colored by victor when known.
-func GenerateReplay(b Battle) (Replay, bool) {
+// flags holds the catalog's flag names, which the narration drops from
+// commander lists.
+func GenerateReplay(b Battle, flags FlagNames) (Replay, bool) {
 	if len(b.Sides) == 0 {
 		return Replay{}, false
 	}
@@ -138,10 +140,17 @@ func GenerateReplay(b Battle) (Replay, bool) {
 	}
 
 	layout := deriveLayout(b)
+	spoken := spokenSides{
+		a:           spokenName(a.Name),
+		b:           spokenName(bSide.Name),
+		aCommanders: spokenCommanders(a, b, flags),
+		bCommanders: spokenCommanders(bSide, b, flags),
+		victor:      spokenName(b.Victor),
+	}
 	phases := []Phase{
-		schematicDeployment(b, a, bSide, unitType, terrain, layout),
-		schematicEngagement(a, bSide, unitType, layout),
-		schematicOutcome(b, a, bSide, unitType, layout),
+		schematicDeployment(b, a, bSide, spoken, unitType, terrain, layout),
+		schematicEngagement(a, bSide, spoken, unitType, layout),
+		schematicOutcome(b, a, bSide, spoken, unitType, layout),
 	}
 
 	aName := factionDisplay(a)
@@ -164,6 +173,22 @@ func GenerateReplay(b Battle) (Replay, bool) {
 		Schematic:       true,
 		Phases:          phases,
 	}, true
+}
+
+// spokenSides holds the names a generated replay speaks: whole side names,
+// commanders as lists, and the victor, each empty when the source gives no
+// usable name. Unit labels keep their short forms.
+type spokenSides struct {
+	// a is faction A's whole name.
+	a string
+	// b is faction B's whole name.
+	b string
+	// aCommanders lists faction A's commanders.
+	aCommanders []string
+	// bCommanders lists faction B's commanders.
+	bCommanders []string
+	// victor is the victor's name.
+	victor string
 }
 
 // orderSides chooses which side is faction A versus B for the schematic.
@@ -294,8 +319,8 @@ func buildSchematicIntro(b Battle, a, bSide Side) string {
 // position from the rear, so the user sees actual motion instead of two
 // static blobs. Also adds flanking units if the layout encodes a flank
 // maneuver.
-func schematicDeployment(b Battle, a, bSide Side, unitType string, terrain []Terrain, layout schematicLayout) Phase {
-	narration := buildDeploymentNarration(b, a, bSide)
+func schematicDeployment(b Battle, a, bSide Side, spoken spokenSides, unitType string, terrain []Terrain, layout schematicLayout) Phase {
+	narration := buildDeploymentNarration(spoken, a, bSide)
 	timeMarker := schematicYearLabel(b)
 	if timeMarker == "" {
 		timeMarker = "Engagement"
@@ -340,25 +365,26 @@ func schematicDeployment(b Battle, a, bSide Side, unitType string, terrain []Ter
 
 // schematicEngagement is the second phase: forces meet. Narration is
 // composed sentence-by-sentence so two commanders read as a clean two-line
-// rather than a comma-stuffed run. The lead commander gets pulled out so
-// the prose drops names where it has them and stays generic otherwise.
-func schematicEngagement(a, bSide Side, unitType string, layout schematicLayout) Phase {
+// rather than a comma-stuffed run. The commanders are named where the source
+// gives them and the prose stays generic otherwise.
+func schematicEngagement(a, bSide Side, spoken spokenSides, unitType string, layout schematicLayout) Phase {
 	narration := "Both sides close to engagement range. Lines meet near the center of the field."
+	lead, foe := spoken.aCommanders, spoken.bCommanders
 	switch {
-	case a.Commander != "" && bSide.Commander != "":
+	case len(lead) > 0 && len(foe) > 0:
 		narration = fmt.Sprintf(
-			"%s closes on %s. Lines meet near the center of the field.",
-			a.Commander, bSide.Commander,
+			"%s %s %s. Lines meet near the center of the field.",
+			joinNames(lead), verbFor(lead, "closes on", "close on"), joinNames(foe),
 		)
-	case a.Commander != "":
+	case len(lead) > 0:
 		narration = fmt.Sprintf(
-			"%s presses forward. Lines meet near the center of the field.",
-			a.Commander,
+			"%s %s forward. Lines meet near the center of the field.",
+			joinNames(lead), verbFor(lead, "presses", "press"),
 		)
-	case bSide.Commander != "":
+	case len(foe) > 0:
 		narration = fmt.Sprintf(
-			"%s holds the line. The opposing force closes to engagement range.",
-			bSide.Commander,
+			"%s %s the line. The opposing force closes to engagement range.",
+			joinNames(foe), verbFor(foe, "holds", "hold"),
 		)
 	}
 	// Both sides converge on the center along the layout axis.
@@ -402,7 +428,7 @@ func schematicEngagement(a, bSide Side, unitType string, layout schematicLayout)
 // casualty strings, so a plural victor like "United States and allies"
 // does not produce "...carries the field" and so multi-side casualty
 // figures land as clean sentences rather than a semicolon-separated run.
-func schematicOutcome(b Battle, a, bSide Side, unitType string, layout schematicLayout) Phase {
+func schematicOutcome(b Battle, a, bSide Side, spoken spokenSides, unitType string, layout schematicLayout) Phase {
 	loserStatus := "broken"
 	if b.Victor == "" {
 		// Indecisive — both sides hold their pressing positions but at reduced strength.
@@ -421,16 +447,20 @@ func schematicOutcome(b Battle, a, bSide Side, unitType string, layout schematic
 	}
 
 	// Verb that works whether the subject is singular ("Hannibal") or plural
-	// ("United States and allies"). "holds the field" reads as both.
-	narration := fmt.Sprintf("%s holds the field.", strings.TrimSpace(b.Victor))
+	// ("United States and allies"). "holds the field" reads as both. A
+	// victor recorded as unknown is not named.
+	narration := "The action concludes."
+	if spoken.victor != "" {
+		narration = fmt.Sprintf("%s holds the field.", spoken.victor)
+	}
 
 	// Casualty roll, one sentence per side. Pull a parsed number when we
 	// can so the prose reads "About 95,000 men lost." rather than dumping
 	// the freeform casualty string into the line.
-	if line := casualtySentence(a); line != "" {
+	if line := casualtySentence(spoken.a, a.Casualties); line != "" {
 		narration += " " + line
 	}
-	if line := casualtySentence(bSide); line != "" {
+	if line := casualtySentence(spoken.b, bSide.Casualties); line != "" {
 		narration += " " + line
 	}
 
@@ -456,19 +486,19 @@ func schematicOutcome(b Battle, a, bSide Side, unitType string, layout schematic
 }
 
 // casualtySentence renders one side's casualty figure as a single clean
-// sentence for the outcome narration. Returns "" when the side has no
-// parseable casualty data so the caller can skip cleanly.
+// sentence for the outcome narration, naming the side in full. Returns ""
+// when the side has no usable name or no parseable casualty data so the
+// caller can skip cleanly.
 //
 // Number extraction reads the largest plausible integer out of the raw
 // freeform casualty string (capped at 10M to skip page numbers and noise).
 // The prose form swallows "1,200-2,000 killed, ~1,500 captured" into
 // "About 2,000 men lost" rather than reprinting all of it.
-func casualtySentence(s Side) string {
-	name := shortFaction(s)
+func casualtySentence(name, casualties string) string {
 	if name == "" {
 		return ""
 	}
-	count := parseLargestCasualtyNumber(s.Casualties)
+	count := parseLargestCasualtyNumber(casualties)
 	if count > 0 {
 		return fmt.Sprintf("%s lost about %s.", name, humanizeCount(count))
 	}
@@ -513,7 +543,8 @@ func parseLargestCasualtyNumber(s string) int {
 // Cannae.
 func humanizeCount(n int) string {
 	if n >= 1_000_000 {
-		return fmt.Sprintf("%.1f million men", float64(n)/1_000_000)
+		millions := strings.TrimSuffix(fmt.Sprintf("%.1f", float64(n)/1_000_000), ".0")
+		return millions + " million men"
 	}
 	if n >= 10_000 {
 		// Round to nearest thousand for readability.
@@ -555,10 +586,10 @@ func commaInt(n int) string {
 // parenthetical-soup) so a side with both strength and commander reads as
 // "Athens fields 10,000 men. Miltiades commands." rather than as a
 // run-on. Parses strength to a number when possible so the prose reads
-// "about 10,000 men" not "10,000 (Miltiades)".
-func buildDeploymentNarration(b Battle, a, bSide Side) string {
-	left := shortFaction(a)
-	right := shortFaction(bSide)
+// "about 10,000 men" not "10,000 (Miltiades)". Sides are named in full, and
+// a list of commanders takes the plural verb.
+func buildDeploymentNarration(spoken spokenSides, a, bSide Side) string {
+	left, right := spoken.a, spoken.b
 	var parts []string
 
 	// Opening: who faces whom. Drops cleanly when names are missing.
@@ -587,18 +618,16 @@ func buildDeploymentNarration(b Battle, a, bSide Side) string {
 	// Commander sentence. Single line in both directions so we are not
 	// rendering "Commanded by X and Y respectively." which always reads
 	// awkward when one commander is unknown.
+	lead, foe := spoken.aCommanders, spoken.bCommanders
 	switch {
-	case a.Commander != "" && bSide.Commander != "":
-		parts = append(parts, fmt.Sprintf("%s commands against %s.", a.Commander, bSide.Commander))
-	case a.Commander != "":
-		parts = append(parts, fmt.Sprintf("%s commands.", a.Commander))
-	case bSide.Commander != "":
-		parts = append(parts, fmt.Sprintf("%s commands the defence.", bSide.Commander))
+	case len(lead) > 0 && len(foe) > 0:
+		parts = append(parts, fmt.Sprintf("%s %s against %s.",
+			joinNames(lead), verbFor(lead, "commands", "command"), joinNames(foe)))
+	case len(lead) > 0:
+		parts = append(parts, fmt.Sprintf("%s %s.", joinNames(lead), verbFor(lead, "commands", "command")))
+	case len(foe) > 0:
+		parts = append(parts, fmt.Sprintf("%s %s the defense.", joinNames(foe), verbFor(foe, "commands", "command")))
 	}
-
-	// b is unused beyond the side data above; reference it so the linter
-	// stays quiet without changing the function signature.
-	_ = b
 
 	return strings.Join(parts, " ")
 }

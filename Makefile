@@ -1,13 +1,14 @@
-.PHONY: check test audit audit-db run web import build-web help
+.PHONY: check test audit audit-db voicecheck run web import build-web help
 
 help:
 	@echo "make targets:"
 	@echo "  run       - start the API server on :8080"
 	@echo "  web       - start the Vite dev server on :5173 (proxies /api)"
 	@echo "  test      - run all Go unit tests"
-	@echo "  check     - test + audit + audit-db + Go build + TypeScript check"
+	@echo "  check     - test + audit + audit-db + voicecheck + Go build + TypeScript check"
 	@echo "  audit     - validate data/battles.json, curated files and replays"
 	@echo "  audit-db  - correctness mismatch report on the SQLite database"
+	@echo "  voicecheck - check every replay's narration for words the voice would misread"
 	@echo "  import    - fetch/refresh Wikidata + Wikipedia data into the DB"
 	@echo "  build-web - production frontend build"
 
@@ -21,7 +22,11 @@ audit:
 audit-db:
 	go run ./cmd/quality -mismatch
 
-check: test audit audit-db
+# voicecheck requires data/battlesight.db and opens it read-only.
+voicecheck:
+	go run ./cmd/voicecheck -summary
+
+check: test audit audit-db voicecheck
 	go build ./...
 	cd web && npx tsc -b --noEmit
 

@@ -2,7 +2,7 @@
   <img src="../internal/logo/battlesight-tools-banner.png" alt="BattleSight command-line tools" width="100%" />
 </p>
 
-Four Go programs build, serve, and curate the catalog. Run each from the
+Five Go programs build, serve, check, and curate the catalog. Run each from the
 repository root so the default `data/` paths resolve. Every flag has a
 sensible default; the tables below list the ones worth overriding.
 
@@ -105,3 +105,32 @@ go run ./cmd/quality -mismatch-ids land-in-ocean
 | `-year-enrich` | `data/.wikicache/year-enrich` | Cache directory of the retired year-enrich pass, for `year-enrich-unreconciled`. |
 | `-phases` | `data/phases.json` | Replay file checked for keys with no battle. |
 | `-references` | `data/references.json` | References file checked for keys with no battle. |
+
+## `voicecheck` — narration the voice can read
+
+Opens the database read-only and never writes to it. Builds every replay the
+way the server does, hand-built first and generated otherwise, rewrites each
+phase's narration as speakable text, and checks it for anything the narrator
+voice would misread: a year left as digits, a Roman numeral, markup, a name
+cut short, a letter outside English, or a stray symbol. It prints one
+tab-separated line per problem (battle, phase, rule, word) and exits 1 when
+any battle fails, so a failing battle is never voiced.
+
+Speakable text is written by rule over all text, never by hand per battle:
+years, clock times, eras, and Roman numerals in words, abbreviations spelled
+out, markup and bracketed notes removed, prose asides kept as asides, and
+letters outside English folded to their English base.
+
+```bash
+go run ./cmd/voicecheck                   # every replay the globe lists
+go run ./cmd/voicecheck -summary          # totals only
+go run ./cmd/voicecheck -dump speak.jsonl # also write each phase's speakable text
+```
+
+| Flag | Default | Purpose |
+| --- | --- | --- |
+| `-db` | `data/battlesight.db` | SQLite database path, opened read-only. |
+| `-phases` | `data/phases.json` | Hand-built replay file. |
+| `-all` | `false` | Check every battle, not only the ones the globe lists. |
+| `-dump` | | Write each phase's text, speakable text, and problems as JSON lines. |
+| `-summary` | `false` | Print only the totals. |

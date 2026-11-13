@@ -1,4 +1,4 @@
-.PHONY: check test audit audit-db voicecheck run web import build-web help
+.PHONY: check test audit audit-db voicecheck names-out names-in run web import build-web help
 
 help:
 	@echo "make targets:"
@@ -9,6 +9,8 @@ help:
 	@echo "  audit     - validate data/battles.json, curated files and replays"
 	@echo "  audit-db  - correctness mismatch report on the SQLite database"
 	@echo "  voicecheck - check every replay's narration for words the voice would misread"
+	@echo "  names-out - write name batches for ChatGPT and Gemini to NAMES_DIR (default ~/Downloads)"
+	@echo "  names-in  - read their answers in NAMES_DIR into data/names.json"
 	@echo "  import    - fetch/refresh Wikidata + Wikipedia data into the DB"
 	@echo "  build-web - production frontend build"
 
@@ -25,6 +27,16 @@ audit-db:
 # voicecheck requires data/battlesight.db and opens it read-only.
 voicecheck:
 	go run ./cmd/voicecheck -summary
+
+# names-out writes the hand-built replays' names that lack a reading to NAMES_DIR as batches for
+# ChatGPT and Gemini. names-in reads their pasted answers there back into data/names.json.
+NAMES_DIR ?= $(HOME)/Downloads
+
+names-out:
+	go run ./cmd/voicecheck -hand -summary -names-out $(NAMES_DIR)
+
+names-in:
+	go run ./cmd/voicecheck -hand -summary -names-in $(NAMES_DIR)
 
 check: test audit audit-db voicecheck
 	go build ./...

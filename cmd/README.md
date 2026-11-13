@@ -121,16 +121,37 @@ years, clock times, eras, and Roman numerals in words, abbreviations spelled
 out, markup and bracketed notes removed, prose asides kept as asides, and
 letters outside English folded to their English base.
 
+It also finds the names each phase speaks: a capitalized word that is not
+ordinary English, or any word that had a letter outside English in the source.
+`data/names.json` says how the British and the American voice say each one,
+in the voice's own phoneme symbols. ChatGPT and Gemini write those readings.
+`-names-out` writes the names the list lacks as batches, each
+a prompt followed by about 200 names, to paste whole into each of them. Their
+answers go into one plain text file per writer, pasted in any order.
+`-names-in` reads both files, keeps every name the two agree on, and writes
+the rest as settle batches for one more pass. A reading with a symbol the
+voice lacks never reaches the list.
+
 ```bash
 go run ./cmd/voicecheck                   # every replay the globe lists
 go run ./cmd/voicecheck -summary          # totals only
 go run ./cmd/voicecheck -dump speak.jsonl # also write each phase's speakable text
+make names-out                            # name batches for the hand-built replays
+make names-in                             # read the answers into data/names.json
+go run ./cmd/voicecheck -hand -names      # fail a hand-built battle with a name missing
 ```
 
 | Flag | Default | Purpose |
 | --- | --- | --- |
 | `-db` | `data/battlesight.db` | SQLite database path, opened read-only. |
 | `-phases` | `data/phases.json` | Hand-built replay file. |
+| `-list` | `data/names.json` | Name list file. |
+| `-words` | `/usr/share/dict/web2` | English word list. A capitalized word outside it is a name. |
 | `-all` | `false` | Check every battle, not only the ones the globe lists. |
-| `-dump` | | Write each phase's text, speakable text, and problems as JSON lines. |
+| `-hand` | `false` | Check only the hand-built replays. |
+| `-names` | `false` | Fail a battle with a name missing from the name list. |
+| `-names-out` | | Write batches of the names the list lacks to this existing directory. |
+| `-names-in` | | Read the writers' answers in this directory into the name list. |
+| `-batch` | `200` | Most names in one batch. |
+| `-dump` | | Write each phase's text, speakable text, names, and problems as JSON lines. |
 | `-summary` | `false` | Print only the totals. |

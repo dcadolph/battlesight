@@ -23,6 +23,10 @@ const (
 	RuleLetter Rule = "letter"
 	// RuleSymbol fails a symbol the voice reads aloud or skips.
 	RuleSymbol Rule = "symbol"
+	// RuleName fails a name with no entry in the name list.
+	RuleName Rule = "name"
+	// RulePhoneme fails a name list reading that is empty or holds a symbol the voice does not have.
+	RulePhoneme Rule = "phoneme"
 )
 
 // Problem is one word in speakable text that fails a rule.

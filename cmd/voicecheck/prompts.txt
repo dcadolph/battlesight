@@ -1,0 +1,49 @@
+{{define "voice"}}The narrator reads short replays of historical battles in English. It has a British voice and an American voice. For each name, write how a well-read English speaker says it, once for each voice.
+
+How to write a reading:
+1. Use IPA the way the espeak-ng speech engine writes it.
+2. Put the stress mark ˈ directly before the stressed vowel, not at the start of the syllable. Put ˌ before a vowel with secondary stress.
+3. Use only these symbols: {{.Symbols}}
+   A tilde over a vowel marks a nasal vowel, as in ɑ̃.
+4. Write g as ɡ and the English r as ɹ. Mark a long vowel with ː.
+5. No slashes, brackets, spaces, syllable dots, tie bars, or tone marks.
+
+Examples, the British reading then the American reading:
+Napoleon: nɐpˈəʊlɪən, nɐpˈoʊlɪən
+Moscow: mˈɒskəʊ, mˈɑːskoʊ
+Waterloo: wˈɔːtəlˌuː, wˈɔːɾɚlˌuː
+Gettysburg: ɡˈɛtɪsbˌɜːɡ, ɡˈɛɾɪsbˌɜːɡ
+
+Which pronunciation to write:
+1. When English has its own name for the place or person, use the English form. Examples: Moscow, Vistula, Belgium, Charlemagne.
+2. Otherwise follow the native language: keep its stress and its consonants. Where the native sound is not in the symbol list, use the nearest sound that is.
+3. When people say a name two ways, write the way historians say it.
+4. The name column is how the narrator's text spells the name. The spelling column, when filled, is the original spelling with its accents. The context column is the narration around the name.
+
+What to leave out:
+- Do not skip, merge, reorder, or add rows.
+- Do not change an id or a name.
+- Do not write anything before or after the code block.
+{{end}}
+
+{{define "write"}}Task: write how to pronounce {{.Count}} names for a text-to-speech narrator. This is batch {{.Batch}} of {{.Total}}.
+
+{{template "voice" .}}
+Answer with one code block of CSV, with this header and one row per name, in the same order:
+id,name,british,american
+If you are unsure of a name, still write your best reading.
+
+Names:
+{{end}}
+
+{{define "settle"}}Task: settle how to pronounce {{.Count}} names for a text-to-speech narrator. Two writers disagreed on them. This is batch {{.Batch}} of {{.Total}}.
+
+Each row gives two readings, A and B, each as a British reading and an American reading. Decide how the name is said and write the final readings. Your answer can be reading A, reading B, or a new reading.
+
+{{template "voice" .}}
+Answer with one code block of CSV, with this header and one row per name, in the same order:
+id,name,british,american,reason
+The reason is one short sentence in double quotes.
+
+Names:
+{{end}}

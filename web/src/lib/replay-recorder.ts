@@ -1,7 +1,7 @@
 // replay-recorder captures a battle replay to a video file, entirely
 // client side. The WebGL canvases (MapLibre basemap + deck.gl action
 // layer) are composited onto an offscreen canvas each frame, and the
-// HTML chrome that lives outside WebGL (unit label pills, the phase
+// HTML chrome that lives outside WebGL (unit and arrow labels, the phase
 // title slate) is re-drawn onto the composite in 2D so the export
 // matches what the viewer saw. The composite streams through
 // MediaRecorder; stopping resolves a Blob ready for download.
@@ -65,7 +65,7 @@ export class RecorderSession {
     this.tick();
   }
 
-  // tick composites one frame: WebGL canvases, then label pills, then
+  // tick composites one frame: WebGL canvases, then labels, then
   // the phase slate.
   private tick = () => {
     if (this.stopped) return;
@@ -90,15 +90,24 @@ export class RecorderSession {
     this.raf = requestAnimationFrame(this.tick);
   };
 
-  // drawLabels re-renders the HTML unit/movement pills. Position comes
-  // from each pill's live translate3d transform (the exact anchor the
-  // imperative positioner wrote); text, color, and leader length come
-  // from data attributes.
-  private drawLabels(rect: DOMRect) {
+  // drawLabels re-renders the HTML unit and movement labels: plain text,
+  // white with a dark outline. Position comes from each label's live
+  // translate3d transform (the box center the positioner wrote), raised by
+  // its lift; the text comes from data attributes. It returns how many
+  // labels it drew.
+  private drawLabels(rect: DOMRect): number {
     const { ctx } = this;
     const labels = this.container.querySelectorAll<HTMLElement>('[data-rec-label]');
+    let drawn = 0;
+    ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.font = '600 12px Inter, system-ui, sans-serif';
+    ctx.letterSpacing = '0.14em';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(10,8,6,0.9)';
+    ctx.fillStyle = '#ffffff';
     for (const el of Array.from(labels)) {
       if (el.style.visibility === 'hidden') continue;
       const wrapOpacity = parseFloat(getComputedStyle(el.parentElement as Element).opacity || '1');
@@ -109,28 +118,14 @@ export class RecorderSession {
       const ay = parseFloat(m[2]);
       if (ax < -40 || ay < -40 || ax > rect.width + 40 || ay > rect.height + 40) continue;
       const text = (el.dataset.recLabel || '').toUpperCase();
-      const color = el.dataset.recColor || '#ffffff';
-      const lift = parseFloat(el.dataset.recLift || '26');
+      const y = ay - parseFloat(el.dataset.recLift || '0');
       ctx.globalAlpha = wrapOpacity;
-      ctx.font = '600 12px Inter, system-ui, sans-serif';
-      const w = ctx.measureText(text).width + 24;
-      const h = 26;
-      ctx.fillStyle = 'rgba(14,10,7,0.88)';
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(ax - w / 2, ay - lift - h, w, h, 6);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(text, ax, ay - lift - h / 2);
-      ctx.strokeStyle = `${color}cc`;
-      ctx.beginPath();
-      ctx.moveTo(ax, ay - lift);
-      ctx.lineTo(ax, ay);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
+      ctx.strokeText(text, ax, y);
+      ctx.fillText(text, ax, y);
+      drawn++;
     }
+    ctx.restore();
+    return drawn;
   }
 
   // drawSlate renders the phase eyebrow, title, and accent rule at the

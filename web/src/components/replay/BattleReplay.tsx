@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import type { Battle } from '../../types/battle';
 import { regionalEraContext } from '../../types/battle';
 import type { Replay } from '../../types/replay';
@@ -23,12 +23,24 @@ import CloseButton from '../CloseButton';
 import { OVERLAY_BAND, OVERLAY_DONATE_CLEARANCE, OVERLAY_HOME_CLEARANCE } from '../../lib/overlayChrome';
 import { findSnapshot, buildCountryColorMap } from '../../data/territory-snapshots';
 import { cachedReplay, loadReplay } from '../../data/replay-cache';
+import { phaseDwellMs } from './beats';
 
 // SPEEDS are the playback rates the transport offers.
 const SPEEDS = [0.5, 1, 1.5, 2] as const;
 
 // Speed is one of the offered playback rates.
 type Speed = (typeof SPEEDS)[number];
+
+// replayPlacesUnitsByLatLng reports whether any unit of the replay carries a
+// real latitude and longitude, by the same test the Surface view places it.
+function replayPlacesUnitsByLatLng(replay: Replay | null): boolean {
+  if (!replay) return false;
+  return replay.phases.some((p) =>
+    (p.units ?? []).some(
+      (u) => typeof u.lat === 'number' && typeof u.lng === 'number' && (u.lat !== 0 || u.lng !== 0),
+    ),
+  );
+}
 
 interface BattleReplayProps {
   battle: Battle;
@@ -172,6 +184,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     setPlaying(true);
     if (cinematicMode && !prefersReducedMotion) setHopCard(battle);
   }
+  // The Schematic view draws the 0 to 100 field values only. A replay that
+  // places its units by latitude and longitude carries placeholders there,
+  // so every unit would land on one point. The button is hidden for those
+  // replays, and a Schematic view falls back to Surface when one arrives.
+  const geoPlaced = useMemo(() => replayPlacesUnitsByLatLng(replay), [replay]);
+  if (view === 'tactical' && geoPlaced) setView('surface');
   useEffect(() => {
     if (!hopCard) return;
     const t = setTimeout(() => setHopCard(null), 2600);
@@ -183,14 +201,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     const current = replay.phases[phaseIdx];
     // Reduced-motion path: skip the dwell entirely. The user can still
     // step through with the scrubber if they want to read each phase.
-    // Phase dwell. Curator-set durations win. The fallback has swung
-    // both ways: 5500/3200 read as glacial solo, 3000/2000 read as
-    // unfollowable inside a war cinematic (three schematic phases blew
-    // past in six seconds). The floor must also outlast the arrow
-    // animations (up to ~4.5s with stagger) or phases cut mid-motion,
-    // which is the "jumpy" feel. Schematics have only three phases, so
-    // the taller floor still finishes a battle in about sixteen seconds.
-    const baseDur = current.durationMs ?? (replay.schematic ? 5400 : 4200);
+    // Phase dwell, shared with the Map view's timeline, which fits its
+    // beats inside it.
+    const baseDur = phaseDwellMs(current.durationMs, Boolean(replay.schematic));
     const dur = prefersReducedMotion ? 0 : baseDur / speed;
     timerRef.current = setTimeout(() => {
       if (phaseIdx >= replay.phases.length - 1) {
@@ -868,12 +881,14 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                   view === 'globe' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >Globe</button>
-              <button
-                onClick={() => setView('tactical')}
-                className={`${viewButtonClass} transition-colors ${
-                  view === 'tactical' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
-                }`}
-              >Schematic</button>
+              {!geoPlaced && (
+                <button
+                  onClick={() => setView('tactical')}
+                  className={`${viewButtonClass} transition-colors ${
+                    view === 'tactical' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                >Schematic</button>
+              )}
             </div>
 
             {/* Chapter interstitial: rides the camera flight between

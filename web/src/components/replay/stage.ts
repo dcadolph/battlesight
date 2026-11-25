@@ -75,12 +75,12 @@ export function resolvePoint(
 }
 
 // stagePadding returns the clear space around the frame, scaled down on small screens
-// so a phone keeps a usable middle.
+// so a phone keeps a usable middle. The bottom keeps room for the captions.
 export function stagePadding(width: number, height: number): StagePadding {
   const side = Math.min(104, width * 0.08);
   return {
     top: Math.min(150, height * 0.16),
-    bottom: Math.min(96, height * 0.12),
+    bottom: Math.min(170, height * 0.2),
     left: side,
     right: side,
   };

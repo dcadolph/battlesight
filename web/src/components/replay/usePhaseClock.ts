@@ -33,6 +33,8 @@ export interface PhaseClockInput {
   onAdvance: () => void;
   // onRefused reports that the browser refused to speak.
   onRefused: () => void;
+  // onSentence reports the sentence the voice starts speaking, so captions follow the voice.
+  onSentence?: (index: number) => void;
 }
 
 // Gate is the clock of one phase visit.
@@ -158,6 +160,7 @@ export function usePhaseClock(input: PhaseClockInput): () => number {
     speak(sentences, g.sentence, NARRATOR_RATE * Math.max(0.1, speed), {
       onSentence: (i) => {
         g.sentence = i;
+        if (gateRef.current === g) live.current.onSentence?.(i);
       },
       onDone: () => {
         g.voiceDone = true;

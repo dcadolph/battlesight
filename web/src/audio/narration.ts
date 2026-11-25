@@ -95,20 +95,21 @@ export function speechAllowed(): boolean {
   return activation ? activation.hasBeenActive : true;
 }
 
-// narratorPreferred reports whether the viewer left the narrator on. On by default.
+// narratorPreferred reports whether the viewer turned the narrator on. Off by default, since
+// captions carry the story and the browser's voice is not good enough to speak first.
 export function narratorPreferred(): boolean {
   try {
-    return localStorage.getItem(NARRATOR_KEY) !== 'off';
+    return localStorage.getItem(NARRATOR_KEY) === 'on';
   } catch {
-    return true;
+    return false;
   }
 }
 
 // setNarratorPreferred remembers the narrator switch in this browser.
 export function setNarratorPreferred(on: boolean): void {
   try {
-    if (on) localStorage.removeItem(NARRATOR_KEY);
-    else localStorage.setItem(NARRATOR_KEY, 'off');
+    if (on) localStorage.setItem(NARRATOR_KEY, 'on');
+    else localStorage.removeItem(NARRATOR_KEY);
   } catch {
     // Private windows and blocked storage forget the switch; the page works without it.
   }

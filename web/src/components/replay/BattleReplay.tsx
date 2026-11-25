@@ -9,7 +9,7 @@ import TacticalSurface from './TacticalSurface';
 import { themeForEra } from '../../theme/era';
 import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
 import { narratorPreferred, setNarratorPreferred, speechAllowed, speechSupported } from '../../audio/narration';
-import { narratedDwellMs, splitSentences, voiceWaitMs } from '../../audio/pacing';
+import { narratedDwellMs, sentenceAt, splitSentences, voiceWaitMs } from '../../audio/pacing';
 import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
 import {
   RecorderSession,
@@ -244,9 +244,11 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   }, [narratorRefused]);
 
   // The phase clock. visit counts jumps, so a jump to the phase already shown starts its
-  // clock and voice fresh. Reduced motion skips the dwell as before, but a narrated phase
-  // still waits for its voice.
+  // clock and voice fresh. Every phase with narration holds long enough to read it, since
+  // the captions carry the story whether or not the voice speaks. Reduced motion skips the
+  // moves but still holds for the reading.
   const [visit, setVisit] = useState(0);
+  const [spoken, setSpoken] = useState({ key: '', idx: 0 });
   const phaseNow = replay?.phases[phaseIdx];
   const narrationText = phaseNow?.narration;
   const sentences = useMemo(() => splitSentences(narrationText), [narrationText]);
@@ -264,10 +266,12 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     }
     setPhaseIdx((i) => i + 1);
   }, [replay, phaseIdx]);
+  const phaseKey = `${battle.id}:${phaseIdx}:${visit}`;
+  const dwellMs = narratedDwellMs(baseDwellMs, narrationText);
   const phaseProgress = usePhaseClock({
-    phaseKey: `${battle.id}:${phaseIdx}:${visit}`,
+    phaseKey,
     sentences,
-    dwellMs: narrating ? narratedDwellMs(baseDwellMs, narrationText) : baseDwellMs,
+    dwellMs,
     voiceWaitMs: voiceWaitMs(narrationText),
     narrating,
     playing: playing && replay !== null,
@@ -275,7 +279,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     speed,
     onAdvance: advancePhase,
     onRefused: refuseNarration,
+    onSentence: (idx) => setSpoken({ key: phaseKey, idx }),
   });
+  const spokenIdx = spoken.key === phaseKey ? spoken.idx : 0;
 
   useEffect(() => {
     onPhaseChange?.(phaseIdx);
@@ -888,6 +894,22 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 bottom-pinned chapter card was removed — it sat far from
                 the arrows and covered too much of the stage. */}
 
+            {/* Captions: the phase's narration, one sentence at a time, while the replay
+                plays and the narration sidebar is hidden. They follow the voice when it
+                speaks and the phase clock when it does not. */}
+            {cinema && sentences.length > 0 && (
+              <PhaseCaption
+                key={phaseKey}
+                sentences={sentences}
+                narrating={narrating}
+                spokenIdx={spokenIdx}
+                progress={phaseProgress}
+                dwellMs={dwellMs}
+                compact={compact}
+                sideways={sideways}
+              />
+            )}
+
             {/* Outro: the battle is over. A composed end card replaces the
                 last phase's chapter flash so the replay lands with intention.
                 Victor, per-side casualty roll, the battle's significance
@@ -1109,9 +1131,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 color: phaseIdx === replay.phases.length - 1 ? '#fff' : '#e2e8f0',
                 border: `1px solid ${theme.accent}55`,
               }}
-              title="Back to battle story (Esc)"
+              title="Close the replay (Esc)"
             >
-              {phaseIdx === replay.phases.length - 1 ? 'Done, back to story' : '← Back to story'}
+              {phaseIdx === replay.phases.length - 1 ? 'Done, close replay' : 'Close replay'}
             </button>
           </div>
         </aside>
@@ -2032,7 +2054,7 @@ function BattleOutro({ battle, replay, theme, onRestart, onBackToStory, cinemati
               className="inline-flex items-center justify-center gap-2.5 h-12 min-w-[180px] px-7 rounded-full text-[13.5px] font-semibold tracking-[0.04em] bg-white text-slate-900 hover:bg-slate-100 transition-all shadow-[0_10px_28px_-10px_rgba(255,255,255,0.55)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 hover:scale-[1.02] whitespace-nowrap"
               style={{ fontFamily: theme.titleFont }}
             >
-              <span>Back to the story</span>
+              <span>Close replay</span>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 2 L10 7 L5 12" />
               </svg>
@@ -2102,6 +2124,63 @@ function formatCompactCasualties(count: number, _raw: string): string {
   }
   if (count === 1) return '1 casualty';
   return `${count.toLocaleString()} casualties`;
+}
+
+// PhaseCaption shows a phase's narration as a caption over the stage, one sentence at a
+// time. With the narrator speaking it shows the sentence the voice is on. Without it, each
+// sentence holds for its spoken estimate along the phase clock. The parent keys it by phase
+// visit, so every visit starts on the first sentence.
+function PhaseCaption({ sentences, narrating, spokenIdx, progress, dwellMs, compact, sideways }: {
+  sentences: string[];
+  narrating: boolean;
+  spokenIdx: number;
+  progress: () => number;
+  dwellMs: number;
+  compact: boolean;
+  sideways: boolean;
+}) {
+  const [clockIdx, setClockIdx] = useState(0);
+  useEffect(() => {
+    if (narrating) return;
+    const tick = () => setClockIdx(sentenceAt(sentences, progress() * dwellMs, dwellMs));
+    tick();
+    const t = setInterval(tick, 150);
+    return () => clearInterval(t);
+  }, [narrating, sentences, progress, dwellMs]);
+  const idx = Math.min(sentences.length - 1, narrating ? spokenIdx : clockIdx);
+  const lift = sideways ? 'bottom-[104px]' : compact ? 'bottom-[88px]' : 'bottom-6';
+  return (
+    <div
+      className={`pointer-events-none absolute inset-x-0 ${lift} z-20 flex justify-center px-4`}
+      aria-live="polite"
+    >
+      <p
+        key={idx}
+        className="max-w-[min(880px,88%)] rounded-xl px-5 py-3 text-center text-slate-50"
+        style={{
+          fontSize: compact ? '15px' : 'clamp(16px, 1.3vw, 21px)',
+          lineHeight: 1.45,
+          background: 'rgba(8, 10, 18, 0.74)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+          boxShadow: '0 10px 30px -12px rgba(0,0,0,0.8)',
+          textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+          animation: 'phase-caption-line 420ms cubic-bezier(.2,.7,.25,1) both',
+        }}
+      >
+        {sentences[idx]}
+      </p>
+      <style>{`
+        @keyframes phase-caption-line {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes phase-caption-line { from { opacity: 1; } to { opacity: 1; } }
+        }
+      `}</style>
+    </div>
+  );
 }
 
 // NarrationReveal renders phase narration word-by-word with a soft fade so

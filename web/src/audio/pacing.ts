@@ -126,3 +126,22 @@ export function narratedDwellMs(baseMs: number, text: string | undefined): numbe
 export function voiceWaitMs(text: string | undefined): number {
   return Math.max(VOICE_WAIT_MIN_MS, spokenMs(text) / 2);
 }
+
+// sentenceAt returns which sentence a caption shows once playedMs of a phase's dwellMs has
+// played at speed 1, when no voice reports its place. Each sentence holds for its spoken
+// estimate, stretched evenly when the dwell is longer than the sentences need, and the last
+// sentence holds to the end of the phase.
+export function sentenceAt(sentences: string[], playedMs: number, dwellMs: number): number {
+  if (sentences.length <= 1) return 0;
+  const ends: number[] = [];
+  let total = 0;
+  for (const s of sentences) {
+    total += sentenceMs(s);
+    ends.push(total);
+  }
+  const scale = Math.max(total, dwellMs - NARRATION_TAIL_MS) / total;
+  for (let i = 0; i < ends.length - 1; i++) {
+    if (playedMs < ends[i] * scale) return i;
+  }
+  return ends.length - 1;
+}

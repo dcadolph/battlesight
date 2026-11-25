@@ -1,27 +1,16 @@
-// narration: browser SpeechSynthesis wrapper for replay phase
-// narration. The caller invokes narrate(text) on every phase advance;
-// the wrapper cancels any in-flight utterance, picks the best system
-// voice available, and starts the new one.
+// narration: the replay narrator, spoken with the browser's SpeechSynthesis. A phase's
+// narration is spoken one sentence an utterance, each started when the one before ends.
+// Stopping reports the sentence in progress, so play can speak again from its start. The
+// utterance in flight stays referenced: Chrome lets an unreferenced utterance be collected,
+// and its events then never arrive.
+
+import { NARRATOR_RATE, sentenceMs } from './pacing';
 //
-// Browsers gate SpeechSynthesis behind a user gesture. In this app the
-// user always clicks "Watch the replay" first, so by the time we begin
-// narrating the gesture has registered.
-//
-// Voice quality is whatever the host OS ships. macOS Samantha / Daniel
-// are clean; Chrome on most platforms exposes "Google US English" which
-// is also serviceable. Falls back to the first English voice and then
-// to the first available voice.
+// Voice quality is whatever the host OS ships. macOS Samantha and Daniel are clean, Chrome
+// on most platforms exposes "Google US English", Edge exposes Aria and Guy. Falls back to
+// the first English voice and then to the first available voice.
 
-import { soundEnabled } from './sound';
-
-let cachedVoice: SpeechSynthesisVoice | null = null;
-let currentUtter: SpeechSynthesisUtterance | null = null;
-let voiceChangedHooked = false;
-
-// PREFERRED_VOICES in priority order. Names match the actual voice
-// objects exposed by SpeechSynthesis on each platform — macOS uses
-// proper names (Samantha, Daniel), Google Chrome uses a "Google US
-// English" branded list, Microsoft Edge exposes Aria / Guy.
+// PREFERRED_VOICES are the voices tried first, in order.
 const PREFERRED_VOICES = [
   'Samantha',
   'Daniel',
@@ -35,88 +24,174 @@ const PREFERRED_VOICES = [
   'Microsoft Eric',
 ];
 
-// pickVoice walks the system voice list looking for the highest-quality
-// English voice we recognise. Memoised in cachedVoice.
+// NARRATOR_KEY is the localStorage key that remembers the narrator switch.
+const NARRATOR_KEY = 'bs.narrator';
+
+// START_WAIT_MS is how long a sentence may take to start before it is spoken again.
+const START_WAIT_MS = 2000;
+
+// START_TRIES is how many times a sentence that never starts is spoken again.
+const START_TRIES = 2;
+
+// END_GRACE_MS is the slack past twice a sentence's estimate before it counts as stuck.
+const END_GRACE_MS = 2000;
+
+let cachedVoice: SpeechSynthesisVoice | null = null;
+let voiceChangedHooked = false;
+// generation numbers each spoken run. Events from an earlier run are ignored.
+let generation = 0;
+// held keeps the utterances of the live run referenced until it ends.
+let held: SpeechSynthesisUtterance[] = [];
+// current is the sentence the live run is speaking, or the one it starts from.
+let current = 0;
+
+// SpeechEvents are the callbacks of one spoken run.
+export interface SpeechEvents {
+  // onSentence fires when a sentence starts, with its index.
+  onSentence?: (index: number) => void;
+  // onDone fires when the last sentence ends.
+  onDone?: () => void;
+  // onRefused fires when the browser refuses to speak before the page has had a click.
+  onRefused?: () => void;
+}
+
+// pickVoice returns the best voice the system offers, memoized in cachedVoice.
 function pickVoice(): SpeechSynthesisVoice | null {
   if (cachedVoice) return cachedVoice;
-  if (typeof speechSynthesis === 'undefined') return null;
   const voices = speechSynthesis.getVoices();
   if (voices.length === 0) return null;
   for (const name of PREFERRED_VOICES) {
     const v = voices.find((vv) => vv.name === name || vv.name.startsWith(name));
-    if (v) { cachedVoice = v; return v; }
+    if (v) {
+      cachedVoice = v;
+      return v;
+    }
   }
-  const en = voices.find((v) => v.lang.startsWith('en'));
-  if (en) { cachedVoice = en; return en; }
-  cachedVoice = voices[0];
+  cachedVoice = voices.find((v) => v.lang.startsWith('en')) ?? voices[0];
   return cachedVoice;
 }
 
-// ensureVoicesLoaded subscribes to the voiceschanged event the first
-// time anything is narrated. Some browsers populate the voice list
-// asynchronously; without this the first phase narration would fall
-// back to a default voice and stick there.
-function ensureVoicesLoaded() {
-  if (voiceChangedHooked || typeof speechSynthesis === 'undefined') return;
+// ensureVoicesLoaded drops the memoized voice when the system list changes. Some browsers
+// fill the list late, and without this the first phase would keep a fallback voice.
+function ensureVoicesLoaded(): void {
+  if (voiceChangedHooked) return;
   voiceChangedHooked = true;
   speechSynthesis.addEventListener('voiceschanged', () => {
     cachedVoice = null;
   });
 }
 
-// narrate speaks the given text. Cancels any in-flight utterance so a
-// rapid phase advance doesn't queue up overlapping voiceovers. Honours
-// the global sound enabled flag — no narration when the user has
-// muted the soundtrack. onEnd fires when speech completes or is
-// interrupted; callers can use it to advance state.
-export function narrate(text: string, opts?: { rate?: number; pitch?: number; onEnd?: () => void }): void {
-  if (typeof speechSynthesis === 'undefined' || !text) return;
-  if (!soundEnabled()) return;
+// speechSupported reports whether the browser has a speech engine.
+export function speechSupported(): boolean {
+  return typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined';
+}
+
+// speechAllowed reports whether the browser will speak now. Browsers refuse speech until
+// the page has had a click. Where the activation API is missing this answers yes, and a
+// refusal arrives as a not-allowed error instead.
+export function speechAllowed(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const activation = (navigator as Navigator & { userActivation?: { hasBeenActive: boolean } }).userActivation;
+  return activation ? activation.hasBeenActive : true;
+}
+
+// narratorPreferred reports whether the viewer left the narrator on. On by default.
+export function narratorPreferred(): boolean {
+  try {
+    return localStorage.getItem(NARRATOR_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
+
+// setNarratorPreferred remembers the narrator switch in this browser.
+export function setNarratorPreferred(on: boolean): void {
+  try {
+    if (on) localStorage.removeItem(NARRATOR_KEY);
+    else localStorage.setItem(NARRATOR_KEY, 'off');
+  } catch {
+    // Private windows and blocked storage forget the switch; the page works without it.
+  }
+}
+
+// speak speaks sentences from index from on, one at a time, at the rate given, after
+// stopping anything spoken before. Chrome's speech queue can stall, so each sentence has a
+// watchdog: one that has not started after START_WAIT_MS is canceled and spoken again, up
+// to START_TRIES times, and one that has not ended after twice its estimate plus
+// END_GRACE_MS is canceled and the next one spoken.
+export function speak(sentences: string[], from: number, rate: number, events: SpeechEvents): void {
+  stopSpeech();
+  if (!speechSupported() || from >= sentences.length) return;
   ensureVoicesLoaded();
-  cancelNarration();
-  const utter = new SpeechSynthesisUtterance(text);
-  const voice = pickVoice();
-  if (voice) {
-    utter.voice = voice;
-    utter.lang = voice.lang;
-  }
-  utter.rate = opts?.rate ?? 0.95;
-  utter.pitch = opts?.pitch ?? 1.0;
-  utter.volume = 1;
-  if (opts?.onEnd) utter.onend = opts.onEnd;
-  currentUtter = utter;
-  // Safari occasionally drops the first utterance when called right
-  // after cancel(). Defer one frame so the cancellation settles.
-  if (typeof requestAnimationFrame !== 'undefined') {
-    requestAnimationFrame(() => speechSynthesis.speak(utter));
-  } else {
-    speechSynthesis.speak(utter);
-  }
+  const gen = generation;
+  current = from;
+  const say = (index: number, tries: number) => {
+    if (gen !== generation) return;
+    if (index >= sentences.length) {
+      held = [];
+      events.onDone?.();
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(sentences[index]);
+    const voice = pickVoice();
+    if (voice) {
+      u.voice = voice;
+      u.lang = voice.lang;
+    }
+    u.rate = rate;
+    u.pitch = 1;
+    u.volume = 1;
+    held = [u];
+    let settled = false;
+    let endTimer: ReturnType<typeof setTimeout> | undefined;
+    const settle = (then: () => void) => {
+      if (settled || gen !== generation) return;
+      settled = true;
+      clearTimeout(startTimer);
+      clearTimeout(endTimer);
+      then();
+    };
+    const startTimer = setTimeout(() => settle(() => {
+      speechSynthesis.cancel();
+      say(tries < START_TRIES ? index : index + 1, tries < START_TRIES ? tries + 1 : 0);
+    }), START_WAIT_MS);
+    u.onstart = () => {
+      if (settled || gen !== generation) return;
+      clearTimeout(startTimer);
+      current = index;
+      events.onSentence?.(index);
+      const expected = (sentenceMs(sentences[index]) * NARRATOR_RATE) / Math.max(0.05, rate);
+      endTimer = setTimeout(() => settle(() => {
+        speechSynthesis.cancel();
+        say(index + 1, 0);
+      }), 2 * expected + END_GRACE_MS);
+    };
+    u.onend = () => settle(() => say(index + 1, 0));
+    u.onerror = (e) => {
+      if (e.error === 'not-allowed') {
+        settle(() => {
+          stopSpeech();
+          events.onRefused?.();
+        });
+        return;
+      }
+      // A cancel of our own reports interrupted or canceled after the watchdog moved on.
+      if (e.error === 'interrupted' || e.error === 'canceled') return;
+      settle(() => say(index + 1, 0));
+    };
+    speechSynthesis.speak(u);
+  };
+  // Safari can drop the first utterance spoken right after a cancel. One frame lets the
+  // cancel settle.
+  if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(() => say(from, 0));
+  else say(from, 0);
 }
 
-// cancelNarration stops any in-flight utterance. Safe to call when
-// nothing is speaking. Used on phase change, replay close, and unmount.
-export function cancelNarration(): void {
-  if (typeof speechSynthesis === 'undefined') return;
-  if (currentUtter || speechSynthesis.speaking || speechSynthesis.pending) {
-    speechSynthesis.cancel();
-    currentUtter = null;
-  }
-}
-
-// pauseNarration pauses without losing the utterance. resumeNarration
-// continues from the same word. Used by the play/pause control so a
-// paused replay does not keep talking.
-export function pauseNarration(): void {
-  if (typeof speechSynthesis === 'undefined') return;
-  if (speechSynthesis.speaking && !speechSynthesis.paused) {
-    speechSynthesis.pause();
-  }
-}
-
-export function resumeNarration(): void {
-  if (typeof speechSynthesis === 'undefined') return;
-  if (speechSynthesis.paused) {
-    speechSynthesis.resume();
-  }
+// stopSpeech stops whatever is spoken and returns the sentence that was in progress.
+export function stopSpeech(): number {
+  generation++;
+  const at = current;
+  if (held.length > 0 && speechSupported()) speechSynthesis.cancel();
+  held = [];
+  return at;
 }

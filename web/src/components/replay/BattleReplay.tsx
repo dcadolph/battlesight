@@ -8,7 +8,8 @@ import GlobeReplay from './GlobeReplay';
 import TacticalSurface from './TacticalSurface';
 import { themeForEra } from '../../theme/era';
 import { playPhaseAdvance, setSoundEra } from '../../audio/sound';
-import { narrate, cancelNarration, pauseNarration, resumeNarration } from '../../audio/narration';
+import { narratorPreferred, setNarratorPreferred, speechAllowed, speechSupported } from '../../audio/narration';
+import { narratedDwellMs, splitSentences, voiceWaitMs } from '../../audio/pacing';
 import { usePauseOnHidden } from '../../hooks/usePauseOnHidden';
 import {
   RecorderSession,
@@ -24,6 +25,7 @@ import { OVERLAY_BAND, OVERLAY_DONATE_CLEARANCE, OVERLAY_HOME_CLEARANCE } from '
 import { findSnapshot, buildCountryColorMap } from '../../data/territory-snapshots';
 import { cachedReplay, loadReplay } from '../../data/replay-cache';
 import { phaseDwellMs } from './beats';
+import { usePhaseClock } from './usePhaseClock';
 
 // SPEEDS are the playback rates the transport offers.
 const SPEEDS = [0.5, 1, 1.5, 2] as const;
@@ -95,7 +97,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   // ~1.6s as an orientation cue, then gets out of the way.
   // Auto-play on open. Opening "Watch the battle" implies "play it". Making
   // the user hunt for a play button to see anything happen is a poor default.
-  const [playing, setPlaying] = useState(true);
+  // The exception is a narrated replay the browser will not speak yet, which
+  // waits on its first phase for a click (see the narrator below).
+  const [playing, setPlaying] = useState(() => !narratorWaitsForClick(cinematicMode));
   const [speed, setSpeed] = useState<Speed>(1);
   const [error, setError] = useState<string | null>(null);
   // Default view is the globe. Auto-switching to the tactical schematic
@@ -111,7 +115,6 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   // outro card so the replay lands with intention instead of just freezing
   // on the final tactical state. Cleared whenever the user scrubs back.
   const [ended, setEnded] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   // chapterRailRef scrolls the active chapter card into view on phase
   // change so the current chapter is never clipped off the rail's edge.
   const chapterRailRef = useRef<HTMLDivElement | null>(null);
@@ -196,56 +199,89 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     return () => clearTimeout(t);
   }, [hopCard]);
 
+  // The narrator speaks each phase while the replay plays, and the phase then holds until
+  // the voice has spoken its last word. narratorOn is the viewer's switch, remembered in
+  // this browser. narratorRefused is true while the browser refuses to speak, which it does
+  // until the page has had a click. A refused narrator holds the replay where it is, so a
+  // deep link waits on its first phase and the narrator button asks for the click. The
+  // first click or key on the page lets the voice in, and "Play narration", Play, and
+  // Space all start the phase from its first sentence. A war cinematic keeps today's
+  // pace, unnarrated.
+  const [narratorOn, setNarratorOn] = useState(narratorPreferred);
+  const [narratorRefused, setNarratorRefused] = useState(() => !speechAllowed());
+  const canNarrate = speechSupported() && !cinematicMode;
+  const voiceWanted = canNarrate && narratorOn;
+  const narrating = voiceWanted && !narratorRefused;
+  const toggleNarrator = useCallback(() => {
+    if (narratorRefused) {
+      setNarratorRefused(false);
+      setNarratorOn(true);
+      setNarratorPreferred(true);
+      if (!ended) setPlaying(true);
+      return;
+    }
+    setNarratorOn(!narratorOn);
+    setNarratorPreferred(!narratorOn);
+  }, [narratorOn, narratorRefused, ended]);
+  const refuseNarration = useCallback(() => {
+    setNarratorRefused(true);
+    setPlaying(false);
+  }, []);
+  // The browser speaks once the page has had a click or a key, so the first one ends a
+  // refusal. It listens for click, not pointerdown, so the narrator button's own click
+  // still sees the refusal and starts the replay instead of switching the narrator off.
   useEffect(() => {
-    if (!playing || !replay) return;
-    const current = replay.phases[phaseIdx];
-    // Reduced-motion path: skip the dwell entirely. The user can still
-    // step through with the scrubber if they want to read each phase.
-    // Phase dwell, shared with the Map view's timeline, which fits its
-    // beats inside it.
-    const baseDur = phaseDwellMs(current.durationMs, Boolean(replay.schematic));
-    const dur = prefersReducedMotion ? 0 : baseDur / speed;
-    timerRef.current = setTimeout(() => {
-      if (phaseIdx >= replay.phases.length - 1) {
-        // Last phase finished its dwell. Trigger the outro card so the
-        // replay reads as "battle over" instead of freezing on the final
-        // tactical state.
-        setPlaying(false);
-        setEnded(true);
-        return;
-      }
-      setPhaseIdx((i) => i + 1);
-    }, dur);
-    return () => clearTimeout(timerRef.current);
-  }, [playing, phaseIdx, replay, speed, prefersReducedMotion]);
+    if (!narratorRefused) return;
+    const lift = (e: Event) => {
+      if (e.isTrusted) setNarratorRefused(false);
+    };
+    window.addEventListener('click', lift);
+    window.addEventListener('keydown', lift);
+    return () => {
+      window.removeEventListener('click', lift);
+      window.removeEventListener('keydown', lift);
+    };
+  }, [narratorRefused]);
+
+  // The phase clock. visit counts jumps, so a jump to the phase already shown starts its
+  // clock and voice fresh. Reduced motion skips the dwell as before, but a narrated phase
+  // still waits for its voice.
+  const [visit, setVisit] = useState(0);
+  const phaseNow = replay?.phases[phaseIdx];
+  const narrationText = phaseNow?.narration;
+  const sentences = useMemo(() => splitSentences(narrationText), [narrationText]);
+  const baseDwellMs = replay && phaseNow && !prefersReducedMotion
+    ? phaseDwellMs(phaseNow.durationMs, Boolean(replay.schematic))
+    : 0;
+  const advancePhase = useCallback(() => {
+    if (!replay) return;
+    if (phaseIdx >= replay.phases.length - 1) {
+      // The last phase is done. The outro card lands the replay as "battle over" instead
+      // of freezing on the final tactical state.
+      setPlaying(false);
+      setEnded(true);
+      return;
+    }
+    setPhaseIdx((i) => i + 1);
+  }, [replay, phaseIdx]);
+  const phaseProgress = usePhaseClock({
+    phaseKey: `${battle.id}:${phaseIdx}:${visit}`,
+    sentences,
+    dwellMs: narrating ? narratedDwellMs(baseDwellMs, narrationText) : baseDwellMs,
+    voiceWaitMs: voiceWaitMs(narrationText),
+    narrating,
+    playing: playing && replay !== null,
+    ended,
+    speed,
+    onAdvance: advancePhase,
+    onRefused: refuseNarration,
+  });
 
   useEffect(() => {
     onPhaseChange?.(phaseIdx);
     // Soft thump on every phase advance. No-op when sound is disabled.
     playPhaseAdvance();
-    // Browser TTS narration of the current phase. Cancels any in-flight
-    // utterance first so rapid advances don't queue overlapping voices.
-    // Only fires while playing — paused scrubbing doesn't trigger speech.
-    if (replay && playing) {
-      const text = replay.phases[phaseIdx]?.narration;
-      if (text) narrate(text);
-    }
-  }, [phaseIdx, onPhaseChange, replay, playing]);
-
-  // Pause / resume the narration when the user toggles play. Without
-  // this, a paused replay keeps the voiceover going past the visible
-  // dwell, which reads as the audio leading the action.
-  useEffect(() => {
-    if (playing) resumeNarration();
-    else pauseNarration();
-  }, [playing]);
-
-  // Cancel any in-flight narration on unmount (replay closed, war
-  // cinematic advanced past this battle, etc.). Without this the
-  // SpeechSynthesis queue keeps talking after the visible chrome is gone.
-  useEffect(() => {
-    return () => { cancelNarration(); };
-  }, []);
+  }, [phaseIdx, onPhaseChange]);
 
   // Fire onEnded a short pause after the replay's final phase lands. The
   // pause gives the outro card time to read; the callback then lets the
@@ -262,10 +298,11 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     setSoundEra(battle.era || '');
   }, [battle.era]);
 
-  // Pause the phase advance whenever the tab is hidden or the window blurs.
-  // Without this the timer keeps firing in the background, the user comes
-  // back to find the replay finished, and the audio drone keeps playing
-  // even though nothing is on screen.
+  // Pause the phase advance whenever the tab is hidden. Without this the
+  // timer keeps firing in the background, the user comes back to find the
+  // replay finished, and the voice keeps talking with nothing on screen.
+  // A window that only loses focus keeps playing, as media players do, so
+  // the narration goes on while the viewer types in another window.
   // Pause-on-hidden only applies in standalone (dossier) viewing. During
   // cinematic playback the war timer is the source of truth: pausing the
   // inner replay while the outer cinematic keeps advancing leaves the
@@ -275,12 +312,13 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   usePauseOnHidden(useCallback(() => {
     if (cinematicMode) return;
     setPlaying(false);
-  }, [cinematicMode]));
+  }, [cinematicMode]), { onBlur: false });
 
   const goto = useCallback((i: number) => {
     if (!replay) return;
     const clamped = Math.max(0, Math.min(replay.phases.length - 1, i));
     setPhaseIdx(clamped);
+    setVisit((v) => v + 1);
     // Any manual phase change clears the outro card. The user has chosen
     // to engage with the replay again; do not occlude it.
     setEnded(false);
@@ -344,6 +382,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   const restartReplay = useCallback(() => {
     if (!replay) return;
     setPhaseIdx(0);
+    setVisit((v) => v + 1);
     setEnded(false);
     setPlaying(true);
   }, [replay]);
@@ -369,10 +408,11 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
         // play/pause control owns the playing state.
         if (!cinematicMode) setPlaying((p) => !p);
       }
+      else if ((e.key === 'm' || e.key === 'M') && canNarrate) toggleNarrator();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose, goto, phaseIdx, cinematicMode, onAdvanceNext, onAdvancePrev, wakeChrome]);
+  }, [onClose, goto, phaseIdx, cinematicMode, onAdvanceNext, onAdvancePrev, wakeChrome, canNarrate, toggleNarrator]);
 
   if (error) {
     return (
@@ -771,6 +811,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 playing={playing}
                 speed={speed}
                 ended={ended}
+                narrated={voiceWanted}
                 prefersReducedMotion={prefersReducedMotion}
                 warCountryColors={(() => {
                   if (warCountryColors) return warCountryColors;
@@ -1128,7 +1169,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
             phases={replay.phases}
             phaseIdx={phaseIdx}
             playing={playing}
-            speed={speed}
+            progress={phaseProgress}
             accent={theme.accent}
             onSeek={goto}
             reducedMotion={prefersReducedMotion}
@@ -1163,8 +1204,71 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
           ))}
         </div>
         )}
+        {canNarrate && (
+          <NarratorButton
+            on={narrating}
+            refused={narratorOn && narratorRefused}
+            compact={compact}
+            accent={theme.accent}
+            onToggle={toggleNarrator}
+          />
+        )}
       </footer>
     </div>
+  );
+}
+
+// narratorWaitsForClick reports whether a replay opening now must wait for a click before
+// it plays: the narrator is on, and the browser will not speak until the page has had one.
+function narratorWaitsForClick(cinematicMode: boolean): boolean {
+  return !cinematicMode && speechSupported() && narratorPreferred() && !speechAllowed();
+}
+
+// NarratorButtonProps are the inputs of the narrator switch.
+interface NarratorButtonProps {
+  // on is true while the narrator speaks.
+  on: boolean;
+  // refused is true while the browser refuses to speak until the page has a click.
+  refused: boolean;
+  // compact sizes the button for a phone.
+  compact: boolean;
+  // accent is the era accent color.
+  accent: string;
+  // onToggle flips the narrator, or starts it after a refusal.
+  onToggle: () => void;
+}
+
+// NarratorButton is the narrator switch in the replay's control bar. After a refusal it
+// pulses and, with room, says "Play narration", so the click the browser needs is one the
+// viewer wants to make.
+function NarratorButton({ on, refused, compact, accent, onToggle }: NarratorButtonProps) {
+  const label = refused ? 'Play narration' : on ? 'Narration on' : 'Narration off';
+  return (
+    <button
+      onClick={onToggle}
+      className={`${compact ? 'h-11 min-w-11' : 'h-9 min-w-9'} shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60 ${refused && !compact ? 'px-3' : ''} ${on ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+      style={{
+        background: on || refused ? `${accent}33` : 'rgba(30,41,59,0.8)',
+        borderColor: on || refused ? `${accent}77` : 'rgba(51,65,85,0.4)',
+        animation: refused ? 'narrator-ask 1600ms ease-in-out infinite' : undefined,
+      }}
+      title={`${label} (M)`}
+      aria-label={label}
+      aria-pressed={on}
+    >
+      {on ? (
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M2 5 L4 5 L7 2 L7 10 L4 7 L2 7 Z"/><path d="M8.5 4 Q10 6 8.5 8" stroke="currentColor" strokeWidth="0.9" fill="none" strokeLinecap="round"/><path d="M9.6 2.8 Q11.6 6 9.6 9.2" stroke="currentColor" strokeWidth="0.9" fill="none" strokeLinecap="round"/></svg>
+      ) : (
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M2 5 L4 5 L7 2 L7 10 L4 7 L2 7 Z"/><path d="M9 4 L11 8 M11 4 L9 8" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/></svg>
+      )}
+      {refused && !compact && <span className="text-[10.5px] font-semibold tracking-wide">Play narration</span>}
+      <style>{`
+        @keyframes narrator-ask {
+          0%, 100% { box-shadow: 0 0 0 0 ${accent}00; }
+          50% { box-shadow: 0 0 0 6px ${accent}55; }
+        }
+      `}</style>
+    </button>
   );
 }
 
@@ -1182,13 +1286,14 @@ interface TransportScrubberProps {
   phases: Replay['phases'];
   phaseIdx: number;
   playing: boolean;
-  speed: number;
+  // progress returns the share of the shown phase played so far, from the phase clock.
+  progress: () => number;
   accent: string;
   onSeek: (i: number) => void;
   reducedMotion: boolean;
 }
 
-function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, reducedMotion }: TransportScrubberProps) {
+function TransportScrubber({ phases, phaseIdx, playing, progress, accent, onSeek, reducedMotion }: TransportScrubberProps) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [hovering, setHovering] = useState(false);
   // hover carries both the raw mouse x (tooltip position) and the [0,1]
@@ -1203,17 +1308,15 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
   // boundary (no animated creep).
   const [intraProgress, setIntraProgress] = useState(0);
 
-  // RAF loop for intra-phase progress. Only runs while playing and not
-  // dragging; otherwise the fill stays put. The cleanup zeroes the fraction
-  // so a pause, scrub, or phase change never leaves stale creep behind.
+  // RAF loop for intra-phase progress, read from the phase clock so a pause
+  // or a speed change carries on from where it was. Only runs while playing
+  // and not dragging; otherwise the fill stays put. The cleanup zeroes the
+  // fraction so a scrub or phase change never leaves stale creep behind.
   useEffect(() => {
     if (!playing || dragging || reducedMotion) return;
-    const dur = (phases[phaseIdx]?.durationMs ?? 5500) / Math.max(0.1, speed);
-    if (dur <= 0) return;
-    const start = performance.now();
     let raf: number;
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - start) / dur);
+    const tick = () => {
+      const p = progress();
       setIntraProgress(p);
       if (p < 1) raf = requestAnimationFrame(tick);
     };
@@ -1222,7 +1325,7 @@ function TransportScrubber({ phases, phaseIdx, playing, speed, accent, onSeek, r
       cancelAnimationFrame(raf);
       setIntraProgress(0);
     };
-  }, [playing, phaseIdx, speed, phases, dragging, reducedMotion]);
+  }, [playing, phaseIdx, progress, dragging, reducedMotion]);
 
   // Resolve clientX to a phase index using the track's bounding rect.
   const clientXToPhase = useCallback((clientX: number): number => {

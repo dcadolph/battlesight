@@ -54,6 +54,7 @@ import {
 } from './stage';
 import type { LngLat, StageFrame } from './stage';
 import { LABEL_RANK, arrowLabelShown, labelRoles, phaseDwellMs, phaseTimeline, rideRule, stateAt } from './beats';
+import { narratedDwellMs, spokenMs } from '../../audio/pacing';
 import type { BeatArrow, BeatUnit, DrawnState, LabelRole, PriorSpot, Ride, Timeline } from './beats';
 import type { Feature, Geometry } from 'geojson';
 
@@ -65,6 +66,9 @@ interface TacticalSurfaceProps {
   playing?: boolean;
   speed?: number;
   ended?: boolean;
+  // narrated is true while the narrator speaks the replay. A phase then lasts as long as its
+  // narration and spreads its moves through it.
+  narrated?: boolean;
   prefersReducedMotion?: boolean;
   warCountryColors?: Record<string, string>;
   warFactionAnchors?: Array<{ faction: string; anchor: string }>;
@@ -621,6 +625,7 @@ export default function TacticalSurface({
   playing = true,
   speed = 1,
   ended = false,
+  narrated = false,
   prefersReducedMotion = false,
   warCountryColors,
   warFactionAnchors,
@@ -693,6 +698,12 @@ export default function TacticalSurface({
   useEffect(() => {
     speedRef.current = speed;
   }, [speed]);
+  // narratedRef is the narrator switch, read when a phase starts so a change inside a phase
+  // never rebuilds its timeline.
+  const narratedRef = useRef(narrated);
+  useEffect(() => {
+    narratedRef.current = narrated;
+  }, [narrated]);
   // labelWrapRef is the HTML label overlay container. Labels are positioned by
   // direct DOM writes on every drawn frame and every map move.
   const labelWrapRef = useRef<HTMLDivElement | null>(null);
@@ -1229,7 +1240,11 @@ export default function TacticalSurface({
       const km = kmBetween(from.lat, from.lng, frame.center[1], frame.center[0]);
       entryMs = Math.min(5200, Math.max(2400, Math.round(km * 5)));
     }
-    const dwellMs = phaseDwellMs(phase.durationMs, Boolean(replay.schematic));
+    // A narrated phase lasts as long as its narration, and its beats spread through the
+    // voice. The replay's phase timer takes the same dwell from the same rule.
+    const baseDwellMs = phaseDwellMs(phase.durationMs, Boolean(replay.schematic));
+    const voiceMs = narratedRef.current ? spokenMs(phase.narration) : 0;
+    const dwellMs = voiceMs > 0 ? narratedDwellMs(baseDwellMs, phase.narration) : baseDwellMs;
 
     // Spread the symbols where units end the phase, at the frame given, and
     // build the timeline from there. The phase starts where the phase before
@@ -1266,6 +1281,7 @@ export default function TacticalSurface({
         dwellMs,
         entryMs,
         speed: phaseSpeed,
+        voiceMs: voiceMs > 0 ? voiceMs : undefined,
       });
       const prevByGid = new Map((prevData?.unitPoints ?? []).map((u) => [u.gid, u] as [string, ResolvedUnit]));
       const look = tl.units.map((t) => (t.unit >= 0 ? units[t.unit] : prevByGid.get(t.gid)));
@@ -1339,6 +1355,7 @@ export default function TacticalSurface({
     phaseData,
     prevData,
     phase.durationMs,
+    phase.narration,
     replay.schematic,
     battle.id,
     cameraLat,

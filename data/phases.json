@@ -3943,7 +3943,7 @@
       {
         "title": "Suburbs East",
         "timeMarker": "August to November 2022",
-        "narration": "Wagner pushes into the eastern outskirts of Bakhmut through small towns of the Donbas: Soledar, Klishchiivka, Pokrovske. The advance is measured in hundreds of metres per week. Wagner uses the technique that becomes its signature: small groups of expendable infantry advance, drawing Ukrainian fire to identify positions, which are then struck by artillery or armour. The infantry that survives the first wave reinforces lodgements for the next group.",
+        "narration": "Wagner pushes into the eastern outskirts of Bakhmut through the small towns of the Donbas, gaining a few hundred meters a week. Its signature tactic: small groups of expendable infantry advance to draw Ukrainian fire, and artillery then strikes the positions they reveal. The survivors hold the ground for the next wave.",
         "durationMs": 6000,
         "terrain": [
           {
@@ -3968,7 +3968,7 @@
           },
           {
             "kind": "town",
-            "label": "Bakhmut centre",
+            "label": "Bakhmut center",
             "points": [
               36,
               36,
@@ -3978,7 +3978,7 @@
           },
           {
             "kind": "town",
-            "label": "Soledar (north-east)",
+            "label": "Soledar (northeast)",
             "points": [
               60,
               14,
@@ -4011,7 +4011,7 @@
             "status": "pressing"
           },
           {
-            "label": "Ukrainian defence (Bakhmut)",
+            "label": "Ukrainian defense (Bakhmut)",
             "faction": "a",
             "unitType": "infantry",
             "x": 36,
@@ -4036,7 +4036,7 @@
       {
         "title": "Soledar Falls",
         "timeMarker": "January 2023",
-        "narration": "Soledar, the salt-mine town just north-east of Bakhmut, falls to Wagner on 13 January 2023. Wagner founder Yevgeny Prigozhin claims the win loudly on Telegram. Russia's regular Ministry of Defence has not been involved at Soledar and the resulting public quarrel between Wagner and the MOD will run for the next five months. Russian regular units begin to operate in coordination with Wagner around the city.",
+        "narration": "Soledar, the salt-mine town just northeast of Bakhmut, falls to Wagner on 13 January 2023, and Ukrainian troops withdraw. Wagner founder Yevgeny Prigozhin claims the win loudly. Russia's Ministry of Defence had no part in it, and the public quarrel between the two runs for the next five months.",
         "durationMs": 5500,
         "terrain": [
           {
@@ -4088,7 +4088,7 @@
       {
         "title": "The Three Roads Out",
         "timeMarker": "February to April 2023",
-        "narration": "Wagner cuts the M-03 and the H-32 highways supplying Bakhmut from the north. The only remaining road into the city is the dirt road from Khromove west of town. Ukrainian artillery covers it. Wagner extends inside the city, taking AZOM industrial complex and crossing the Bakhmutka river. Buildings change hands daily. By the end of April Wagner controls more than two thirds of the city. Prigozhin publishes a video tour of his own dead on a battlefield, blaming the Ministry of Defence for not supplying his men.",
+        "narration": "Wagner cuts the highways supplying Bakhmut from the north. The only road left into the city is a dirt track from Khromove, west of town. Inside, Wagner takes the AZOM industrial complex and crosses the Bakhmutka river, and buildings change hands daily. By the end of April it holds more than two thirds of the city.",
         "durationMs": 5500,
         "terrain": [
           {
@@ -4135,7 +4135,7 @@
             "status": "pressing"
           },
           {
-            "label": "Ukrainian defence (compressed)",
+            "label": "Ukrainian defense (compressed)",
             "faction": "a",
             "unitType": "infantry",
             "x": 36,
@@ -4171,7 +4171,7 @@
       {
         "title": "Flanks Bypassed",
         "timeMarker": "May 2023",
-        "narration": "Ukrainian forces north and south of Bakhmut at Berkhivka and Klishchiivka counter-attack and gain ground on Wagner's flanks. The bypass means the city, even if completely held by Russia, sits in a fragile salient. Wagner declares the centre of Bakhmut captured on 20 May. Prigozhin announces Wagner will hand over the city to regular Russian units and withdraw. Casualties on both sides are heavy, with credible estimates of Russian losses in the campaign at twenty thousand dead, mostly Wagner, and Ukrainian losses at perhaps half that.",
+        "narration": "Ukrainian forces north and south of Bakhmut, at Berkhivka and Klishchiivka, counterattack and gain ground on Wagner's flanks. The bypass means the city, even if fully held by Russia, sits in a fragile salient. On 20 May Wagner declares Bakhmut taken. Russian dead are estimated at twenty thousand, mostly Wagner.",
         "durationMs": 5500,
         "terrain": [
           {
@@ -4207,7 +4207,7 @@
         ],
         "units": [
           {
-            "label": "Wagner in city centre",
+            "label": "Wagner in city center",
             "faction": "b",
             "unitType": "infantry",
             "x": 36,
@@ -4253,7 +4253,7 @@
       {
         "title": "Wagner Mutiny",
         "timeMarker": "23 June 2023",
-        "narration": "One month after the fall of Bakhmut Prigozhin's quarrel with the Russian Ministry of Defence reaches its end. On 23 June Wagner columns leave Ukraine, cross the Russian border at Rostov, take the city's military headquarters, and start north toward Moscow with Prigozhin demanding the dismissal of Shoigu and Gerasimov. The mutiny ends in twenty-four hours with a deal brokered by Lukashenko of Belarus. Two months later Prigozhin's aircraft falls out of the sky north of Tver and he is killed. Wagner is folded into the Russian regular structure.",
+        "narration": "One month after Bakhmut falls, Prigozhin's quarrel with the Ministry of Defence boils over. On 23 June Wagner columns leave Ukraine, take the military headquarters in Rostov, and drive toward Moscow. The mutiny ends within a day, in a deal brokered by Belarus. Two months later Prigozhin dies when his plane falls from the sky north of Tver.",
         "durationMs": 4500,
         "terrain": [
           {

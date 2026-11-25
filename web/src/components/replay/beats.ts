@@ -76,6 +76,9 @@ export interface TimelineInput {
   entryMs: number;
   // speed is the playback speed.
   speed: number;
+  // voiceMs is how long the narrator speaks the phase, on the phase clock from the phase's
+  // start, or undefined when no narrator speaks. With it the beats spread through the voice.
+  voiceMs?: number;
 }
 
 // UnitTrack is one unit's path through a phase.
@@ -122,8 +125,9 @@ export interface Beat {
   window: [number, number];
 }
 
-// FitStep names how far the fit rule went to place the beats inside the budget.
-export type FitStep = 'full' | 'shortened' | 'merged' | 'over';
+// FitStep names how the beats were placed: spread through the narration, or how far the
+// fit rule went to place them inside the budget.
+export type FitStep = 'spread' | 'full' | 'shortened' | 'merged' | 'over';
 
 // Timeline is the whole choreography of one phase.
 export interface Timeline {
@@ -339,6 +343,25 @@ function beatsNeed(groups: number[][], full: number[], k: number): number {
   return total + BEAT_GAP * Math.max(0, groups.length - 1);
 }
 
+// spreadStarts returns the start of each beat when the beats spread through the narration:
+// beat b of n starts at lead + b x (voiceEnd - lead) / n, or BEAT_GAP after the beat before
+// ends if that is later, at full length. It returns null when the voice ends before the
+// lead, a beat would start once the voice has ended, or a beat would end past room.
+function spreadStarts(groups: number[][], full: number[], lead: number, voiceEnd: number, room: number): number[] | null {
+  if (groups.length === 0 || voiceEnd <= lead) return null;
+  const slot = (voiceEnd - lead) / groups.length;
+  const starts: number[] = [];
+  let free = lead;
+  for (let b = 0; b < groups.length; b++) {
+    const start = Math.max(lead + b * slot, free);
+    const len = Math.max(BEAT_MIN, Math.max(...groups[b].map((i) => full[i])));
+    if (start >= voiceEnd || start + len > room) return null;
+    starts.push(start);
+    free = start + len + BEAT_GAP;
+  }
+  return starts;
+}
+
 // fitScale returns the largest scale up to 1 that fits the beats into room, or -1 when
 // even the shortest beats do not fit.
 function fitScale(groups: number[][], full: number[], room: number): number {
@@ -373,16 +396,22 @@ export function phaseTimeline(input: TimelineInput): Timeline {
   const full = arrows.map((a) => arrowDuration(a.kind));
   let groups = groupBeats(arrows);
   let fit: FitStep = 'full';
-  let k = fitScale(groups, full, room - lead);
-  if (k < 1) fit = 'shortened';
-  if (k < 0) {
-    const merged = mergeBySide(arrows);
-    fit = 'merged';
-    k = fitScale(merged, full, room - lead);
-    groups = merged;
+  let k = 1;
+  const spread = input.voiceMs === undefined ? null : spreadStarts(groups, full, lead, input.voiceMs - entry, room);
+  if (spread) {
+    fit = 'spread';
+  } else {
+    k = fitScale(groups, full, room - lead);
+    if (k < 1) fit = 'shortened';
     if (k < 0) {
-      fit = 'over';
-      k = 0;
+      const merged = mergeBySide(arrows);
+      fit = 'merged';
+      k = fitScale(merged, full, room - lead);
+      groups = merged;
+      if (k < 0) {
+        fit = 'over';
+        k = 0;
+      }
     }
   }
 
@@ -390,6 +419,7 @@ export function phaseTimeline(input: TimelineInput): Timeline {
   const beats: Beat[] = [];
   let cursor = lead;
   groups.forEach((g, b) => {
+    if (spread) cursor = spread[b];
     let longest = 0;
     for (const i of g) {
       const dur = Math.max(Math.min(full[i], BEAT_MIN), full[i] * k);

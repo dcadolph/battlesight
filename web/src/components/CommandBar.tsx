@@ -187,7 +187,7 @@ export default function CommandBar({
     if (e.key === 'Escape') { handleClear(); inputRef.current?.blur(); }
     else if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIndex((p) => Math.min(p + 1, results.length - 1)); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIndex((p) => Math.max(p - 1, 0)); }
-    else if (e.key === 'Enter' && activeIndex >= 0 && results[activeIndex]) handleSelect(results[activeIndex]);
+    else if (e.key === 'Enter' && results[Math.max(0, activeIndex)]) handleSelect(results[Math.max(0, activeIndex)]);
   };
 
   useEffect(() => {

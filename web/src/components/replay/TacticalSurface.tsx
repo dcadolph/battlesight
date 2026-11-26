@@ -65,6 +65,7 @@ import {
   groundNames,
   groundShapes,
   isFieldReplay,
+  PAPER_READY,
   placeNames,
 } from './ground';
 import type { FieldPoint, GroundName, GroundShape, PlacedName, ScreenBox } from './ground';
@@ -956,10 +957,10 @@ export default function TacticalSurface({
   const extentLatDeg = replay.extentLatDeg ?? 3;
   const extentLngDeg = (replay.extentLngDeg ?? 3) * (replay.aspectRatio ?? 1.6);
 
-  // The plate. A field replay is drawn on paper from the ground its own phases name; a
-  // replay placed by latitude and longitude keeps the true ground. The ground is built
-  // once a replay, from every phase, so it never changes under the viewer.
-  const fieldPlate = useMemo(() => isFieldReplay(replay), [replay]);
+  // The plate. A field replay whose ground is ready is drawn on paper from the ground its
+  // own phases name. Every other replay keeps the real map. The ground is built once a
+  // replay, from every phase, so it never changes under the viewer.
+  const fieldPlate = useMemo(() => isFieldReplay(replay) && PAPER_READY.has(battle.id), [replay, battle.id]);
   const look = useMemo(() => plateLook(battle.era), [battle.era]);
   const plateDraw = useMemo(() => {
     if (!fieldPlate) return null;

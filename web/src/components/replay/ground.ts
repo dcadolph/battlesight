@@ -90,6 +90,10 @@ export function isLineKind(kind: TerrainKind): boolean {
 
 // isFieldReplay reports whether a replay is laid out in field space, with no unit placed
 // by latitude and longitude. Field replays get the plate; the others keep true ground.
+// PAPER_READY holds the battles whose ground is drawn well enough for the paper plate. Every
+// other battle keeps the real map. A battle joins only once its ground has been seen on paper.
+export const PAPER_READY: ReadonlySet<string> = new Set<string>(['gettysburg-1863']);
+
 export function isFieldReplay(replay: Replay): boolean {
   for (const ph of replay.phases) {
     for (const u of ph.units ?? []) {

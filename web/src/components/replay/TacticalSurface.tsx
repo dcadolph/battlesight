@@ -12,7 +12,7 @@
 //
 // No tokens. No signups. All sources CORS-open.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import type { StyleSpecification } from 'maplibre-gl';
 import { MapboxOverlay } from '@deck.gl/mapbox';
@@ -20,6 +20,7 @@ import type { LayersList } from '@deck.gl/core';
 import {
   IconLayer,
   LineLayer,
+  PathLayer,
   PolygonLayer,
   ScatterplotLayer,
   TextLayer,
@@ -49,12 +50,24 @@ import {
   frameForBox,
   homeBox,
   phaseBox,
+  projectToScreen,
   resolvePoint,
   spreadPoints,
   symbolSize,
 } from './stage';
 import type { LngLat, StageFrame } from './stage';
 import { splitLabel } from './labels';
+import {
+  buildGround,
+  fieldToLngLat,
+  groundNames,
+  groundShapes,
+  isFieldReplay,
+  placeNames,
+} from './ground';
+import type { FieldPoint, GroundName, GroundShape, PlacedName, ScreenBox } from './ground';
+import { nameInk, plateLook, roleStyle } from './look';
+import type { PlateLook } from './look';
 import { LABEL_RANK, arrowLabelShown, labelRoles, phaseDwellMs, phaseTimeline, rideRule, stateAt } from './beats';
 import { narratedDwellMs, spokenMs } from '../../audio/pacing';
 import type { BeatArrow, BeatUnit, DrawnState, LabelRole, PriorSpot, Ride, Timeline } from './beats';
@@ -477,6 +490,11 @@ interface DrawnFrame {
 const LABEL_OUTLINE =
   '0 0 2px rgba(10,8,6,0.95), 1px 1px 0 rgba(10,8,6,0.9), -1px -1px 0 rgba(10,8,6,0.9), 1px -1px 0 rgba(10,8,6,0.9), -1px 1px 0 rgba(10,8,6,0.9)';
 
+// paperOutline is the light halo around label text on the paper plate, as a text shadow.
+function paperOutline(halo: string): string {
+  return `0 0 3px ${halo}, 1px 1px 0 ${halo}, -1px -1px 0 ${halo}, 1px -1px 0 ${halo}, -1px 1px 0 ${halo}`;
+}
+
 // LABEL_GAP_PX is the gap between a symbol's lower edge and its label.
 const LABEL_GAP_PX = 3;
 
@@ -541,7 +559,20 @@ const PLATE_LAND = '#1a1814';
 const PLATE_WATER = '#0d1113';
 const PLATE_WOOD = '#1e1d17';
 
-const OPEN_STYLE: StyleSpecification = {
+// BASEMAP_LAYERS are the basemap layers a field replay's plate hides, with the paint
+// property that fades each one and its value when shown.
+const BASEMAP_LAYERS: Array<[string, string, number]> = [
+  ['woodland', 'fill-opacity', 0.9],
+  ['water', 'fill-opacity', 1],
+  ['rivers', 'line-opacity', 1],
+  ['hillshade', 'hillshade-exaggeration', 0.45],
+];
+
+// openStyle returns the map style. With a plate, the sheet is the plate's land and the
+// basemap layers start hidden, so a field replay never shows the dark map first.
+function openStyle(plate: PlateLook | null): StyleSpecification {
+  const shown = (id: string) => (plate && BASEMAP_LAYERS.some(([l]) => l === id) ? 'none' : 'visible') as 'none' | 'visible';
+  return {
   version: 8,
   sources: {
     // OpenFreeMap vector tiles in the OpenMapTiles schema: keyless, free,
@@ -571,7 +602,7 @@ const OPEN_STYLE: StyleSpecification = {
     {
       id: 'matte',
       type: 'background',
-      paint: { 'background-color': PLATE_LAND },
+      paint: { 'background-color': plate ? plate.land : PLATE_LAND },
     },
     // Woodland and wetland, barely lifted off the land so cover a battle
     // turned on is visible without competing with the faction palette.
@@ -581,6 +612,7 @@ const OPEN_STYLE: StyleSpecification = {
       source: 'openmaptiles',
       'source-layer': 'landcover',
       filter: ['in', ['get', 'class'], ['literal', ['wood', 'wetland']]],
+      layout: { visibility: shown('woodland') },
       paint: { 'fill-color': PLATE_WOOD, 'fill-opacity': 0.9 },
     },
     {
@@ -588,7 +620,8 @@ const OPEN_STYLE: StyleSpecification = {
       type: 'fill',
       source: 'openmaptiles',
       'source-layer': 'water',
-      paint: { 'fill-color': PLATE_WATER },
+      layout: { visibility: shown('water') },
+      paint: { 'fill-color': PLATE_WATER, 'fill-opacity': 1 },
     },
     {
       id: 'rivers',
@@ -596,7 +629,9 @@ const OPEN_STYLE: StyleSpecification = {
       source: 'openmaptiles',
       'source-layer': 'waterway',
       filter: ['in', ['get', 'class'], ['literal', ['river', 'canal']]],
+      layout: { visibility: shown('rivers') },
       paint: {
+        'line-opacity': 1,
         'line-color': PLATE_WATER,
         'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.6, 10, 1.6, 14, 4],
       },
@@ -607,6 +642,7 @@ const OPEN_STYLE: StyleSpecification = {
       id: 'hillshade',
       type: 'hillshade',
       source: 'terrain',
+      layout: { visibility: shown('hillshade') },
       paint: {
         'hillshade-exaggeration': 0.45,
         'hillshade-illumination-direction': 315,
@@ -617,7 +653,155 @@ const OPEN_STYLE: StyleSpecification = {
     },
   ],
   glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
-};
+  };
+}
+
+// setBasemap shows the plate or the true ground on a loaded map, fading over fadeMs. The
+// returned function cancels the pending hide.
+function setBasemap(map: maplibregl.Map, plate: PlateLook | null, fadeMs: number): () => void {
+  const transition = { duration: fadeMs, delay: 0 };
+  map.setPaintProperty('matte', 'background-color-transition', transition);
+  map.setPaintProperty('matte', 'background-color', plate ? plate.land : PLATE_LAND);
+  for (const [id, prop, value] of BASEMAP_LAYERS) {
+    map.setPaintProperty(id, `${prop}-transition`, transition);
+    if (!plate) map.setLayoutProperty(id, 'visibility', 'visible');
+    map.setPaintProperty(id, prop, plate ? 0 : value);
+  }
+  if (!plate) return () => {};
+  const hide = () => {
+    for (const [id] of BASEMAP_LAYERS) map.setLayoutProperty(id, 'visibility', 'none');
+  };
+  if (fadeMs <= 0) {
+    hide();
+    return () => {};
+  }
+  const t = setTimeout(hide, fadeMs);
+  return () => clearTimeout(t);
+}
+
+// PAPER_GRAIN is a soft fractal noise tile, the grain of the paper plate.
+const PAPER_GRAIN =
+  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'>" +
+  "<filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/>" +
+  "<feColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.3 0 0 0 0 0.24 0 0 0 0.55 0'/></filter>" +
+  "<rect width='100%' height='100%' filter='url(%23g)'/></svg>\")";
+
+// PLACE_SERIF is the face of place names on the plate. Georgia first: its italic keeps
+// every tail inside the glyph's own box, which the font atlas needs.
+const PLACE_SERIF = "Georgia, 'Times New Roman', serif";
+
+// PlateGeo is what maps field space onto the map.
+interface PlateGeo {
+  // lat is the field's center latitude.
+  lat: number;
+  // lng is the field's center longitude.
+  lng: number;
+  // extentLatDeg is the field's latitude span.
+  extentLatDeg: number;
+  // extentLngDeg is the field's longitude span.
+  extentLngDeg: number;
+}
+
+// plateLngLat maps a field point onto the map.
+function plateLngLat(p: FieldPoint, geo: PlateGeo): [number, number] {
+  return fieldToLngLat(p, geo.lat, geo.lng, geo.extentLatDeg, geo.extentLngDeg);
+}
+
+// DrawnShape is a ground shape mapped onto the map, with its look.
+interface DrawnShape {
+  // path is the shape's points on the map.
+  path: Array<[number, number]>;
+  // color is the shape's color.
+  color: Rgba;
+  // widthPx is the line width in pixels.
+  widthPx: number;
+}
+
+// buildGroundLayers draws a plate's ground as deck layers under everything else, each run of fills or lines in drawing order, so a river crosses a
+// hill and a town sits on a road. opacity fades the whole ground.
+function buildGroundLayers(shapes: GroundShape[], look: PlateLook, geo: PlateGeo, key: string, opacity: number): unknown[] {
+  const out: unknown[] = [];
+  let run: { fill: boolean; items: DrawnShape[] } | null = null;
+  const flush = () => {
+    if (!run || run.items.length === 0) return;
+    const id = `plate-${run.fill ? 'fill' : 'line'}-${out.length}-${key}`;
+    if (run.fill) {
+      out.push(new PolygonLayer<DrawnShape>({
+        id,
+        data: run.items,
+        getPolygon: (d) => d.path,
+        getFillColor: (d) => d.color,
+        filled: true,
+        stroked: false,
+        opacity,
+        pickable: false,
+        parameters: { depthCompare: 'always' },
+      }));
+    } else {
+      out.push(new PathLayer<DrawnShape>({
+        id,
+        data: run.items,
+        getPath: (d) => d.path,
+        getColor: (d) => d.color,
+        getWidth: (d) => d.widthPx,
+        widthUnits: 'pixels',
+        capRounded: true,
+        jointRounded: true,
+        opacity,
+        pickable: false,
+        parameters: { depthCompare: 'always' },
+      }));
+    }
+  };
+  for (const sh of shapes) {
+    const st = roleStyle(look, sh.role);
+    const item: DrawnShape = {
+      path: sh.points.map((p) => plateLngLat(p, geo)),
+      color: hexToRgb(st.color, st.alpha),
+      widthPx: st.widthPx,
+    };
+    if (!run || run.fill !== sh.fill) {
+      flush();
+      run = { fill: sh.fill, items: [] };
+    }
+    run.items.push(item);
+  }
+  flush();
+  return out;
+}
+
+// buildNameLayer draws a plate's place names as one deck text layer, italic serif with a
+// light halo, towns upright.
+function buildNameLayer(placed: PlacedName[], look: PlateLook, geo: PlateGeo, key: string, opacity: number): unknown[] {
+  if (placed.length === 0) return [];
+  const halo = hexToRgb(look.halo, 235);
+  const layer = (upright: boolean) =>
+    new TextLayer<PlacedName>({
+      id: `plate-names-${upright ? 'town' : 'place'}-${key}`,
+      data: placed.filter((p) => (p.kind === 'town' || p.kind === 'fort') === upright),
+      getPosition: (d) => plateLngLat(d.spot.at, geo),
+      getText: (d) => d.text,
+      getSize: (d) => d.sizePx,
+      getColor: (d) => hexToRgb(nameInk(look, d.kind), 255),
+      getAngle: (d) => d.spot.angle,
+      getTextAnchor: (d) => d.spot.anchor,
+      getAlignmentBaseline: (d) => d.spot.baseline,
+      getPixelOffset: (d) => d.spot.offset,
+      fontFamily: PLACE_SERIF,
+      fontWeight: upright ? '600' : '500',
+      // A wide buffer keeps italic overhangs and descenders whole in the font atlas.
+      fontSettings: { sdf: true, fontSize: 64, buffer: 14 },
+      outlineWidth: 4,
+      outlineColor: halo,
+      characterSet: 'auto',
+      sizeUnits: 'pixels',
+      billboard: true,
+      opacity,
+      pickable: false,
+      parameters: { depthCompare: 'always' },
+    });
+  return [layer(false), layer(true)];
+}
 
 export default function TacticalSurface({
   battle,
@@ -752,6 +936,65 @@ export default function TacticalSurface({
   const extentLatDeg = replay.extentLatDeg ?? 3;
   const extentLngDeg = (replay.extentLngDeg ?? 3) * (replay.aspectRatio ?? 1.6);
 
+  // The plate. A field replay is drawn on paper from the ground its own phases name; a
+  // replay placed by latitude and longitude keeps the true ground. The ground is built
+  // once a replay, from every phase, so it never changes under the viewer.
+  const fieldPlate = useMemo(() => isFieldReplay(replay), [replay]);
+  const look = useMemo(() => plateLook(battle.era), [battle.era]);
+  const plateDraw = useMemo(() => {
+    if (!fieldPlate) return null;
+    const ground = buildGround(replay, extentLngDeg / extentLatDeg);
+    let sx = 0;
+    let sy = 0;
+    let n = 0;
+    for (const ph of replay.phases) {
+      for (const u of ph.units ?? []) {
+        sx += u.x;
+        sy += u.y;
+        n++;
+      }
+    }
+    const heart: FieldPoint = n > 0 ? [sx / n, sy / n] : [50, 50];
+    return { shapes: groundShapes(ground, heart), names: groundNames(ground) };
+  }, [fieldPlate, replay, extentLngDeg, extentLatDeg]);
+  // plateWantRef is the plate the current battle wants. The map puts it down when the
+  // camera lands, so a battle hop flies over the old ground and fades to the new.
+  const plateWantRef = useRef<{
+    battleId: string;
+    look: PlateLook | null;
+    shapes: GroundShape[];
+    names: GroundName[];
+    geo: PlateGeo;
+  }>({ battleId: '', look: null, shapes: [], names: [], geo: { lat: 0, lng: 0, extentLatDeg: 3, extentLngDeg: 3 } });
+  useLayoutEffect(() => {
+    plateWantRef.current = {
+      battleId: battle.id,
+      look: plateDraw ? look : null,
+      shapes: plateDraw?.shapes ?? [],
+      names: plateDraw?.names ?? [],
+      geo: { lat: battle.lat, lng: battle.lng, extentLatDeg, extentLngDeg },
+    };
+  }, [battle.id, battle.lat, battle.lng, plateDraw, look, extentLatDeg, extentLngDeg]);
+  // plateRef is the plate the map shows now and the battle it belongs to.
+  const plateRef = useRef<{ battleId: string; look: PlateLook | null; geo: PlateGeo | null }>({
+    battleId: '',
+    look: null,
+    geo: null,
+  });
+  // paperShown is the plate on screen, for the chrome around the map.
+  const [paperShown, setPaperShown] = useState<PlateLook | null>(() => (plateDraw ? look : null));
+  // groundLayersRef and nameLayersRef hold the plate's deck layers, drawn under the
+  // territory and the units. namesRef holds the names placed for the current phase.
+  const groundLayersRef = useRef<unknown[]>([]);
+  const nameLayersRef = useRef<unknown[]>([]);
+  const namesRef = useRef<{ battleId: string; placed: PlacedName[] }>({ battleId: '', placed: [] });
+  // plateFadeRef cancels a fade or a pending basemap hide when the plate changes again.
+  const plateFadeRef = useRef<() => void>(() => {});
+  // applyPlateRef puts down the plate the current battle wants, fading over fadeMs.
+  const applyPlateRef = useRef<(fadeMs: number) => void>(() => {});
+  // drawNamesRef rebuilds the name layer from the names placed for the current phase.
+  const drawNamesRef = useRef<(opacity: number) => void>(() => {});
+
   const cameraLat = phase.cameraLat ?? battle.lat ?? 49.34;
   const cameraLng = phase.cameraLng ?? battle.lng ?? -0.51;
 
@@ -768,7 +1011,7 @@ export default function TacticalSurface({
     );
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: OPEN_STYLE,
+      style: openStyle(plateWantRef.current.look),
       center: start.center,
       zoom: start.zoom,
       pitch: 0,
@@ -1049,7 +1292,9 @@ export default function TacticalSurface({
     //    plus a tight crisp 2px line on top. The glow lifts the
     //    political layer off the dark basemap so country shapes read
     //    as deliberate cartographic frames, not flat color blocks.
-    if (countryPolygons.length > 0) {
+    // The plate is drawn ground, not the real map, so it carries no country shading
+    // and no country banners: they would sit on the wrong ground.
+    if (countryPolygons.length > 0 && !paperShown) {
       result.push(new PolygonLayer({
         id: `country-border-glow-${phaseIdx}`,
         data: countryPolygons,
@@ -1080,7 +1325,7 @@ export default function TacticalSurface({
 
     // 1b. Faction banners. Period-accurate flag + editorial caption per
     //     controlling power at the centroid of its anchor country.
-    if (factionBanners.length > 0) {
+    if (factionBanners.length > 0 && !paperShown) {
       result.push(new IconLayer({
         id: `faction-flags-${phaseIdx}`,
         data: factionBanners.filter((b) => b.flag),
@@ -1170,7 +1415,7 @@ export default function TacticalSurface({
     }
 
     return result;
-  }, [controlPolygons, countryPolygons, factionBanners, phaseIdx]);
+  }, [controlPolygons, countryPolygons, factionBanners, phaseIdx, paperShown]);
 
   // pushFrame concatenates the static and animated layer halves into a
   // single overlay update. Called from the static-mirror effect and
@@ -1178,11 +1423,65 @@ export default function TacticalSurface({
   const pushFrame = useCallback(() => {
     overlayRef.current?.setProps({
       layers: [
+        ...groundLayersRef.current,
+        ...nameLayersRef.current,
         ...staticLayersRef.current,
         ...animatedLayersRef.current,
       ] as unknown as LayersList,
     });
   }, []);
+
+  // The plate is put down here and nowhere else: on the first loaded frame with no fade,
+  // and after a battle hop has landed with a fade, so the ground never swaps mid-flight.
+  useEffect(() => {
+    drawNamesRef.current = (opacity: number) => {
+      const shown = plateRef.current;
+      const placed = namesRef.current;
+      nameLayersRef.current =
+        shown.look && shown.geo && placed.battleId === shown.battleId
+          ? buildNameLayer(placed.placed, shown.look, shown.geo, shown.battleId, opacity)
+          : [];
+    };
+    applyPlateRef.current = (fadeMs: number) => {
+      const map = mapRef.current;
+      if (!map || !map.isStyleLoaded()) return;
+      const want = plateWantRef.current;
+      plateFadeRef.current();
+      plateRef.current = { battleId: want.battleId, look: want.look, geo: want.geo };
+      const cancelHide = setBasemap(map, want.look, fadeMs);
+      setPaperShown(want.look);
+      const draw = (opacity: number) => {
+        groundLayersRef.current = want.look
+          ? buildGroundLayers(want.shapes, want.look, want.geo, want.battleId, opacity)
+          : [];
+        drawNamesRef.current(opacity);
+        pushFrame();
+      };
+      if (fadeMs <= 0 || !want.look) {
+        draw(1);
+        plateFadeRef.current = cancelHide;
+        return;
+      }
+      let raf = 0;
+      const start = performance.now();
+      const step = (now: number) => {
+        const k = Math.min(1, (now - start) / fadeMs);
+        draw(k);
+        if (k < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+      plateFadeRef.current = () => {
+        cancelAnimationFrame(raf);
+        cancelHide();
+      };
+    };
+  }, [pushFrame]);
+
+  // The first plate goes down as soon as the map has loaded.
+  useEffect(() => {
+    if (!mapReady || plateRef.current.battleId !== '') return;
+    applyPlateRef.current(0);
+  }, [mapReady]);
 
   // Mirror static layers into their ref whenever they rebuild (phase
   // change, zoom bucket flip, territory update) and push a frame.
@@ -1269,6 +1568,47 @@ export default function TacticalSurface({
       const size = `${w}x${h}`;
       if (endsRef.current.battleId !== battle.id) endsRef.current = { battleId: battle.id, byPhase: new Map() };
       const drawnEnd = spreadPoints(phaseData.ride.end, sizes, f, w, h);
+      // Place names where they meet no unit symbol and no unit label at phase end.
+      const want = plateWantRef.current;
+      if (want.look && want.names.length > 0) {
+        const blocked: ScreenBox[] = [];
+        units.forEach((u, i) => {
+          const [x, y] = projectToScreen(drawnEnd[i], f, w, h);
+          const r = u.size / 2 + 3;
+          blocked.push({ x1: x - r, y1: y - r, x2: x + r, y2: y + r });
+          const name = splitLabel(u.label).name;
+          if (name) {
+            const lw = name.length * 7 + 6;
+            const top = y + u.size / 2 + LABEL_GAP_PX;
+            blocked.push({ x1: x - lw / 2, y1: top, x2: x + lw / 2, y2: top + 18 });
+          }
+        });
+        // Arrows too: a name never sits on a move.
+        for (const trip of phaseData.trips) {
+          const [ax, ay] = projectToScreen(trip.from, f, w, h);
+          const [bx, by] = projectToScreen(trip.to, f, w, h);
+          const steps = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 16));
+          for (let k = 0; k <= steps; k++) {
+            const x = ax + ((bx - ax) * k) / steps;
+            const y = ay + ((by - ay) * k) / steps;
+            blocked.push({ x1: x - 12, y1: y - 12, x2: x + 12, y2: y + 12 });
+          }
+        }
+        const placed = placeNames(
+          want.names,
+          (p) => projectToScreen(plateLngLat(p, want.geo), f, w, h),
+          blocked,
+          w,
+          h,
+        );
+        namesRef.current = { battleId: battle.id, placed };
+      } else {
+        namesRef.current = { battleId: battle.id, placed: [] };
+      }
+      if (plateRef.current.battleId === battle.id) {
+        drawNamesRef.current(1);
+        pushFrame();
+      }
       spreadRef.current = new Map(units.map((u, i) => [u.gid, drawnEnd[i]] as [string, LngLat]));
       endsRef.current.byPhase.set(phaseIdx, { size, spots: priorFromUnits(units, phaseData.ride.end, drawnEnd) });
       const firstPhase = phaseIdx === 0 || prevData === null;
@@ -1322,6 +1662,7 @@ export default function TacticalSurface({
     const onSettled = () => {
       // A moveend from a superseded phase must not revive this phase's labels.
       if (gen !== camGenRef.current) return;
+      if (plateRef.current.battleId !== battle.id) applyPlateRef.current(isHop ? 600 : 0);
       if (wrap) {
         wrap.style.transition = 'opacity 500ms ease-out';
         wrap.style.opacity = '1';
@@ -1382,6 +1723,7 @@ export default function TacticalSurface({
     extentLngDeg,
     fightBox,
     prefersReducedMotion,
+    pushFrame,
   ]);
 
   // The per-frame animation loop. Advances the phase clock, draws the
@@ -1704,7 +2046,7 @@ export default function TacticalSurface({
         style={{
           position: 'absolute',
           inset: 0,
-          background: '#0d0a08',
+          background: paperShown ? paperShown.land : '#0d0a08',
         }}
       />
 
@@ -1713,19 +2055,38 @@ export default function TacticalSurface({
           Documentary maps SUBTRACT. The vignette stays because it
           guides the eye to the action centroid; everything else
           competed with the focal layer. */}
-      <div
-        className="pointer-events-none absolute inset-0 z-10"
-        style={{
-          background: `radial-gradient(ellipse 70% 65% at 50% 50%, transparent 45%, rgba(0,0,0,0.65) 100%)`,
-        }}
-      />
+      {/* Paper grain over the plate, fixed to the screen like the grain of a sheet. */}
+      {paperShown && (
+        <div
+          className="pointer-events-none absolute inset-0 z-[5]"
+          style={{
+            backgroundImage: PAPER_GRAIN,
+            backgroundSize: '220px 220px',
+            opacity: paperShown.grainAlpha / 100,
+            mixBlendMode: 'multiply',
+          }}
+        />
+      )}
+      {!paperShown && (
+        <div
+          className="pointer-events-none absolute inset-0 z-10"
+          style={{
+            background: `radial-gradient(ellipse 70% 65% at 50% 50%, transparent 45%, rgba(0,0,0,0.65) 100%)`,
+          }}
+        />
+      )}
 
       {/* HTML overlay labels: plain text, white with a dark outline. Each label
           carries its unit or arrow; the positioning routine places it at its box
           center by direct DOM writes, and the camera effect fades the whole layer
           during entry flights. The recorder draws the same text from the
           data-rec attributes. */}
-      <div ref={labelWrapRef} className="pointer-events-none absolute inset-0 z-[15]">
+      <div
+        ref={labelWrapRef}
+        className="pointer-events-none absolute inset-0 z-[15]"
+        data-rec-ink={paperShown ? paperShown.labelInk : undefined}
+        data-rec-halo={paperShown ? paperShown.halo : undefined}
+      >
         {labelCandidates.map((label) => (
           <div
             key={label.key}
@@ -1743,17 +2104,22 @@ export default function TacticalSurface({
             }}
           >
             <div
-              className="text-[13px] font-semibold text-white whitespace-nowrap text-center"
+              className="text-[13px] font-semibold whitespace-nowrap text-center"
               style={{
                 transform: 'translate(-50%, -50%)',
                 lineHeight: '16px',
                 fontFamily: 'Inter, system-ui, sans-serif',
-                textShadow: LABEL_OUTLINE,
+                color: paperShown ? paperShown.labelInk : '#ffffff',
+                textShadow: paperShown ? paperOutline(paperShown.halo) : LABEL_OUTLINE,
               }}
             >
               {label.text}
               {label.note && (
-                <div data-note className="text-[12px] font-normal text-slate-200" style={{ display: 'none' }}>
+                <div
+                  data-note
+                  className="text-[12px] font-normal"
+                  style={{ display: 'none', color: paperShown ? paperShown.labelInk : '#e2e8f0' }}
+                >
                   {label.note}
                 </div>
               )}
@@ -1916,9 +2282,12 @@ export default function TacticalSurface({
         </div>
       )}
 
-      <div className="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded text-[9px] uppercase tracking-wider text-slate-300/60 pointer-events-none">
-        &copy; OpenStreetMap contributors . OpenFreeMap . Mapzen terrain . MapLibre
-      </div>
+      {/* The plate draws no map data, so the map credits show only on true ground. */}
+      {!paperShown && (
+        <div className="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded text-[9px] uppercase tracking-wider text-slate-300/60 pointer-events-none">
+          &copy; OpenStreetMap contributors . OpenFreeMap . Mapzen terrain . MapLibre
+        </div>
+      )}
     </div>
   );
 }

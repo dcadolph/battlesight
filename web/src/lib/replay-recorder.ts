@@ -105,8 +105,10 @@ export class RecorderSession {
     ctx.font = '600 13px Inter, system-ui, sans-serif';
     ctx.lineJoin = 'round';
     ctx.lineWidth = 3;
-    ctx.strokeStyle = 'rgba(10,8,6,0.9)';
-    ctx.fillStyle = '#ffffff';
+    // On the paper plate labels are dark ink with a light halo, as the page draws them.
+    const wrap = labels[0]?.parentElement;
+    ctx.strokeStyle = wrap?.dataset.recHalo || 'rgba(10,8,6,0.9)';
+    ctx.fillStyle = wrap?.dataset.recInk || '#ffffff';
     for (const el of Array.from(labels)) {
       if (el.style.visibility === 'hidden') continue;
       const wrapOpacity = parseFloat(getComputedStyle(el.parentElement as Element).opacity || '1');

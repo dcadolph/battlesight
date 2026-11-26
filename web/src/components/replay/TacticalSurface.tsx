@@ -385,7 +385,7 @@ function buildUnitLayers(
 // buildMotionLayers renders the arrows as the timeline draws them at one moment: each
 // arrow grown to its progress and dimmed once its beat has ended, and a flash at the
 // tip on arrival for the kinds that flash.
-function buildMotionLayers(state: DrawnState, trips: ResolvedTrip[], phaseIdx: number): unknown[] {
+function buildMotionLayers(state: DrawnState, trips: ResolvedTrip[], phaseIdx: number, maxHalfM: number): unknown[] {
   if (state.arrows.length === 0) return [];
   const result: unknown[] = [];
 
@@ -395,7 +395,7 @@ function buildMotionLayers(state: DrawnState, trips: ResolvedTrip[], phaseIdx: n
       trip.from[0] + (trip.to[0] - trip.from[0]) * d.progress,
       trip.from[1] + (trip.to[1] - trip.from[1]) * d.progress,
     ];
-    return { trip, dim: d.dim, polygon: buildAtlasArrow(trip.from, tip, trip.kind as never, 1) };
+    return { trip, dim: d.dim, polygon: buildAtlasArrow(trip.from, tip, trip.kind as never, 1, maxHalfM) };
   });
   type LiveArrow = (typeof arrowsLive)[number];
 
@@ -512,6 +512,12 @@ const ARROW_LABEL_STEPS = [0, 24, 52];
 // ARROW_LABEL_ALONG are the shares of the arrow's length an arrow's label tries,
 // midpoint first.
 const ARROW_LABEL_ALONG = [0.5, 0.35, 0.65, 0.2, 0.8];
+
+// ARROW_HALF_SHARE is the widest an arrow's half shaft may draw, as a share of the whole fight's span.
+const ARROW_HALF_SHARE = 0.02;
+
+// ARROW_HALF_FLOOR_M is the least that cap may be, in meters, so a tiny fight keeps visible arrows.
+const ARROW_HALF_FLOOR_M = 60;
 
 // EDGE_RANK places edge pin labels after the one the viewer points at and before
 // every other label, since a pin is the only sign of a unit past the edge.
@@ -1036,6 +1042,15 @@ export default function TacticalSurface({
       ),
     [geo, replay],
   );
+
+  // arrowHalfM is the widest an arrow's half shaft may draw, a small share of the whole
+  // fight, so one long arrow never paints a band across a small field.
+  const arrowHalfM = useMemo(() => {
+    if (!fightBox) return Infinity;
+    const cos = Math.cos((((fightBox[1] + fightBox[3]) / 2) * Math.PI) / 180);
+    const spanM = Math.max((fightBox[3] - fightBox[1]) * 111_320, (fightBox[2] - fightBox[0]) * 111_320 * cos);
+    return Math.max(ARROW_HALF_FLOOR_M, spanM * ARROW_HALF_SHARE);
+  }, [fightBox]);
 
   // Initialise the map once, north up and flat for the life of the replay.
   // Subsequent phase changes drive the camera and overlay setProps via refs.
@@ -1809,7 +1824,7 @@ export default function TacticalSurface({
       const state = stateAt(now.tl, t);
       animatedLayersRef.current = [
         ...buildUnitLayers(state, now.look, phaseIdx, unitAtlas, statusAtlas, dashes),
-        ...buildMotionLayers(state, phaseData.trips, phaseIdx),
+        ...buildMotionLayers(state, phaseData.trips, phaseIdx, arrowHalfM),
       ];
       pushFrame();
       frameRef.current = { battleId: now.battleId, phaseIdx: now.phaseIdx, state, t };
@@ -1853,6 +1868,7 @@ export default function TacticalSurface({
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [
+    arrowHalfM,
     battle.id,
     phaseIdx,
     phaseData,

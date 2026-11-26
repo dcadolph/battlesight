@@ -89,11 +89,13 @@ function geomFor(kind: MovementKind | undefined): MovementGeom {
 // closed by deck.gl automatically; we do not duplicate the first point.
 // `scale` lets the caller multiply baseWidth (e.g. by phase intensity or
 // unit strength).
+// `maxHalfM` caps the half shaft in meters, so the caller can hold an arrow to the size of its field.
 export function buildAtlasArrow(
   from: [number, number],
   to: [number, number],
   kind: MovementKind | undefined,
   scale = 1,
+  maxHalfM = Infinity,
 ): [number, number][] {
   const [fLng, fLat] = from;
   const [tLng, tLat] = to;
@@ -115,7 +117,7 @@ export function buildAtlasArrow(
   // to 0.12 so heavier shafts read at tactical zooms without losing
   // the "axis of advance" silhouette on short trips.
   const halfShaftMax = lengthM * 0.12;
-  const halfShaft = Math.min(g.baseWidth * scale, halfShaftMax);
+  const halfShaft = Math.min(g.baseWidth * scale, halfShaftMax, maxHalfM);
   const halfHead = halfShaft * g.headWidthRatio;
   const headLen = Math.min(g.headLenFrac * lengthM, halfShaft * 4.5);
   const neckPos = lengthM - headLen;

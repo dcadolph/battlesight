@@ -102,8 +102,7 @@ export class RecorderSession {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = '600 12px Inter, system-ui, sans-serif';
-    ctx.letterSpacing = '0.14em';
+    ctx.font = '600 13px Inter, system-ui, sans-serif';
     ctx.lineJoin = 'round';
     ctx.lineWidth = 3;
     ctx.strokeStyle = 'rgba(10,8,6,0.9)';
@@ -117,7 +116,7 @@ export class RecorderSession {
       const ax = parseFloat(m[1]);
       const ay = parseFloat(m[2]);
       if (ax < -40 || ay < -40 || ax > rect.width + 40 || ay > rect.height + 40) continue;
-      const text = (el.dataset.recLabel || '').toUpperCase();
+      const text = el.dataset.recLabel || '';
       const y = ay - parseFloat(el.dataset.recLift || '0');
       ctx.globalAlpha = wrapOpacity;
       ctx.strokeText(text, ax, y);

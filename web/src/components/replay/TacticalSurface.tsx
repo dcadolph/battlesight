@@ -53,6 +53,7 @@ import {
   symbolSize,
 } from './stage';
 import type { LngLat, StageFrame } from './stage';
+import { splitLabel } from './labels';
 import { LABEL_RANK, arrowLabelShown, labelRoles, phaseDwellMs, phaseTimeline, rideRule, stateAt } from './beats';
 import { narratedDwellMs, spokenMs } from '../../audio/pacing';
 import type { BeatArrow, BeatUnit, DrawnState, LabelRole, PriorSpot, Ride, Timeline } from './beats';
@@ -1459,14 +1460,16 @@ export default function TacticalSurface({
   // one for every named arrow. Which of them show, and where, is decided on every
   // drawn frame by the positioning routine below, so this rebuilds only per phase.
   const labelCandidates = useMemo(() => {
-    type Candidate = { key: string; gid?: string; arrow?: number; text: string; color: string };
+    type Candidate = { key: string; gid?: string; arrow?: number; text: string; note: string; color: string };
     const out: Candidate[] = [];
     for (const u of phaseData.unitPoints) {
       if (!u.label) continue;
+      const { name, note } = splitLabel(u.label);
       out.push({
         key: `unit-${u.gid}`,
         gid: u.gid,
-        text: u.label,
+        text: name,
+        note,
         color: `rgb(${u.color[0]},${u.color[1]},${u.color[2]})`,
       });
     }
@@ -1475,7 +1478,8 @@ export default function TacticalSurface({
       out.push({
         key: `mov-${t.index}`,
         arrow: i,
-        text: t.label,
+        text: splitLabel(t.label).name,
+        note: '',
         color: `rgb(${t.color[0]},${t.color[1]},${t.color[2]})`,
       });
     });
@@ -1509,6 +1513,14 @@ export default function TacticalSurface({
       }
       const w = wrap.clientWidth;
       const h = wrap.clientHeight;
+      // A pinned unit label shows its note under the name. Set before measuring.
+      for (const el of els) {
+        const note = el.querySelector<HTMLElement>('[data-note]');
+        if (!note) continue;
+        const gid = el.dataset.gid;
+        const want = gid && (gid === hoverGidRef.current || gid === tapGidRef.current) ? 'block' : 'none';
+        if (note.style.display !== want) note.style.display = want;
+      }
       // Read every size before any write, so the browser lays out once.
       const sizes = els.map((el) => {
         const inner = el.firstElementChild as HTMLElement | null;
@@ -1713,16 +1725,20 @@ export default function TacticalSurface({
             }}
           >
             <div
-              className="text-[12px] uppercase font-semibold text-white whitespace-nowrap"
+              className="text-[13px] font-semibold text-white whitespace-nowrap text-center"
               style={{
                 transform: 'translate(-50%, -50%)',
-                lineHeight: '15px',
-                letterSpacing: '0.14em',
+                lineHeight: '16px',
                 fontFamily: 'Inter, system-ui, sans-serif',
                 textShadow: LABEL_OUTLINE,
               }}
             >
               {label.text}
+              {label.note && (
+                <div data-note className="text-[12px] font-normal text-slate-200" style={{ display: 'none' }}>
+                  {label.note}
+                </div>
+              )}
             </div>
           </div>
         ))}

@@ -369,9 +369,45 @@ export interface StageChoice {
   hold: boolean;
 }
 
+// STAGE_LONE_SPREAD is how many times wider than the rest of a phase one lone point may
+// make the frame before it is left to an edge pin.
+export const STAGE_LONE_SPREAD = 3;
+
+// boxSpan returns the larger side of a box in degrees, or 0 for no box.
+function boxSpan(b: StageBox | null): number {
+  return b ? Math.max(b[2] - b[0], b[3] - b[1]) : 0;
+}
+
+// LoneDrop is a phase's points less the lone far point, if one was dropped.
+export interface LoneDrop {
+  // kept is the points the frame takes.
+  kept: LngLat[];
+  // dropped is the index of the point left to an edge pin, or -1.
+  dropped: number;
+}
+
+// dropLonePoint returns the points less the first one whose removal leaves a box under
+// a third of the span of them all, so one far or misplaced point cannot set the frame.
+export function dropLonePoint(points: LngLat[]): LoneDrop {
+  const full = boxSpan(phaseBox(points));
+  for (let i = 0; i < points.length; i++) {
+    const rest = points.filter((_, j) => j !== i);
+    if (boxSpan(phaseBox(rest)) * STAGE_LONE_SPREAD < full) return { kept: rest, dropped: i };
+  }
+  return { kept: points, dropped: -1 };
+}
+
+// countOnScreen returns how many points fall inside a width by height screen under a frame.
+export function countOnScreen(points: LngLat[], frame: StageFrame, width: number, height: number): number {
+  return points.filter((p) => !offScreen(projectToScreen(p, frame, width, height), width, height)).length;
+}
+
 // chooseFrame picks the camera for a phase. Prior is the frame before when the
 // camera may hold on it, else null. Home is the frame of the whole fight, or null
-// when the replay has no shape. Fallback is used only when both are missing.
+// when the replay has no shape. Fallback is used only when both are missing. The
+// frame is kept within the home cap unless that would leave fewer than half the
+// phase's units on screen. Then it takes the whole phase, its units and arrow ends,
+// less one lone far point, which gets an edge pin.
 export function chooseFrame(
   prior: StageFrame | null,
   box: StageBox | null,
@@ -379,13 +415,19 @@ export function chooseFrame(
   fallback: () => StageFrame,
   width: number,
   height: number,
+  units: LngLat[] = [],
+  points: LngLat[] = [],
 ): StageChoice {
   if (!box) {
     if (prior) return { frame: prior, hold: true };
     return { frame: home ?? fallback(), hold: false };
   }
   const fit = frameForBox(box, width, height);
-  const frame = home ? capFrame(fit, home) : fit;
+  let frame = home ? capFrame(fit, home) : fit;
+  if (frame !== fit && units.length > 0 && countOnScreen(units, frame, width, height) * 2 < units.length) {
+    const wide = phaseBox(dropLonePoint(points.length > 0 ? points : units).kept);
+    if (wide) frame = frameForBox(wide, width, height);
+  }
   if (prior && (holdFrame(prior, box, width, height) || nearFrame(prior, frame, width))) {
     return { frame: prior, hold: true };
   }

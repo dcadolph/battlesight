@@ -1573,7 +1573,17 @@ export default function TacticalSurface({
     const establishing =
       phaseIdx === 0 && !isHop && !viewerMoved && home !== null && (prior === null || prior.battleId !== battle.id);
     if (establishing) map.jumpTo({ center: home.center, zoom: home.zoom, bearing: 0, pitch: 0 });
-    const choice = chooseFrame(mayHold && prior ? prior.frame : null, box, home, fallback, width, height);
+    const unitSpots = phaseData.unitPoints.map((u) => u.position);
+    const choice = chooseFrame(
+      mayHold && prior ? prior.frame : null,
+      box,
+      home,
+      fallback,
+      width,
+      height,
+      unitSpots,
+      points,
+    );
     const hold = choice.hold;
     const frame: StageFrame = choice.frame;
     stageRef.current = { battleId: battle.id, width, height, frame };
@@ -1717,6 +1727,8 @@ export default function TacticalSurface({
         () => fallbackFrame([cameraLng, cameraLat], extentLngDeg, extentLatDeg, w, h),
         w,
         h,
+        unitSpots,
+        points,
       ).frame;
       stageRef.current = { battleId: battle.id, width: w, height: h, frame: next };
       buildTimeline(next, w, h);

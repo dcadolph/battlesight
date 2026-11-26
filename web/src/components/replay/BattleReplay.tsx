@@ -3,7 +3,6 @@ import type { Battle } from '../../types/battle';
 import { regionalEraContext } from '../../types/battle';
 import type { Replay } from '../../types/replay';
 import { factionColorFor } from '../../types/replay';
-import TacticalMap from './TacticalMap';
 import GlobeReplay from './GlobeReplay';
 import TacticalSurface from './TacticalSurface';
 import { themeForEra } from '../../theme/era';
@@ -32,17 +31,6 @@ const SPEEDS = [0.5, 1, 1.5, 2] as const;
 
 // Speed is one of the offered playback rates.
 type Speed = (typeof SPEEDS)[number];
-
-// replayPlacesUnitsByLatLng reports whether any unit of the replay carries a
-// real latitude and longitude, by the same test the Surface view places it.
-function replayPlacesUnitsByLatLng(replay: Replay | null): boolean {
-  if (!replay) return false;
-  return replay.phases.some((p) =>
-    (p.units ?? []).some(
-      (u) => typeof u.lat === 'number' && typeof u.lng === 'number' && (u.lat !== 0 || u.lng !== 0),
-    ),
-  );
-}
 
 interface BattleReplayProps {
   battle: Battle;
@@ -102,15 +90,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   const [playing, setPlaying] = useState(() => !narratorWaitsForClick(cinematicMode));
   const [speed, setSpeed] = useState<Speed>(1);
   const [error, setError] = useState<string | null>(null);
-  // Default view is the globe. Auto-switching to the tactical schematic
-  // was reverted: curated phases for lat/lng-only battles (Normandy and
-  // most modern battles) leave x/y at the placeholder 50/50, so the
-  // TacticalMap stacks every unit and movement at the centre of the
-  // schematic. The globe carries real coastline imagery and is the only
-  // sensible default. The toggle still lets the user pick TacticalMap
-  // explicitly for older abstract-schematic battles (Marathon, Cannae)
-  // where x/y is real curated data.
-  const [view, setView] = useState<'globe' | 'tactical' | 'surface'>('surface');
+  // view is the stage: the Surface map, drawn on the paper plate for field replays, or
+  // the Globe.
+  const [view, setView] = useState<'globe' | 'surface'>('surface');
   // ended is true after the last phase's dwell completes. It triggers the
   // outro card so the replay lands with intention instead of just freezing
   // on the final tactical state. Cleared whenever the user scrubs back.
@@ -187,12 +169,6 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
     setPlaying(true);
     if (cinematicMode && !prefersReducedMotion) setHopCard(battle);
   }
-  // The Schematic view draws the 0 to 100 field values only. A replay that
-  // places its units by latitude and longitude carries placeholders there,
-  // so every unit would land on one point. The button is hidden for those
-  // replays, and a Schematic view falls back to Surface when one arrives.
-  const geoPlaced = useMemo(() => replayPlacesUnitsByLatLng(replay), [replay]);
-  if (view === 'tactical' && geoPlaced) setView('surface');
   useEffect(() => {
     if (!hopCard) return;
     const t = setTimeout(() => setHopCard(null), 2600);
@@ -442,7 +418,6 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
   }
 
   const phase = replay.phases[phaseIdx];
-  const aspectRatio = replay.aspectRatio ?? 1.6;
   // Sideways the bars float over a full-screen stage and fade together.
   const barFade = `transition-opacity duration-300 ${chromeShown ? 'opacity-100' : 'opacity-0 pointer-events-none'}`;
   const headerClass = sideways
@@ -840,7 +815,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                   return snap ? Math.floor(snap.year) : undefined;
                 })()}
               />
-            ) : view === 'globe' ? (
+            ) : (
               <GlobeReplay
                 battle={battle}
                 replay={replay}
@@ -878,14 +853,6 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                   return snap ? Math.floor(snap.year) : undefined;
                 })()}
               />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="w-full max-w-6xl">
-                  <div className="rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
-                    <TacticalMap key={phaseIdx} phase={phase} aspectRatio={aspectRatio} paletteCtx={replay} />
-                  </div>
-                </div>
-              </div>
             )}
 
             {/* Phase title appears as a tethered field caption inside the
@@ -944,14 +911,6 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                   view === 'globe' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >Globe</button>
-              {!geoPlaced && (
-                <button
-                  onClick={() => setView('tactical')}
-                  className={`${viewButtonClass} transition-colors ${
-                    view === 'tactical' ? 'bg-blue-500/40 text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                >Schematic</button>
-              )}
             </div>
 
             {/* Chapter interstitial: rides the camera flight between

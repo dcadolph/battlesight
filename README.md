@@ -36,7 +36,7 @@ totals that include civilians, famine, and genocide.
 | **Territory&nbsp;tides** | Per-war country-level control snapshots that paint the globe as the playhead crosses each calendar boundary. Watch Axis territory expand across Europe in 1940-42 and recede in 1943-45. |
 | **Faction&nbsp;palette** | Iconic color identities for major factions: Wehrmacht in feldgrau, Soviets in red, Imperial Japan in blood crimson, Confederates in gray vs Union navy, ISIS in black, etc. Auto-detected from side names with explicit overrides where it matters. |
 | **War&nbsp;aggregation** | Wars roll up curated human-deaths totals (civilians + military + famine + genocide) into a single number you can sort by. Theaters and campaigns nest under their parent war. |
-| **Globe&nbsp;view&nbsp;+&nbsp;tactical&nbsp;view** | Same replay rendered two ways: cinematic globe with real geography for the campaign sweep, schematic SVG for the surveyed tactical layout. |
+| **Surface&nbsp;map&nbsp;+&nbsp;globe** | Same replay rendered two ways: a battle map, drawn on a paper plate from the ground the replay names when its positions are schematic, and a cinematic globe with real geography for the campaign sweep. |
 | **Hot-reload&nbsp;curation** | Edit `data/phases.json` or `data/wars.json` and the running server picks the change up without a restart. |
 
 ## The Gap We're Closing

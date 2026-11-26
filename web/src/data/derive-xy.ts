@@ -3,8 +3,8 @@
 // A replay carries two coordinate systems: geographic lat/lng for the
 // surface map, and 0-100 schematic x/y for the tactical view. Authoring
 // a battle from real coordinates leaves x/y at the 50/50 placeholder,
-// and TacticalMap drops any entity still sitting on that placeholder,
-// so a replay authored purely from geography renders an empty schematic.
+// and an entity still sitting on that placeholder is dropped,
+// so a replay authored purely from geography would draw nothing in field space.
 // Cannae, the flagship reconstruction, was one of them.
 //
 // Rather than hand-place hundreds of units, project the geography into

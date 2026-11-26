@@ -66,17 +66,19 @@ changes, and serves the HTTP API.
 ## Frontend
 
 The React app is one Vite bundle. Tailwind for layout, custom CSS for
-the cinematic keyframes, `react-globe.gl` for the 3D globe, custom SVG
-for the tactical map.
+the cinematic keyframes, `react-globe.gl` for the 3D globe, MapLibre and
+deck.gl for the Surface map.
 
 | Path&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Purpose |
 | --- | --- |
 | `web/src/App.tsx`&nbsp;&nbsp; | Top-level state + routing for the war list, dossier, replays, history sweep. |
 | `web/src/components/BattleGlobe.tsx`&nbsp;&nbsp; | The 3D globe. Points, rings, polygon shading, focus rings. |
 | `web/src/components/WarPlayback.tsx`&nbsp;&nbsp; | War list, cinematic auto-step, dwell timer, territory effect. |
-| `web/src/components/replay/BattleReplay.tsx`&nbsp;&nbsp; | Per-battle replay overlay. Wraps the globe or tactical view. |
+| `web/src/components/replay/BattleReplay.tsx`&nbsp;&nbsp; | Per-battle replay overlay. Wraps the Surface map or the globe. |
 | `web/src/components/replay/GlobeReplay.tsx`&nbsp;&nbsp; | Globe view of one battle: arrows, units, impact flashes. |
-| `web/src/components/replay/TacticalMap.tsx`&nbsp;&nbsp; | Schematic SVG view of one battle: terrain, unit blocks, movement curves. |
+| `web/src/components/replay/TacticalSurface.tsx`&nbsp;&nbsp; | Surface map of one battle: MapLibre ground with deck.gl units, arrows, and labels. |
+| `web/src/components/replay/ground.ts`&nbsp;&nbsp; | The paper plate's ground: landmarks joined across phases, their shapes, and name placement. |
+| `web/src/components/replay/look.ts`&nbsp;&nbsp; | Paper plate colors per era and the contrast they are held to. |
 | `web/src/data/faction-palette.ts`&nbsp;&nbsp; | Iconic faction color keys + auto-detect from side names. |
 | `web/src/data/territory-snapshots.ts`&nbsp;&nbsp; | Per-war country-level control snapshots over time. |
 

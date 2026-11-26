@@ -44,9 +44,10 @@ import { themeForEra } from '../../theme/era';
 import { buildAtlasArrow, alphaForKind } from './atlas-arrows';
 import {
   STAGE_MOVE_MS,
+  chooseFrame,
   fallbackFrame,
   frameForBox,
-  holdFrame,
+  homeBox,
   phaseBox,
   resolvePoint,
   spreadPoints,
@@ -896,6 +897,18 @@ export default function TacticalSurface({
   const phaseData = useMemo(() => resolvePhase(phase, geo, replay), [phase, geo, replay]);
   const prevPhase = phaseIdx > 0 ? replay.phases[phaseIdx - 1] : undefined;
   const prevData = useMemo(() => (prevPhase ? resolvePhase(prevPhase, geo, replay) : null), [prevPhase, geo, replay]);
+  // The box of the whole fight, from every phase, so the camera never pulls back
+  // past the field.
+  const fightBox = useMemo(
+    () =>
+      homeBox(
+        replay.phases.map((p) => {
+          const r = resolvePhase(p, geo, replay);
+          return [...r.unitPoints.map((u) => u.position), ...r.trips.flatMap((t) => [t.from, t.to])];
+        }),
+      ),
+    [geo, replay],
+  );
 
   // Per-phase control regions, lifted into the deck.gl PolygonLayer
   // shape. Each ring is faction-colored; alpha scales with zoom so a
@@ -1215,8 +1228,7 @@ export default function TacticalSurface({
     }
     const box = phaseBox(points);
     const prior = stageRef.current;
-    const hold =
-      box !== null &&
+    const mayHold =
       prior !== null &&
       phaseIdx > 0 &&
       !isHop &&
@@ -1224,12 +1236,12 @@ export default function TacticalSurface({
       !wasMoving &&
       prior.battleId === battle.id &&
       prior.width === width &&
-      prior.height === height &&
-      holdFrame(prior.frame, box, width, height);
-    let frame: StageFrame;
-    if (hold && prior) frame = prior.frame;
-    else if (box) frame = frameForBox(box, width, height);
-    else frame = fallbackFrame([cameraLng, cameraLat], extentLngDeg, extentLatDeg, width, height);
+      prior.height === height;
+    const home = fightBox ? frameForBox(fightBox, width, height) : null;
+    const fallback = () => fallbackFrame([cameraLng, cameraLat], extentLngDeg, extentLatDeg, width, height);
+    const choice = chooseFrame(mayHold && prior ? prior.frame : null, box, home, fallback, width, height);
+    const hold = choice.hold;
+    const frame: StageFrame = choice.frame;
     stageRef.current = { battleId: battle.id, width, height, frame };
 
     // The move between phases runs at the playback speed, so it takes the same
@@ -1322,9 +1334,14 @@ export default function TacticalSurface({
       const h = container.clientHeight;
       if (gen !== camGenRef.current || !w || !h || userCameraLockRef.current) return;
       if (now && now.battleId === battle.id && now.width === w && now.height === h) return;
-      const next = box
-        ? frameForBox(box, w, h)
-        : fallbackFrame([cameraLng, cameraLat], extentLngDeg, extentLatDeg, w, h);
+      const next = chooseFrame(
+        null,
+        box,
+        fightBox ? frameForBox(fightBox, w, h) : null,
+        () => fallbackFrame([cameraLng, cameraLat], extentLngDeg, extentLatDeg, w, h),
+        w,
+        h,
+      ).frame;
       stageRef.current = { battleId: battle.id, width: w, height: h, frame: next };
       buildTimeline(next, w, h);
       // Stopping a move in flight fires its moveend, which shows the labels.
@@ -1363,6 +1380,7 @@ export default function TacticalSurface({
     cameraLng,
     extentLatDeg,
     extentLngDeg,
+    fightBox,
     prefersReducedMotion,
   ]);
 

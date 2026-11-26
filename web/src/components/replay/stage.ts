@@ -301,3 +301,93 @@ export function holdFrame(current: StageFrame, box: StageBox, width: number, hei
   const inside = sx0 >= pad.left && sx1 <= width - pad.right && sy0 >= pad.top && sy1 <= height - pad.bottom;
   return inside && boxFill(box, current, width, height) >= STAGE_HOLD_FILL;
 }
+
+// STAGE_HOME_CAP is how much wider than the home frame a phase frame may be.
+export const STAGE_HOME_CAP = 1.15;
+
+// STAGE_OUTLIER_SPANS is how many median phase spans from the median center a point
+// may sit and still count toward the home frame.
+export const STAGE_OUTLIER_SPANS = 2.5;
+
+// STAGE_NEAR_SCALE is the scale change under which a new frame is close enough to hold.
+export const STAGE_NEAR_SCALE = 0.08;
+
+// STAGE_NEAR_SHIFT is the share of the screen width a center may move and still hold.
+export const STAGE_NEAR_SHIFT = 0.1;
+
+// median returns the middle value of a non-empty list.
+function median(values: number[]): number {
+  const s = [...values].sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+// homeBox returns the box of the whole fight: every phase's points, less the ones
+// farther than the outlier limit from the median phase center. Null when no phase
+// has a shape or fewer than two points remain.
+export function homeBox(phases: LngLat[][]): StageBox | null {
+  const boxes = phases.map(phaseBox).filter((b): b is StageBox => b !== null);
+  if (boxes.length === 0) return null;
+  const span = Math.max(
+    median(boxes.map((b) => Math.max(b[2] - b[0], b[3] - b[1]))),
+    STAGE_FLOOR_DEG,
+  );
+  const cLng = median(boxes.map((b) => (b[0] + b[2]) / 2));
+  const cLat = median(boxes.map((b) => (b[1] + b[3]) / 2));
+  const limit = span * STAGE_OUTLIER_SPANS;
+  const kept: LngLat[] = [];
+  for (const pts of phases) {
+    for (const p of pts) {
+      if (Math.abs(p[0] - cLng) <= limit && Math.abs(p[1] - cLat) <= limit) kept.push(p);
+    }
+  }
+  return phaseBox(kept);
+}
+
+// capFrame returns the frame no wider than the home frame times the cap, keeping
+// its center.
+export function capFrame(frame: StageFrame, home: StageFrame): StageFrame {
+  const widest = home.zoom - Math.log2(STAGE_HOME_CAP);
+  return frame.zoom < widest ? { center: frame.center, zoom: widest } : frame;
+}
+
+// nearFrame reports whether two frames differ so little in scale and center that a
+// move between them would read as a twitch.
+export function nearFrame(a: StageFrame, b: StageFrame, width: number): boolean {
+  if (Math.abs(a.zoom - b.zoom) >= Math.log2(1 + STAGE_NEAR_SCALE)) return false;
+  const scale = worldSize(a.zoom);
+  const dx = (mercX(b.center[0]) - mercX(a.center[0])) * scale;
+  const dy = (mercY(b.center[1]) - mercY(a.center[1])) * scale;
+  return Math.hypot(dx, dy) < width * STAGE_NEAR_SHIFT;
+}
+
+// StageChoice is the camera picked for a phase and whether it is the one before.
+export interface StageChoice {
+  // frame is the camera for the phase.
+  frame: StageFrame;
+  // hold is true when the frame is the prior frame, kept without a move.
+  hold: boolean;
+}
+
+// chooseFrame picks the camera for a phase. Prior is the frame before when the
+// camera may hold on it, else null. Home is the frame of the whole fight, or null
+// when the replay has no shape. Fallback is used only when both are missing.
+export function chooseFrame(
+  prior: StageFrame | null,
+  box: StageBox | null,
+  home: StageFrame | null,
+  fallback: () => StageFrame,
+  width: number,
+  height: number,
+): StageChoice {
+  if (!box) {
+    if (prior) return { frame: prior, hold: true };
+    return { frame: home ?? fallback(), hold: false };
+  }
+  const fit = frameForBox(box, width, height);
+  const frame = home ? capFrame(fit, home) : fit;
+  if (prior && (holdFrame(prior, box, width, height) || nearFrame(prior, frame, width))) {
+    return { frame: prior, hold: true };
+  }
+  return { frame, hold: false };
+}

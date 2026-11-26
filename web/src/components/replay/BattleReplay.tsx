@@ -795,6 +795,9 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                 narrated={voiceWanted}
                 prefersReducedMotion={prefersReducedMotion}
                 warCountryColors={(() => {
+                  // Country shading belongs to the war cinematic. A single replay keeps the
+                  // map clear, since a wide frame would flood with it.
+                  if (!cinematicMode) return undefined;
                   if (warCountryColors) return warCountryColors;
                   if (!battle.war) return undefined;
                   const snap = findSnapshot(battle.war, battle.year || 0);
@@ -802,7 +805,7 @@ export default function BattleReplay({ battle, initialPhase = 0, onClose, onPhas
                   return buildCountryColorMap(snap);
                 })()}
                 warFactionAnchors={warFactionAnchors ?? (() => {
-                  if (!battle.war) return undefined;
+                  if (!cinematicMode || !battle.war) return undefined;
                   const snap = findSnapshot(battle.war, battle.year || 0);
                   if (!snap) return undefined;
                   return Object.entries(snap.control)

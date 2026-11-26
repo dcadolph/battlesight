@@ -46,16 +46,18 @@ import { buildAtlasArrow, alphaForKind } from './atlas-arrows';
 import {
   STAGE_MOVE_MS,
   chooseFrame,
+  edgePin,
   fallbackFrame,
   frameForBox,
   homeBox,
   phaseBox,
   projectToScreen,
   resolvePoint,
+  slidePin,
   spreadPoints,
   symbolSize,
 } from './stage';
-import type { LngLat, StageFrame } from './stage';
+import type { EdgePin, LngLat, StageFrame } from './stage';
 import { splitLabel } from './labels';
 import {
   buildGround,
@@ -510,6 +512,19 @@ const ARROW_LABEL_STEPS = [0, 24, 52];
 // midpoint first.
 const ARROW_LABEL_ALONG = [0.5, 0.35, 0.65, 0.2, 0.8];
 
+// EDGE_RANK places edge pin labels after the one the viewer points at and before
+// every other label, since a pin is the only sign of a unit past the edge.
+const EDGE_RANK = -1.5;
+
+// EDGE_CHEVRON_PX is the size of an edge pin's chevron.
+const EDGE_CHEVRON_PX = 12;
+
+// EDGE_GAP_PX is the space between an edge pin's chevron and its label.
+const EDGE_GAP_PX = 4;
+
+// EDGE_SLIDES are the steps along the edge tried, in order, when a pin meets a placed label.
+const EDGE_SLIDES = [0, 22, -22, 44, -44, 66, -66];
+
 // Box is a screen rectangle in pixels.
 interface Box {
   // x0 is the left edge.
@@ -923,6 +938,11 @@ export default function TacticalSurface({
   // reframeRef re-frames the current phase for a new container size. The
   // camera effect replaces it each phase; the resize observer calls it.
   const reframeRef = useRef<() => void>(() => {});
+  // idleRef mirrors mapIdle for the camera effect, which must not rerun when it flips.
+  const idleRef = useRef(false);
+  // establishRef holds the first move of a replay, kept until the loading card lifts so
+  // the viewer sees the whole field before the camera goes in.
+  const establishRef = useRef<(() => void) | null>(null);
   // spreadRef holds where each unit of the current phase ends the phase after
   // the ride rule and the spread, keyed by gid. The camera effect fills it once
   // it knows the frame; the timeline and the label anchors read it.
@@ -998,17 +1018,34 @@ export default function TacticalSurface({
   const cameraLat = phase.cameraLat ?? battle.lat ?? 49.34;
   const cameraLng = phase.cameraLng ?? battle.lng ?? -0.51;
 
+  // geo is the battle center and extent every phase resolves its positions against.
+  const geo = useMemo<PhaseGeo>(
+    () => ({ lat: battle.lat, lng: battle.lng, extentLatDeg, extentLngDeg }),
+    [battle.lat, battle.lng, extentLatDeg, extentLngDeg],
+  );
+  // The box of the whole fight, from every phase, so the camera never pulls back
+  // past the field.
+  const fightBox = useMemo(
+    () =>
+      homeBox(
+        replay.phases.map((p) => {
+          const r = resolvePhase(p, geo, replay);
+          return [...r.unitPoints.map((u) => u.position), ...r.trips.flatMap((t) => [t.from, t.to])];
+        }),
+      ),
+    [geo, replay],
+  );
+
   // Initialise the map once, north up and flat for the life of the replay.
   // Subsequent phase changes drive the camera and overlay setProps via refs.
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const start = fallbackFrame(
-      [cameraLng, cameraLat],
-      extentLngDeg,
-      extentLatDeg,
-      containerRef.current.clientWidth || 1200,
-      containerRef.current.clientHeight || 700,
-    );
+    // The replay opens on the frame of the whole fight, under the loading card.
+    const startW = containerRef.current.clientWidth || 1200;
+    const startH = containerRef.current.clientHeight || 700;
+    const start = fightBox
+      ? frameForBox(fightBox, startW, startH)
+      : fallbackFrame([cameraLng, cameraLat], extentLngDeg, extentLatDeg, startW, startH);
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: openStyle(plateWantRef.current.look),
@@ -1118,6 +1155,15 @@ export default function TacticalSurface({
   // — making the user wait for a 200KB topojson before the action
   // appears is exactly the "insanely slow load" complaint. Cached at
   // module scope so the second battle is instant.
+  // The loading card lifted: make the first move held for it.
+  useEffect(() => {
+    idleRef.current = mapIdle;
+    if (!mapIdle) return;
+    const move = establishRef.current;
+    establishRef.current = null;
+    move?.();
+  }, [mapIdle]);
+
   useEffect(() => {
     if (!mapIdle) return;
     let cancelled = false;
@@ -1133,25 +1179,9 @@ export default function TacticalSurface({
   // applies the ride rule once so every layer below reads from the same
   // source. The phase before is resolved too: the current phase starts
   // from where its units ended, and its units that left the field fade out.
-  const geo = useMemo<PhaseGeo>(
-    () => ({ lat: battle.lat, lng: battle.lng, extentLatDeg, extentLngDeg }),
-    [battle.lat, battle.lng, extentLatDeg, extentLngDeg],
-  );
   const phaseData = useMemo(() => resolvePhase(phase, geo, replay), [phase, geo, replay]);
   const prevPhase = phaseIdx > 0 ? replay.phases[phaseIdx - 1] : undefined;
   const prevData = useMemo(() => (prevPhase ? resolvePhase(prevPhase, geo, replay) : null), [prevPhase, geo, replay]);
-  // The box of the whole fight, from every phase, so the camera never pulls back
-  // past the field.
-  const fightBox = useMemo(
-    () =>
-      homeBox(
-        replay.phases.map((p) => {
-          const r = resolvePhase(p, geo, replay);
-          return [...r.unitPoints.map((u) => u.position), ...r.trips.flatMap((t) => [t.from, t.to])];
-        }),
-      ),
-    [geo, replay],
-  );
 
   // Per-phase control regions, lifted into the deck.gl PolygonLayer
   // shape. Each ring is faction-colored; alpha scales with zoom so a
@@ -1538,6 +1568,11 @@ export default function TacticalSurface({
       prior.height === height;
     const home = fightBox ? frameForBox(fightBox, width, height) : null;
     const fallback = () => fallbackFrame([cameraLng, cameraLat], extentLngDeg, extentLatDeg, width, height);
+    // The first phase of a replay opened here starts from the home frame and always moves
+    // in to its own action, never holding.
+    const establishing =
+      phaseIdx === 0 && !isHop && !viewerMoved && home !== null && (prior === null || prior.battleId !== battle.id);
+    if (establishing) map.jumpTo({ center: home.center, zoom: home.zoom, bearing: 0, pitch: 0 });
     const choice = chooseFrame(mayHold && prior ? prior.frame : null, box, home, fallback, width, height);
     const hold = choice.hold;
     const frame: StageFrame = choice.frame;
@@ -1701,14 +1736,23 @@ export default function TacticalSurface({
       wrap.style.transition = 'opacity 200ms ease-out';
       wrap.style.opacity = '0';
     }
-    map.once('moveend', onSettled);
-    map.easeTo({
-      ...target,
-      duration: entryMs,
-      essential: true,
-      // Cinematic ease-out: fast accelerate, gentle arrival.
-      easing: (t: number) => 1 - Math.pow(1 - t, 3),
-    });
+    const move = () => {
+      if (gen !== camGenRef.current) return;
+      // The establishing frame shows the ground before the camera goes in.
+      if (establishing && plateRef.current.battleId !== battle.id) applyPlateRef.current(0);
+      map.once('moveend', onSettled);
+      map.easeTo({
+        ...target,
+        duration: entryMs,
+        essential: true,
+        // Cinematic ease-out: fast accelerate, gentle arrival.
+        easing: (t: number) => 1 - Math.pow(1 - t, 3),
+      });
+    };
+    establishRef.current = null;
+    // The phase clock waits for the loading card to lift, so the first move does too.
+    if (establishing && !idleRef.current) establishRef.current = move;
+    else move();
   }, [
     phaseIdx,
     phaseData,
@@ -1909,12 +1953,21 @@ export default function TacticalSurface({
       }
 
       const endState = !Number.isFinite(frame.t);
+      // A unit past the screen edge, or an arrow that ends past it, gets an edge pin:
+      // a chevron on the edge pointing at it, with its label beside the chevron.
+      const edgeOf = new Map<number, { pin: EdgePin; target: [number, number] }>();
       const slots: Array<{ i: number; rank: number; strength: number }> = [];
       els.forEach((el, i) => {
         const gid = el.dataset.gid;
         if (gid) {
           const s = byGid.get(gid);
           if (!s || s.alpha < 0.5) return;
+          const pin = edgePin([s.x, s.y], null, w, h);
+          if (pin) {
+            edgeOf.set(i, { pin, target: [s.x, s.y] });
+            slots.push({ i, rank: EDGE_RANK, strength: s.strength });
+            return;
+          }
           const pinned = gid === hoverGidRef.current || gid === tapGidRef.current;
           const role = cur.roles[s.track];
           if (!pinned && !role) return;
@@ -1923,7 +1976,13 @@ export default function TacticalSurface({
         }
         const a = Number(el.dataset.arrow);
         const shown = endState ? (cur.tl.arrows[a]?.beat ?? -1) >= 0 : arrowLabelShown(cur.tl, a, frame.t);
-        if (shown) slots.push({ i, rank: -1, strength: 0 });
+        if (!shown) return;
+        const trip = phaseData.trips[a];
+        const pf = map.project(trip.from);
+        const pt = map.project(trip.to);
+        const pin = edgePin([pt.x, pt.y], [pf.x, pf.y], w, h);
+        if (pin) edgeOf.set(i, { pin, target: [pt.x, pt.y] });
+        slots.push({ i, rank: pin ? EDGE_RANK : -1, strength: 0 });
       });
       slots.sort((x, y) => x.rank - y.rank || y.strength - x.strength || x.i - y.i);
 
@@ -1936,10 +1995,36 @@ export default function TacticalSurface({
         !kept.some((k) => boxesMeet(k, b)) &&
         (pinned || !symbols.some((s) => s.gid !== own && boxesMeet(s.box, b)));
       const show = new Map<number, [number, number]>();
+      const chevronAt = new Map<number, EdgePin>();
       for (const slot of slots) {
         const el = els[slot.i];
         const [bw, bh] = sizes[slot.i];
         const gid = el.dataset.gid;
+        const edge = edgeOf.get(slot.i);
+        if (edge) {
+          // Slide along the edge until the chevron and the label meet nothing placed.
+          for (const by of EDGE_SLIDES) {
+            const pin = by === 0 ? edge.pin : slidePin(edge.pin, by, edge.target, w, h);
+            const reach = EDGE_CHEVRON_PX / 2 + EDGE_GAP_PX;
+            const [x, y] =
+              pin.side === 'left'
+                ? [pin.x + reach + bw / 2, pin.y]
+                : pin.side === 'right'
+                  ? [pin.x - reach - bw / 2, pin.y]
+                  : pin.side === 'top'
+                    ? [Math.min(w - bw / 2, Math.max(bw / 2, pin.x)), pin.y + reach + bh / 2]
+                    : [Math.min(w - bw / 2, Math.max(bw / 2, pin.x)), pin.y - reach - bh / 2];
+            const b = centeredBox(x, y, bw, bh);
+            const c = centeredBox(pin.x, pin.y, EDGE_CHEVRON_PX, EDGE_CHEVRON_PX);
+            if (fits(b, gid ?? null, false) && fits(c, gid ?? null, false)) {
+              kept.push(b, c);
+              show.set(slot.i, [x, y]);
+              chevronAt.set(slot.i, { ...pin, x: pin.x - x, y: pin.y - y });
+              break;
+            }
+          }
+          continue;
+        }
         if (gid) {
           const s = byGid.get(gid) as Placed;
           const dy = s.size / 2 + LABEL_GAP_PX + bh / 2;
@@ -1992,6 +2077,16 @@ export default function TacticalSurface({
 
       els.forEach((el, i) => {
         const at = show.get(i);
+        const chevron = el.querySelector<HTMLElement>('[data-chevron]');
+        const pin = chevronAt.get(i);
+        if (chevron) {
+          chevron.style.display = pin ? 'block' : 'none';
+          if (pin) {
+            chevron.style.transform = `translate(${pin.x}px, ${pin.y}px) translate(-50%, -50%) rotate(${pin.angle}rad)`;
+          }
+        }
+        if (pin) el.dataset.recPin = `${pin.x.toFixed(1)},${pin.y.toFixed(1)},${pin.angle.toFixed(3)}`;
+        else delete el.dataset.recPin;
         if (!at) {
           el.style.visibility = 'hidden';
           return;
@@ -2124,6 +2219,30 @@ export default function TacticalSurface({
                 </div>
               )}
             </div>
+            <svg
+              data-chevron
+              width={EDGE_CHEVRON_PX}
+              height={EDGE_CHEVRON_PX}
+              viewBox="0 0 12 12"
+              style={{ position: 'absolute', left: 0, top: 0, display: 'none', overflow: 'visible' }}
+            >
+              <path
+                d="M3 1.5 L9 6 L3 10.5"
+                fill="none"
+                stroke={paperShown ? paperShown.halo : 'rgba(10,8,6,0.9)'}
+                strokeWidth={5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M3 1.5 L9 6 L3 10.5"
+                fill="none"
+                stroke={paperShown ? paperShown.labelInk : '#ffffff'}
+                strokeWidth={2.2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
         ))}
       </div>

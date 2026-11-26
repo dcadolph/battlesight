@@ -123,10 +123,35 @@ export class RecorderSession {
       ctx.globalAlpha = wrapOpacity;
       ctx.strokeText(text, ax, y);
       ctx.fillText(text, ax, y);
+      const pin = el.dataset.recPin?.split(',').map(Number);
+      if (pin && pin.length === 3 && pin.every(Number.isFinite)) this.drawChevron(ax + pin[0], ay + pin[1], pin[2]);
       drawn++;
     }
     ctx.restore();
     return drawn;
+  }
+
+  // drawChevron renders an edge pin's chevron centered on x, y and pointing along the
+  // angle, in the label stroke and fill already set on the context.
+  private drawChevron(x: number, y: number, angle: number) {
+    const { ctx } = this;
+    const fill = ctx.fillStyle;
+    const width = ctx.lineWidth;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-3, -4.5);
+    ctx.lineTo(3, 0);
+    ctx.lineTo(-3, 4.5);
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.strokeStyle = fill;
+    ctx.lineWidth = 2.2;
+    ctx.stroke();
+    ctx.restore();
+    ctx.lineWidth = width;
   }
 
   // drawSlate renders the phase eyebrow, title, and accent rule at the

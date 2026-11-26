@@ -391,3 +391,94 @@ export function chooseFrame(
   }
   return { frame, hold: false };
 }
+
+// EDGE_PIN_INSET is how far in from the left, right, and top of the screen an edge pin sits.
+export const EDGE_PIN_INSET = 18;
+
+// EdgePinBox is the screen area edge pins sit on: the screen less the inset at the
+// sides, the room under the title slate, and the caption band at the bottom.
+export interface EdgePinBox {
+  // x0 is the left edge in pixels.
+  x0: number;
+  // y0 is the top edge in pixels.
+  y0: number;
+  // x1 is the right edge in pixels.
+  x1: number;
+  // y1 is the bottom edge in pixels.
+  y1: number;
+}
+
+// edgePinBox returns the area edge pins sit on for a width by height screen.
+export function edgePinBox(width: number, height: number): EdgePinBox {
+  const pad = stagePadding(width, height);
+  return {
+    x0: EDGE_PIN_INSET,
+    y0: Math.max(EDGE_PIN_INSET, pad.top * 0.75),
+    x1: width - EDGE_PIN_INSET,
+    y1: height - pad.bottom,
+  };
+}
+
+// EdgeSide is the edge of the pin box a pin sits on.
+export type EdgeSide = 'left' | 'right' | 'top' | 'bottom';
+
+// EdgePin is a mark on the pin box edge for something past the screen edge.
+export interface EdgePin {
+  // x is the pin's screen x in pixels.
+  x: number;
+  // y is the pin's screen y in pixels.
+  y: number;
+  // angle points from the pin to the thing it stands for, in radians, screen y down.
+  angle: number;
+  // side is the pin box edge the pin sits on.
+  side: EdgeSide;
+}
+
+// offScreen reports whether a screen point lies outside a width by height screen.
+export function offScreen(p: [number, number], width: number, height: number): boolean {
+  return p[0] < 0 || p[1] < 0 || p[0] > width || p[1] > height;
+}
+
+// edgePin returns where a point past the screen edge is pinned: the spot where the
+// line from the start toward the point leaves the pin box. The start is used when it
+// lies inside the pin box, else the box center. Null when the point is on screen.
+export function edgePin(
+  target: [number, number],
+  start: [number, number] | null,
+  width: number,
+  height: number,
+): EdgePin | null {
+  if (!offScreen(target, width, height)) return null;
+  const b = edgePinBox(width, height);
+  const inside = (p: [number, number]) => p[0] >= b.x0 && p[0] <= b.x1 && p[1] >= b.y0 && p[1] <= b.y1;
+  const s: [number, number] = start && inside(start) ? start : [(b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2];
+  const dx = target[0] - s[0];
+  const dy = target[1] - s[1];
+  // The smallest positive step along the line that meets an edge.
+  let t = Infinity;
+  let side: EdgeSide = 'right';
+  const tryEdge = (tt: number, sd: EdgeSide) => {
+    if (tt > 0 && tt < t) {
+      t = tt;
+      side = sd;
+    }
+  };
+  if (dx < 0) tryEdge((b.x0 - s[0]) / dx, 'left');
+  if (dx > 0) tryEdge((b.x1 - s[0]) / dx, 'right');
+  if (dy < 0) tryEdge((b.y0 - s[1]) / dy, 'top');
+  if (dy > 0) tryEdge((b.y1 - s[1]) / dy, 'bottom');
+  if (!Number.isFinite(t)) return null;
+  const x = Math.min(b.x1, Math.max(b.x0, s[0] + dx * t));
+  const y = Math.min(b.y1, Math.max(b.y0, s[1] + dy * t));
+  return { x, y, angle: Math.atan2(target[1] - y, target[0] - x), side };
+}
+
+// slidePin moves a pin along its edge by a number of pixels, kept inside the pin box,
+// and points it at the target again.
+export function slidePin(pin: EdgePin, by: number, target: [number, number], width: number, height: number): EdgePin {
+  const b = edgePinBox(width, height);
+  const vertical = pin.side === 'left' || pin.side === 'right';
+  const x = vertical ? pin.x : Math.min(b.x1, Math.max(b.x0, pin.x + by));
+  const y = vertical ? Math.min(b.y1, Math.max(b.y0, pin.y + by)) : pin.y;
+  return { x, y, angle: Math.atan2(target[1] - y, target[0] - x), side: pin.side };
+}
